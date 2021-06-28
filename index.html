@@ -240,7 +240,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-06-28 21:56:23" itemprop="dateModified" datetime="2021-06-28T21:56:23+08:00">2021-06-28</time>
+        <time title="修改时间：2021-06-28 22:05:00" itemprop="dateModified" datetime="2021-06-28T22:05:00+08:00">2021-06-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -298,7 +298,7 @@
 <p>例如，调用过程中如果出现了某个动物不在的问题，我们不关心，继续访问下一个，最后统一处理一下，看看有多少动物是不在的，打印一下即可。</p>
 <p>这时，第二种处理方式明显会更简洁。</p>
 <blockquote>
-<p>一般推荐在工具类是采用这种方式，处理的内容比较直观，不会有太多异常case</p>
+<p>一般推荐在工具类中采用这种方式，处理的内容比较直观，不会有太多异常case</p>
 </blockquote>
 <h3 id="错误有多种分类，会影响到程序的运行逻辑"><a href="#错误有多种分类，会影响到程序的运行逻辑" class="headerlink" title="错误有多种分类，会影响到程序的运行逻辑"></a>错误有多种分类，会影响到程序的运行逻辑</h3><p>例如<code>VisitPanda(panda *Panda)</code> 可能产生的错误分2类：</p>
 <ul>
@@ -323,7 +323,7 @@
 
 <p>值得一提的是</p>
 <ul>
-<li><code>ContinueOnError</code>表示遇到了error有只记录下来，但整个流程继续往下跑</li>
+<li><code>ContinueOnError</code>表示遇到了error只记录下来，但整个流程继续往下跑</li>
 <li><code>BreakOnError</code>表示遇到了error就直接break，不再跑接下来的<code>MyFunc</code></li>
 </ul>
 <h2 id="方案三背后的思想与延伸"><a href="#方案三背后的思想与延伸" class="headerlink" title="方案三背后的思想与延伸"></a>方案三背后的思想与延伸</h2><p>函数式编程最直观的一个特点是 <strong>延迟执行</strong>，也就是在引用<code>MyFunc</code>处不运行，在<code>ContinueOnError</code>或<code>BreakOnError</code>里才是真正执行的地方。</p>
