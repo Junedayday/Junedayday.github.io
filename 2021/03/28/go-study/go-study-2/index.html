@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="核心成长方向如何成为一名优秀的Go语言工程师，这是很多人都长期疑惑的问题。 我这边抛出自己的观点，希望能引起大家的思考： 掌握基础，熟悉生态，集百家长，深耕领域 接下来，我将围绕这四个词展开今天的分享。 1. 掌握基础首先，我们来聊聊这个老生常谈的话题 - 掌握基础。关于基础的学习路线我会在后面细讲，今天我们先来谈点别的。 所谓基础，会根据工作的不同阶段而不断变化。 也就是要用 发展 的眼光来看">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言学习路线 - 2.方向篇:如何成为一名优秀的Go语言工程师">
+<meta property="og:url" content="http://example.com/2021/03/28/go-study/go-study-2/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="核心成长方向如何成为一名优秀的Go语言工程师，这是很多人都长期疑惑的问题。 我这边抛出自己的观点，希望能引起大家的思考： 掌握基础，熟悉生态，集百家长，深耕领域 接下来，我将围绕这四个词展开今天的分享。 1. 掌握基础首先，我们来聊聊这个老生常谈的话题 - 掌握基础。关于基础的学习路线我会在后面细讲，今天我们先来谈点别的。 所谓基础，会根据工作的不同阶段而不断变化。 也就是要用 发展 的眼光来看">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-03-28T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-29T12:51:46.961Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Study">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/03/28/go-study/go-study-2/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言学习路线 - 2.方向篇:如何成为一名优秀的Go语言工程师 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%88%90%E9%95%BF%E6%96%B9%E5%90%91"><span class="nav-number">1.</span> <span class="nav-text">核心成长方向</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%8E%8C%E6%8F%A1%E5%9F%BA%E7%A1%80"><span class="nav-number">2.</span> <span class="nav-text">1. 掌握基础</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E7%86%9F%E6%82%89%E7%94%9F%E6%80%81"><span class="nav-number">3.</span> <span class="nav-text">2. 熟悉生态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%9B%86%E7%99%BE%E5%AE%B6%E9%95%BF"><span class="nav-number">4.</span> <span class="nav-text">3.集百家长</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95"><span class="nav-number">4.1.</span> <span class="nav-text">简单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%91%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80"><span class="nav-number">4.2.</span> <span class="nav-text">云时代的编程语言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CNCF"><span class="nav-number">4.3.</span> <span class="nav-text">CNCF</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%B7%B1%E8%80%95%E9%A2%86%E5%9F%9F"><span class="nav-number">5.</span> <span class="nav-text">4. 深耕领域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/28/go-study/go-study-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言学习路线 - 2.方向篇:如何成为一名优秀的Go语言工程师
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-28 12:00:00" itemprop="dateCreated datePublished" datetime="2021-03-28T12:00:00+08:00">2021-03-28</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="核心成长方向"><a href="#核心成长方向" class="headerlink" title="核心成长方向"></a>核心成长方向</h2><p>如何成为一名优秀的Go语言工程师，这是很多人都长期疑惑的问题。</p>
+<p>我这边抛出自己的观点，希望能引起大家的思考：</p>
+<p><strong>掌握基础，熟悉生态，集百家长，深耕领域</strong></p>
+<p>接下来，我将围绕这四个词展开今天的分享。</p>
+<h2 id="1-掌握基础"><a href="#1-掌握基础" class="headerlink" title="1. 掌握基础"></a>1. 掌握基础</h2><p>首先，我们来聊聊这个老生常谈的话题 - <strong>掌握基础</strong>。关于基础的学习路线我会在后面细讲，今天我们先来谈点别的。</p>
+<p><strong>所谓基础，会根据工作的不同阶段而不断变化。</strong> 也就是要用 <strong>发展</strong> 的眼光来看问题。</p>
+<p>举个例子，就以 <strong>编程语言</strong> 的作为切入点：</p>
+<ul>
+<li>一名合格的业务开发者，会熟练地应用<strong>编程语言</strong>去实现功能需求，熟练掌握常见的<strong>开源工具库</strong>；</li>
+<li>进一步，如果作为一名模块的负责人，那就需要考虑<strong>设计模式</strong>来抽象复杂业务，熟悉编程语言底层的<strong>运行原理</strong>；</li>
+<li>再进一步，作为一名架构师，就得思考如何用 <strong>工程化</strong> 来控制复杂度和约束规范性；</li>
+<li>而如果是更高一层的角色，如CTO，就需要从编程语言或框架的 <strong>成熟度、前瞻性</strong> 的角度来决定路线。</li>
+</ul>
+<h2 id="2-熟悉生态"><a href="#2-熟悉生态" class="headerlink" title="2. 熟悉生态"></a>2. 熟悉生态</h2><p><strong>生态</strong> 这个词很微妙，社区里有不同的见解，我也无法抛出一个准确的定义，这块需要大家自行摸索。不过，我倒是可以分享几个踩坑经历：</p>
+<ol>
+<li><strong>语言生态</strong> ：编程语言都是有对应的应用领域的，我在上一讲已经说过，这里不再细谈；</li>
+<li><strong>框架生态</strong> ：编程语言往往提供多种框架，不同框架的设计理念和使用场景不同，甚至会有一定的矛盾。例如有的框架提供了重量级的解决方案，可以快速生成一套代码，但对应的灵活性就大大降低；对应的，另一个框架能提供轻量级的插件化解决方案，需要你自行挑选、组装、调试，以提升复杂度的代价换来了灵活性；</li>
+<li><strong>社区生态</strong> ：除了极少的探索性的工作，绝大部分的开发工作都能在社区中找到同路人，经常能发现很有价值的建议。但社区里的声音很杂，筛选信息是最大障碍，这一点很容易反复踩坑。</li>
+</ol>
+<blockquote>
+<p>比起一些告诉你 <strong>该怎么做</strong> 的建议，我更倾向于那些 <strong>不该怎么做</strong> 的建议。</p>
+<p>一次成功往往有大量的偶然因素，而从失败中分析出原因更有长期价值。</p>
+</blockquote>
+<h2 id="3-集百家长"><a href="#3-集百家长" class="headerlink" title="3.集百家长"></a>3.集百家长</h2><p>接下来的这点，是本章的重点，希望大家看完之后能重点思考。</p>
+<p><strong>Go</strong> 语言是一个以简单著称的编程语言，又被号称是 <strong>云时代的编程语言</strong>。这背后蕴含了两层含义。</p>
+<h3 id="简单"><a href="#简单" class="headerlink" title="简单"></a>简单</h3><p>第一点，也就是 <strong>简单</strong> 带来的副作用。一种编程语言如果被冠以 <strong>简单</strong> 的头衔，那么它的设计核心就是 <strong>可读性</strong>。</p>
+<p>但是，无论是模板、元编程、泛型这些语法上的高端特性，还是继承、多态、函数式等编程范式上的特性，虽然很复杂（或者说是学习曲线很陡峭），但不得不承认它们在特定的场景中，达到了很好的抽象效果，大幅度地提升了程序的效率。</p>
+<p>所以，<strong>Go</strong> 语言决定了在单个程序中支持的复杂度有限，进一步则需要 <strong>JAVA、C++为代表的工业级编程语言</strong> 的一些特性。</p>
+<h3 id="云时代的编程语言"><a href="#云时代的编程语言" class="headerlink" title="云时代的编程语言"></a>云时代的编程语言</h3><p>从上一点来看，<strong>Go</strong> 语言支持的单个程序复杂度有限，那就非常依赖 <strong>微服务</strong> 的核心理念 - 拆。通过拆解，可以将单个程序的复杂度转移到架构层面，也更好地契合了<strong>服务内聚</strong>的理念。</p>
+<p>但是，即便进行了很好的设计与拆分，<strong>微服务</strong> 依然有两个比较重要的前置要求：<strong>服务间通信</strong> 和 <strong>微服务治理</strong>。前者相对容易解决，统一采用 <strong>RESTful</strong> 风格或 <strong>gRPC</strong> 等框架进行通信，就能满足基本要求；而微服务的治理问题就非常复杂了，很长一段时间都没有一套成熟的解决方案。近几年，随着 <strong>Docker容器化</strong> + <strong>Kubernetes调度平台</strong> 的出现与推广，已经成为了 <strong>微服务的Best Practice</strong> 。</p>
+<p>以 <strong>K8s为核心的云原生生态</strong>，涵盖了<strong>监控、日志采集、链路追踪、Service Mesh</strong>等各类子领域的解决方案，均得到了快速迭代。其中，各种核心组件均是通过 <strong>Go</strong> 语言开发而成，像 <strong>Kubernetes、Prometheus、Etcd</strong> 等。</p>
+<p>至此，我们开发的服务不再需要过分关注基础组件，而是更聚焦于业务领域。</p>
+<h3 id="CNCF"><a href="#CNCF" class="headerlink" title="CNCF"></a>CNCF</h3><p>再回到这一个话题的核心 - <strong>集百家长</strong>。</p>
+<p>云原生的社区<strong>CNCF</strong>提供了大量的组件，大家可以通过<a target="_blank" rel="noopener" href="https://landscape.cncf.io/images/landscape.png">这个链接</a>看到对应的全景图。它提供了是一整套<strong>插件化</strong>的组合方案，需要开发人员按需组合（后面我也会给出一些建议）。</p>
+<p>我非常不建议大家去自己从头开发一个模块，主要有两点（巨型互联网的基础团队除外）：</p>
+<ol>
+<li>自建轮子跟不上社区迭代，投入产出比价值低；</li>
+<li>很多时候某些功能已经在某个组件中实现，或者正在实现，只是没正确使用。</li>
+</ol>
+<blockquote>
+<p>如果真要新增某个重要功能，优先去找个现有CNCF项目的负责人聊聊，提交PR合入，或者自行fork开发。</p>
+<p>相信我，在一个成熟产品中新增特性，比你重写一个轮子更有价值！无论是对技术的提升、还是投递简历时的效果，都更有意义。</p>
+</blockquote>
+<p>举一个场景，当我们发现需要在程序中用<code>map</code>保存大量结果时，用默认的数据结构效率很低：</p>
+<ul>
+<li>如果在<strong>JAVA</strong>生态里，那么内部就有丰富的容器库可供选择，放在一个服务中即可；</li>
+<li>而在<strong>Go</strong>中，自然也可以借用<strong>github</strong>上面搜索的三方库来解决，但更建议根据场景选用开源的K-V组件，通过RPC调用来解决问题，也就是拆成了 <strong>业务功能</strong> 与 <strong>map数据存储</strong> 两个服务</li>
+<li>专业的事交给专业的组件</li>
+</ul>
+<h2 id="4-深耕领域"><a href="#4-深耕领域" class="headerlink" title="4. 深耕领域"></a>4. 深耕领域</h2><p>在工作三年以上，我越来越感受到 <strong>领域</strong> 是一个很重要的概念，也是各公司考验高端人才的重要素质。</p>
+<p>举几个例子：</p>
+<ul>
+<li><p>作为一名 <strong>电商支付领域</strong> 的开发专家，需要在编程语言的 <strong>如何保证数据一致性</strong> 的相关特性有深入研究；</p>
+</li>
+<li><p>如果是 <strong>物流订单领域</strong> 的专家，则要考虑 <strong>如何合理抽象各类物流类型</strong> 的问题，来支持复杂的场景；</p>
+</li>
+<li><p>当你负责的是一个 <strong>秒杀系统</strong>，那么需要对 <strong>高并发场景与异常兜底</strong> 有足够的经验。</p>
+</li>
+</ul>
+<p>每一块 <strong>领域</strong> 都需要有大量的 <strong>专业技能</strong> 与 <strong>行业经验</strong> 沉淀，这是高端人才的核心竞争力。</p>
+<p>虽说两者缺一不可，但还是具有一定的倾向性</p>
+<ul>
+<li>偏技术的领域更需要 <strong>专业技能</strong> ，瓶颈往往是某一个垂直领域的技术深度；</li>
+<li>偏业务的领域更要求 <strong>行业经验</strong> ，要求负责人能 <strong>带领团队避开坑，走对路</strong> 。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>回顾一下这四个点： <strong>掌握基础，熟悉生态，集百家长，深耕领域</strong> 。这一整个过程，也可以说是：<strong>修炼内功，学习并合理使用外部资源，沉淀于特定领域</strong> 。</p>
+<p>纵观周围环境，我发现大部分的开发者都热衷于 <strong>修炼内功和领域沉淀</strong>，而过于轻视了 <strong>外部资源</strong> 的作用，就错失了一个快速提升个人能力的手段，技术视野也非常有限。这一块，将是我后续分享的重点，也是区别于其余教程的一大特点。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Study/" rel="tag"># Go-Study</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/07/go-tip/go-tip-1/" rel="prev" title="Go语言技巧 - 1.【惊艳亮相】如何写出一个优雅的main函数">
+                  <i class="fa fa-chevron-left"></i> Go语言技巧 - 1.【惊艳亮相】如何写出一个优雅的main函数
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/05/go-study/go-study-3/" rel="next" title="Go语言学习路线 - 3.准备篇:打造个人专属的学习环境">
+                  Go语言学习路线 - 3.准备篇:打造个人专属的学习环境 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

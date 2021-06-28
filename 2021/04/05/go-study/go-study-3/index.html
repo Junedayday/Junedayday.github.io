@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="为何我们需要持续学习终身成长 一词已被广泛认可，意味着我们将比前人花费更多的时间在 学习成长 中，才能将个人的认知跟上社会的步伐。且不论是否应该放慢脚步，但我们大部分人不得不跟随社会的节奏，持续学习并提高自己。 相信有不少朋友跟我一样，在学习的过程中经常会 半途而废。那么我在这里分享一些方法和技巧（包括但不仅限于Go语言），希望能给大家带来一些启发。 这部分内容依旧会带有一些强烈的个人主观色彩，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言学习路线 - 3.准备篇:打造个人专属的学习环境">
+<meta property="og:url" content="http://example.com/2021/04/05/go-study/go-study-3/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="为何我们需要持续学习终身成长 一词已被广泛认可，意味着我们将比前人花费更多的时间在 学习成长 中，才能将个人的认知跟上社会的步伐。且不论是否应该放慢脚步，但我们大部分人不得不跟随社会的节奏，持续学习并提高自己。 相信有不少朋友跟我一样，在学习的过程中经常会 半途而废。那么我在这里分享一些方法和技巧（包括但不仅限于Go语言），希望能给大家带来一些启发。 这部分内容依旧会带有一些强烈的个人主观色彩，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-04-05T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-04-19T03:36:19.943Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Study">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/04/05/go-study/go-study-3/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言学习路线 - 3.准备篇:打造个人专属的学习环境 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BD%95%E6%88%91%E4%BB%AC%E9%9C%80%E8%A6%81%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.</span> <span class="nav-text">为何我们需要持续学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%83%E7%90%86%E5%BB%BA%E8%AE%BE"><span class="nav-number">2.</span> <span class="nav-text">心理建设</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%A6%E4%B9%A0%E7%8E%AF%E5%A2%83%E7%9A%84%E5%87%86%E5%A4%87"><span class="nav-number">3.</span> <span class="nav-text">学习环境的准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.1.</span> <span class="nav-text">操作系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Go%E8%AF%AD%E8%A8%80%E7%89%88%E6%9C%AC"><span class="nav-number">3.2.</span> <span class="nav-text">Go语言版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E7%BC%96%E8%BE%91%E5%99%A8"><span class="nav-number">3.3.</span> <span class="nav-text">代码编辑器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BD%99%E6%8F%90%E6%95%88%E5%B7%A5%E5%85%B7"><span class="nav-number">3.4.</span> <span class="nav-text">其余提效工具</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Markdown%E6%8A%80%E6%9C%AF%E5%86%99%E4%BD%9C"><span class="nav-number">4.</span> <span class="nav-text">Markdown技术写作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.</span> <span class="nav-text">个人博客系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%8E%A9%E5%8D%9A%E5%AE%A2"><span class="nav-number">5.1.</span> <span class="nav-text">为什么要玩博客</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B"><span class="nav-number">5.2.</span> <span class="nav-text">搭建教程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E5%8D%9A%E5%AE%A2%E7%9A%84Tips"><span class="nav-number">5.3.</span> <span class="nav-text">写博客的Tips</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/05/go-study/go-study-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言学习路线 - 3.准备篇:打造个人专属的学习环境
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-05 12:00:00" itemprop="dateCreated datePublished" datetime="2021-04-05T12:00:00+08:00">2021-04-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-04-19 11:36:19" itemprop="dateModified" datetime="2021-04-19T11:36:19+08:00">2021-04-19</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="为何我们需要持续学习"><a href="#为何我们需要持续学习" class="headerlink" title="为何我们需要持续学习"></a>为何我们需要持续学习</h2><p><strong>终身成长</strong> 一词已被广泛认可，意味着我们将比前人花费更多的时间在 <strong>学习成长</strong> 中，才能将个人的认知跟上社会的步伐。且不论是否应该放慢脚步，但我们大部分人不得不跟随社会的节奏，<strong>持续学习并提高自己</strong>。</p>
+<p>相信有不少朋友跟我一样，在学习的过程中经常会 <strong>半途而废</strong>。那么我在这里分享一些方法和技巧（包括但不仅限于Go语言），希望能给大家带来一些启发。</p>
+<p>这部分内容依旧会带有一些强烈的个人主观色彩，大家按需选用~</p>
+<h2 id="心理建设"><a href="#心理建设" class="headerlink" title="心理建设"></a>心理建设</h2><p>在正式开始聊工具和方法前，我先聊聊自己学习前的心理建设。这一点看过去 <strong>很“软”</strong> ，但我吃过很多次亏：</p>
+<p><strong>与其在学习的过程中，给自己找100个理由放弃，还不如在一开始就否定这些理由。</strong> </p>
+<p>以Go语言为例，常见的放弃理由如下：</p>
+<ul>
+<li>Go真的能长期“火”下去吗？</li>
+<li>Go的就业面不广，是否另选其它编程语言</li>
+<li>学了基础的Go语法后，没有实践的机会</li>
+<li>一段时间提升很不明显，感觉什么都懂、但什么都不精通</li>
+</ul>
+<p>我就是抱着这样的想法，走走停停，错过了很多快速提升的时期；不过也是由于这段经历，让我对许多朋友的想法有切身体会。今天我不会对着上面的问题一一回复，只强调一个重点：</p>
+<p><strong>学技术带着功利心（跳槽、升职）是正常且必要的，毕竟只有解决问题的技术才是有价值的。Go语言是非常依赖“云原生”这一体系的：它实现了云原生的基石-Kubernetes及其余组件，也依赖云原生、提供了非常优雅的微服务解决方案。如今公有云和私有云的建设如火如荼，注定是一个不可逆的过程，所以Go语言是一个需求很大的方向。</strong></p>
+<h2 id="学习环境的准备"><a href="#学习环境的准备" class="headerlink" title="学习环境的准备"></a>学习环境的准备</h2><p>下面，正式进入准备的细节：</p>
+<h3 id="操作系统"><a href="#操作系统" class="headerlink" title="操作系统"></a>操作系统</h3><p>尽管Go语言支持跨操作系统，但我还是强烈建议大家使用Mac OS，关键在于 <strong>提效</strong>。</p>
+<blockquote>
+<p> 既然可以花7分力气做一件事，为什么需要10分呢？</p>
+</blockquote>
+<p>不排除后期Windows系统越来越完善，但目前来看，所有的大厂提供给开发者都是Macbook，这点就不言而喻了吧。如果你有在windows/Linux环境上高效开发的经验，欢迎与大家分享~</p>
+<h3 id="Go语言版本"><a href="#Go语言版本" class="headerlink" title="Go语言版本"></a>Go语言版本</h3><p>在<a target="_blank" rel="noopener" href="https://golang.google.cn/dl/">官网</a>任意挑选。</p>
+<p>如果公司没有要求，那就直接上最新的版本吧~</p>
+<blockquote>
+<p>如果公司还在用1.13之前的版本，可以尝试着跟领导沟通，升级到较新的版本。</p>
+<p>使用低版本会不断发现不兼容某些开源库的情况，比如有些依赖库引入了context的特性</p>
+</blockquote>
+<h3 id="代码编辑器"><a href="#代码编辑器" class="headerlink" title="代码编辑器"></a>代码编辑器</h3><p>强烈建议准备 VSCode + Goland ！对，不用二选一，而是两个都要！</p>
+<ul>
+<li><p>VSCode对各类语言、组件兼容都很好，面对<strong>轻量级</strong>的开发时完全可以胜任</p>
+</li>
+<li><p>Goland在面对<strong>重量级</strong>项目时效果很棒，尤其是对重构项目时，效率能提升一大截</p>
+</li>
+</ul>
+<p>这里提供两个官网： <a target="_blank" rel="noopener" href="https://code.visualstudio.com/">VSCode</a> / <a target="_blank" rel="noopener" href="https://www.jetbrains.com/go/">Goland</a></p>
+<blockquote>
+<p>这两款软件的配置，前期尽量用默认的即可。</p>
+<p>而如果有大量私人化的配置，记得将整个配置方案导出并保存。</p>
+</blockquote>
+<h3 id="其余提效工具"><a href="#其余提效工具" class="headerlink" title="其余提效工具"></a>其余提效工具</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://git-scm.com/">git</a> 不要把git单纯地当作公司的版本管理工具，它更是你私人代码的管理工具</li>
+<li><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000014992947">iTerm2 + Oh My Zsh</a> 这是在Mac下我非常喜欢的一套终端配置方案，大家可以借鉴</li>
+<li>笔记类：这块大家按自己的习惯选用，常见的如 印象笔记、Microsoft TODO、typora、幕布、系统自带的笔记本等</li>
+<li>上网助手：技术渠道有不少是在国外的网站上，不清楚具体访问方法的话，可以多和周围的开发者交流</li>
+</ul>
+<blockquote>
+<p>欢迎大家留言谈谈自己最喜爱的工具，分享给我~</p>
+</blockquote>
+<h2 id="Markdown技术写作"><a href="#Markdown技术写作" class="headerlink" title="Markdown技术写作"></a>Markdown技术写作</h2><p>作为一个技术工作者，文档是一个必备技能。我们不应把写文档当作一个负担，大部分的时候它是一种沟通与协作上的提效工具。</p>
+<p>这里不得不提一下Markdown，它的语法简单，产出的文档样式也满足基本的场景。大家可以根据<a target="_blank" rel="noopener" href="https://www.markdown.xyz/basic-syntax/">这个链接</a>或者自行搜索教程。</p>
+<blockquote>
+<p>学习Markdown就是一个很小且价值很高的技术点，可以拿这个作为练手，先使用起来。</p>
+<p>补充一句：Markdown在社区中的支持度不同，但基本大同小异。为了兼容性，少用html的相关特性。</p>
+</blockquote>
+<p>Markdown尽管简单，也有很多语法点，建议大家分阶段使用：</p>
+<ol>
+<li>标题、粗体、代码、链接、列表</li>
+<li>图片、引用、分隔线、表格</li>
+<li>其它</li>
+</ol>
+<p>第一阶段的5种语法已经可以满足日常的文档协作，第二阶段的特性可以让文档更具专业性，而其余特性完全可以在使用到时再去查询。</p>
+<p><strong>切忌一次性想掌握全部，分阶段使用才是最有效的学习路径。</strong></p>
+<p>这里推荐一个我常用的本地Markdown文档写作工具 - <a target="_blank" rel="noopener" href="https://typora.io/">typora</a> 。尽管有Web文档工具支持在线编辑，但我更喜欢本地编辑后再复制过去，这样也方便留档。</p>
+<h2 id="个人博客系统"><a href="#个人博客系统" class="headerlink" title="个人博客系统"></a>个人博客系统</h2><h3 id="为什么要玩博客"><a href="#为什么要玩博客" class="headerlink" title="为什么要玩博客"></a>为什么要玩博客</h3><ol>
+<li><strong>根本价值</strong> - 作为个人的知识输出，沉淀到文档</li>
+<li><strong>附带价值</strong> - 面试前后，让心仪的公司更好地了解你</li>
+<li><strong>持续价值</strong> - 形成 <strong>正反馈</strong>，持续激励自我</li>
+</ol>
+<blockquote>
+<p>有些人玩博客会将价值颠倒，比如将面试筹码作为根本价值，那么这个技术博客就会明显变味。</p>
+</blockquote>
+<h3 id="搭建教程"><a href="#搭建教程" class="headerlink" title="搭建教程"></a>搭建教程</h3><p>搭建博客系统的方法有很多，我这边推荐一个 <a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000017986794">hexo + github pages</a> 的。</p>
+<p>这种博客的优点在于2点：</p>
+<ol>
+<li>发布非常方便、非常方便、非常方便！</li>
+<li>原始文档为Markdown，可在本地编辑、存档</li>
+</ol>
+<h3 id="写博客的Tips"><a href="#写博客的Tips" class="headerlink" title="写博客的Tips"></a>写博客的Tips</h3><ol>
+<li><strong>降低“成本”</strong> - 让一篇博客从创作到发布变得简单，这点比较依赖博客系统，例如上面的 hexo+github pages</li>
+<li><strong>分享作品</strong> - 分享个人的文章，有利于形成“正反馈”；对于比较腼腆的朋友，可以在小规模的圈子中先进行尝试</li>
+<li><strong>多元化</strong> - 博客不仅仅停留在技术上，工作上的心得或者生活上的感悟，都可以写进来</li>
+<li><strong>适当拆分</strong> - 不要过分追求长篇大作或者系列形式的文章，<em>小步快走</em> 在这里也适用</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>打造个人专属的学习环境，我认为主要包括三块：</p>
+<ol>
+<li>个人心态 - 坚持</li>
+<li>开发环境 - 快速便捷</li>
+<li>正反馈路线 - 文档博客</li>
+</ol>
+<p>当然，你可以根据实际情况，添加一些个人专属的内容：</p>
+<ul>
+<li>如果你是windows用户，你需要搞一套虚拟机</li>
+<li>如果你已有一套成熟的文档系统，那就继续使用</li>
+<li>如果你想快速地了解Go而不计划深入，那么没必要过于完善学习环境</li>
+</ul>
+<p>希望大家在 <strong>心理</strong> 和 <strong>环境</strong> 都做好充分的准备后，再去走这条长期的技术学习路线，并能坚持下来。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Study/" rel="tag"># Go-Study</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/28/go-study/go-study-2/" rel="prev" title="Go语言学习路线 - 2.方向篇:如何成为一名优秀的Go语言工程师">
+                  <i class="fa fa-chevron-left"></i> Go语言学习路线 - 2.方向篇:如何成为一名优秀的Go语言工程师
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/17/go-study/go-study-4/" rel="next" title="Go语言学习路线 - 4.入门篇:快速体系化地入门Go语言">
+                  Go语言学习路线 - 4.入门篇:快速体系化地入门Go语言 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

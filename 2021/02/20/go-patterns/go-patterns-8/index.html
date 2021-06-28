@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="注：本文的灵感来源于GOPHER 2020年大会陈皓的分享，原PPT的链接可能并不方便获取，所以我下载了一份PDF到git仓，方便大家阅读。我将结合自己的实际项目经历，与大家一起细品这份文档。  目录 装饰模式 管道模式 访问者模式  今天，我会抛开官方的定义，简单介绍一下三种设计模式。   后续会有介绍Go语言设计模式Design Patterns的系列，会更具理论性。  Decoratio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go编程模式 - 8-装饰、管道和访问者模式">
+<meta property="og:url" content="http://example.com/2021/02/20/go-patterns/go-patterns-8/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="注：本文的灵感来源于GOPHER 2020年大会陈皓的分享，原PPT的链接可能并不方便获取，所以我下载了一份PDF到git仓，方便大家阅读。我将结合自己的实际项目经历，与大家一起细品这份文档。  目录 装饰模式 管道模式 访问者模式  今天，我会抛开官方的定义，简单介绍一下三种设计模式。   后续会有介绍Go语言设计模式Design Patterns的系列，会更具理论性。  Decoratio">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-20T10:32:09.000Z">
+<meta property="article:modified_time" content="2021-03-29T12:51:46.961Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Programming-Patterns">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://example.com/2021/02/20/go-patterns/go-patterns-8/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go编程模式 - 8-装饰、管道和访问者模式 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95"><span class="nav-number">1.</span> <span class="nav-text">目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Decoration"><span class="nav-number">2.</span> <span class="nav-text">Decoration</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pipeline"><span class="nav-number">3.</span> <span class="nav-text">Pipeline</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Visitor"><span class="nav-number">4.</span> <span class="nav-text">Visitor</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/go-patterns/go-patterns-8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go编程模式 - 8-装饰、管道和访问者模式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-20 18:32:09" itemprop="dateCreated datePublished" datetime="2021-02-20T18:32:09+08:00">2021-02-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BB%8F%E5%85%B8%E5%93%81%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">经典品读</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p> 注：本文的灵感来源于GOPHER 2020年大会陈皓的分享，原PPT的<a target="_blank" rel="noopener" href="https://www2.slideshare.net/haoel/go-programming-patterns?from_action=save">链接</a>可能并不方便获取，所以我下载了一份<a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading/tree/master/doc/Go_Programming_Patterns.pdf">PDF</a>到git仓，方便大家阅读。我将结合自己的实际项目经历，与大家一起细品这份文档。</p>
+</blockquote>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#Decoration">装饰模式</a></li>
+<li><a href="#Pipeline">管道模式</a></li>
+<li><a href="#Visitorl">访问者模式</a></li>
+</ul>
+<p>今天，我会抛开官方的定义，简单介绍一下三种设计模式。</p>
+<blockquote>
+<p> 后续会有介绍Go语言设计模式Design Patterns的系列，会更具理论性。</p>
+</blockquote>
+<h2 id="Decoration"><a href="#Decoration" class="headerlink" title="Decoration"></a>Decoration</h2><p>代码实例</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">decorator</span><span class="params">(f <span class="keyword">func</span>(s <span class="keyword">string</span>)</span>) <span class="title">func</span><span class="params">(s <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">&quot;Started&quot;</span>)</span><br><span class="line">		f(s)</span><br><span class="line">		fmt.Println(<span class="string">&quot;Done&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一句话解释：<strong>在函数f前后，添加装饰性的功能函数，但不改变函数本身的行为</strong>。</p>
+<p>这种设计模式，对一些被高频率调用的代码非常有用：</p>
+<ol>
+<li>HTTP Server被调用的handler</li>
+<li>HTTP Client发送请求</li>
+<li>对MySQL的操作</li>
+</ol>
+<p>而装饰性的功能，常见的有：</p>
+<ol>
+<li>打印相关的日志信息（Debug中非常有用！）</li>
+<li>耗时相关的计算</li>
+<li>监控埋点</li>
+</ol>
+<h2 id="Pipeline"><a href="#Pipeline" class="headerlink" title="Pipeline"></a>Pipeline</h2><p>代码示例</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> HttpHandlerDecorator <span class="function"><span class="keyword">func</span><span class="params">(http.HandlerFunc)</span> <span class="title">http</span>.<span class="title">HandlerFunc</span></span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Handler</span><span class="params">(h http.HandlerFunc, decors ...HttpHandlerDecorator)</span> <span class="title">http</span>.<span class="title">HandlerFunc</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> decors &#123;</span><br><span class="line">        d := decors[<span class="built_in">len</span>(decors)<span class="number">-1</span>-i] <span class="comment">// iterate in reverse</span></span><br><span class="line">        h = d(h)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> h</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一句话解释：<strong>用不定参数的特性，将入参中的函数，逐个应用到对象上</strong></p>
+<blockquote>
+<p>看到这里，如果你能想起之前 <code>Functional Option</code> 那篇，会发现有这块的影子。</p>
+</blockquote>
+<p>主要应用于： 有多种可选择的配置（对应Field）或处理（对应方法）的复杂对象。</p>
+<p>耗子叔在后面又增加了一些用Goroutine+Channel的方式，其实就是讲Channel作为一个管道的承载体。</p>
+<h2 id="Visitor"><a href="#Visitor" class="headerlink" title="Visitor"></a>Visitor</h2><p>关于访问者设计者模式，我之前在Kubernetes源码分析中专门分析了源码。今天，我们也简单地过一下。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义访问的函数类型</span></span><br><span class="line"><span class="keyword">type</span> VisitorFunc <span class="function"><span class="keyword">func</span><span class="params">(*Info, error)</span> <span class="title">error</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Visitor接口设计</span></span><br><span class="line"><span class="keyword">type</span> Visitor <span class="keyword">interface</span> &#123;</span><br><span class="line">	Visit(VisitorFunc) error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 资源对象</span></span><br><span class="line"><span class="keyword">type</span> Info <span class="keyword">struct</span> &#123;</span><br><span class="line">	Namespace   <span class="keyword">string</span></span><br><span class="line">	Name        <span class="keyword">string</span></span><br><span class="line">	OtherThings <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将Visitor函数应用到资源对象上</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(info *Info)</span> <span class="title">Visit</span><span class="params">(fn VisitorFunc)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> fn(info, <span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后看其中一个实现：NameVisitor，其余的也类似，这样就能注入对应的Visitor</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> NameVisitor <span class="keyword">struct</span> &#123;</span><br><span class="line">	visitor Visitor</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(v NameVisitor)</span> <span class="title">Visit</span><span class="params">(fn VisitorFunc)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> v.visitor.Visit(<span class="function"><span class="keyword">func</span><span class="params">(info *Info, err error)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="comment">// 这里是运行入参中的VisitorFunc，这一块的逻辑有点像pipeline</span></span><br><span class="line">		err = fn(info, err)</span><br><span class="line">		<span class="comment">// NameVisitor自己实现的Visit逻辑</span></span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然，Kubernetes中的Visitor还有进一步的封装，包括遇到错误时的处理，这里不细讲，有兴趣的朋友可以看看我对那一篇的分析。</p>
+<p>Visitor模式最大的优点就是 <code>解耦了数据和程序</code>。回头看Kubernetes的Visitor应用场景，主要是从各种输入源中解析出资源<code>Info</code>。这个过程中Info是数据，各类解析方法是资源。</p>
+<p>所以，我认为Visitor模式比较适合的是：<strong>目标数据明确，但获取数据的方法多样且复杂</strong>。但由于多层Visitor调用复杂，建议大家可以在外面再简单地封一层，提供常用的几种Visitor组合后的接口，供使用方调用。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号：golangcoding</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Programming-Patterns/" rel="tag"># Go-Programming-Patterns</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/02/20/go-patterns/go-patterns-7/" rel="prev" title="Go编程模式 - 7-代码生成">
+                  <i class="fa fa-chevron-left"></i> Go编程模式 - 7-代码生成
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/02/20/grpc/grpc-1/" rel="next" title="gRPC源码分析（一）：gRPC的系统调用过程">
+                  gRPC源码分析（一）：gRPC的系统调用过程 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

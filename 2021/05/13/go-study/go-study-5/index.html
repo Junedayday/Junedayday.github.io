@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="从一个Web项目开始经过了 入门篇 的学习，大家已经初步了解Go语言的语法，也能写常见的代码了。接下来，我们就从一个Web项目入手，看看一些常见的技能与知识吧。 我们先简单地聊一下这个Web项目的背景：我们要做的是一个简单的web系统 ，有前端同学负责界面的开发，后端不会考虑高并发等复杂情况。 我们先从一个Web请求出发，看看会涉及到哪些模块。 前端的请求生命周期用户在web界面上点击了一个按钮">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点">
+<meta property="og:url" content="http://example.com/2021/05/13/go-study/go-study-5/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="从一个Web项目开始经过了 入门篇 的学习，大家已经初步了解Go语言的语法，也能写常见的代码了。接下来，我们就从一个Web项目入手，看看一些常见的技能与知识吧。 我们先简单地聊一下这个Web项目的背景：我们要做的是一个简单的web系统 ，有前端同学负责界面的开发，后端不会考虑高并发等复杂情况。 我们先从一个Web请求出发，看看会涉及到哪些模块。 前端的请求生命周期用户在web界面上点击了一个按钮">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-05-13T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-19T14:52:26.479Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Study">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/05/13/go-study/go-study-5/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E4%B8%80%E4%B8%AAWeb%E9%A1%B9%E7%9B%AE%E5%BC%80%E5%A7%8B"><span class="nav-number">1.</span> <span class="nav-text">从一个Web项目开始</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%AB%AF%E7%9A%84%E8%AF%B7%E6%B1%82%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">2.</span> <span class="nav-text">前端的请求生命周期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E5%B1%82%EF%BC%9AAPI%E5%B1%82"><span class="nav-number">3.</span> <span class="nav-text">第一层：API层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%EF%BC%9AService%E5%B1%82"><span class="nav-number">4.</span> <span class="nav-text">第二层：Service层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%EF%BC%9ADao%E5%B1%82"><span class="nav-number">5.</span> <span class="nav-text">第三层：Dao层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B2%E8%81%94%E4%B8%89%E5%B1%82"><span class="nav-number">6.</span> <span class="nav-text">串联三层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CRUD%E7%A8%8B%E5%BA%8F%E5%91%98"><span class="nav-number">7.</span> <span class="nav-text">CRUD程序员</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9D%9F%E8%AF%AD"><span class="nav-number">8.</span> <span class="nav-text">结束语</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/13/go-study/go-study-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-13 12:00:00" itemprop="dateCreated datePublished" datetime="2021-05-13T12:00:00+08:00">2021-05-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-06-19 22:52:26" itemprop="dateModified" datetime="2021-06-19T22:52:26+08:00">2021-06-19</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="从一个Web项目开始"><a href="#从一个Web项目开始" class="headerlink" title="从一个Web项目开始"></a>从一个Web项目开始</h2><p>经过了 <strong>入门篇</strong> 的学习，大家已经初步了解Go语言的语法，也能写常见的代码了。接下来，我们就从一个Web项目入手，看看一些常见的技能与知识吧。</p>
+<p>我们先简单地聊一下这个Web项目的背景：我们要做的是一个简单的web系统 ，有前端同学负责界面的开发，后端不会考虑高并发等复杂情况。</p>
+<p>我们先从一个Web请求出发，看看会涉及到哪些模块。</p>
+<h2 id="前端的请求生命周期"><a href="#前端的请求生命周期" class="headerlink" title="前端的请求生命周期"></a>前端的请求生命周期</h2><p>用户在web界面上点击了一个按钮，就由前端发起了一个请求。那这个请求的生命周期是怎么样的呢？</p>
+<p>通常情况下，后端的工作是<strong>解析前端的数据，处理对应的业务逻辑，返回操作结果</strong>。</p>
+<p>这里，离不开三层概念：</p>
+<ul>
+<li>API层：解析来自前端的数据，转化成go的数据结构</li>
+<li>Service层：包含业务逻辑，是这个请求具体要做的事情</li>
+<li>Dao层：数据持久化，也就是更新到数据库等，保证不丢失</li>
+</ul>
+<blockquote>
+<p>不同框架有不同的命名方式，但我个人建议只关注这三层即可。</p>
+</blockquote>
+<p>当然，这三层逻辑并不绝对，会因为项目特点有所调整，但整体的<strong>分层思路</strong>是不会变化的。我认为，如果你能真正地理解web的分层，对项目的框架就能掌握得很棒了。</p>
+<p>接下来，我们自顶向下逐层聊聊。</p>
+<h2 id="第一层：API层"><a href="#第一层：API层" class="headerlink" title="第一层：API层"></a>第一层：API层</h2><p>通常来说，API层只做三件事：</p>
+<ol>
+<li><strong>根据路由规则，调用具体的处理函数</strong> ，常见的RESTful就是由<code>URL</code>+<code>Method</code>的作为路由规则；</li>
+<li><strong>解析文本或二进制数据到Go结构体</strong>，常见的是用<code>json</code>反序列化；</li>
+<li><strong>调用下一层Service的函数</strong></li>
+</ol>
+<p>抛开第三点暂且不谈，前两者比较容易理解，大家可以使用标准库里的<code>net/http</code>和<code>encoding/json</code>来完成。具体的代码我就不写了，网上示例非常多。</p>
+<p>那么，API层这么简单，有什么学问嘛？这里，我建议大家看看两个开源库：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/gin-gonic/gin">Gin</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/gorilla/mux">Mux</a></li>
+</ul>
+<p>看看上面的示例，对比一下原生的<code>net/http</code>库写出来的代码，是否感觉可读性大大提高？没错，API层关键点之一的就是<strong>可读性</strong>。</p>
+<p>不过Gin相对于Mux非常重量级，学习起来成本很大；而Mux虽然可读性提高，但在解析<code>http body</code>数据这块效果不佳，还是需要逐个手写结构体。</p>
+<blockquote>
+<p>所以，在我看来，这两个都并不是最佳方案，我非常建议有条件的项目能够直接引入 <strong>RPC级别的解决方案</strong>，例如gRPC。这块我会拿具体项目、花好几讲来好好说说。</p>
+</blockquote>
+<p>在开发的过程中，我对API层的开发会重点关注这几点：</p>
+<ul>
+<li>可读性：可以快速地根据命名了解功能，如<strong>RESTful</strong></li>
+<li>高度复用：如引入<code>mux</code> 中的各种 middleware，比如 <strong>防止panic</strong> 、<strong>用户认证</strong> 、日志打印等</li>
+<li>尽量薄：不做或少做业务逻辑处理，复杂处理都丢到service层</li>
+<li>文档化：将接口的相关参数通过文档给到前端或第三方，尽量做到自动化或半自动化</li>
+</ul>
+<p>我再强调一下API层的重要性：<strong>API层是程序最关键的入口和出口，能很好地追踪到数据的前后变化情况。</strong> 一个优秀的API层实现，不仅能让我们少写很多重复性代码，也能大幅度地降低我们排查问题的效率。</p>
+<h2 id="第二层：Service层"><a href="#第二层：Service层" class="headerlink" title="第二层：Service层"></a>第二层：Service层</h2><p>Service层可以理解为服务层，是整个项目中最复杂、也是代码比重往往是最多的。它是一个项目最核心的业务价值所在。</p>
+<p>Service是最灵活、也是最考验设计能力的，虽说<strong>没有一套固定的模式</strong>，但还是会有一定的<strong>套路</strong>。</p>
+<p>我分享一下个人的三个见解：</p>
+<ol>
+<li>单元测试覆盖率要尽量高，这是一个<strong>高频迭代与重构</strong>的模块，也是最容易出现问题的部分；</li>
+<li>深入实践 <strong>面向对象与DDD</strong> ，最锻炼工程师抽象、解耦等能力的模块；</li>
+<li>选择合适的 <strong>设计模式</strong> 可大幅度地提升研发效率；</li>
+</ol>
+<p>再提一句，请跃跃欲试的各位冷静一下，<strong>Service层是和业务一起成长的</strong>，前期没必要过度设计。我们把重点放在<strong>单元测试</strong>的编写上即可，适当地选用一些库来提高效率，如开源的<code>stretchr/testify</code>，内部的<code>reflect</code>等。</p>
+<h2 id="第三层：Dao层"><a href="#第三层：Dao层" class="headerlink" title="第三层：Dao层"></a>第三层：Dao层</h2><p>Dao层常被理解为数据持久化层，但我们可以将它进行一定的延伸：<strong>将RPC调用也当做Dao层</strong>（不妨认为将数据持久化到了另一个服务），来适配微服务架构的场景。</p>
+<blockquote>
+<p>严格意义上，RPC调用和普通的Dao差异有不少，但为了收敛话题，我们暂且不细分。</p>
+</blockquote>
+<p>今天，我们不关注分布式场景下的各种数据问题，也不考虑各种存储中间件的特点，而是聚焦于一个问题：<strong>如何将内存中的对象持久化到数据库中</strong>。在编程领域，这部分的工具被称为<strong>ORM</strong>。</p>
+<p>以Go语言对接MySQL为例，最常见的为<a target="_blank" rel="noopener" href="https://github.com/go-gorm/gorm">gorm</a>，它能很便捷地将一个Go语言中的结构体，映射到MySQL数据库某个表中的一行数据。</p>
+<blockquote>
+<p>请自行对比一下，用go官方的sql库写增删改查，与用gorm写增删改查的工作量差异。</p>
+</blockquote>
+<p>关于Dao层，我认为有部分的实践是比较通用的：</p>
+<ol>
+<li><strong>选用官方或社区高频使用的库</strong>，避免后期出现功能缺失或性能瓶颈的问题；</li>
+<li><strong>灵活性比易用性更重要</strong>，通过一层浅封装，往往能更适配项目，达到更棒的易用性；</li>
+<li><strong>关注数据库的原理、而不是ORM工具的实现方式</strong>，数据库的原理是长期的积累，对技术选型和排查故障很有帮助。</li>
+</ol>
+<blockquote>
+<p>至于不同的数据库ORM有不同的最佳实践，一一列举的工作量太大，我会在工程化的过程中选择性地讲解。</p>
+</blockquote>
+<h2 id="串联三层"><a href="#串联三层" class="headerlink" title="串联三层"></a>串联三层</h2><p>到这里，我们对这三层有了初步的了解，可以总结为**两边薄（API、Dao），中间厚（Service)**。</p>
+<p>这里的实践需要大家不断打磨，比如说：</p>
+<ul>
+<li>API与Dao会随着个人编程能力的提升，不断地总结出更好的编程实践；</li>
+<li>做性能优化时，优先考虑Dao，其次考虑API，这两部分的提效是最明显的；</li>
+<li>排查问题时，先分析API的出入口，再分析Dao的出入口，实在解决不了再去看Service（此时已经是严重的业务逻辑问题了）；</li>
+</ul>
+<p>到最后，相信大家对这三层认知会进一步提升：</p>
+<ul>
+<li>API：服务对外的门面，通过一个接口定义就能了解大致实现原理；</li>
+<li>Service：复杂的业务逻辑，非该服务的核心成员无需关注，而核心成员须重点维护；</li>
+<li>Dao：无论是调用<strong>ORM</strong>还是<strong>SDK</strong>，都视为一种<strong>工具集</strong>，是一个技术人员沉淀通用能力的重点。</li>
+</ul>
+<h2 id="CRUD程序员"><a href="#CRUD程序员" class="headerlink" title="CRUD程序员"></a>CRUD程序员</h2><p>很多程序员都戏称自己是一个只会<strong>CRUD</strong>的码农。让我们换个视角，看看CRUD背后有没有一些的技术点。</p>
+<ul>
+<li>API层：遵循<strong>RESTful</strong>的原则，提高可读性（最好能在一行代码中看到，如<code>mux</code>）<ul>
+<li>将操作（CRUD）对应到HTTP的Method</li>
+<li>将资源对象对应到HTTP的URL</li>
+</ul>
+</li>
+<li>Service层：<ul>
+<li>对于只是简单的修改，Service不用做复杂处理，透传到Dao层即可</li>
+<li>如果涉及到多个表的修改，进行事务处理（如mysql的transaction）</li>
+<li>在Dao层出现错误时，适当封装错误信息，提高可读性</li>
+</ul>
+</li>
+<li>Dao层：<ul>
+<li>选择并熟练运用ORM，快速实现基本的CRUD</li>
+<li>对复杂的ORM进行一层浅封装，方便Service层的调用</li>
+</ul>
+</li>
+</ul>
+<p>经过一段时间的磨练，CRUD的工作能大大提效，我们就能抽出更多的时间去学习其余技能了。</p>
+<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>Web项目是我们日常开发最常见的项目类型，也是很多面试考察点的基点。</p>
+<p>我建议大家从<strong>分层</strong>着手，明确各层职责，<strong>关注API与Dao层的提效工作，做好Service层的质量保障</strong>，更好地掌控全局。而在具体的开源库的使用过程中，<strong>选对比会用更重要</strong>，集中在<strong>API与Dao层</strong>。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Study/" rel="tag"># Go-Study</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/07/go-tip/go-tip-3/" rel="prev" title="Go语言技巧 - 3.【Error工程化】Go Error的工程化探索">
+                  <i class="fa fa-chevron-left"></i> Go语言技巧 - 3.【Error工程化】Go Error的工程化探索
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/27/go-tip/go-tip-4/" rel="next" title="Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学">
+                  Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
