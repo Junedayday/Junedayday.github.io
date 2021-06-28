@@ -142,20 +142,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-001/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-002/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2021/02/20/grpc/grpc-3/</loc>
     
     <lastmod>2021-03-29</lastmod>
@@ -164,6 +150,20 @@
   
   <url>
     <loc>http://example.com/2021/02/20/grpc/grpc-4/</loc>
+    
+    <lastmod>2021-03-29</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/02/18/k8s/k8s-001/</loc>
+    
+    <lastmod>2021-03-29</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/02/18/k8s/k8s-002/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -191,14 +191,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/21/go-study/go-study-0/</loc>
+    <loc>http://example.com/2021/03/05/go-study/go-study-1/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/03/05/go-study/go-study-1/</loc>
+    <loc>http://example.com/2021/02/21/go-study/go-study-0/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -291,14 +291,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Kubernetes/</loc>
+    <loc>http://example.com/tags/gRPC/</loc>
     <lastmod>2021-06-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://example.com/tags/gRPC/</loc>
+    <loc>http://example.com/tags/Kubernetes/</loc>
     <lastmod>2021-06-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
