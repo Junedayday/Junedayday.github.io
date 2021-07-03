@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="Go Mod的官方说明Go语言自从推出了go mod作为版本管理工具后，结束Go语言版本管理工具的纷争，实现了大一统。 相信有很多人都对这个版本管理的机制都有基础的概念、但并不深入。而官方把最核心的实现，都放在这一篇 https:&#x2F;&#x2F;golang.org&#x2F;ref&#x2F;mod 文档中。 今天，我们一起来读读这一篇文章。 快速入门 - 5篇介绍Go Mod系列的官方博客新手直接阅读这篇文章的门槛有点高，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言技巧 - 5.【初探Go Module】Go语言的版本管理">
+<meta property="og:url" content="http://example.com/2021/07/03/go-tip/go-tip-5/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="Go Mod的官方说明Go语言自从推出了go mod作为版本管理工具后，结束Go语言版本管理工具的纷争，实现了大一统。 相信有很多人都对这个版本管理的机制都有基础的概念、但并不深入。而官方把最核心的实现，都放在这一篇 https:&#x2F;&#x2F;golang.org&#x2F;ref&#x2F;mod 文档中。 今天，我们一起来读读这一篇文章。 快速入门 - 5篇介绍Go Mod系列的官方博客新手直接阅读这篇文章的门槛有点高，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-07-03T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-03T04:52:42.000Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Tip">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/07/03/go-tip/go-tip-5/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言技巧 - 5.【初探Go Module】Go语言的版本管理 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-Mod%E7%9A%84%E5%AE%98%E6%96%B9%E8%AF%B4%E6%98%8E"><span class="nav-number">1.</span> <span class="nav-text">Go Mod的官方说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8-5%E7%AF%87%E4%BB%8B%E7%BB%8DGo-Mod%E7%B3%BB%E5%88%97%E7%9A%84%E5%AE%98%E6%96%B9%E5%8D%9A%E5%AE%A2"><span class="nav-number">2.</span> <span class="nav-text">快速入门 - 5篇介绍Go Mod系列的官方博客</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-using-go-modules"><span class="nav-number">2.1.</span> <span class="nav-text">1. using-go-modules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-migrating-to-go-modules"><span class="nav-number">2.2.</span> <span class="nav-text">2. migrating-to-go-modules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-publishing-go-modules"><span class="nav-number">2.3.</span> <span class="nav-text">3. publishing-go-modules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-v2-go-modules"><span class="nav-number">2.4.</span> <span class="nav-text">4. v2-go-modules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-module-compatibility"><span class="nav-number">2.5.</span> <span class="nav-text">5. module-compatibility</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8Ego-mod%E7%9A%84%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%AE%B2%E8%B5%B7"><span class="nav-number">3.</span> <span class="nav-text">从go.mod的文件格式讲起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E6%B7%B1%E7%90%86%E8%A7%A3-incompatible%E5%92%8Cindirect"><span class="nav-number">4.</span> <span class="nav-text">加深理解 - incompatible和indirect</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#incompatible-%E5%85%BC%E5%AE%B9v2%E5%8F%8A%E4%BB%A5%E4%B8%8A%E7%9A%84%E7%89%88%E6%9C%AC%E5%8F%B7"><span class="nav-number">4.1.</span> <span class="nav-text">incompatible - 兼容v2及以上的版本号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#indirect-%E6%9C%AA%E5%9C%A8go-mod%E9%87%8C%E5%AE%9A%E4%B9%89%E3%80%81%E4%BD%86%E9%97%B4%E6%8E%A5%E8%B0%83%E7%94%A8%E7%9A%84%E5%BA%93"><span class="nav-number">4.2.</span> <span class="nav-text">indirect - 未在go.mod里定义、但间接调用的库</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D"><span class="nav-number">5.</span> <span class="nav-text">常见命令介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8go-mod-init%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%B9%E7%9B%AE"><span class="nav-number">5.1.</span> <span class="nav-text">用go mod init初始化项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8go-get%E4%B8%8B%E8%BD%BD%E6%8C%87%E5%AE%9A%E4%BE%9D%E8%B5%96%E5%BA%93%E4%B8%8E%E7%89%88%E6%9C%AC"><span class="nav-number">5.2.</span> <span class="nav-text">用go get下载指定依赖库与版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AEgo-mod%E4%B8%8B%E8%BD%BD%E4%BE%9D%E8%B5%96%E5%BA%93go-mod-download-vendor"><span class="nav-number">5.3.</span> <span class="nav-text">根据go.mod下载依赖库go mod download&#x2F;vendor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E7%90%86%E4%BE%9D%E8%B5%96go-mod-tidy"><span class="nav-number">5.4.</span> <span class="nav-text">整理依赖go mod tidy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BA%93%E7%9A%84%E6%94%AF%E6%8C%81%E7%89%88%E6%9C%ACgo-list"><span class="nav-number">5.5.</span> <span class="nav-text">查看库的支持版本go list</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E5%BA%93%E7%9A%84%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BBgo-mod-graph"><span class="nav-number">5.6.</span> <span class="nav-text">查看当前库的依赖关系go mod graph</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%8C%87%E5%AE%9A%E5%BA%93%E6%98%AF%E6%80%8E%E4%B9%88%E8%A2%AB%E4%BE%9D%E8%B5%96%E7%9A%84go-mod-why"><span class="nav-number">5.7.</span> <span class="nav-text">查看指定库是怎么被依赖的go mod why</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E7%9A%84%E4%BE%9D%E8%B5%96%E4%BF%A1%E6%81%AFgo-version-m"><span class="nav-number">5.8.</span> <span class="nav-text">查看二进制文件的依赖信息go version -m</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEGOPRXOY"><span class="nav-number">6.</span> <span class="nav-text">设置GOPRXOY</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/03/go-tip/go-tip-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言技巧 - 5.【初探Go Module】Go语言的版本管理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-07-03 12:00:00 / 修改时间：12:52:42" itemprop="dateCreated datePublished" datetime="2021-07-03T12:00:00+08:00">2021-07-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="Go-Mod的官方说明"><a href="#Go-Mod的官方说明" class="headerlink" title="Go Mod的官方说明"></a>Go Mod的官方说明</h2><p>Go语言自从推出了<code>go mod</code>作为版本管理工具后，结束Go语言版本管理工具的纷争，实现了大一统。</p>
+<p>相信有很多人都对这个版本管理的机制都有基础的概念、但并不深入。而官方把最核心的实现，都放在这一篇 <a target="_blank" rel="noopener" href="https://golang.org/ref/mod">https://golang.org/ref/mod</a> 文档中。</p>
+<p>今天，我们一起来读读这一篇文章。</p>
+<h2 id="快速入门-5篇介绍Go-Mod系列的官方博客"><a href="#快速入门-5篇介绍Go-Mod系列的官方博客" class="headerlink" title="快速入门 - 5篇介绍Go Mod系列的官方博客"></a>快速入门 - 5篇介绍Go Mod系列的官方博客</h2><p>新手直接阅读这篇文章的门槛有点高，我建议可以先看看下面这五篇较为通俗的官方博客，能帮助我们了解一些背景知识。</p>
+<h3 id="1-using-go-modules"><a href="#1-using-go-modules" class="headerlink" title="1. using-go-modules"></a>1. using-go-modules</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/using-go-modules">https://blog.golang.org/using-go-modules</a> </p>
+<ol>
+<li><code>go.mod</code>放在项目的根目录，抛弃原来的<code>GOPATH</code></li>
+<li>用<code>MAJOR.MINOR.PATCH</code>格式管理版本，详细可参考<a target="_blank" rel="noopener" href="https://semver.org/">Semantic Versioning 2.0.0</a></li>
+<li>用<code>go.sum</code>保证依赖文件被完整下载（如果公司搭建私有库就会出现校验问题，需要关闭GOSUM）</li>
+<li>项目内部的库，不再是相对路径，而用的是 <code>go mod模块名</code> + <code>相对路径</code> ，定义更加清晰</li>
+</ol>
+<blockquote>
+<p>第四点的价值很大，可读性大大提高，我们可以将一整个path来辅助命名，如 market/order，前者market可以帮助后者order的含义做一定补充</p>
+</blockquote>
+<h3 id="2-migrating-to-go-modules"><a href="#2-migrating-to-go-modules" class="headerlink" title="2. migrating-to-go-modules"></a>2. migrating-to-go-modules</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/migrating-to-go-modules">https://blog.golang.org/migrating-to-go-modules</a></p>
+<p>将项目迁移到go mod，主要讲的是对接老的版本管理系统，如<code>godeps</code>。</p>
+<h3 id="3-publishing-go-modules"><a href="#3-publishing-go-modules" class="headerlink" title="3. publishing-go-modules"></a>3. publishing-go-modules</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/publishing-go-modules">https://blog.golang.org/publishing-go-modules</a></p>
+<p>版本命名规则：推荐不稳定版本用<code>v0.x.x</code>开始，稳定后改成<code>v1.x.x</code>。</p>
+<p><strong>pseudo-version</strong> 直译为假的版本，一般是直接依赖branch，而不是按规范依赖tag</p>
+<h3 id="4-v2-go-modules"><a href="#4-v2-go-modules" class="headerlink" title="4. v2-go-modules"></a>4. v2-go-modules</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/v2-go-modules">https://blog.golang.org/v2-go-modules</a></p>
+<p>注意主版本名为<code>v2</code>之后的，项目里对应的要新增一个<code>v2</code>或者更高版本号的目录。</p>
+<blockquote>
+<p>我个人感觉升级到v2这种方式不太友好，需要我们再维护一整个目录</p>
+</blockquote>
+<h3 id="5-module-compatibility"><a href="#5-module-compatibility" class="headerlink" title="5. module-compatibility"></a>5. module-compatibility</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/module-compatibility">https://blog.golang.org/module-compatibility</a></p>
+<ol>
+<li>用不定参数<code>...</code>的特性提高函数的入参扩展性</li>
+<li>引入函数式的参数，也就是将具体的执行逻辑作为参数，传递进来</li>
+<li>引入<code>Option types</code>模式，更详细地可以参考我的<a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/02/20/go-patterns/go-patterns-5/">文章</a></li>
+<li>用接口<code>interface</code>分离调用和实现</li>
+<li>如果结构体<code>struct</code>明确不能对比，就用一个<code>doNotCompare</code>的<code>field</code>来告诉调用者</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> doNotCompare [<span class="number">0</span>]<span class="function"><span class="keyword">func</span><span class="params">()</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Point <span class="keyword">struct</span> &#123;</span><br><span class="line">        doNotCompare</span><br><span class="line">        X <span class="keyword">int</span></span><br><span class="line">        Y <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>第五点非常有意思，也就是要求我们在前期设计对象时，就要考虑清楚这个对象后续的特性，比如示例中的是否可以对比</p>
+</blockquote>
+<h2 id="从go-mod的文件格式讲起"><a href="#从go-mod的文件格式讲起" class="headerlink" title="从go.mod的文件格式讲起"></a>从go.mod的文件格式讲起</h2><p>进入正题，我们来一起看看<code>go.mod</code>，它的定义简单示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">module example.com/my/thing</span><br><span class="line"></span><br><span class="line">go 1.12</span><br><span class="line"></span><br><span class="line">require example.com/other/thing v1.0.2</span><br><span class="line">require example.com/new/thing/v2 v2.3.4</span><br><span class="line">exclude example.com/old/thing v1.2.3</span><br><span class="line">replace example.com/bad/thing v1.4.5 =&gt; example.com/good/thing v1.4.5</span><br><span class="line">retract [v1.9.0, v1.9.5]</span><br></pre></td></tr></table></figure>
+
+<p>IDE会帮助你格式化，记住以下关键词即可（重点为前三个）</p>
+<ol>
+<li><strong>module</strong> - go mod init指令定义的<strong>库名</strong></li>
+<li><strong>go</strong> - <strong>要求go语言的最低版本</strong>，会影响到后面依赖库的下载</li>
+<li><strong>require</strong> - <strong>必备库</strong>，也就是代码中直接import的部分</li>
+<li><strong>replace</strong> - <strong>替换库</strong>，在重构时挺好用（比如某个开源组件有问题，内部fork了一版，直接replace即可）</li>
+<li><strong>retract</strong> <strong>撤回版本</strong>，告诉调用本库的项目，部分版本有严重问题、不要引用</li>
+</ol>
+<blockquote>
+<p>go mod 底层实现依赖 - <strong>MVS</strong> 最小版本选择。</p>
+<p>这个特性很有意思，后续单独来讲讲这块，一开始就不深入到细节了</p>
+</blockquote>
+<h2 id="加深理解-incompatible和indirect"><a href="#加深理解-incompatible和indirect" class="headerlink" title="加深理解 - incompatible和indirect"></a>加深理解 - incompatible和indirect</h2><p>在我们整理<code>go.mod</code>文件时，经常能看到两个奇怪的字符<code>indirect</code>和<code>incompatible</code>。我们来详细地分析一下。</p>
+<h3 id="incompatible-兼容v2及以上的版本号"><a href="#incompatible-兼容v2及以上的版本号" class="headerlink" title="incompatible - 兼容v2及以上的版本号"></a>incompatible - 兼容v2及以上的版本号</h3><p>上面我们已经讲过，如果一个库的tag为v1以上，如v2，就必须得创建一个v2的目录。例如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">require example.com/new/thing/v2 v2.3.4</span><br></pre></td></tr></table></figure>
+
+<p>这就要求我们在项目<code>example.com/new/thing</code>下新建v2目录，再存放代码。但是，很多库往往只是升级个主版本号，并不会去新建目录、还需要迁移代码。为了兼容这个情况，就会引入<code>+incompatible</code>。例如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">require example.com/new/thing v2.3.4+incompatible</span><br></pre></td></tr></table></figure>
+
+<h3 id="indirect-未在go-mod里定义、但间接调用的库"><a href="#indirect-未在go-mod里定义、但间接调用的库" class="headerlink" title="indirect - 未在go.mod里定义、但间接调用的库"></a>indirect - 未在go.mod里定义、但间接调用的库</h3><p>我们先聊一个简单的场景：<strong>当前项目为A，调用了项目B，B又调用了C。对A进行编译，需要B和C的相关代码</strong>。</p>
+<p>在完全规范的项目中：</p>
+<ul>
+<li><strong>条件1</strong> - A的go.mod里包含B</li>
+<li><strong>条件2</strong> - B的go.mod里包含C</li>
+</ul>
+<p>在编译A时，会在go.mod找到B的信息，所以B是<code>require</code>字段；而C的信息已经被维护在B的go.mod里了，不需要在A的go.mod里维护。</p>
+<p>而什么样的情况会发生indirect呢？它对应的是 <strong>条件2</strong> 缺失的场景</p>
+<ol>
+<li>B<strong>没有启用Go Module</strong>，采用的是老项目管理方式</li>
+<li>B的<strong>go.mod部分缺失</strong>，未填写模块C</li>
+</ol>
+<blockquote>
+<p>最常见的部分缺失场景是：项目虽然有go.mod，但实际编译不走Go Module，而是如vendor目录等方式</p>
+</blockquote>
+<p>用一句话总结，<strong>A库无法根据B库的<code>go.mod</code>找到C库</strong>。</p>
+<h2 id="常见命令介绍"><a href="#常见命令介绍" class="headerlink" title="常见命令介绍"></a>常见命令介绍</h2><p>相关的指令有很多，我重点分两块来说：</p>
+<p>先是<strong>高频使用</strong>的命令：</p>
+<h3 id="用go-mod-init初始化项目"><a href="#用go-mod-init初始化项目" class="headerlink" title="用go mod init初始化项目"></a>用go mod init初始化项目</h3><p>初始化项目，保证module名称与git路径一致。</p>
+<p>例如 <code>go mod init github.com/example/a</code></p>
+<h3 id="用go-get下载指定依赖库与版本"><a href="#用go-get下载指定依赖库与版本" class="headerlink" title="用go get下载指定依赖库与版本"></a>用go get下载指定依赖库与版本</h3><p>常见的flags</p>
+<ul>
+<li><strong>-d</strong> 只更新<code>go.mod</code>中的依赖，轻量级</li>
+<li><strong>-u</strong> 更新指定库与依赖它的库，全量</li>
+</ul>
+<p>例如<code>go get -d github.com/example/b</code></p>
+<h3 id="根据go-mod下载依赖库go-mod-download-vendor"><a href="#根据go-mod下载依赖库go-mod-download-vendor" class="headerlink" title="根据go.mod下载依赖库go mod download/vendor"></a>根据go.mod下载依赖库go mod download/vendor</h3><p>其中download是下载到Go Module的缓存中，而vendor是下载到vendor依赖路径。官方推荐前者。</p>
+<p>我经常会去手动编辑<code>go.mod</code>文件，然后用这个指令刷新一下依赖库</p>
+<h3 id="整理依赖go-mod-tidy"><a href="#整理依赖go-mod-tidy" class="headerlink" title="整理依赖go mod tidy"></a>整理依赖go mod tidy</h3><p>整理并更新go mod的依赖信息，保证当前的<code>go.mod</code>为最新。</p>
+<p>然后是<strong>排查依赖库问题</strong>用到的：</p>
+<h3 id="查看库的支持版本go-list"><a href="#查看库的支持版本go-list" class="headerlink" title="查看库的支持版本go list"></a>查看库的支持版本go list</h3><ul>
+<li><code>go list -m all</code> 查看本项目的所有依赖库与版本</li>
+<li><code>go list -m -versions &#123;module名&#125;</code> 查看module支持的版本号</li>
+<li><code>go list -m -json &#123;module名&#125;@&#123;版本号&#125;</code> 用json格式查看指定module版本号的信息，如创建时间</li>
+</ul>
+<h3 id="查看当前库的依赖关系go-mod-graph"><a href="#查看当前库的依赖关系go-mod-graph" class="headerlink" title="查看当前库的依赖关系go mod graph"></a>查看当前库的依赖关系go mod graph</h3><p>查看所有go mod的依赖，一般在查依赖关系时用到</p>
+<h3 id="查看指定库是怎么被依赖的go-mod-why"><a href="#查看指定库是怎么被依赖的go-mod-why" class="headerlink" title="查看指定库是怎么被依赖的go mod why"></a>查看指定库是怎么被依赖的go mod why</h3><p>查指定库是怎么被依赖的</p>
+<h3 id="查看二进制文件的依赖信息go-version-m"><a href="#查看二进制文件的依赖信息go-version-m" class="headerlink" title="查看二进制文件的依赖信息go version -m"></a>查看二进制文件的依赖信息go version -m</h3><p>查看指定（go文件编译的）二进制文件的版本信息</p>
+<h2 id="设置GOPRXOY"><a href="#设置GOPRXOY" class="headerlink" title="设置GOPRXOY"></a>设置GOPRXOY</h2><p>大部分人使用<code>go.mod</code>的最大问题是无法下载代码库，也就是代理的设置，网上也有很多教程，我这边给三个我常用的：</p>
+<ol>
+<li>阿里云：GOPROXY=<a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/goproxy,direct">https://mirrors.aliyun.com/goproxy,direct</a></li>
+<li>七牛云：GOPROXY=<a target="_blank" rel="noopener" href="https://goproxy.cn,direct/">https://goproxy.cn,direct</a></li>
+<li>全球代理：GOPROXY=<a target="_blank" rel="noopener" href="https://goproxy.io,direct/">https://goproxy.io,direct</a></li>
+</ol>
+<blockquote>
+<p>公司私有库需要私有代理。</p>
+</blockquote>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本讲的内容到这里就告一段落了，相信通过这篇文章，大家已经能应对绝大部分Go Module的场景。</p>
+<p>下一讲，我会重点讲Go Module最核心的 <strong>Minimal version selection (MVS)</strong> 机制。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Tip/" rel="tag"># Go-Tip</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/27/go-tip/go-tip-4/" rel="prev" title="Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学">
+                  <i class="fa fa-chevron-left"></i> Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

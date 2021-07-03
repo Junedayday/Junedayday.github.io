@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-count">36</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -205,6 +205,194 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/03/go-tip/go-tip-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/03/go-tip/go-tip-5/" class="post-title-link" itemprop="url">Go语言技巧 - 5.【初探Go Module】Go语言的版本管理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-07-03 12:00:00 / 修改时间：12:52:42" itemprop="dateCreated datePublished" datetime="2021-07-03T12:00:00+08:00">2021-07-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="Go-Mod的官方说明"><a href="#Go-Mod的官方说明" class="headerlink" title="Go Mod的官方说明"></a>Go Mod的官方说明</h2><p>Go语言自从推出了<code>go mod</code>作为版本管理工具后，结束Go语言版本管理工具的纷争，实现了大一统。</p>
+<p>相信有很多人都对这个版本管理的机制都有基础的概念、但并不深入。而官方把最核心的实现，都放在这一篇 <a target="_blank" rel="noopener" href="https://golang.org/ref/mod">https://golang.org/ref/mod</a> 文档中。</p>
+<p>今天，我们一起来读读这一篇文章。</p>
+<h2 id="快速入门-5篇介绍Go-Mod系列的官方博客"><a href="#快速入门-5篇介绍Go-Mod系列的官方博客" class="headerlink" title="快速入门 - 5篇介绍Go Mod系列的官方博客"></a>快速入门 - 5篇介绍Go Mod系列的官方博客</h2><p>新手直接阅读这篇文章的门槛有点高，我建议可以先看看下面这五篇较为通俗的官方博客，能帮助我们了解一些背景知识。</p>
+<h3 id="1-using-go-modules"><a href="#1-using-go-modules" class="headerlink" title="1. using-go-modules"></a>1. using-go-modules</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/using-go-modules">https://blog.golang.org/using-go-modules</a> </p>
+<ol>
+<li><code>go.mod</code>放在项目的根目录，抛弃原来的<code>GOPATH</code></li>
+<li>用<code>MAJOR.MINOR.PATCH</code>格式管理版本，详细可参考<a target="_blank" rel="noopener" href="https://semver.org/">Semantic Versioning 2.0.0</a></li>
+<li>用<code>go.sum</code>保证依赖文件被完整下载（如果公司搭建私有库就会出现校验问题，需要关闭GOSUM）</li>
+<li>项目内部的库，不再是相对路径，而用的是 <code>go mod模块名</code> + <code>相对路径</code> ，定义更加清晰</li>
+</ol>
+<blockquote>
+<p>第四点的价值很大，可读性大大提高，我们可以将一整个path来辅助命名，如 market/order，前者market可以帮助后者order的含义做一定补充</p>
+</blockquote>
+<h3 id="2-migrating-to-go-modules"><a href="#2-migrating-to-go-modules" class="headerlink" title="2. migrating-to-go-modules"></a>2. migrating-to-go-modules</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/migrating-to-go-modules">https://blog.golang.org/migrating-to-go-modules</a></p>
+<p>将项目迁移到go mod，主要讲的是对接老的版本管理系统，如<code>godeps</code>。</p>
+<h3 id="3-publishing-go-modules"><a href="#3-publishing-go-modules" class="headerlink" title="3. publishing-go-modules"></a>3. publishing-go-modules</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/publishing-go-modules">https://blog.golang.org/publishing-go-modules</a></p>
+<p>版本命名规则：推荐不稳定版本用<code>v0.x.x</code>开始，稳定后改成<code>v1.x.x</code>。</p>
+<p><strong>pseudo-version</strong> 直译为假的版本，一般是直接依赖branch，而不是按规范依赖tag</p>
+<h3 id="4-v2-go-modules"><a href="#4-v2-go-modules" class="headerlink" title="4. v2-go-modules"></a>4. v2-go-modules</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/v2-go-modules">https://blog.golang.org/v2-go-modules</a></p>
+<p>注意主版本名为<code>v2</code>之后的，项目里对应的要新增一个<code>v2</code>或者更高版本号的目录。</p>
+<blockquote>
+<p>我个人感觉升级到v2这种方式不太友好，需要我们再维护一整个目录</p>
+</blockquote>
+<h3 id="5-module-compatibility"><a href="#5-module-compatibility" class="headerlink" title="5. module-compatibility"></a>5. module-compatibility</h3><p><a target="_blank" rel="noopener" href="https://blog.golang.org/module-compatibility">https://blog.golang.org/module-compatibility</a></p>
+<ol>
+<li>用不定参数<code>...</code>的特性提高函数的入参扩展性</li>
+<li>引入函数式的参数，也就是将具体的执行逻辑作为参数，传递进来</li>
+<li>引入<code>Option types</code>模式，更详细地可以参考我的<a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/02/20/go-patterns/go-patterns-5/">文章</a></li>
+<li>用接口<code>interface</code>分离调用和实现</li>
+<li>如果结构体<code>struct</code>明确不能对比，就用一个<code>doNotCompare</code>的<code>field</code>来告诉调用者</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> doNotCompare [<span class="number">0</span>]<span class="function"><span class="keyword">func</span><span class="params">()</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Point <span class="keyword">struct</span> &#123;</span><br><span class="line">        doNotCompare</span><br><span class="line">        X <span class="keyword">int</span></span><br><span class="line">        Y <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>第五点非常有意思，也就是要求我们在前期设计对象时，就要考虑清楚这个对象后续的特性，比如示例中的是否可以对比</p>
+</blockquote>
+<h2 id="从go-mod的文件格式讲起"><a href="#从go-mod的文件格式讲起" class="headerlink" title="从go.mod的文件格式讲起"></a>从go.mod的文件格式讲起</h2><p>进入正题，我们来一起看看<code>go.mod</code>，它的定义简单示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">module example.com/my/thing</span><br><span class="line"></span><br><span class="line">go 1.12</span><br><span class="line"></span><br><span class="line">require example.com/other/thing v1.0.2</span><br><span class="line">require example.com/new/thing/v2 v2.3.4</span><br><span class="line">exclude example.com/old/thing v1.2.3</span><br><span class="line">replace example.com/bad/thing v1.4.5 =&gt; example.com/good/thing v1.4.5</span><br><span class="line">retract [v1.9.0, v1.9.5]</span><br></pre></td></tr></table></figure>
+
+<p>IDE会帮助你格式化，记住以下关键词即可（重点为前三个）</p>
+<ol>
+<li><strong>module</strong> - go mod init指令定义的<strong>库名</strong></li>
+<li><strong>go</strong> - <strong>要求go语言的最低版本</strong>，会影响到后面依赖库的下载</li>
+<li><strong>require</strong> - <strong>必备库</strong>，也就是代码中直接import的部分</li>
+<li><strong>replace</strong> - <strong>替换库</strong>，在重构时挺好用（比如某个开源组件有问题，内部fork了一版，直接replace即可）</li>
+<li><strong>retract</strong> <strong>撤回版本</strong>，告诉调用本库的项目，部分版本有严重问题、不要引用</li>
+</ol>
+<blockquote>
+<p>go mod 底层实现依赖 - <strong>MVS</strong> 最小版本选择。</p>
+<p>这个特性很有意思，后续单独来讲讲这块，一开始就不深入到细节了</p>
+</blockquote>
+<h2 id="加深理解-incompatible和indirect"><a href="#加深理解-incompatible和indirect" class="headerlink" title="加深理解 - incompatible和indirect"></a>加深理解 - incompatible和indirect</h2><p>在我们整理<code>go.mod</code>文件时，经常能看到两个奇怪的字符<code>indirect</code>和<code>incompatible</code>。我们来详细地分析一下。</p>
+<h3 id="incompatible-兼容v2及以上的版本号"><a href="#incompatible-兼容v2及以上的版本号" class="headerlink" title="incompatible - 兼容v2及以上的版本号"></a>incompatible - 兼容v2及以上的版本号</h3><p>上面我们已经讲过，如果一个库的tag为v1以上，如v2，就必须得创建一个v2的目录。例如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">require example.com/new/thing/v2 v2.3.4</span><br></pre></td></tr></table></figure>
+
+<p>这就要求我们在项目<code>example.com/new/thing</code>下新建v2目录，再存放代码。但是，很多库往往只是升级个主版本号，并不会去新建目录、还需要迁移代码。为了兼容这个情况，就会引入<code>+incompatible</code>。例如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">require example.com/new/thing v2.3.4+incompatible</span><br></pre></td></tr></table></figure>
+
+<h3 id="indirect-未在go-mod里定义、但间接调用的库"><a href="#indirect-未在go-mod里定义、但间接调用的库" class="headerlink" title="indirect - 未在go.mod里定义、但间接调用的库"></a>indirect - 未在go.mod里定义、但间接调用的库</h3><p>我们先聊一个简单的场景：<strong>当前项目为A，调用了项目B，B又调用了C。对A进行编译，需要B和C的相关代码</strong>。</p>
+<p>在完全规范的项目中：</p>
+<ul>
+<li><strong>条件1</strong> - A的go.mod里包含B</li>
+<li><strong>条件2</strong> - B的go.mod里包含C</li>
+</ul>
+<p>在编译A时，会在go.mod找到B的信息，所以B是<code>require</code>字段；而C的信息已经被维护在B的go.mod里了，不需要在A的go.mod里维护。</p>
+<p>而什么样的情况会发生indirect呢？它对应的是 <strong>条件2</strong> 缺失的场景</p>
+<ol>
+<li>B<strong>没有启用Go Module</strong>，采用的是老项目管理方式</li>
+<li>B的<strong>go.mod部分缺失</strong>，未填写模块C</li>
+</ol>
+<blockquote>
+<p>最常见的部分缺失场景是：项目虽然有go.mod，但实际编译不走Go Module，而是如vendor目录等方式</p>
+</blockquote>
+<p>用一句话总结，<strong>A库无法根据B库的<code>go.mod</code>找到C库</strong>。</p>
+<h2 id="常见命令介绍"><a href="#常见命令介绍" class="headerlink" title="常见命令介绍"></a>常见命令介绍</h2><p>相关的指令有很多，我重点分两块来说：</p>
+<p>先是<strong>高频使用</strong>的命令：</p>
+<h3 id="用go-mod-init初始化项目"><a href="#用go-mod-init初始化项目" class="headerlink" title="用go mod init初始化项目"></a>用go mod init初始化项目</h3><p>初始化项目，保证module名称与git路径一致。</p>
+<p>例如 <code>go mod init github.com/example/a</code></p>
+<h3 id="用go-get下载指定依赖库与版本"><a href="#用go-get下载指定依赖库与版本" class="headerlink" title="用go get下载指定依赖库与版本"></a>用go get下载指定依赖库与版本</h3><p>常见的flags</p>
+<ul>
+<li><strong>-d</strong> 只更新<code>go.mod</code>中的依赖，轻量级</li>
+<li><strong>-u</strong> 更新指定库与依赖它的库，全量</li>
+</ul>
+<p>例如<code>go get -d github.com/example/b</code></p>
+<h3 id="根据go-mod下载依赖库go-mod-download-vendor"><a href="#根据go-mod下载依赖库go-mod-download-vendor" class="headerlink" title="根据go.mod下载依赖库go mod download/vendor"></a>根据go.mod下载依赖库go mod download/vendor</h3><p>其中download是下载到Go Module的缓存中，而vendor是下载到vendor依赖路径。官方推荐前者。</p>
+<p>我经常会去手动编辑<code>go.mod</code>文件，然后用这个指令刷新一下依赖库</p>
+<h3 id="整理依赖go-mod-tidy"><a href="#整理依赖go-mod-tidy" class="headerlink" title="整理依赖go mod tidy"></a>整理依赖go mod tidy</h3><p>整理并更新go mod的依赖信息，保证当前的<code>go.mod</code>为最新。</p>
+<p>然后是<strong>排查依赖库问题</strong>用到的：</p>
+<h3 id="查看库的支持版本go-list"><a href="#查看库的支持版本go-list" class="headerlink" title="查看库的支持版本go list"></a>查看库的支持版本go list</h3><ul>
+<li><code>go list -m all</code> 查看本项目的所有依赖库与版本</li>
+<li><code>go list -m -versions &#123;module名&#125;</code> 查看module支持的版本号</li>
+<li><code>go list -m -json &#123;module名&#125;@&#123;版本号&#125;</code> 用json格式查看指定module版本号的信息，如创建时间</li>
+</ul>
+<h3 id="查看当前库的依赖关系go-mod-graph"><a href="#查看当前库的依赖关系go-mod-graph" class="headerlink" title="查看当前库的依赖关系go mod graph"></a>查看当前库的依赖关系go mod graph</h3><p>查看所有go mod的依赖，一般在查依赖关系时用到</p>
+<h3 id="查看指定库是怎么被依赖的go-mod-why"><a href="#查看指定库是怎么被依赖的go-mod-why" class="headerlink" title="查看指定库是怎么被依赖的go mod why"></a>查看指定库是怎么被依赖的go mod why</h3><p>查指定库是怎么被依赖的</p>
+<h3 id="查看二进制文件的依赖信息go-version-m"><a href="#查看二进制文件的依赖信息go-version-m" class="headerlink" title="查看二进制文件的依赖信息go version -m"></a>查看二进制文件的依赖信息go version -m</h3><p>查看指定（go文件编译的）二进制文件的版本信息</p>
+<h2 id="设置GOPRXOY"><a href="#设置GOPRXOY" class="headerlink" title="设置GOPRXOY"></a>设置GOPRXOY</h2><p>大部分人使用<code>go.mod</code>的最大问题是无法下载代码库，也就是代理的设置，网上也有很多教程，我这边给三个我常用的：</p>
+<ol>
+<li>阿里云：GOPROXY=<a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/goproxy,direct">https://mirrors.aliyun.com/goproxy,direct</a></li>
+<li>七牛云：GOPROXY=<a target="_blank" rel="noopener" href="https://goproxy.cn,direct/">https://goproxy.cn,direct</a></li>
+<li>全球代理：GOPROXY=<a target="_blank" rel="noopener" href="https://goproxy.io,direct/">https://goproxy.io,direct</a></li>
+</ol>
+<blockquote>
+<p>公司私有库需要私有代理。</p>
+</blockquote>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本讲的内容到这里就告一段落了，相信通过这篇文章，大家已经能应对绝大部分Go Module的场景。</p>
+<p>下一讲，我会重点讲Go Module最核心的 <strong>Minimal version selection (MVS)</strong> 机制。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/27/go-tip/go-tip-4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -240,7 +428,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-06-28 22:05:00" itemprop="dateModified" datetime="2021-06-28T22:05:00+08:00">2021-06-28</time>
+        <time title="修改时间：2021-06-29 20:37:33" itemprop="dateModified" datetime="2021-06-29T20:37:33+08:00">2021-06-29</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -263,8 +451,8 @@
     
     <div class="post-body" itemprop="articleBody">
           <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
-<h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>先来模拟一个背景故事：</p>
-<p>我们要去动物园进行一次游玩，主要行为有：</p>
+<h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>通过前面两讲，我们对错误的认知已经超过很多人了。让我们继续去看看常见项目中对错误的处理方式，探索背后的深意。</p>
+<p>在介绍具体的处理方式前，我们先来模拟一个场景：我们要去动物园进行一次游玩，主要行为有</p>
 <ul>
 <li>进入动物园</li>
 <li>参观熊猫</li>
@@ -1663,129 +1851,6 @@
 <p>然而，目前<code>Java</code>编程语言已经产生了一个成熟的生态圈，从单纯的代码实现功能，慢慢影响到了开发的各个流程，这样就或多或少地具备了 <strong>项目工程化</strong> 的一些特征。其它的编程语言如果希望能支持复杂的开发场景，必须得有一套初步的系统化方法论（成熟度暂且不论），才有可能分得一杯羹。当然，由于不同编程语言背后的编程范式、设计理念不同，方法论也各具特色，很有可能随着时间推移而变化。</p>
 </blockquote>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>今天跟大家聊的话题挺广的，也结合了很多我的个人感受，希望能给大家带来启发。下一篇，我会继续 <strong>方向篇</strong> 的话题，细化到具体工作上，和大家谈谈具体工作上的内容。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/21/go-study/go-study-0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/21/go-study/go-study-0/" class="post-title-link" itemprop="url">Go语言学习路线 - 0.总览</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-21 11:27:15" itemprop="dateCreated datePublished" datetime="2021-02-21T11:27:15+08:00">2021-02-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
-<p>大家好，我是六月天天。从今天开始，我将开启一个新的系列 - <strong>Go语言学习路线</strong>。</p>
-<blockquote>
-<p>大家可以从 <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">bilibili</a> 的视频分享中看到观点的延伸思考</p>
-</blockquote>
-<h2 id="以成长为核心"><a href="#以成长为核心" class="headerlink" title="以成长为核心"></a>以成长为核心</h2><p>目前网上已有很多Go相关的教程，包括基础讲解、源码解析、面试技巧等，但我依然下决心来做一个具有强烈个人主观观点色彩的<strong>Go语言学习路线</strong>：这个系列的目标只有一个 - <strong>成长</strong> 。我不求这个系列超越其它的教程，而是能做到<strong>去芜存菁</strong> ，引发一批朋友的共鸣。</p>
-<p>整个系列中，我会输出大量的主观观点，大家不一定能全盘接受，我也不希望大家全盘接受。我坚信，<strong>没有碰撞的技术观点无法引起大家的深度思考</strong> ，犹如上课时老师对你进行单方面的内容输出；同时，<strong>主观观点会更具现实色彩与实践意义</strong> ，我经历的公司和方向都很丰富，或多或少会和大家的实际工作产生共鸣。</p>
-<h2 id="学习路线概览"><a href="#学习路线概览" class="headerlink" title="学习路线概览"></a>学习路线概览</h2><ol>
-<li>方向篇 - 明确学习的 <strong>短期目标</strong> 和 <strong>长期目标</strong> ，以及我的一些主观建议</li>
-<li>准备篇 - <strong>工欲善其事，必先利其器</strong> ，一套好的工具和方法，不仅能让你更高效地学习，更能让你 <strong>坚持下来</strong></li>
-<li>入门篇 - <strong>基础语法</strong> 的学习思路，提纲挈领，但不会细化到语法的讲解</li>
-<li>基础篇 - <strong>简单web项目</strong> 的实现思路，介绍 <strong>项目布局</strong>、<strong>模块职责</strong>、<strong>业务特点</strong></li>
-<li>提效篇 - <strong>提升开发效率</strong> ，常见思路是采用一些优秀的 <strong>编程实践</strong>、<strong>开源库</strong>、<strong>研发工具</strong>等</li>
-<li>进阶篇 - 抛开日常的CRUD，根据自己的目标，找到适合自己的 <strong>进阶路线</strong></li>
-<li>高级篇 - 根据互联网上相关信息，结合我的个人经验，谈谈<strong>Go语言的后续发展</strong></li>
-</ol>
-<blockquote>
-<p>可能部分朋友会看重 <strong>入门、基础这些偏实践的模块</strong> ，但我花了大量心血在 <strong>方向及进阶相关的内容</strong> 上：</p>
-<ul>
-<li>入门的方式各有不同，快的一个月，慢的半年，但最终达到的效果差不了多少</li>
-<li>方向错误会严重影响到个人的长远发展，拘泥于自己的舒适圈，越到后期，沉没成本越高</li>
-</ul>
-</blockquote>
-<h2 id="自我简介"><a href="#自我简介" class="headerlink" title="自我简介"></a>自我简介</h2><p>我简单地介绍一下自己重要的编程经历，让大家更好地了解我：</p>
-<ul>
-<li>4年<code>C++</code> / 4年<code>Go</code> 开发，<code>Python</code>/<code>Java</code>/<code>Js</code>等也都有中小平台的研发经验</li>
-<li>曾在某中型公司（已上市，1000+人）的运维开发团队中作为技术负责人，搭建研发效能平台</li>
-<li>目前在某一线大厂任职，参与商用业务平台的开发</li>
-<li>用<code>Go</code>语言研发过公司内部的 <strong>私有云平台</strong> 和已商用的 <strong>业务平台</strong></li>
-</ul>
-<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>最后，我再谈一谈自己对 <strong>Go语言学习路线</strong> 这个系列的期许，也是我希望能区别于其它教程的点：</p>
-<ul>
-<li><strong>可落地</strong> - 不停留于泛泛而谈，实践的具体路线清晰</li>
-<li><strong>正反馈</strong> - 持续激励自己，避免半途而废</li>
-<li><strong>阶梯式</strong> - 层层递进，有明确的进步目标</li>
-<li><strong>通用性</strong> - 可延伸至各种技术的学习，形成自己的学习方法</li>
-<li><strong>及时性</strong> - 定期更新，保证学习路线的内容不过时</li>
-</ul>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
