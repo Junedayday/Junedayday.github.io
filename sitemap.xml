@@ -79,14 +79,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/categories/index.html</loc>
+    <loc>http://example.com/tags/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/tags/index.html</loc>
+    <loc>http://example.com/categories/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -100,14 +100,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-009/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-010/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-010/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-009/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -226,13 +226,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-3/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2021/02/20/go-patterns/go-patterns-4/</loc>
     
     <lastmod>2021-03-29</lastmod>
@@ -241,6 +234,13 @@
   
   <url>
     <loc>http://example.com/2021/02/20/go-patterns/go-patterns-5/</loc>
+    
+    <lastmod>2021-03-29</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-3/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
