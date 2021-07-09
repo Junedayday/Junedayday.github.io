@@ -2,9 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://example.com/2021/07/04/go-tip/go-tip-6/</loc>
+    <loc>http://example.com/2021/07/09/go-tip/go-tip-6/</loc>
     
-    <lastmod>2021-07-04</lastmod>
+    <lastmod>2021-07-09</lastmod>
     
   </url>
   
@@ -142,14 +142,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-007/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-006/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-006/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-007/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -226,14 +226,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-4/</loc>
+    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-3/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-3/</loc>
+    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-4/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -298,14 +298,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/gRPC/</loc>
+    <loc>http://example.com/tags/Go-Tip/</loc>
     <lastmod>2021-07-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Tip/</loc>
+    <loc>http://example.com/tags/gRPC/</loc>
     <lastmod>2021-07-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
