@@ -86,14 +86,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/categories/index.html</loc>
+    <loc>http://example.com/tags/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/tags/index.html</loc>
+    <loc>http://example.com/categories/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -312,14 +312,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/gRPC/</loc>
+    <loc>http://example.com/tags/Go-Tip/</loc>
     <lastmod>2021-07-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Tip/</loc>
+    <loc>http://example.com/tags/gRPC/</loc>
     <lastmod>2021-07-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
