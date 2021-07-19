@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-count">41</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,6 +201,147 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/18/k8s/k8s-011/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/02/18/k8s/k8s-011/" class="post-title-link" itemprop="url">【K8s源码品读】011：Phase 1 - kube-scheduler - 了解分配pod的大致流程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-18 16:55:57" itemprop="dateCreated datePublished" datetime="2021-02-18T16:55:57+08:00">2021-02-18</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="聚焦目标"><a href="#聚焦目标" class="headerlink" title="聚焦目标"></a>聚焦目标</h2><p>理解一个pod的被调度的大致流程 </p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
+<li><a href="#Scheduler">分析Scheduler的结构体</a></li>
+<li><a href="#SchedulingQueue">往SchedulingQueue里</a></li>
+<li><a href="#scheduleOne">调度一个pod对象</a><ol>
+<li><a href="#ScheduleResult">调度计算结果 - ScheduleResult</a></li>
+<li><a href="#Assume">初步推算 - Assume</a></li>
+<li><a href="#Bind">实际绑定 - Bind</a></li>
+</ol>
+</li>
+<li><a href="#update-to-etcd">将绑定成功后的数据更新到etcd</a></li>
+<li><a href="#Summary">pod绑定Node的总结</a></li>
+</ol>
+<h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>在前面，我们了解了<code>Pod调度算法的注册</code>和<code>Informer机制来监听kube-apiserver上的资源变化</code>，今天这一讲，我们就将两者串联起来，看看在kube-scheduler中，Informer监听到资源变化后，如何用调度算法将pod进行调度。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在运行 kube-scheduler 的初期，我们创建了一个Scheduler的数据结构，回头再看看有什么和pod调度算法相关的</span></span><br><span class="line"><span class="keyword">type</span> Scheduler <span class="keyword">struct</span> &#123;</span><br><span class="line">	SchedulerCache internalcache.Cache</span><br><span class="line">	Algorithm core.ScheduleAlgorithm</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 获取下一个需要调度的Pod</span></span><br><span class="line">	NextPod <span class="function"><span class="keyword">func</span><span class="params">()</span> *<span class="title">framework</span>.<span class="title">QueuedPodInfo</span></span></span><br><span class="line"></span><br><span class="line">	Error <span class="function"><span class="keyword">func</span><span class="params">(*framework.QueuedPodInfo, error)</span></span></span><br><span class="line">	StopEverything &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 等待调度的Pod队列，我们重点看看这个队列是什么</span></span><br><span class="line">	SchedulingQueue internalqueue.SchedulingQueue</span><br><span class="line"></span><br><span class="line">	Profiles profile.Map</span><br><span class="line">	scheduledPodsHasSynced <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">bool</span></span></span><br><span class="line">	client clientset.Interface</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Scheduler的实例化函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="keyword">var</span> sched *Scheduler</span><br><span class="line">	<span class="keyword">switch</span> &#123;</span><br><span class="line">  <span class="comment">// 从 Provider 创建</span></span><br><span class="line">	<span class="keyword">case</span> source.Provider != <span class="literal">nil</span>:</span><br><span class="line">		sc, err := configurator.createFromProvider(*source.Provider)</span><br><span class="line">		sched = sc</span><br><span class="line">  <span class="comment">// 从文件或者ConfigMap中创建</span></span><br><span class="line">	<span class="keyword">case</span> source.Policy != <span class="literal">nil</span>:</span><br><span class="line">		sc, err := configurator.createFromConfig(*policy)</span><br><span class="line">		sched = sc</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;unsupported algorithm source: %v&quot;</span>, source)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 两个创建方式，底层都是调用的 create 函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">createFromProvider</span><span class="params">(providerName <span class="keyword">string</span>)</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> c.create()</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">createFromConfig</span><span class="params">(policy schedulerapi.Policy)</span> <span class="params">(*Scheduler, error)</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> c.create()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">create</span><span class="params">()</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 实例化 podQueue</span></span><br><span class="line">	podQueue := internalqueue.NewSchedulingQueue(</span><br><span class="line">		lessFn,</span><br><span class="line">		internalqueue.WithPodInitialBackoffDuration(time.Duration(c.podInitialBackoffSeconds)*time.Second),</span><br><span class="line">		internalqueue.WithPodMaxBackoffDuration(time.Duration(c.podMaxBackoffSeconds)*time.Second),</span><br><span class="line">		internalqueue.WithPodNominator(nominator),</span><br><span class="line">	)</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">return</span> &amp;Scheduler&#123;</span><br><span class="line">		SchedulerCache:  c.schedulerCache,</span><br><span class="line">		Algorithm:       algo,</span><br><span class="line">		Profiles:        profiles,</span><br><span class="line">    <span class="comment">// NextPod 函数依赖于 podQueue</span></span><br><span class="line">		NextPod:         internalqueue.MakeNextPodFunc(podQueue),</span><br><span class="line">		Error:           MakeDefaultErrorFunc(c.client, c.informerFactory.Core().V1().Pods().Lister(), podQueue, c.schedulerCache),</span><br><span class="line">		StopEverything:  c.StopEverything,</span><br><span class="line">    <span class="comment">// 调度队列被赋值为podQueue</span></span><br><span class="line">		SchedulingQueue: podQueue,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 再看看这个调度队列的初始化函数，从命名可以看到是一个优先队列，它的实现细节暂不细看</span></span><br><span class="line"><span class="comment">// 结合实际情况思考下，pod会有重要程度的区分，所以调度的顺序需要考虑优先级的</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSchedulingQueue</span><span class="params">(lessFn framework.LessFunc, opts ...Option)</span> <span class="title">SchedulingQueue</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> NewPriorityQueue(lessFn, opts...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="SchedulingQueue"><a href="#SchedulingQueue" class="headerlink" title="SchedulingQueue"></a>SchedulingQueue</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在上面实例化Scheduler后，有个注册事件 Handler 的函数：addAllEventHandlers(sched, informerFactory, podInformer)</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addAllEventHandlers</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">	sched *Scheduler,</span></span></span><br><span class="line"><span class="params"><span class="function">	informerFactory informers.SharedInformerFactory,</span></span></span><br><span class="line"><span class="params"><span class="function">	podInformer coreinformers.PodInformer,</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> &#123;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	函数前后有很多注册的Handler，但是和未调度pod添加到队列相关的，只有这个</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	podInformer.Informer().AddEventHandler(</span><br><span class="line">		cache.FilteringResourceEventHandler&#123;</span><br><span class="line">      <span class="comment">// 定义过滤函数：必须为未调度的pod</span></span><br><span class="line">			FilterFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">				<span class="keyword">switch</span> t := obj.(<span class="keyword">type</span>) &#123;</span><br><span class="line">				<span class="keyword">case</span> *v1.Pod:</span><br><span class="line">					<span class="keyword">return</span> !assignedPod(t) &amp;&amp; responsibleForPod(t, sched.Profiles)</span><br><span class="line">				<span class="keyword">case</span> cache.DeletedFinalStateUnknown:</span><br><span class="line">					<span class="keyword">if</span> pod, ok := t.Obj.(*v1.Pod); ok &#123;</span><br><span class="line">						<span class="keyword">return</span> !assignedPod(pod) &amp;&amp; responsibleForPod(pod, sched.Profiles)</span><br><span class="line">					&#125;</span><br><span class="line">					utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;unable to convert object %T to *v1.Pod in %T&quot;</span>, obj, sched))</span><br><span class="line">					<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">				<span class="keyword">default</span>:</span><br><span class="line">					utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;unable to handle object in %T: %T&quot;</span>, sched, obj))</span><br><span class="line">					<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">				&#125;</span><br><span class="line">			&#125;,</span><br><span class="line">     	<span class="comment">// 增改删三个操作对应的Handler，操作到对应的Queue</span></span><br><span class="line">			Handler: cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">				AddFunc:    sched.addPodToSchedulingQueue,</span><br><span class="line">				UpdateFunc: sched.updatePodInSchedulingQueue,</span><br><span class="line">				DeleteFunc: sched.deletePodFromSchedulingQueue,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">	)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 牢记我们第一阶段要分析的对象：create nginx pod，所以进入这个add的操作，对应加入到队列</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">addPodToSchedulingQueue</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	pod := obj.(*v1.Pod)</span><br><span class="line">	klog.V(<span class="number">3</span>).Infof(<span class="string">&quot;add event for unscheduled pod %s/%s&quot;</span>, pod.Namespace, pod.Name)</span><br><span class="line">  <span class="comment">// 加入到队列</span></span><br><span class="line">	<span class="keyword">if</span> err := sched.SchedulingQueue.Add(pod); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;unable to queue %T: %v&quot;</span>, obj, err))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 入队操作我们清楚了，那出队呢？我们回过头去看看上面定义的NextPod的方法实现</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MakeNextPodFunc</span><span class="params">(queue SchedulingQueue)</span> <span class="title">func</span><span class="params">()</span> *<span class="title">framework</span>.<span class="title">QueuedPodInfo</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span> *<span class="title">framework</span>.<span class="title">QueuedPodInfo</span></span> &#123;</span><br><span class="line">    <span class="comment">// 从队列中弹出</span></span><br><span class="line">		podInfo, err := queue.Pop()</span><br><span class="line">		<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;About to try and schedule pod %v/%v&quot;</span>, podInfo.Pod.Namespace, podInfo.Pod.Name)</span><br><span class="line">			<span class="keyword">return</span> podInfo</span><br><span class="line">		&#125;</span><br><span class="line">		klog.Errorf(<span class="string">&quot;Error while retrieving next pod from scheduling queue: %v&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="scheduleOne"><a href="#scheduleOne" class="headerlink" title="scheduleOne"></a>scheduleOne</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 了解入队和出队操作后，我们看一下Scheduler运行的过程</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">Run</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> !cache.WaitForCacheSync(ctx.Done(), sched.scheduledPodsHasSynced) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	sched.SchedulingQueue.Run()</span><br><span class="line">  <span class="comment">// 调度一个pod对象</span></span><br><span class="line">	wait.UntilWithContext(ctx, sched.scheduleOne, <span class="number">0</span>)</span><br><span class="line">	sched.SchedulingQueue.Close()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接下来scheduleOne方法代码很长，我们一步一步来看</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">scheduleOne</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">  <span class="comment">// podInfo 就是从队列中获取到的pod对象</span></span><br><span class="line">	podInfo := sched.NextPod()</span><br><span class="line">	<span class="comment">// 检查pod的有效性</span></span><br><span class="line">	<span class="keyword">if</span> podInfo == <span class="literal">nil</span> || podInfo.Pod == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	pod := podInfo.Pod</span><br><span class="line">  <span class="comment">// 根据定义的 pod.Spec.SchedulerName 查到对应的profile</span></span><br><span class="line">	prof, err := sched.profileForPod(pod)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		klog.Error(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 可以跳过调度的情况，一般pod进不来</span></span><br><span class="line">	<span class="keyword">if</span> sched.skipPodSchedule(prof, pod) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 调用调度算法，获取结果</span></span><br><span class="line">	scheduleResult, err := sched.Algorithm.Schedule(schedulingCycleCtx, prof, state, pod)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">		出现调度失败的情况：</span></span><br><span class="line"><span class="comment">		这个时候可能会触发抢占preempt，抢占是一套复杂的逻辑，后面我们专门会讲</span></span><br><span class="line"><span class="comment">		目前假设各类资源充足，能正常调度</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">	&#125;</span><br><span class="line">	metrics.SchedulingAlgorithmLatency.Observe(metrics.SinceInSeconds(start))</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// assumePod 是假设这个Pod按照前面的调度算法分配后，进行验证</span></span><br><span class="line">	assumedPodInfo := podInfo.DeepCopy()</span><br><span class="line">	assumedPod := assumedPodInfo.Pod</span><br><span class="line">	<span class="comment">// SuggestedHost 为建议的分配的Host</span></span><br><span class="line">	err = sched.assume(assumedPod, scheduleResult.SuggestedHost)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// 失败就重新分配，不考虑这种情况</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 运行相关插件的代码先跳过</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 异步绑定pod</span></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    </span><br><span class="line">		<span class="comment">// 有一系列的检查工作</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 真正做绑定的动作</span></span><br><span class="line">		err := sched.bind(bindingCycleCtx, prof, assumedPod, scheduleResult.SuggestedHost, state)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// 错误处理，清除状态并重试</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// 打印结果，调试时将log level调整到2以上</span></span><br><span class="line">			<span class="keyword">if</span> klog.V(<span class="number">2</span>).Enabled() &#123;</span><br><span class="line">				klog.InfoS(<span class="string">&quot;Successfully bound pod to node&quot;</span>, <span class="string">&quot;pod&quot;</span>, klog.KObj(pod), <span class="string">&quot;node&quot;</span>, scheduleResult.SuggestedHost, <span class="string">&quot;evaluatedNodes&quot;</span>, scheduleResult.EvaluatedNodes, <span class="string">&quot;feasibleNodes&quot;</span>, scheduleResult.FeasibleNodes)</span><br><span class="line">			&#125;</span><br><span class="line">      <span class="comment">// metrics中记录相关的监控指标</span></span><br><span class="line">			metrics.PodScheduled(prof.Name, metrics.SinceInSeconds(start))</span><br><span class="line">			metrics.PodSchedulingAttempts.Observe(<span class="keyword">float64</span>(podInfo.Attempts))</span><br><span class="line">      metrics.PodSchedulingDuration.WithLabelValues(getAttemptsLabel(podInfo)).Observe(metrics.SinceInSeconds(podInfo.InitialAttemptTimestamp))</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 运行绑定后的插件</span></span><br><span class="line">			prof.RunPostBindPlugins(bindingCycleCtx, state, assumedPod, scheduleResult.SuggestedHost)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="ScheduleResult"><a href="#ScheduleResult" class="headerlink" title="ScheduleResult"></a>ScheduleResult</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 调用算法下的Schedule</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span></span>&#123;</span><br><span class="line">  scheduleResult, err := sched.Algorithm.Schedule(schedulingCycleCtx, prof, state, pod)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">create</span><span class="params">()</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">  algo := core.NewGenericScheduler(</span><br><span class="line">		c.schedulerCache,</span><br><span class="line">		c.nodeInfoSnapshot,</span><br><span class="line">		extenders,</span><br><span class="line">		c.informerFactory.Core().V1().PersistentVolumeClaims().Lister(),</span><br><span class="line">		c.disablePreemption,</span><br><span class="line">		c.percentageOfNodesToScore,</span><br><span class="line">	)</span><br><span class="line">  <span class="keyword">return</span> &amp;Scheduler&#123;</span><br><span class="line">		Algorithm:       algo,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// genericScheduler 的 Schedule 的实现</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *genericScheduler)</span> <span class="title">Schedule</span><span class="params">(ctx context.Context, prof *profile.Profile, state *framework.CycleState, pod *v1.Pod)</span> <span class="params">(result ScheduleResult, err error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 对 pod 进行 pvc 的信息检查</span></span><br><span class="line">	<span class="keyword">if</span> err := podPassesBasicChecks(pod, g.pvcLister); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> result, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 对当前的信息做一个快照</span></span><br><span class="line">	<span class="keyword">if</span> err := g.snapshot(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> result, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Node 节点数量为0，表示无可用节点</span></span><br><span class="line">	<span class="keyword">if</span> g.nodeInfoSnapshot.NumNodes() == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> result, ErrNoNodesAvailable</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// Predict阶段：找到所有满足调度条件的节点feasibleNodes，不满足的就直接过滤</span></span><br><span class="line">	feasibleNodes, filteredNodesStatuses, err := g.findNodesThatFitPod(ctx, prof, state, pod)</span><br><span class="line">	<span class="comment">// 没有可用节点直接报错</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(feasibleNodes) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> result, &amp;FitError&#123;</span><br><span class="line">			Pod:                   pod,</span><br><span class="line">			NumAllNodes:           g.nodeInfoSnapshot.NumNodes(),</span><br><span class="line">			FilteredNodesStatuses: filteredNodesStatuses,</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 只有一个节点就直接选用</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(feasibleNodes) == <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> ScheduleResult&#123;</span><br><span class="line">			SuggestedHost:  feasibleNodes[<span class="number">0</span>].Name,</span><br><span class="line">			EvaluatedNodes: <span class="number">1</span> + <span class="built_in">len</span>(filteredNodesStatuses),</span><br><span class="line">			FeasibleNodes:  <span class="number">1</span>,</span><br><span class="line">		&#125;, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Priority阶段：通过打分，找到一个分数最高、也就是最优的节点</span></span><br><span class="line">	priorityList, err := g.prioritizeNodes(ctx, prof, state, pod, feasibleNodes)</span><br><span class="line">	host, err := g.selectHost(priorityList)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> ScheduleResult&#123;</span><br><span class="line">		SuggestedHost:  host,</span><br><span class="line">		EvaluatedNodes: <span class="built_in">len</span>(feasibleNodes) + <span class="built_in">len</span>(filteredNodesStatuses),</span><br><span class="line">		FeasibleNodes:  <span class="built_in">len</span>(feasibleNodes),</span><br><span class="line">	&#125;, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">Predict 和 Priority 是选择调度节点的两个关键性步骤， 它的底层调用了各种algorithm算法。我们暂时不细看。</span></span><br><span class="line"><span class="comment">以我们前面讲到过的 NodeName 算法为例，节点必须与 NodeName 匹配，它是属于Predict阶段的。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Assume"><a href="#Assume" class="headerlink" title="Assume"></a>Assume</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">assume</span><span class="params">(assumed *v1.Pod, host <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="comment">// 将 host 填入到 pod spec字段的nodename，假定分配到对应的节点上</span></span><br><span class="line">	assumed.Spec.NodeName = host</span><br><span class="line">  <span class="comment">// 调用 SchedulerCache 下的 AssumePod</span></span><br><span class="line">	<span class="keyword">if</span> err := sched.SchedulerCache.AssumePod(assumed); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		klog.Errorf(<span class="string">&quot;scheduler cache AssumePod failed: %v&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> sched.SchedulingQueue != <span class="literal">nil</span> &#123;</span><br><span class="line">		sched.SchedulingQueue.DeleteNominatedPodIfExists(assumed)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 回头去找 SchedulerCache 初始化的地方</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">create</span><span class="params">()</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;Scheduler&#123;</span><br><span class="line">		SchedulerCache:  c.schedulerCache,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 这里就是初始化的实例 schedulerCache</span></span><br><span class="line">	schedulerCache := internalcache.New(<span class="number">30</span>*time.Second, stopEverything)</span><br><span class="line">	configurator := &amp;Configurator&#123;</span><br><span class="line">		schedulerCache:           schedulerCache,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 看看AssumePod做了什么</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cache *schedulerCache)</span> <span class="title">AssumePod</span><span class="params">(pod *v1.Pod)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="comment">// 获取 pod 的 uid</span></span><br><span class="line">	key, err := framework.GetPodKey(pod)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 加锁操作，保证并发情况下的一致性</span></span><br><span class="line">	cache.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> cache.mu.Unlock()</span><br><span class="line">  <span class="comment">// 根据 uid 找不到 pod 当前的状态</span></span><br><span class="line">	<span class="keyword">if</span> _, ok := cache.podStates[key]; ok &#123;</span><br><span class="line">		<span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;pod %v is in the cache, so can&#x27;t be assumed&quot;</span>, key)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 把 Assume Pod 的信息放到对应 Node 节点中</span></span><br><span class="line">	cache.addPod(pod)</span><br><span class="line">  <span class="comment">// 把 pod 状态设置为 Assume 成功</span></span><br><span class="line">	ps := &amp;podState&#123;</span><br><span class="line">		pod: pod,</span><br><span class="line">	&#125;</span><br><span class="line">	cache.podStates[key] = ps</span><br><span class="line">	cache.assumedPods[key] = <span class="literal">true</span></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Bind"><a href="#Bind" class="headerlink" title="Bind"></a>Bind</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">bind</span><span class="params">(ctx context.Context, prof *profile.Profile, assumed *v1.Pod, targetNode <span class="keyword">string</span>, state *framework.CycleState)</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">	start := time.Now()</span><br><span class="line">  <span class="comment">// 把 assumed 的 pod 信息保存下来</span></span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		sched.finishBinding(prof, assumed, targetNode, start, err)</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="comment">// 阶段1： 运行扩展绑定进行验证，如果已经绑定报错</span></span><br><span class="line">	bound, err := sched.extendersBinding(assumed, targetNode)</span><br><span class="line">	<span class="keyword">if</span> bound &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 阶段2：运行绑定插件验证状态</span></span><br><span class="line">	bindStatus := prof.RunBindPlugins(ctx, state, assumed, targetNode)</span><br><span class="line">	<span class="keyword">if</span> bindStatus.IsSuccess() &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> bindStatus.Code() == framework.Error &#123;</span><br><span class="line">		<span class="keyword">return</span> bindStatus.AsError()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;bind status: %s, %v&quot;</span>, bindStatus.Code().String(), bindStatus.Message())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Update-To-Etcd"><a href="#Update-To-Etcd" class="headerlink" title="Update To Etcd"></a>Update To Etcd</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这块的代码我不做细致的逐层分析了，大家根据兴趣自行探索</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b DefaultBinder)</span> <span class="title">Bind</span><span class="params">(ctx context.Context, state *framework.CycleState, p *v1.Pod, nodeName <span class="keyword">string</span>)</span> *<span class="title">framework</span>.<span class="title">Status</span></span> &#123;</span><br><span class="line">	klog.V(<span class="number">3</span>).Infof(<span class="string">&quot;Attempting to bind %v/%v to %v&quot;</span>, p.Namespace, p.Name, nodeName)</span><br><span class="line">	binding := &amp;v1.Binding&#123;</span><br><span class="line">		ObjectMeta: metav1.ObjectMeta&#123;Namespace: p.Namespace, Name: p.Name, UID: p.UID&#125;,</span><br><span class="line">		Target:     v1.ObjectReference&#123;Kind: <span class="string">&quot;Node&quot;</span>, Name: nodeName&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// ClientSet就是访问kube-apiserver的客户端，将数据更新上去</span></span><br><span class="line">	err := b.handle.ClientSet().CoreV1().Pods(binding.Namespace).Bind(ctx, binding, metav1.CreateOptions&#123;&#125;)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> framework.NewStatus(framework.Error, err.Error())</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>今天这一次分享比较长，我们一起来总结一下：</p>
+<ol>
+<li>Pod的调度是通过一个队列<code>SchedulingQueue</code>异步工作的<ol>
+<li>监听到对应pod事件后，放入队列</li>
+<li>有个消费者从队列中获取pod，进行调度</li>
+</ol>
+</li>
+<li>单个pod的调度主要分为3个步骤：<ol>
+<li>根据Predict和Priority两个阶段，调用各自的算法插件，选择最优的Node</li>
+<li>Assume这个Pod被调度到对应的Node，保存到cache</li>
+<li>用extender和plugins进行验证，如果通过则绑定</li>
+</ol>
+</li>
+<li>绑定成功后，将数据通过client向kube-apiserver发送，更新etcd</li>
+</ol>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号：golangcoding</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -1316,131 +1457,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/18/k8s/k8s-001/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/18/k8s/k8s-001/" class="post-title-link" itemprop="url">【K8s源码品读】001：Phase 1 - 掌握k8s创建pod的基本流程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-18 16:55:48" itemprop="dateCreated datePublished" datetime="2021-02-18T16:55:48+08:00">2021-02-18</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>部署Kubernetes集群的方法（建议用kubeadm），详细可参考<a target="_blank" rel="noopener" href="http://www.junes.tech/?p=150">我的博客</a>，或者可直接参考<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/">官方文档</a>。</p>
-<p>本次分析的源码基于release-1.19。</p>
-<blockquote>
-<p>后续版本如果对某个模块有大改动的话，大家也可以提醒我进行更新</p>
-</blockquote>
-<h2 id="确立目标"><a href="#确立目标" class="headerlink" title="确立目标"></a>确立目标</h2><ol>
-<li>从<code>创建pod</code>的全流程入手，了解各组件的工作内容，组件主要包括<ol>
-<li>kubectl</li>
-<li>kube-apiserver</li>
-<li>etcd</li>
-<li>kube-controller</li>
-<li>kube-scheduler</li>
-<li>kubelet</li>
-</ol>
-</li>
-<li>对<code>核心模块</code>与<code>引用的库</code>有基本的认识，为后续深入做好铺垫</li>
-<li>结合源码，掌握kubernetes的<code>核心概念</code></li>
-</ol>
-<h2 id="写一个Yaml"><a href="#写一个Yaml" class="headerlink" title="写一个Yaml"></a>写一个Yaml</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nginx-pod</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">    <span class="attr">containers:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">nginx:1.8</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="部署Pod"><a href="#部署Pod" class="headerlink" title="部署Pod"></a>部署Pod</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f nginx_pod.yaml</span><br><span class="line"></span><br><span class="line">pod/nginx-pod created</span><br></pre></td></tr></table></figure>
-
-<p>提示创建成功</p>
-<h2 id="查询Pod"><a href="#查询Pod" class="headerlink" title="查询Pod"></a>查询Pod</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods</span><br><span class="line"></span><br><span class="line">NAME                               READY   STATUS              RESTARTS   AGE</span><br><span class="line">nginx-pod                          1/1     Running             0          4m22s</span><br></pre></td></tr></table></figure>
-
-<p>打印出状态：</p>
-<ul>
-<li>NAME - nginx-pod就是对应上面 <code>metadata.name</code></li>
-<li>READY - 就绪的个数</li>
-<li>STATUS - 当前的状态，RUNNING表示运行中</li>
-<li>RESTARTS - 重启的次数</li>
-<li>AGE - 运行的次数</li>
-</ul>
-<h2 id="完结撒花"><a href="#完结撒花" class="headerlink" title="完结撒花"></a>完结撒花</h2><p>整个操作就这么结束了~</p>
-<p>后续的分析，都是基于这个nginx pod的创建示例来的。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
