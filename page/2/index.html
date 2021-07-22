@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,6 +201,300 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/07/go-tip/go-tip-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/07/go-tip/go-tip-3/" class="post-title-link" itemprop="url">Go语言技巧 - 3.【Error工程化】Go Error的工程化探索</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-07 12:00:00" itemprop="dateCreated datePublished" datetime="2021-05-07T12:00:00+08:00">2021-05-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-06-19 22:52:26" itemprop="dateModified" datetime="2021-06-19T22:52:26+08:00">2021-06-19</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="Go-Error的工程化探索"><a href="#Go-Error的工程化探索" class="headerlink" title="Go Error的工程化探索"></a>Go Error的工程化探索</h2><p>在上一篇，我分享了对 <a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/master/design/29934-error-values.md">官方Proposal</a> 的一些见解，偏向于理论层面。</p>
+<p>本篇里，我会具体到代码层面，谈谈如何在一个工程化的项目中利用<code>github.com/pkg/errors</code>包，完整实现一套的错误处理机制。</p>
+<h2 id="全局定义的error实现-MyError"><a href="#全局定义的error实现-MyError" class="headerlink" title="全局定义的error实现 - MyError"></a>全局定义的error实现 - MyError</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 全局的 错误号 类型，用于API调用之间传递</span></span><br><span class="line"><span class="keyword">type</span> MyErrorCode <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 全局的 错误号 的具体定义</span></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	ErrorBookNotFoundCode MyErrorCode = <span class="literal">iota</span> + <span class="number">1</span></span><br><span class="line">	ErrorBookHasBeenBorrowedCode</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 内部的错误map，用来对应 错误号和错误信息</span></span><br><span class="line"><span class="keyword">var</span> errCodeMap = <span class="keyword">map</span>[MyErrorCode]<span class="keyword">string</span>&#123;</span><br><span class="line">	ErrorBookNotFoundCode:        <span class="string">&quot;Book was not found&quot;</span>,</span><br><span class="line">	ErrorBookHasBeenBorrowedCode: <span class="string">&quot;Book has been borrowed&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Sentinel Error： 即全局定义的Static错误变量</span></span><br><span class="line"><span class="comment">// 注意，这里的全局error是没有保存堆栈信息的，所以需要在初始调用处使用 errors.Wrap</span></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	ErrorBookNotFound        = NewMyError(ErrorBookNotFoundCode)</span><br><span class="line">	ErrorBookHasBeenBorrowed = NewMyError(ErrorBookHasBeenBorrowedCode)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewMyError</span><span class="params">(code MyErrorCode)</span> *<span class="title">MyError</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;MyError&#123;</span><br><span class="line">		Code:    code,</span><br><span class="line">		Message: errCodeMap[code],</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// error的具体实现</span></span><br><span class="line"><span class="keyword">type</span> MyError <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// 对外使用 - 错误码</span></span><br><span class="line">	Code MyErrorCode</span><br><span class="line">	<span class="comment">// 对外使用 - 错误信息</span></span><br><span class="line">	Message <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *MyError)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> e.Message</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="具体示例-借书的三种场景"><a href="#具体示例-借书的三种场景" class="headerlink" title="具体示例 - 借书的三种场景"></a>具体示例 - 借书的三种场景</h2><p>我们来模拟一个场景：</p>
+<p>我去图书馆借几本书，会存在三个场景，分别的处理逻辑如下</p>
+<ol>
+<li>找到书 - 不需要任何处理</li>
+<li>发现书被借走了 - 打印一下即可，不认为是错误</li>
+<li>发现图书馆不存在这本书 - 认为是错误，需要打印详细的错误信息</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	books := []<span class="keyword">string</span>&#123;</span><br><span class="line">		<span class="string">&quot;Hamlet&quot;</span>,</span><br><span class="line">		<span class="string">&quot;Jane Eyre&quot;</span>,</span><br><span class="line">		<span class="string">&quot;War and Peace&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, bookName := <span class="keyword">range</span> books &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;%s start\n===\n&quot;</span>, bookName)</span><br><span class="line"></span><br><span class="line">		err := borrowOne(bookName)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;%+v\n&quot;</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		fmt.Printf(<span class="string">&quot;===\n%s end\n\n&quot;</span>, bookName)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">borrowOne</span><span class="params">(bookName <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// Step1: 找书</span></span><br><span class="line">	err := searchBook(bookName)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Step2: 处理</span></span><br><span class="line">	<span class="comment">// 特殊业务场景：如果发现书被借走了，下次再来就行了，不需要作为错误处理</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// 提取error这个interface底层的错误码，一般在API的返回前才提取</span></span><br><span class="line">		<span class="comment">// As - 获取错误的具体实现</span></span><br><span class="line">		<span class="keyword">var</span> myError = <span class="built_in">new</span>(MyError)</span><br><span class="line">		<span class="keyword">if</span> errors.As(err, &amp;myError) &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;error code is %d, message is %s\n&quot;</span>, myError.Code, myError.Message)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 特殊逻辑: 对应场景2，指定错误(ErrorBookHasBeenBorrowed)时，打印即可，不返回错误</span></span><br><span class="line">		<span class="comment">// Is - 判断错误是否为指定类型</span></span><br><span class="line">		<span class="keyword">if</span> errors.Is(err, ErrorBookHasBeenBorrowed) &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;book %s has been borrowed, I will come back later!\n&quot;</span>, bookName)</span><br><span class="line">			err = <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">searchBook</span><span class="params">(bookName <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// 下面两个 error 都是不带堆栈信息的，所以初次调用得用Wrap方法</span></span><br><span class="line">	<span class="comment">// 如果已有堆栈信息，应调用WithMessage方法</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 3 发现图书馆不存在这本书 - 认为是错误，需要打印详细的错误信息</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(bookName) &gt; <span class="number">10</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.Wrapf(ErrorBookNotFound, <span class="string">&quot;bookName is %s&quot;</span>, bookName)</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(bookName) &gt; <span class="number">8</span> &#123;</span><br><span class="line">		<span class="comment">// 2 发现书被借走了 - 打印一下被接走的提示即可，不认为是错误</span></span><br><span class="line">		<span class="keyword">return</span> errors.Wrapf(ErrorBookHasBeenBorrowed, <span class="string">&quot;bookName is %s&quot;</span>, bookName)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 1 找到书 - 不需要任何处理</span></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h2><h3 id="1-找到书-Helmet"><a href="#1-找到书-Helmet" class="headerlink" title="1. 找到书 - Helmet"></a>1. 找到书 - Helmet</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Hamlet start</span><br><span class="line">===</span><br><span class="line">===</span><br><span class="line">Hamlet end</span><br></pre></td></tr></table></figure>
+
+<p>没有任何错误信息</p>
+<h3 id="2-发现书被借走了-Jane-Eyre"><a href="#2-发现书被借走了-Jane-Eyre" class="headerlink" title="2. 发现书被借走了 - Jane Eyre"></a>2. 发现书被借走了 - Jane Eyre</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Jane Eyre start</span><br><span class="line">===</span><br><span class="line">error code is 2, message is Book has been borrowed</span><br><span class="line">book Jane Eyre has been borrowed, I will come back later!</span><br><span class="line">===</span><br><span class="line">Jane Eyre end</span><br></pre></td></tr></table></figure>
+
+<p><strong>打印被借走的提示</strong>，而错误被 <code>err = nil</code> 屏蔽。</p>
+<h3 id="3-发现图书馆不存在这本书-War-and-Peace"><a href="#3-发现图书馆不存在这本书-War-and-Peace" class="headerlink" title="3. 发现图书馆不存在这本书 - War and Peace"></a>3. 发现图书馆不存在这本书 - War and Peace</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">War and Peace start</span><br><span class="line">===</span><br><span class="line">error code is 1, message is Book was not found</span><br><span class="line">Book was not found</span><br><span class="line">bookName is War and Peace</span><br><span class="line">main.searchBook</span><br><span class="line">        /GoProject/godemo/main.go:98</span><br><span class="line">main.borrowOne</span><br><span class="line">        /GoProject/godemo/main.go:71</span><br><span class="line">main.main</span><br><span class="line">        /GoProject/godemo/main.go:60</span><br><span class="line">runtime.main</span><br><span class="line">        /usr/local/go1.13.5/src/runtime/proc.go:203</span><br><span class="line">runtime.goexit</span><br><span class="line">        /usr/local/go1.13.5/src/runtime/asm_amd64.s:1357</span><br><span class="line">===</span><br><span class="line">War and Peace end</span><br></pre></td></tr></table></figure>
+
+<p><strong>打印了错误的详细堆栈</strong>，在IDE中调试非常方便，可以直接跳转到对应代码位置。</p>
+<h2 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h2><ol>
+<li><code>MyError</code> 作为全局 <code>error</code> 的底层实现，保存具体的错误码和错误信息；</li>
+<li><code>MyError</code>向上返回错误时，第一次先用<code>Wrap</code>初始化堆栈，后续用<code>WithMessage</code>增加堆栈信息；</li>
+<li>从<code>error</code>中解析具体错误时，用<code>errors.As</code>提取出<code>MyError</code>，其中的错误码和错误信息可以传入到具体的API接口中；</li>
+<li>要判断<code>error</code>是否为指定的错误时，用<code>errors.Is</code> + <code>Sentinel Error</code>的方法，处理一些特定情况下的逻辑；</li>
+</ol>
+<blockquote>
+<p>Tips：</p>
+<ol>
+<li>不要一直用errors.Wrap来反复包装错误，堆栈信息会爆炸，具体情况可自行测试了解</li>
+<li>利用go generate可以大量简化初始化Sentinel Error这块重复的工作</li>
+<li><code>github.com/pkg/errors</code>和标准库的<code>error</code>完全兼容，可以先替换、后续改造历史遗留的代码</li>
+<li>一定要注意打印<code>error</code>的堆栈需要用<code>%+v</code>，而原来的<code>%v</code>依旧为普通字符串方法；同时也要注意日志采集工具是否支持多行匹配</li>
+</ol>
+</blockquote>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>从现状来看，<code>Go</code> 语言的 <code>Error Handling</code> 已趋于共识，。</p>
+<p>后续差异点就在底层 <code>MyError</code> 这块的实现，我个人认为会有如下三个方向：</p>
+<ul>
+<li>增加一些其余业务或系统的字段</li>
+<li>对<code>Is</code>，<code>As</code> 等函数再进行一定的封装，使用起来更方便</li>
+<li>区分不同的错误类型，来告诉调用方该如何处理，如 <strong>普通错误</strong>、<strong>重试错误</strong> 、<strong>服务降级错误</strong> 等</li>
+</ul>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/05/go-tip/go-tip-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/05/go-tip/go-tip-2/" class="post-title-link" itemprop="url">Go语言技巧 - 2.【错误处理】谈谈Go Error的前世今生</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-05 12:00:00" itemprop="dateCreated datePublished" datetime="2021-05-05T12:00:00+08:00">2021-05-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-06-19 22:51:46" itemprop="dateModified" datetime="2021-06-19T22:51:46+08:00">2021-06-19</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="从Go-2-Error-Proposal谈起"><a href="#从Go-2-Error-Proposal谈起" class="headerlink" title="从Go 2 Error Proposal谈起"></a>从Go 2 Error Proposal谈起</h2><p><code>Go</code>对<code>error</code>的处理一直都是很大的争议点，这点官方也已多次发文，并在2019年1月推出了一篇Proposal，有兴趣的可以点击链接细细品读。</p>
+<p><a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/master/design/29934-error-values.md">官方原文链接</a></p>
+<p>下面，我会结合Proposal原文，发表一些自己的看法（会带上主观意见），欢迎讨论。</p>
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>这篇Proposal有一句话很好地解释了对<code>error</code>的期许：</p>
+<p><strong>making errors more informative for both programs and people</strong></p>
+<p>错误不仅是告诉机器怎么做的，也是告诉人发生了什么问题。</p>
+<h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><p>先让我们一起简单地回顾一下<code>error</code>的现状，来更好地理解这个 <strong>more informative</strong> 指的是什么。</p>
+<p>原始的error定义为：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> error <span class="keyword">interface</span> &#123;</span><br><span class="line">  Error() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里面的包含信息很少：一个Error() 的方法，即用字符串返回对应的错误信息。</p>
+<p>最常用的<code>error</code>相关方法是2种：</p>
+<ol>
+<li>创建<code>error</code> - <code>fmt.Errorf</code>，它是针对<code>Error() </code>方法返回的字符串进行加工，如附带一些参数信息（暂不讨论%w这个wrap错误的实现）</li>
+<li>使用<code>error</code> - 由于我们将<code>error</code>的输出结果定义为字符串，所以使用<code>error</code>时，一旦涉及到细节，就只能使用一些<code>string</code>的方法了</li>
+</ol>
+<p>举个具体的例子：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 假设 readFile 存在于第三方或公用的库，我们没有权限修改、或者修改它的影响面很大</span></span><br><span class="line">	_, err := readFile(<span class="string">&quot;test&quot;</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 错误中包含业务逻辑:</span></span><br><span class="line">	<span class="comment">// 1. 文件不存在时，认为是 正常</span></span><br><span class="line">	<span class="comment">// 2. 其余报错时，认为是 异常</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> strings.Index(err.Error(), <span class="string">&quot;no such file or directory&quot;</span>) &gt;= <span class="number">0</span> &#123;</span><br><span class="line">			log.Println(<span class="string">&quot;file not exist&quot;</span>)</span><br><span class="line">			os.Exit(<span class="number">0</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		log.Println(<span class="string">&quot;open file error&quot;</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">readFile</span><span class="params">(fileName <span class="keyword">string</span>)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	b, err := ioutil.ReadFile(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里存在3个明显的问题：</p>
+<ol>
+<li><strong>破坏性</strong> - <code>fmt.Errorf</code> 破坏了原有的error，将它从一个 <strong>具体对象</strong> 转化为 <strong>扁平的</strong> <code>string</code>，再填充到了新的<code>error</code>中。所以，通过<code>fmt.Errorf</code>处理后的error，都只传递了一个<code>string</code>的信息</li>
+<li><strong>实现僵化</strong> - <strong>“no such file or directory”</strong> 这个错误信息用的是<strong>硬编码</strong>，对第三方<code>readFile</code>的内容有强依赖，不灵活</li>
+<li><strong>排查问题效率低</strong> - 可以通过日志组件了解到error在<code>main</code>函数哪行发生，但无法知道错误从<code>readFile</code>中的哪行返回过来的</li>
+</ol>
+<blockquote>
+<p>其中第一个破坏性的问题，其实就是破坏了error这个interface背后的具体实现，违背了面向对象的继承原则。</p>
+</blockquote>
+<h2 id="Handle-Errors-Only-Once"><a href="#Handle-Errors-Only-Once" class="headerlink" title="Handle Errors Only Once"></a>Handle Errors Only Once</h2><p>在工程中，为了解决 <strong>排查问题效率低</strong> 这个问题，有一个很常见的做法（以上面的readFile为例）:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">readFile</span><span class="params">(fileName <span class="keyword">string</span>)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	b, err := ioutil.ReadFile(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Printf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>没错，就是 <strong>打印错误并返回</strong>。有大量排查问题经验的同学，对此肯定是深恶痛绝： <strong>一个错误能找到N处打印，看得人眼花缭乱</strong>。</p>
+<p>这里违背了一个关键性的原则：<strong>对错误只进行一次处理，处理完之后就不要再往上抛了，而打印错误也是一种处理。</strong></p>
+<p>结合三种具体的场景，我们分析一下：</p>
+<ol>
+<li>一个程序模块内，<code>error</code>不断往上抛，最上层处理；</li>
+<li>一个公共的工具包中，<code>error</code>不记录，传给调用方处理；</li>
+<li>一个RPC模块的调用中，<code>error</code>可以记录，作为<code>debug</code>信息，而具体的处理仍应交给调用方。</li>
+</ol>
+<p>示例参考文章</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully">https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.orsolabs.com/post/go-errors-and-logs/">https://www.orsolabs.com/post/go-errors-and-logs/</a></li>
+</ul>
+<h2 id="理论实现"><a href="#理论实现" class="headerlink" title="理论实现"></a>理论实现</h2><p>那么，怎么样的<code>error</code>才是合适的呢？我们分两个角度来看这个<code>error</code>：</p>
+<ol>
+<li>对程序来说，<code>error</code>要包含<strong>错误细节</strong>：如错误类型、错误码等，方便在模块间传递；</li>
+<li>对人来说，<code>error</code>要包含<strong>代码信息</strong>：如相关的调用参数、运行信息，方便查问题；</li>
+</ol>
+<p>用原文一句话来归纳：<strong>hide implementation details from programs while displaying them for diagnosis</strong></p>
+<ul>
+<li>Wrap - 隐藏实现，针对代码调用时的堆栈信息</li>
+<li>Is/As - 展示细节，针对底层真正实现的数据结构</li>
+</ul>
+<h2 id="当前实现"><a href="#当前实现" class="headerlink" title="当前实现"></a>当前实现</h2><p><code>Go</code>语言发展多年，已经有了很多关于<code>error</code>的处理方法，但大多为过渡方案，我就不一一分析了。</p>
+<p>这里我以 github.com/pkg/errors 为例，也是这个<strong>官方Proposal</strong>的重点参考对象，简单地分享一下大致实现思路。</p>
+<p>代码量并不多，大家可以自行阅读源码：</p>
+<h3 id="New-产生错误的堆栈信息"><a href="#New-产生错误的堆栈信息" class="headerlink" title="New 产生错误的堆栈信息"></a>New 产生错误的堆栈信息</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;fundamental&#123;</span><br><span class="line">		msg:   message,</span><br><span class="line">		stack: callers(),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> fundamental <span class="keyword">struct</span> &#123;</span><br><span class="line">	msg <span class="keyword">string</span></span><br><span class="line">	*stack</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> stack保存了错误产生的堆栈信息，如函数名、代码行</p>
+<h3 id="Wrap-包装错误"><a href="#Wrap-包装错误" class="headerlink" title="Wrap 包装错误"></a>Wrap 包装错误</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Wrap</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	err = &amp;withMessage&#123;</span><br><span class="line">		cause: err,</span><br><span class="line">		msg:   message,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;withStack&#123;</span><br><span class="line">		err,</span><br><span class="line">		callers(),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> 将错误包装出一个全新的堆栈。一般只用于对外接口产生错误时，包括标准库、RPC。</p>
+<h3 id="WithMessage-添加普通信息"><a href="#WithMessage-添加普通信息" class="headerlink" title="WithMessage 添加普通信息"></a>WithMessage 添加普通信息</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithMessage</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;withMessage&#123;</span><br><span class="line">		cause: err,</span><br><span class="line">		msg:   message,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> 添加错误信息，增加一个普通的堆栈打印</p>
+<h3 id="Is-解析Sentinel错误、即全局错误变量"><a href="#Is-解析Sentinel错误、即全局错误变量" class="headerlink" title="Is 解析Sentinel错误、即全局错误变量"></a>Is 解析Sentinel错误、即全局错误变量</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Is</span><span class="params">(err, target error)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> stderrors.Is(err, target) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Is</span><span class="params">(err, target error)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> target == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err == target</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	isComparable := reflectlite.TypeOf(target).Comparable()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> isComparable &amp;&amp; err == target &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> x, ok := err.(<span class="keyword">interface</span>&#123; Is(error) <span class="keyword">bool</span> &#125;); ok &amp;&amp; x.Is(target) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// <span class="doctag">TODO:</span> consider supporing target.Is(err). This would allow</span></span><br><span class="line">		<span class="comment">// user-definable predicates, but also may allow for coping with sloppy</span></span><br><span class="line">		<span class="comment">// APIs, thereby making it easier to get away with them.</span></span><br><span class="line">		<span class="keyword">if</span> err = Unwrap(err); err == <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> 反复Unwrap、提取错误，解析并对比错误类型</p>
+<h2 id="As-提取出具体的错误数据结构"><a href="#As-提取出具体的错误数据结构" class="headerlink" title="As - 提取出具体的错误数据结构"></a>As - 提取出具体的错误数据结构</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">As</span><span class="params">(err error, target <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> stderrors.As(err, target) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">As</span><span class="params">(err error, target <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> target == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: target cannot be nil&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	val := reflectlite.ValueOf(target)</span><br><span class="line">	typ := val.Type()</span><br><span class="line">	<span class="keyword">if</span> typ.Kind() != reflectlite.Ptr || val.IsNil() &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: target must be a non-nil pointer&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> e := typ.Elem(); e.Kind() != reflectlite.Interface &amp;&amp; !e.Implements(errorType) &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: *target must be interface or implement error&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	targetType := typ.Elem()</span><br><span class="line">	<span class="keyword">for</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> reflectlite.TypeOf(err).AssignableTo(targetType) &#123;</span><br><span class="line">			val.Elem().Set(reflectlite.ValueOf(err))</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> x, ok := err.(<span class="keyword">interface</span>&#123; As(<span class="keyword">interface</span>&#123;&#125;) <span class="keyword">bool</span> &#125;); ok &amp;&amp; x.As(target) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		err = Unwrap(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> 反复Unwrap、提取错误，提取底层的实现类型</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><code>Go</code>语言对<code>error</code>的定义很简单，虽然带来了灵活性，但也导致处理方式泛滥，一如当年的<strong>Go语言的版本管理</strong>。如今的<strong>go mod</strong>版本管理机制已经”一统江湖“，随着大家对<code>error</code>这块的不断深入，<code>Error Handling</code>也总会达成共识。</p>
+<p>接下来，我会结合实际代码样例，写一个具体工程中 <strong>Error Handling</strong> 的操作方法，提供一定的参考。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -1416,269 +1710,6 @@
 <h4 id="server-reflection"><a href="#server-reflection" class="headerlink" title="server reflection"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/server-reflection-tutorial.md">server reflection</a></h4><p>服务端方法映射，跟着教程走即可。</p>
 <p>值得一提的是，采用c++中的grpc_cli模块，可以查看指定端口暴露出来的服务详情。</p>
 <h4 id="versioning"><a href="#versioning" class="headerlink" title="versioning"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/versioning.md">versioning</a></h4><p>版本演进，一般情况下每6周一个小版本，紧急修复会打补丁号。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/grpc/grpc-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/20/grpc/grpc-2/" class="post-title-link" itemprop="url">gRPC源码分析(二)：从官网文档看gRPC的特性</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-20 19:34:45" itemprop="dateCreated datePublished" datetime="2021-02-20T19:34:45+08:00">2021-02-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>在第一部分，我们学习了gRPC的基本调用过程，这样我们对全局层面有了一定了解。接下来，我们将结合官方文档，继续深入学习、探索下去。</p>
-<h2 id="1-Authentication-认证的实现"><a href="#1-Authentication-认证的实现" class="headerlink" title="1. Authentication 认证的实现"></a>1. Authentication 认证的实现</h2><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/guides/auth/#with-server-authentication-ssltls">官方示例</a></p>
-<p>示例很简单，客户端和服务端都大致分为两步：</p>
-<ol>
-<li>生成对应的认证信息 <code>creds</code></li>
-<li>将认证信息作为 <code>DialOption</code> 传入信息</li>
-</ol>
-<p>认证方法的底层实现并不在我们今天的讨论范围内。这里值得一提的是，由于请求会存在大量的输入参数，这里提供的方法是 <code>opts ...DialOption</code>，也就是可变长度的参数，这一点很值得我们思考和学习。</p>
-<h4 id="客户端的认证实现"><a href="#客户端的认证实现" class="headerlink" title="客户端的认证实现"></a>客户端的认证实现</h4><p>第一步：将认证信息放入连接中</p>
-<ul>
-<li><code>grpc.WithTransportCredentials</code> 中，将<code>creds</code> 保存到<code>copts.TransportCredentials</code></li>
-<li>调用<code>Dial</code>，在内部用 <code>opt.apply(&amp;cc.dopts)</code>将认证信息传递到结构中</li>
-<li><code>credsClone = creds.Clone()</code> 使用了一份复制，放到了Balancer中，估计是用于负载均衡的，暂时不用考虑</li>
-</ul>
-<p>第二步：将认证信息请求中发出</p>
-<ul>
-<li>首先我们先找到 <code>Invoke</code>函数，这里是发送请求的入口（对这一块有疑问的，查看上一篇）</li>
-<li>分析一下函数 <code>invoke</code> ，调用了<code>newClientStream</code>，一大段代码都没有用到<code>copts.TransportCredentials</code>中的参数，大致猜测是在<code>clientStream</code>中</li>
-<li>接下来这块，只通过阅读代码，要找到对应使用到<code>copts.TransportCredentials</code>很麻烦，建议第一次可以先通过反向查找，调用到这个参数的地方</li>
-<li><code>newHTTP2Client</code> =&gt; <code>NewClientTransport</code> =&gt; <code>createTransport</code> =&gt; <code>tryAllAddrs</code> =&gt; <code>resetTransport</code> =&gt; <code>connect</code> =&gt; <code>getReadyTransport</code> =&gt;<code>pick</code> =&gt; <code>getTransport</code> =&gt;<code>newAttemptLocked</code> =&gt; <code>newAttemptLocked</code> =&gt; <code>newClientStream</code></li>
-<li>这时，我们再正向梳理一下其调用逻辑，大致是查找连接情况，对传输层进行初始化。如果你了解认证是基于传输层<code>Transport</code>的，那下次正向查找时，会有一条比较明确的方向了</li>
-</ul>
-<h4 id="服务端的认证实现"><a href="#服务端的认证实现" class="headerlink" title="服务端的认证实现"></a>服务端的认证实现</h4><p>第一步：将认证信息放入Server结构中</p>
-<ul>
-<li>将<code>creds</code>包装成<code>ServerOption</code>，传入<code>NewServer</code>中</li>
-<li>类似Client中的操作，被存至 <code>opts.creds</code> 里</li>
-</ul>
-<p>第二步：在连接中进行认证</p>
-<ul>
-<li>参考之前一讲的分析，我们进入函数 <code>handleRawConn</code></li>
-<li>这次，我们的进展很顺利，一下子就看到了关键函数名<code>useTransportAuthenticator</code></li>
-<li>在这里，调用了<code>creds</code>实现的<code>ServerHandshake</code>实现了认证。到这里，认证已经完成，不过我们可以再看看，认证信息是怎么传递的</li>
-<li>接着，认证信息传入了 <code>newHTTP2Transport</code>，保存到结构体<code>http2Server</code>中的<code>authInfo</code>，最后返回了一个Interface <code>ServerTransport</code></li>
-<li>在进行连接时，调用了<code>serveStreams</code>，然后调用了 <code>http2Server</code>的<code>HandleStreams</code>方法，这时，我们大致可以猜测，auth在这里被用到了</li>
-<li>往下看，发现有个对header帧的处理<code>operateHeaders</code>，在这里被赋值到 <code>pr.AuthInfo</code>里，并被保存到s的Context中</li>
-<li>一般情况下，Context的调用是十分隐蔽的，我们可以通过反向查找，哪里调用了<code>peer.FromContext</code>，然而并没有地方应用，那认证的分析，就告一段落了</li>
-</ul>
-<h2 id="2-四类gRPC调用的实现"><a href="#2-四类gRPC调用的实现" class="headerlink" title="2. 四类gRPC调用的实现"></a>2. 四类gRPC调用的实现</h2><p>这一块我们暂不深入源码，先了解使用时的特性</p>
-<h4 id="2-1-简单RPC"><a href="#2-1-简单RPC" class="headerlink" title="2.1 简单RPC"></a>2.1 简单RPC</h4><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/tutorials/basic/go/#simple-rpc">代码链接</a></p>
-<p>代码逻辑很直观，即处理后返回</p>
-<h4 id="2-2-服务端流式RPC"><a href="#2-2-服务端流式RPC" class="headerlink" title="2.2 服务端流式RPC"></a>2.2 服务端流式RPC</h4><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/tutorials/basic/go/#server-side-streaming-rpc">代码链接</a></p>
-<p>代码的关键在于两个函数<code>inRange</code>和 <code>stream.Send</code></p>
-<h4 id="2-3-客户端流式RPC"><a href="#2-3-客户端流式RPC" class="headerlink" title="2.3 客户端流式RPC"></a>2.3 客户端流式RPC</h4><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/tutorials/basic/go/#client-side-streaming-rpc">代码链接</a></p>
-<p>用一个for循环进行多次发送，<code>stream.Recv()</code>实现了从服务端获取数据，当EOF时，才调用<code>stream.SendAndClose</code>结束发送</p>
-<h4 id="2-4-双向流式RPC"><a href="#2-4-双向流式RPC" class="headerlink" title="2.4 双向流式RPC"></a>2.4 双向流式RPC</h4><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/tutorials/basic/go/#bidirectional-streaming-rpc">代码链接</a></p>
-<p>将 <code>SendAndClose</code> 变为 <code>Send</code>，其余基本不变。从这里可以看到，正常的关闭都是由服务端发起的。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/grpc/grpc-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/20/grpc/grpc-1/" class="post-title-link" itemprop="url">gRPC源码分析（一）：gRPC的系统调用过程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-20 19:34:41" itemprop="dateCreated datePublished" datetime="2021-02-20T19:34:41+08:00">2021-02-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>参考<a target="_blank" rel="noopener" href="https://grpc.io/docs/quickstart/go/">官方文档</a>，进行部署并运行成功</p>
-<h2 id="分析思路：GRPC是怎么实现方法调用的"><a href="#分析思路：GRPC是怎么实现方法调用的" class="headerlink" title="分析思路：GRPC是怎么实现方法调用的"></a>分析思路：GRPC是怎么实现方法调用的</h2><ol>
-<li>分析PB生成的对应文件</li>
-<li>运行server</li>
-<li>运行client</li>
-</ol>
-<h2 id="1-分析PB生成的对应文件"><a href="#1-分析PB生成的对应文件" class="headerlink" title="1. 分析PB生成的对应文件"></a>1. 分析PB生成的对应文件</h2><h3 id="HelloRequest-HelloReply-结构分析"><a href="#HelloRequest-HelloReply-结构分析" class="headerlink" title="HelloRequest/HelloReply 结构分析"></a>HelloRequest/HelloReply 结构分析</h3><p>存在三个冗余字段 <code>XXX_NoUnkeyedLiteral</code> <code>XXX_unrecognized</code> <code>XXX_sizecache</code></p>
-<p>这部分主要是兼容proto2的，我们暂时不用细究</p>
-<h3 id="GreeterClient客户端"><a href="#GreeterClient客户端" class="headerlink" title="GreeterClient客户端"></a>GreeterClient客户端</h3><p>传入一个 cc grpc.ClientConnInterface 客户端连接</p>
-<p>可调用的方法为SayHello，其内部的method为”/helloworld.Greeter/SayHello”，也就是<code>/&#123;package&#125;.&#123;service&#125;/&#123;method&#125;</code> ，作为一个唯一的URI</p>
-<h3 id="GreeterServer服务端"><a href="#GreeterServer服务端" class="headerlink" title="GreeterServer服务端"></a>GreeterServer服务端</h3><p>需要自己实现一个SayHello的方法</p>
-<p>其中有个 UnimplementedGreeterServer 的接口，可以嵌入到对应的server结构体中（有方法未实现时，会返回codes.Unimplemented）</p>
-<h2 id="2-运行server"><a href="#2-运行server" class="headerlink" title="2. 运行server"></a>2. 运行server</h2><h3 id="定义server"><a href="#定义server" class="headerlink" title="定义server"></a>定义server</h3><p>这里pb.UnimplementedGreeterServer被嵌入了server结构，所以即使没有实现SayHello方法，编译也能通过。</p>
-<p>但是，我们通常要强制server在编译期就必须实现对应的方法，所以生产中建议不嵌入。</p>
-<h3 id="实现自己的业务逻辑"><a href="#实现自己的业务逻辑" class="headerlink" title="实现自己的业务逻辑"></a>实现自己的业务逻辑</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *server)</span> <span class="title">SayHello</span><span class="params">(ctx context.Context, in *pb.HelloRequest)</span> <span class="params">(*pb.HelloReply, error)</span></span>&#123;</span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="注册TCP监听端口"><a href="#注册TCP监听端口" class="headerlink" title="注册TCP监听端口"></a>注册TCP监听端口</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lis, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, port)</span><br></pre></td></tr></table></figure>
-
-<p>因为gRPC的应用层是基于HTTP2的，所以这里不出意外，监听的是tcp端口</p>
-<h3 id="grpc-NewServer"><a href="#grpc-NewServer" class="headerlink" title="grpc.NewServer()"></a>grpc.NewServer()</h3><ol>
-<li>入参为选项参数options</li>
-<li>自带一组defaultServerOptions，最大发送size、最大接收size、连接超时、发送缓冲、接收缓冲</li>
-<li><code>s.cv = sync.NewCond(&amp;s.mu)</code> 条件锁，用于关闭连接</li>
-<li>全局参数 <code>EnableTraciing</code> ，会调用golang.org/x/net/trace 这个包</li>
-</ol>
-<h3 id="pb-RegisterGreeterServer-s-amp-server"><a href="#pb-RegisterGreeterServer-s-amp-server" class="headerlink" title="pb.RegisterGreeterServer(s, &amp;server{})"></a>pb.RegisterGreeterServer(s, &amp;server{})</h3><p>对比自己创建的server和pb中定义的server，确定每个方法都已经实现</p>
-<p>service放在 <code>m map[string]*service</code> 中，所以一个server可以放多个proto定义的服务</p>
-<p>内部的method和stream放在 service 中的两个map中</p>
-<h3 id="s-Serve-lis"><a href="#s-Serve-lis" class="headerlink" title="s.Serve(lis)"></a>s.Serve(lis)</h3><ol>
-<li>listener 放到内部的map中</li>
-<li>for循环，进行tcp连接，这一部分和http源码中的ListenAndServe极其类似</li>
-<li>在协程中进行handleRawConn</li>
-<li>将tcp连接封装对应的creds认证信息</li>
-<li>新建newHTTP2Transport传输层连接</li>
-<li>在协程中进行serveStreams，而http1这里为阻塞的</li>
-<li>函数HandleStreams中参数为2个函数，前者为处理请求，后者用于trace</li>
-<li>进入handleStream，前半段被拆为service，后者为method，通过map查找</li>
-<li>method在processUnaryRPC处理，stream在processStreamingRPC处理，这两块内部就比较复杂了，涉及到具体的算法，以后有时间细读</li>
-</ol>
-<h2 id="3-运行client"><a href="#3-运行client" class="headerlink" title="3. 运行client"></a>3. 运行client</h2><h3 id="grpc-Dial"><a href="#grpc-Dial" class="headerlink" title="grpc.Dial"></a>grpc.Dial</h3><p>新建一个conn连接，这里是一个支持HTTP2.0的客户端，暂不细讲</p>
-<h3 id="pb-NewGreeterClient-conn"><a href="#pb-NewGreeterClient-conn" class="headerlink" title="pb.NewGreeterClient(conn)"></a>pb.NewGreeterClient(conn)</h3><p>新建一个client，包装对应的method，方便调用SayHello</p>
-<h3 id="调用SayHello"><a href="#调用SayHello" class="headerlink" title="调用SayHello"></a>调用SayHello</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r, err := c.SayHello(ctx, &amp;pb.HelloRequest&#123;Name: name&#125;)</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>核心调用的是 Invoke 方法，具体实现要看grpc.ClientConn中</li>
-<li>grpc.ClientConn中实现了Invoke方法，在call.go文件中，详情都在invoke中</li>
-</ol>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>

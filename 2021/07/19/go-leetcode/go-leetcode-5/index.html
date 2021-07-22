@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="Leetcode-5 最长回文子串原题链接 https:&#x2F;&#x2F;leetcode-cn.com&#x2F;problems&#x2F;longest-palindromic-substring&#x2F; 12func longestPalindrome(s string) string &amp;#123;&amp;#125;  这道题中，我们也要注意奇数和偶数的边界情况。 基本解法枚举所有情况刚拿到这道题时，我们很容易想到一个解法：  枚举">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go算法实战 - 5.【最长回文子串LeetCode-5】">
+<meta property="og:url" content="http://example.com/2021/07/19/go-leetcode/go-leetcode-5/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="Leetcode-5 最长回文子串原题链接 https:&#x2F;&#x2F;leetcode-cn.com&#x2F;problems&#x2F;longest-palindromic-substring&#x2F; 12func longestPalindrome(s string) string &amp;#123;&amp;#125;  这道题中，我们也要注意奇数和偶数的边界情况。 基本解法枚举所有情况刚拿到这道题时，我们很容易想到一个解法：  枚举">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-07-19T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-21T12:11:07.798Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Leetcode">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/07/19/go-leetcode/go-leetcode-5/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go算法实战 - 5.【最长回文子串LeetCode-5】 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Leetcode-5-%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2"><span class="nav-number">1.</span> <span class="nav-text">Leetcode-5 最长回文子串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%A7%A3%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">基本解法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%9A%E4%B8%BE%E6%89%80%E6%9C%89%E6%83%85%E5%86%B5"><span class="nav-number">2.1.</span> <span class="nav-text">枚举所有情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E9%80%92%E5%BD%92%E6%8B%86%E5%88%86%E6%88%90%E5%AD%90%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.</span> <span class="nav-text">利用递归拆分成子问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E9%98%B6%E8%A7%A3%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">进阶解法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E5%AF%B9%E7%A7%B0%E7%82%B9"><span class="nav-number">3.1.</span> <span class="nav-text">利用对称点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8C%96%E7%A9%BA%E7%99%BD%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">3.2.</span> <span class="nav-text">简化空白的处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92"><span class="nav-number">4.</span> <span class="nav-text">动态规划</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E8%A7%A3%E6%B3%95"><span class="nav-number">4.1.</span> <span class="nav-text">动态规划解法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%961-%E4%BC%98%E5%8C%96%E6%9D%A1%E4%BB%B6%E5%88%86%E6%94%AF"><span class="nav-number">4.2.</span> <span class="nav-text">优化1 优化条件分支</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%962-%E5%88%86%E6%9E%90%E5%BE%AA%E7%8E%AF%E5%86%85%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E9%80%BB%E8%BE%91"><span class="nav-number">4.3.</span> <span class="nav-text">优化2 分析循环内代码执行逻辑</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/19/go-leetcode/go-leetcode-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go算法实战 - 5.【最长回文子串LeetCode-5】
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-19 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-19T12:00:00+08:00">2021-07-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-21 20:11:07" itemprop="dateModified" datetime="2021-07-21T20:11:07+08:00">2021-07-21</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-5-最长回文子串"><a href="#Leetcode-5-最长回文子串" class="headerlink" title="Leetcode-5 最长回文子串"></a>Leetcode-5 最长回文子串</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/longest-palindromic-substring/">https://leetcode-cn.com/problems/longest-palindromic-substring/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这道题中，我们也要注意<strong>奇数和偶数</strong>的边界情况。</p>
+<h2 id="基本解法"><a href="#基本解法" class="headerlink" title="基本解法"></a>基本解法</h2><h3 id="枚举所有情况"><a href="#枚举所有情况" class="headerlink" title="枚举所有情况"></a>枚举所有情况</h3><p>刚拿到这道题时，我们很容易想到一个解法：</p>
+<ul>
+<li>枚举出s所有的子字符串</li>
+<li>找到最长的回文串</li>
+</ul>
+<p>这个解法代码我就不专门写了，复杂度很高，但如果你想不到解决方案时，可以先写出这个解法，再逐步优化。</p>
+<h3 id="利用递归拆分成子问题"><a href="#利用递归拆分成子问题" class="headerlink" title="利用递归拆分成子问题"></a>利用递归拆分成子问题</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) &lt;= <span class="number">1</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> s</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 查找以s[0]为开头的最长回文子串</span></span><br><span class="line">    right := <span class="built_in">len</span>(s)</span><br><span class="line">    <span class="keyword">for</span> ; right &gt;= <span class="number">0</span>; right-- &#123;</span><br><span class="line">        <span class="comment">// 找到最长的回文子串就退出</span></span><br><span class="line">        <span class="keyword">if</span> isPalindrome(s[:right]) &#123;</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 用递归的方式获取s[1:]的长度，与上面的结果对比</span></span><br><span class="line">    subS := longestPalindrome(s[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(subS) &gt; right &#123;</span><br><span class="line">        <span class="keyword">return</span> subS</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> s[:right]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 头尾两个指针不断往中间缩进</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) &lt;= <span class="number">1</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    left, right := <span class="number">0</span>, <span class="built_in">len</span>(s) - <span class="number">1</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 如果s长度为奇数，退出时刚好left=right，偶数则为 left &gt; right</span></span><br><span class="line">    <span class="keyword">for</span> left &lt; right &#123;</span><br><span class="line">        <span class="keyword">if</span> s[left] != s[right] &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        left++</span><br><span class="line">        right--</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个解法的代码思路相对清晰，核心思路是将 <strong>以s[0]开头的回文字符串</strong> 与 <strong>s[1:]中最长回文子串</strong> 进行对比，其中后者是递归的子问题。</p>
+<p>在有一定的算法基础后，我个人比较喜欢先用 <strong>递归思路去简化问题</strong>，将代码拆分成子问题，能大量地简化代码。</p>
+<h2 id="进阶解法"><a href="#进阶解法" class="headerlink" title="进阶解法"></a>进阶解法</h2><h3 id="利用对称点"><a href="#利用对称点" class="headerlink" title="利用对称点"></a>利用对称点</h3><p>从回文串的特点来看，它存在一个对称点：</p>
+<ul>
+<li>长度为奇数2n+1的字符串，对称点为第n+1个字符</li>
+<li>长度为偶数2n的字符串，对称点为第n与n+1个字符之间，我们不妨命名为空白blank</li>
+</ul>
+<p>所以，我们就对字符串s进行遍历，查找它的<strong>每个对称点上最长的回文串</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> longest <span class="keyword">string</span></span><br><span class="line">	<span class="comment">// 是否为空白</span></span><br><span class="line">	<span class="comment">// 我们把字符串s看作为： s[0]-blank-s[1]-...-s[n-1]</span></span><br><span class="line">	<span class="keyword">var</span> isBlank <span class="keyword">bool</span></span><br><span class="line">	<span class="keyword">var</span> mid <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> mid &lt; <span class="built_in">len</span>(s) &#123;</span><br><span class="line">		<span class="keyword">var</span> sub <span class="keyword">string</span></span><br><span class="line">		<span class="keyword">if</span> isBlank &#123;</span><br><span class="line">			<span class="comment">// 空白的话，我们认为这个空白是在mid-1和mid之间的，从两边开始对比</span></span><br><span class="line">			sub = findLongestPalindromeByMid(s, mid<span class="number">-1</span>, mid)</span><br><span class="line">			isBlank = <span class="literal">false</span></span><br><span class="line">			mid++</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// 非空白的话，从索引mid的两边开始对比</span></span><br><span class="line">			sub = findLongestPalindromeByMid(s, mid<span class="number">-1</span>, mid+<span class="number">1</span>)</span><br><span class="line">			isBlank = <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(sub) &gt; <span class="built_in">len</span>(longest) &#123;</span><br><span class="line">			longest = sub</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> longest</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findLongestPalindromeByMid</span><span class="params">(s <span class="keyword">string</span>, left, right <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="comment">// left和right就是两个指针，不断往两边移动，直到找到不相同的两个字符</span></span><br><span class="line">	<span class="keyword">for</span> left &gt;= <span class="number">0</span> &amp;&amp; right &lt; <span class="built_in">len</span>(s) &#123;</span><br><span class="line">		<span class="keyword">if</span> s[left] != s[right] &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">		left--</span><br><span class="line">		right++</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 注意这里的索引，很容易搞混，我们要取的是left+1到right-1，这里切片后面的索引为right</span></span><br><span class="line">	<span class="keyword">return</span> s[left+<span class="number">1</span> : right]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="简化空白的处理"><a href="#简化空白的处理" class="headerlink" title="简化空白的处理"></a>简化空白的处理</h3><p>从上面的代码来看，空白的处理挺麻烦，我们可以直接从代码结构去优化。</p>
+<p>大家可以仔细的阅读<code>isBlank</code>相关的代码，可以直接消除这个变量：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> longest <span class="keyword">string</span></span><br><span class="line">    <span class="keyword">var</span> mid <span class="keyword">int</span> </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> mid &lt; <span class="built_in">len</span>(s) &#123;</span><br><span class="line">        <span class="comment">// 对称点为某个字符，长度为奇数</span></span><br><span class="line">        sub := findLongestPalindromeByMid(s, mid<span class="number">-1</span>, mid)</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(sub) &gt; <span class="built_in">len</span>(longest) &#123;</span><br><span class="line">            longest = sub</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 对称点为空白，长度为偶数</span></span><br><span class="line">        sub = findLongestPalindromeByMid(s, mid<span class="number">-1</span>, mid+<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(sub) &gt; <span class="built_in">len</span>(longest) &#123;</span><br><span class="line">            longest = sub</span><br><span class="line">        &#125;</span><br><span class="line">        mid++</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> longest</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findLongestPalindromeByMid</span><span class="params">(s <span class="keyword">string</span>, left, right <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> left &gt;= <span class="number">0</span> &amp;&amp; right &lt; <span class="built_in">len</span>(s) &#123;</span><br><span class="line">        <span class="keyword">if</span> s[left] != s[right] &#123;</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">        left--</span><br><span class="line">        right++</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> s[left+<span class="number">1</span>:right]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="动态规划"><a href="#动态规划" class="headerlink" title="动态规划"></a>动态规划</h2><p>动态规划是算法中大量出现的一个解法，我们以这道题为例，进行探索。</p>
+<blockquote>
+<p>动态规划的细节请自行搜索，如 <a target="_blank" rel="noopener" href="https://www.zhihu.com/question/39948290">https://www.zhihu.com/question/39948290</a> </p>
+</blockquote>
+<h3 id="动态规划解法"><a href="#动态规划解法" class="headerlink" title="动态规划解法"></a>动态规划解法</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="comment">// 边界条件判断</span></span><br><span class="line">	length := <span class="built_in">len</span>(s)</span><br><span class="line">	<span class="keyword">if</span> length &lt;= <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> s</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 回文子串至少为1，即单个字符</span></span><br><span class="line">	begin, maxLen := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">	<span class="comment">// 动态规划的关键数组dp</span></span><br><span class="line">	<span class="keyword">var</span> dp = <span class="built_in">make</span>([][]<span class="keyword">bool</span>, length)</span><br><span class="line">	<span class="keyword">for</span> k1 := <span class="keyword">range</span> dp &#123;</span><br><span class="line">		dp[k1] = <span class="built_in">make</span>([]<span class="keyword">bool</span>, length)</span><br><span class="line">		<span class="keyword">for</span> k2 := <span class="keyword">range</span> dp[k1] &#123;</span><br><span class="line">			<span class="comment">// 初始化均为false</span></span><br><span class="line">			dp[k1][k2] = <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 单个字符默认为回文串</span></span><br><span class="line">		dp[k1][k1] = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> size := <span class="number">2</span>; size &lt;= length; size++ &#123;</span><br><span class="line">		<span class="keyword">for</span> start := <span class="number">0</span>; start &lt;= length-size; start++ &#123;</span><br><span class="line">			end := start + size - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">			<span class="comment">// 如果首位字符串相同</span></span><br><span class="line">			<span class="keyword">if</span> s[start] == s[end] &#123;</span><br><span class="line">				<span class="keyword">if</span> size == <span class="number">2</span> &#123;</span><br><span class="line">					<span class="comment">// 边界情况，即只有2个字符且相等</span></span><br><span class="line">					dp[start][end] = <span class="literal">true</span></span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					<span class="comment">// 核心：动态规划的核心推导函数</span></span><br><span class="line">					dp[start][end] = dp[start+<span class="number">1</span>][end<span class="number">-1</span>]</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 更新最长回文子串</span></span><br><span class="line">			<span class="keyword">if</span> dp[start][end] &amp;&amp; size &gt; maxLen &#123;</span><br><span class="line">				maxLen = size</span><br><span class="line">				begin = start</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> s[begin : begin+maxLen]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最核心的公式为<code>dp[start][end] = dp[start+1][end-1]</code>，其余都是对边界条件的处理。</p>
+<p>但运行结果的效率偏低</p>
+<ul>
+<li>执行用时：104 ms, 在所有 Go 提交中击败了42.53%的用户</li>
+<li>内存消耗：7 MB, 在所有 Go 提交中击败了24.68%的用户</li>
+</ul>
+<h3 id="优化1-优化条件分支"><a href="#优化1-优化条件分支" class="headerlink" title="优化1 优化条件分支"></a>优化1 优化条件分支</h3><p>我们分析一下上面的代码：从空间复杂度来看，动态规划的数组<code>dp</code>是不可或缺的，所以减少内存消耗比较困难了。</p>
+<p>因此，我们把目光放在执行时间上，那么重点就是<code>for</code>循环里的代码复杂度。</p>
+<p>我们注意到一个关键的变量<code>dp[start][end]</code>，对它进行改造</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	length := <span class="built_in">len</span>(s)</span><br><span class="line">	<span class="keyword">if</span> length &lt;= <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> s</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	begin, maxLen := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">	<span class="keyword">var</span> dp = <span class="built_in">make</span>([][]<span class="keyword">bool</span>, length)</span><br><span class="line">	<span class="keyword">for</span> k1 := <span class="keyword">range</span> dp &#123;</span><br><span class="line">		dp[k1] = <span class="built_in">make</span>([]<span class="keyword">bool</span>, length)</span><br><span class="line">		<span class="keyword">for</span> k2 := <span class="keyword">range</span> dp[k1] &#123;</span><br><span class="line">			dp[k1][k2] = <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">		dp[k1][k1] = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> size := <span class="number">2</span>; size &lt;= length; size++ &#123;</span><br><span class="line">		<span class="keyword">for</span> start := <span class="number">0</span>; start &lt;= length-size; start++ &#123;</span><br><span class="line">			end := start + size - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> s[start] == s[end] &#123;</span><br><span class="line">				<span class="keyword">if</span> size == <span class="number">2</span> || dp[start+<span class="number">1</span>][end<span class="number">-1</span>] &#123;</span><br><span class="line">					dp[start][end] = <span class="literal">true</span></span><br><span class="line">					<span class="comment">// 减少if-else的分支判断次数</span></span><br><span class="line">					<span class="keyword">if</span> size &gt; maxLen &#123;</span><br><span class="line">						maxLen = size</span><br><span class="line">						begin = start</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> s[begin : begin+maxLen]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果很明显，代码执行时间减少</p>
+<ul>
+<li>执行用时：72 ms, 在所有 Go 提交中击败了50.93%的用户</li>
+<li>内存消耗：7 MB, 在所有 Go 提交中击败了28.37%的用户</li>
+</ul>
+<h3 id="优化2-分析循环内代码执行逻辑"><a href="#优化2-分析循环内代码执行逻辑" class="headerlink" title="优化2 分析循环内代码执行逻辑"></a>优化2 分析循环内代码执行逻辑</h3><p>我们继续看代码里的<code>size &gt; maxLen</code>条件，发现会出现如下情况：</p>
+<ul>
+<li>如果一个字符有多个相同<code>size</code>的回文子串，这个<code>if</code>内的语句会被执行多次</li>
+<li>但我们只需要获得最长的回文子串之一，所以只需要记录第一次即可</li>
+</ul>
+<p>于是我们尝试改造：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	length := <span class="built_in">len</span>(s)</span><br><span class="line">	<span class="keyword">if</span> length &lt;= <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> s</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	begin, maxLen := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">	<span class="keyword">var</span> dp = <span class="built_in">make</span>([][]<span class="keyword">bool</span>, length)</span><br><span class="line">	<span class="keyword">for</span> k1 := <span class="keyword">range</span> dp &#123;</span><br><span class="line">		dp[k1] = <span class="built_in">make</span>([]<span class="keyword">bool</span>, length)</span><br><span class="line">		<span class="keyword">for</span> k2 := <span class="keyword">range</span> dp[k1] &#123;</span><br><span class="line">			dp[k1][k2] = <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">		dp[k1][k1] = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> size := <span class="number">2</span>; size &lt;= length; size++ &#123;</span><br><span class="line">		<span class="comment">// 用来表示对应size的字符串已经找到</span></span><br><span class="line">		founded := <span class="literal">false</span></span><br><span class="line">		<span class="keyword">for</span> start := <span class="number">0</span>; start &lt;= length-size; start++ &#123;</span><br><span class="line">			end := start + size - <span class="number">1</span></span><br><span class="line">			<span class="keyword">if</span> s[start] == s[end] &#123;</span><br><span class="line">				<span class="keyword">if</span> size == <span class="number">2</span> || dp[start+<span class="number">1</span>][end<span class="number">-1</span>] &#123;</span><br><span class="line">					dp[start][end] = <span class="literal">true</span></span><br><span class="line">					<span class="comment">// 只记录第一个即可</span></span><br><span class="line">					<span class="keyword">if</span> !founded &amp;&amp; size &gt; maxLen &#123;</span><br><span class="line">						maxLen, begin = size, start</span><br><span class="line">						founded = <span class="literal">true</span></span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> s[begin : begin+maxLen]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>执行用时：80 ms, 在所有 Go 提交中击败了49.30%的用户</li>
+<li>内存消耗：7 MB, 在所有 Go 提交中击败了31.54%的用户</li>
+</ul>
+<p>然而，执行结果告诉我们这部分的优化无明显效果，甚至还降低了评分。但我们无需沮丧，<strong>因为这道题针对的是小规模场景的算法题，这个思路可能在大规模的计算场景下带来很明显的提升</strong>。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Leetcode第五题的难度不高，也让我们初次接触了 <strong>动态规划</strong> 这个思路。</p>
+<p>同时，我们也遇到了一个<strong>“失败的优化案例”</strong>。这也从侧面告诉了我们，<strong>抛开具体场景的优化都是不可靠的</strong>。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Leetcode/" rel="tag"># Go-Leetcode</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/07/14/go-leetcode/go-leetcode-3/" rel="prev" title="Go算法实战 - 3.【无重复字符的最长子串LeetCode-3】">
+                  <i class="fa fa-chevron-left"></i> Go算法实战 - 3.【无重复字符的最长子串LeetCode-3】
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/07/19/go-leetcode/go-leetcode-4/" rel="next" title="Go算法实战 - 4.【寻找两个正序数组的中位数LeetCode-4】">
+                  Go算法实战 - 4.【寻找两个正序数组的中位数LeetCode-4】 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
