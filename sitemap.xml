@@ -240,13 +240,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-8/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2021/02/21/go-study/go-study-0/</loc>
     
     <lastmod>2021-03-29</lastmod>
@@ -262,6 +255,13 @@
   
   <url>
     <loc>http://example.com/2021/03/28/go-study/go-study-2/</loc>
+    
+    <lastmod>2021-03-29</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-8/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -333,14 +333,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Programming-Patterns/</loc>
+    <loc>http://example.com/tags/Go-Study/</loc>
     <lastmod>2021-07-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Study/</loc>
+    <loc>http://example.com/tags/Go-Programming-Patterns/</loc>
     <lastmod>2021-07-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
