@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-07-25T04:39:16.390Z</updated>
+  <updated>2021-07-25T09:31:20.850Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -21,9 +21,9 @@
     <link href="http://example.com/2021/07/25/go-study/go-study-7/"/>
     <id>http://example.com/2021/07/25/go-study/go-study-7/</id>
     <published>2021-07-25T04:00:00.000Z</published>
-    <updated>2021-07-25T04:39:16.390Z</updated>
+    <updated>2021-07-25T09:31:20.850Z</updated>
     
-    <content type="html"><![CDATA[<p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p><h2 id="阶段性的思考"><a href="#阶段性的思考" class="headerlink" title="阶段性的思考"></a>阶段性的思考</h2><p>通过前面几讲的分享，相信大家已经能清楚地看到一名普通软件工程师的发展路线：<strong>不断学习技能，提高研发效能，实现业务功能</strong>。</p><p>如果我们尝试回头看，可能会对自己的定位存在疑问：这些日常CRUD的开发工作，很多不具备太高的技术难度，可以靠人力堆积来实现。那么，如何在研发团队里打造自己的<strong>技术壁垒</strong>、体现个人价值呢？</p><p>下面，我将分多个层面和大家聊聊，大家可以根据自己的发展目标和工作环境，选择性地发展几项。</p><h2 id="1-专项业务领域"><a href="#1-专项业务领域" class="headerlink" title="1. 专项业务领域"></a>1. 专项业务领域</h2><p><strong>业务往往与公司的赢利点挂钩</strong>，决定了公司的生死存亡，所以业务驱动了公司里的很多事情，包括晋升、组织架构等。</p><p>大多数的开发者往往长期投入在公司的业务相关开发，或是满足产品的迭代，或是满足甲方的需求。从结果来看，业务开发是最容易看到成果的，可以与具体的增长和营收挂钩。那么，业务领域的开发者需要关注什么呢？我也列举三点</p><ul><li>产品设计 - 具备<strong>产品的规划与设计</strong>能力，将业务开发的经验沉淀为对产品的理解</li><li>业务架构 - 能将<strong>软件架构适配业</strong>务，也能根据公司的基础能力灵活调整</li><li>权衡能力 - <strong>权衡技术与业务的冲突</strong>，能保证业务快速实现的同时，尽可能地减少技术债</li></ul><h2 id="2-专项技术领域"><a href="#2-专项技术领域" class="headerlink" title="2. 专项技术领域"></a>2. 专项技术领域</h2><p>技术人常常期望能<strong>抛开烦杂的业务需求，长期在一个技术领域深耕</strong>，例如专职研究存储系统、网络架构、云原生架构、大数据引擎等。这里，我希望有此类想法的同学先想清楚一个问题：你究竟是厌倦了做需求迭代，还是真正喜欢某项技术？</p><p>深耕专项的技术领域，遇到的挑战很多，我列举三个比较重要的：</p><ul><li>评价产出 - 思考如何将<strong>技术变现</strong>，在公司中体现自己的<strong>能力价值</strong></li><li>承载业务 - <strong>对接并服务</strong>各个业务团队，根据具体场景做优化、适配等工作</li><li>探索前景 - <strong>紧跟并探索</strong>技术发展前景，方向准确，并长期坚持</li></ul><h2 id="3-团队领导力"><a href="#3-团队领导力" class="headerlink" title="3. 团队领导力"></a>3. 团队领导力</h2><p>合作与分工是所有团队都面临的问题。随着一名工程师的经验与资历的提升，都会直接或间接地带领团队去实现目标。</p><p>那怎么考验一个人的<strong>团队领导力</strong>呢？一般会更关注以下三点：</p><ul><li>能力提升 - 保证资深员工能有效地将<strong>经验与技能</strong>传递给新人，自身也有足够的发展空间</li><li>合理用人 - <strong>如何管理性格、能力各异的成员，尽可能实现产出最大化</strong></li><li>落地文化 - 一个团队如果要长久发展，必须得形成<strong>文化价值观</strong>，并聚拢一批认同这个价值观的成员</li></ul><h2 id="4-研发效能管理"><a href="#4-研发效能管理" class="headerlink" title="4. 研发效能管理"></a>4. 研发效能管理</h2><p>如今，<strong>软件工程日益精细化</strong>，公司越来越重视研发效能的管理，而非当初那种野蛮地堆人力、抢占市场。</p><p>研发效能的管理分为多个方向，例如：</p><ul><li>项目/需求/故障管理 - 用平台跟进项目进度、投入人力</li><li>CICD/devops - 各类自动化的工具平台，促进研发与运维一体化，让研发对整个生命周期负责</li><li>基础框架/库 - 加速研发对接日志、监控、部署等平台</li><li>流程平台化 - 将公司内的各种日常流程落地为平台</li></ul><h2 id="5-安全"><a href="#5-安全" class="headerlink" title="5. 安全"></a>5. 安全</h2><p>安全是一个很有意思的话题，大部分人的认知是：<strong>在没有问题时，安全一文不值；在出现问题后，安全又是至关重要的</strong>。</p><p>安全领域门槛很高，会有专属于自己的一个小圈子。绝大多数的开发者并不需要过多掌握安全相关的技能，只需了解一些常规的安全技能，在日常研发中有意识地加以重视：</p><ul><li>网络安全 - 常见的<code>HTTPS</code>、证书、<code>Sync Flooding</code>等</li><li>数据安全 - 加解密、备份</li><li>编程相关 - SQL注入、核心参数校验、审计功能</li></ul><h2 id="6-稳定性"><a href="#6-稳定性" class="headerlink" title="6. 稳定性"></a>6. 稳定性</h2><p>在项目投入生产使用后，<strong>稳定性</strong>逐渐成为一项重要指标，它与公司的营收直接相关。</p><p>在某个程度上，稳定性与安全非常类似，<strong>不出问题时，大家都不care稳定性，都想着快速迭代；出现问题后，又想法设法维持稳定</strong>。那如何体现一个人在稳定性上的能力呢？</p><ul><li>代码研发 - 从实际代码出发，保证核心功能的<strong>健壮性和可扩展性</strong></li><li>软件架构 - 软件架构稳定，既能保证<strong>功能迭代</strong>，也能随着规模扩大保证<strong>性能稳定</strong></li><li>工作流程 - 从功能迭代、需求上线、故障处理等流程出发，控制风险</li></ul><h2 id="我的思考"><a href="#我的思考" class="headerlink" title="我的思考"></a>我的思考</h2><p>以上六点，是作为开发者的价值点沉淀。我比较赞同一个观点：<strong>对公司的价值输出，决定了你的绩效；而对自己能力的沉淀，决定了你的市场价值</strong>。所以，绝大多数的人更应该把关注点放在自身的能力沉淀。</p><p>不过，我这边也针对一个极端的观点做一下修正：<strong>不要花太多心思在公司工作上，而是多提升自身能力。</strong></p><p>公司评定一个人包括两块：工作产出与自身能力。光有能力而没有足够产出，是可以让我们在当前岗位上表现达到中上，却很难让自己获得晋升、进而到一个更高的位置去锻炼自己。</p><p>个人能力毕竟有限，必须截止公司的力量，才能产出更大的价值；反之，如果你的产出全部依赖公司平台，也就是说脱离了平台你的价值大打折扣，那也是一个非常严重的问题。</p><p>我比较建议，在 <strong>保证自己能在当前岗位成为TOP10%的前提下，多多提升自己</strong>。</p><p>如果在工作中投入了100%的时间与精力，却依旧达不到TOP10%的业绩产出，这也是很多人遇到的问题。此时，我建议<strong>减少纯工作上的投入，多花时间提升个人能力</strong>。哪怕会在短期内会导致绩效的不如意，但能换来长期良好的职业发展。</p><h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>本篇和大家聊了很多关于个人长期发展的话题，也探讨了个人与公司上的冲突问题。</p><p>如果用一句话总结，我会选择：<strong>软件工程师的价值沉淀是一个长期过程，核心是锻炼自身能力，也要借助公司的平台来帮助自己更快地成长</strong>。</p><blockquote><p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p><p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p><p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p><p>公众号: golangcoding</p><p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p></blockquote>]]></content>
+    <content type="html"><![CDATA[<p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p><h2 id="阶段性的思考"><a href="#阶段性的思考" class="headerlink" title="阶段性的思考"></a>阶段性的思考</h2><p>通过前面几讲的分享，相信大家已经能清楚地看到一名普通软件工程师的发展路线：<strong>不断学习技能，提高研发效能，实现业务功能</strong>。</p><p>如果我们尝试回头看，可能会对自己的定位存在疑问：这些日常CRUD的开发工作，很多不具备太高的技术难度，可以靠人力堆积来实现。那么，如何在研发团队里打造自己的<strong>技术壁垒</strong>、体现个人价值呢？</p><p>下面，我将分多个层面和大家聊聊，大家可以根据自己的发展目标和工作环境，选择性地发展几项。今天的内容会抛开编程语言之争，从更高的维度来看问题。</p><h2 id="1-专项业务领域"><a href="#1-专项业务领域" class="headerlink" title="1. 专项业务领域"></a>1. 专项业务领域</h2><p><strong>业务往往与公司的赢利点挂钩</strong>，决定了公司的生死存亡，所以业务驱动了公司里的很多事情，包括晋升、组织架构等。</p><p>大多数的开发者往往长期投入在公司的业务相关开发，或是满足产品的迭代，或是满足甲方的需求。从结果来看，业务开发是最容易看到成果的，可以与具体的增长和营收挂钩。那么，业务领域的开发者需要关注什么呢？我也列举三点</p><ul><li>产品设计 - 具备<strong>产品的规划与设计</strong>能力，将业务开发的经验沉淀为对产品的理解</li><li>业务架构 - 能将<strong>软件架构适配业</strong>务，也能根据公司的基础能力灵活调整</li><li>权衡能力 - <strong>权衡技术与业务的冲突</strong>，能保证业务快速实现的同时，尽可能地减少技术债</li></ul><h2 id="2-专项技术领域"><a href="#2-专项技术领域" class="headerlink" title="2. 专项技术领域"></a>2. 专项技术领域</h2><p>技术人常常期望能<strong>抛开烦杂的业务需求，长期在一个技术领域深耕</strong>，例如专职研究存储系统、网络架构、云原生架构、大数据引擎等。这里，我希望有此类想法的同学先想清楚一个问题：你究竟是厌倦了做需求迭代，还是真正喜欢某项技术？</p><p>深耕专项的技术领域，遇到的挑战很多，我列举三个比较重要的：</p><ul><li>评价产出 - 思考如何将<strong>技术变现</strong>，在公司中体现自己的<strong>能力价值</strong></li><li>承载业务 - <strong>对接并服务</strong>各个业务团队，根据具体场景做优化、适配等工作</li><li>探索前景 - <strong>紧跟并探索</strong>技术发展前景，方向准确，并长期坚持</li></ul><h2 id="3-团队领导力"><a href="#3-团队领导力" class="headerlink" title="3. 团队领导力"></a>3. 团队领导力</h2><p>合作与分工是所有团队都面临的问题。随着一名工程师的经验与资历的提升，都会直接或间接地带领团队去实现目标。</p><p>那怎么考验一个人的<strong>团队领导力</strong>呢？一般会更关注以下三点：</p><ul><li>能力提升 - 保证资深员工能有效地将<strong>经验与技能</strong>传递给新人，自身也有足够的发展空间</li><li>合理用人 - <strong>如何管理性格、能力各异的成员，尽可能实现产出最大化</strong></li><li>落地文化 - 一个团队如果要长久发展，必须得形成<strong>文化价值观</strong>，并聚拢一批认同这个价值观的成员</li></ul><h2 id="4-研发效能管理"><a href="#4-研发效能管理" class="headerlink" title="4. 研发效能管理"></a>4. 研发效能管理</h2><p>如今，<strong>软件工程日益精细化</strong>，公司越来越重视研发效能的管理，而非当初那种野蛮地堆人力、抢占市场。</p><p>研发效能的管理分为多个方向，例如：</p><ul><li>项目/需求/故障管理 - 用平台跟进项目进度、投入人力</li><li>CICD/devops - 各类自动化的工具平台，促进研发与运维一体化，让研发对整个生命周期负责</li><li>基础框架/库 - 加速研发对接日志、监控、部署等平台</li><li>流程平台化 - 将公司内的各种日常流程落地为平台</li></ul><h2 id="5-安全"><a href="#5-安全" class="headerlink" title="5. 安全"></a>5. 安全</h2><p>安全是一个很有意思的话题，大部分人的认知是：<strong>在没有问题时，安全一文不值；在出现问题后，安全又是至关重要的</strong>。</p><p>安全领域门槛很高，会有专属于自己的一个小圈子。绝大多数的开发者并不需要过多掌握安全相关的技能，只需了解一些常规的安全技能，在日常研发中有意识地加以重视：</p><ul><li>网络安全 - 常见的<code>HTTPS</code>、证书、<code>Sync Flooding</code>等</li><li>数据安全 - 加解密、备份</li><li>编程相关 - SQL注入、核心参数校验、审计功能</li></ul><h2 id="6-稳定性"><a href="#6-稳定性" class="headerlink" title="6. 稳定性"></a>6. 稳定性</h2><p>在项目投入生产使用后，<strong>稳定性</strong>逐渐成为一项重要指标，它与公司的营收直接相关。</p><p>在某个程度上，稳定性与安全非常类似，<strong>不出问题时，大家都不care稳定性，都想着快速迭代；出现问题后，又想法设法维持稳定</strong>。那如何体现一个人在稳定性上的能力呢？</p><ul><li>代码研发 - 从实际代码出发，保证核心功能的<strong>健壮性和可扩展性</strong></li><li>软件架构 - 软件架构稳定，既能保证<strong>功能迭代</strong>，也能随着规模扩大保证<strong>性能稳定</strong></li><li>工作流程 - 从功能迭代、需求上线、故障处理等流程出发，控制风险</li></ul><h2 id="我的思考"><a href="#我的思考" class="headerlink" title="我的思考"></a>我的思考</h2><p>以上六点，是作为开发者的价值点沉淀。我比较赞同一个观点：<strong>对公司的价值输出，决定了你的绩效；而对自己能力的沉淀，决定了你的市场价值</strong>。所以，绝大多数的人更应该把关注点放在自身的能力沉淀。</p><p>不过，我这边也针对一个极端的观点做一下修正：<strong>不要花太多心思在公司工作上，而是多提升自身能力。</strong></p><p>公司评定一个人包括两块：工作产出与自身能力。光有能力而没有足够产出，是可以让我们在当前岗位上表现达到中上，却很难让自己获得晋升、进而到一个更高的位置去锻炼自己。</p><p>个人能力毕竟有限，必须截止公司的力量，才能产出更大的价值；反之，如果你的产出全部依赖公司平台，也就是说脱离了平台你的价值大打折扣，那也是一个非常严重的问题。</p><p>我比较建议，在 <strong>保证自己能在当前岗位成为TOP10%的前提下，多多提升自己</strong>。</p><p>如果在工作中投入了100%的时间与精力，却依旧达不到TOP10%的业绩产出，这也是很多人遇到的问题。此时，我建议<strong>减少纯工作上的投入，多花时间提升个人能力</strong>。哪怕会在短期内会导致绩效的不如意，但能换来长期良好的职业发展。</p><h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>本篇和大家聊了很多关于个人长期发展的话题，也探讨了个人与公司上的冲突问题。</p><p>如果用一句话总结，我会选择：<strong>软件工程师的价值沉淀是一个长期过程，核心是锻炼自身能力，也要借助公司的平台来帮助自己更快地成长</strong>。</p><blockquote><p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p><p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p><p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p><p>公众号: golangcoding</p><p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p></blockquote>]]></content>
     
     <summary type="html">
     
@@ -277,6 +277,58 @@
   </entry>
   
   <entry>
+    <title>Go算法实战 - 6.【正则表达式匹配LeetCode-10】</title>
+    <link href="http://example.com/2021/06/19/go-leetcode/go-leetcode-6/"/>
+    <id>http://example.com/2021/06/19/go-leetcode/go-leetcode-6/</id>
+    <published>2021-06-19T14:52:26.499Z</published>
+    <updated>2021-07-25T10:54:31.460Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p><h2 id="Leetcode-10-正则表达式匹配"><a href="#Leetcode-10-正则表达式匹配" class="headerlink" title="Leetcode-10 正则表达式匹配"></a>Leetcode-10 正则表达式匹配</h2><p>原题链接 <a href="https://leetcode-cn.com/problems/regular-expression-matching/">https://leetcode-cn.com/problems/regular-expression-matching/</a></p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Leetcode第五题的难度不高，也让我们初次接触了 <strong>动态规划</strong> 这个思路。</p><p>同时，我们也遇到了一个<strong>“失败的优化案例”</strong>。这也从侧面告诉了我们，<strong>抛开具体场景的优化都是不可靠的</strong>。</p><blockquote><p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p><p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p><p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p><p>公众号: golangcoding</p><p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;img src=&quot;https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg&quot; alt=&quot;Go-Leetcode&quot;&gt;&lt;/p&gt;
+&lt;h2 id=&quot;Leetcode-10-正则表达式匹配&quot;&gt;&lt;a href=&quot;#Leetcode-10-正则
+      
+    
+    </summary>
+    
+      <category term="成长分享" scheme="http://example.com/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/"/>
+    
+    
+      <category term="Go-Leetcode" scheme="http://example.com/tags/Go-Leetcode/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go语言学习路线 - 8.高级篇:畅想Go工程师的未来发展</title>
+    <link href="http://example.com/2021/06/19/go-study/go-study-8/"/>
+    <id>http://example.com/2021/06/19/go-study/go-study-8/</id>
+    <published>2021-06-19T14:52:26.473Z</published>
+    <updated>2021-07-25T10:54:53.479Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p><h2 id="编程语言对软件工程师的意义"><a href="#编程语言对软件工程师的意义" class="headerlink" title="编程语言对软件工程师的意义"></a>编程语言对软件工程师的意义</h2><p>有人常说，编程语言对软件工程师来说并不重要，更重要的是<strong>软件工程思想</strong>、<strong>架构设计能力</strong>等更高层面的内容。</p><p>这个观点本身没有问题，但它更多的是针对有相当工作经验的程序员。对于绝大多数的人，<strong>编程语言依然是最重要、最核心的技能，也是通往更高层面的敲门砖</strong>。所以，<strong>精通一门编程语言，不仅仅要熟悉其语法与原理，更要了解其周边的生态，包括框架、开源库、中间件等，以及掌握它适用的业务场景</strong>。</p><p>所以，作为一名将Go语言作为主要开发语言的工程师，如果你能合理地利用好这个敲门砖，你的职业发展必将更加通畅。下面，我会从几个常见问题谈起，分享我的经验与见解，希望能给各位带来启发。</p><h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><blockquote><p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p><p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p><p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p><p>公众号: golangcoding</p><p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;img src=&quot;https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg&quot; alt=&quot;Go-Study&quot;&gt;&lt;/p&gt;
+&lt;h2 id=&quot;编程语言对软件工程师的意义&quot;&gt;&lt;a href=&quot;#编程语言对软件工程师的意义&quot; class=&quot;h
+      
+    
+    </summary>
+    
+      <category term="成长分享" scheme="http://example.com/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/"/>
+    
+    
+      <category term="Go-Study" scheme="http://example.com/tags/Go-Study/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点</title>
     <link href="http://example.com/2021/05/13/go-study/go-study-5/"/>
     <id>http://example.com/2021/05/13/go-study/go-study-5/</id>
@@ -481,57 +533,6 @@
     
     
       <category term="Go-Study" scheme="http://example.com/tags/Go-Study/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go语言学习路线 - 0.总览</title>
-    <link href="http://example.com/2021/02/21/go-study/go-study-0/"/>
-    <id>http://example.com/2021/02/21/go-study/go-study-0/</id>
-    <published>2021-02-21T03:27:15.000Z</published>
-    <updated>2021-03-29T12:51:46.961Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p><p>大家好，我是六月天天。从今天开始，我将开启一个新的系列 - <strong>Go语言学习路线</strong>。</p><blockquote><p>大家可以从 <a href="https://space.bilibili.com/293775192">bilibili</a> 的视频分享中看到观点的延伸思考</p></blockquote><h2 id="以成长为核心"><a href="#以成长为核心" class="headerlink" title="以成长为核心"></a>以成长为核心</h2><p>目前网上已有很多Go相关的教程，包括基础讲解、源码解析、面试技巧等，但我依然下决心来做一个具有强烈个人主观观点色彩的<strong>Go语言学习路线</strong>：这个系列的目标只有一个 - <strong>成长</strong> 。我不求这个系列超越其它的教程，而是能做到<strong>去芜存菁</strong> ，引发一批朋友的共鸣。</p><p>整个系列中，我会输出大量的主观观点，大家不一定能全盘接受，我也不希望大家全盘接受。我坚信，<strong>没有碰撞的技术观点无法引起大家的深度思考</strong> ，犹如上课时老师对你进行单方面的内容输出；同时，<strong>主观观点会更具现实色彩与实践意义</strong> ，我经历的公司和方向都很丰富，或多或少会和大家的实际工作产生共鸣。</p><h2 id="学习路线概览"><a href="#学习路线概览" class="headerlink" title="学习路线概览"></a>学习路线概览</h2><ol><li>方向篇 - 明确学习的 <strong>短期目标</strong> 和 <strong>长期目标</strong> ，以及我的一些主观建议</li><li>准备篇 - <strong>工欲善其事，必先利其器</strong> ，一套好的工具和方法，不仅能让你更高效地学习，更能让你 <strong>坚持下来</strong></li><li>入门篇 - <strong>基础语法</strong> 的学习思路，提纲挈领，但不会细化到语法的讲解</li><li>基础篇 - <strong>简单web项目</strong> 的实现思路，介绍 <strong>项目布局</strong>、<strong>模块职责</strong>、<strong>业务特点</strong></li><li>提效篇 - <strong>提升开发效率</strong> ，常见思路是采用一些优秀的 <strong>编程实践</strong>、<strong>开源库</strong>、<strong>研发工具</strong>等</li><li>进阶篇 - 抛开日常的CRUD，根据自己的目标，找到适合自己的 <strong>进阶路线</strong></li><li>高级篇 - 根据互联网上相关信息，结合我的个人经验，谈谈<strong>Go语言的后续发展</strong></li></ol><blockquote><p>可能部分朋友会看重 <strong>入门、基础这些偏实践的模块</strong> ，但我花了大量心血在 <strong>方向及进阶相关的内容</strong> 上：</p><ul><li>入门的方式各有不同，快的一个月，慢的半年，但最终达到的效果差不了多少</li><li>方向错误会严重影响到个人的长远发展，拘泥于自己的舒适圈，越到后期，沉没成本越高</li></ul></blockquote><h2 id="自我简介"><a href="#自我简介" class="headerlink" title="自我简介"></a>自我简介</h2><p>我简单地介绍一下自己重要的编程经历，让大家更好地了解我：</p><ul><li>4年<code>C++</code> / 4年<code>Go</code> 开发，<code>Python</code>/<code>Java</code>/<code>Js</code>等也都有中小平台的研发经验</li><li>曾在某中型公司（已上市，1000+人）的运维开发团队中作为技术负责人，搭建研发效能平台</li><li>目前在某一线大厂任职，参与商用业务平台的开发</li><li>用<code>Go</code>语言研发过公司内部的 <strong>私有云平台</strong> 和已商用的 <strong>业务平台</strong></li></ul><h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>最后，我再谈一谈自己对 <strong>Go语言学习路线</strong> 这个系列的期许，也是我希望能区别于其它教程的点：</p><ul><li><strong>可落地</strong> - 不停留于泛泛而谈，实践的具体路线清晰</li><li><strong>正反馈</strong> - 持续激励自己，避免半途而废</li><li><strong>阶梯式</strong> - 层层递进，有明确的进步目标</li><li><strong>通用性</strong> - 可延伸至各种技术的学习，形成自己的学习方法</li><li><strong>及时性</strong> - 定期更新，保证学习路线的内容不过时</li></ul><blockquote><p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p><p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p><p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p><p>公众号: golangcoding</p><p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;&lt;img src=&quot;https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg&quot; alt=&quot;Go-Study&quot;&gt;&lt;/p&gt;
-&lt;p&gt;大家好，我是六月天天。从今天开始，我将开启一个新的系列 - &lt;strong&gt;Go语言学习路线&lt;/stron
-      
-    
-    </summary>
-    
-      <category term="成长分享" scheme="http://example.com/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/"/>
-    
-    
-      <category term="Go-Study" scheme="http://example.com/tags/Go-Study/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>gRPC源码分析(四)：剖析Proto序列化</title>
-    <link href="http://example.com/2021/02/20/grpc/grpc-4/"/>
-    <id>http://example.com/2021/02/20/grpc/grpc-4/</id>
-    <published>2021-02-20T11:34:49.000Z</published>
-    <updated>2021-03-29T12:51:46.963Z</updated>
-    
-    <content type="html"><![CDATA[<p>在前面的分析中，我们已经知道了使用proto序列化的代码在<a href="https://github.com/grpc/grpc-go/tree/v1.29.x/encoding/proto">encoding目录</a>中，路径中只有三个文件，其中2个还是测试文件，看起来这次的工作量并不大。</p><p>首先，针对读源码是先看源代码还是测试代码，因人而异。个人建议在对源码毫无头绪时，先从测试入手，了解大致功能；如果有一定基础，那么也可以直接入手源代码。我认为优秀的Go源码可读性是非常高的，所以一般情况下，我都直接从源文件入手，遇到问题才会去对应的测试里阅读。</p><h2 id="Marshal"><a href="#Marshal" class="headerlink" title="Marshal"></a>Marshal</h2><p>Marshal的代码不多，关键在于传入参数的类型，有2个分支路线：</p><ol><li><a href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L68">proto.Marshaler类型</a>，实现了<code>Marshal() ([]byte, error)</code>方法</li><li><a href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L54">proto.Message类型</a>，实现了<code>Reset()</code>、<code>String() string</code> 和<code>ProtoMessage()</code>三个方法</li></ol><p>我们回头看看proto生成的<a href="https://github.com/grpc/grpc-go/blob/v1.29.x/examples/helloworld/helloworld/helloworld.pb.go#L35">go文件</a>，发现对应的是第二个接口。那我们接着看：</p><ol><li>调用了protoBufferPool，是一个sync.Pool，是为了加速proto对象的分配</li><li>内部采用的是 <code>marshalAppend</code>，字面来看就是 序列化并追加，对应了 <code> wire-format</code>这个概念，并不需要将整个结构加载完毕、再进行序列化</li><li>接下来调用的是<code>protoV2.MarshalOptions</code>，需要关注的是protoV2是另一个package，<code>protoV2 &quot;google.golang.org/protobuf/proto&quot;</code></li><li>在正式marshal前，调用<code>m.ProtoReflect()</code>方法，根据名字可以猜测是对Message做反射，详细内容不妨后面再看</li><li>最后就是正式的marshal了，分两个分支：<code>out, err = methods.Marshal(in)</code>和<code>out.Buf, err = o.marshalMessageSlow(b, m)</code>。后者是慢速的，一般情况下是不会用到，我们重点关注前者，这时就需要回头看4中的实现了</li><li>逐个往前搜索，<code>接口protoreflect.Message =&gt; </code> <code>接口Message</code> =&gt;<code>函数MessageV2</code>  =&gt; <code>函数ProtoMessageV2Of</code>  =&gt; <code>函数legacyWrapMessage</code> =&gt; <code>函数MessageOf</code> =&gt; <code>类型messageReflectWrapper</code>，终于，在这里找到了目标函数 <code>ProtoMethods</code></li><li>因为我们取的是<code>methods</code>，所以很快将代码定位到 <code>makeCoderMethods</code> =&gt; <code>marshal</code> =&gt; <code>marshalAppendPointer</code> ，最后找到一行核心代码 <code>b, err = f.funcs.marshal(b, fptr, f, opts)</code></li><li>那这个marshal什么时候被赋值的呢？在步骤7中，我们查看了methods被赋值的地方，其实旁边就有一个函数 <code>makeReflectFuncs</code> ，最后定位到了 <code>/google.golang.org/protobuf/internal/impl/codec_gen.go</code> 文件中。每种变量的序列化，都是按照特定规则来执行的。</li></ol><h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>那么 protobuf 实际是如何对每种类型进行Encoding的呢？有兴趣的朋友可以点击<a href="https://developers.google.com/protocol-buffers/docs/encoding">这个链接</a>，阅读原文。这里，我直接拿出一个实例进行讲解。</p><h4 id="定义proto"><a href="#定义proto" class="headerlink" title="定义proto"></a>定义proto</h4><figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">People</span> </span>&#123;</span><br><span class="line"><span class="built_in">bool</span> male = <span class="number">1</span>;</span><br><span class="line"><span class="built_in">int32</span> age = <span class="number">2</span>;</span><br><span class="line"><span class="built_in">string</span> address = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h4 id="生成对应文件后，编写测试用例"><a href="#生成对应文件后，编写测试用例" class="headerlink" title="生成对应文件后，编写测试用例"></a>生成对应文件后，编写测试用例</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">people := &amp;pbmsg.People&#123;</span><br><span class="line">Male:    <span class="literal">true</span>,</span><br><span class="line">Age:     <span class="number">80</span>,</span><br><span class="line">Address: <span class="string">&quot;China Town&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line">b, _ := proto.Marshal(people)</span><br><span class="line">fmt.Printf(<span class="string">&quot;%b\n&quot;</span>, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h4 id="运行生成结果"><a href="#运行生成结果" class="headerlink" title="运行生成结果"></a>运行生成结果</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[1000 1 10000 1010000 11010 1010 1000011 1101000 1101001 1101110 1100001 100000 1010100 1101111 1110111 1101110]</span><br></pre></td></tr></table></figure><h4 id="分析第一个字段Bool"><a href="#分析第一个字段Bool" class="headerlink" title="分析第一个字段Bool"></a>分析第一个字段Bool</h4><p>首先，Male是一个bool字段，序号为1。</p><p>根据Google上的文档，bool是Varint，所以计算</p><p>(field_number &lt;&lt; 3) | wire_type = (1&lt;&lt;3)|0 = 8，对应第一个字节： <code>1000</code></p><p>然后，它的值true对应第二个字节<code>1</code></p><h4 id="分析第二个字段Int"><a href="#分析第二个字段Int" class="headerlink" title="分析第二个字段Int"></a>分析第二个字段Int</h4><p>同样的，(field_number &lt;&lt; 3) | wire_type = (2&lt;&lt;3)|0 = 16，对应第三个字节<code>10000</code></p><p>值80对应<code>1010000</code></p><h4 id="分析第三个字段String"><a href="#分析第三个字段String" class="headerlink" title="分析第三个字段String"></a>分析第三个字段String</h4><p>因为string是不定长的，所以需要一个额外的长度字段</p><p>(field_number &lt;&lt; 3) | wire_type = (3&lt;&lt;3)|2=26，对应<code>11010</code></p><p>接下来是长度字段，我们有10个英文单词，所以长度为10，对应 <code>1010</code></p><p>然后就是10个Byte表示”China Town”了</p><h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>本次的分析到这里就暂时告一段落了，阅读protobuf的相关代码还是非常耗时耗力的。其实这块最主要的复杂度在于为了兼容新老版本，采用了大量的Interface实现。Interface带有面向对象特色，在重构代码时很有意义，不过也给阅读代码时，查找方法对应实现时带来了复杂度。</p><blockquote><p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p><p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p><p>Bilibili：<a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p><p>公众号：golangcoding</p></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;在前面的分析中，我们已经知道了使用proto序列化的代码在&lt;a href=&quot;https://github.com/grpc/grpc-go/tree/v1.29.x/encoding/proto&quot;&gt;encoding目录&lt;/a&gt;中，路径中只有三个文件，其中2个还是测试文件，看
-      
-    
-    </summary>
-    
-      <category term="源码阅读" scheme="http://example.com/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/"/>
-    
-    
-      <category term="gRPC" scheme="http://example.com/tags/gRPC/"/>
     
   </entry>
   

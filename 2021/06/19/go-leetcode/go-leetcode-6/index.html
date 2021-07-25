@@ -22,20 +22,24 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="Blog信息">
-<meta property="og:type" content="website">
-<meta property="og:title" content="文章标签">
-<meta property="og:url" content="http://example.com/tags/index.html">
+  <meta name="description" content="Leetcode-10 正则表达式匹配原题链接 https:&#x2F;&#x2F;leetcode-cn.com&#x2F;problems&#x2F;regular-expression-matching&#x2F; 12func isMatch(s string, p string) bool &amp;#123;&amp;#125;    总结Leetcode第五题的难度不高，也让我们初次接触了 动态规划 这个思路。 同时，我们也遇到了一个“失败的优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go算法实战 - 6.【正则表达式匹配LeetCode-10】">
+<meta property="og:url" content="http://example.com/2021/06/19/go-leetcode/go-leetcode-6/index.html">
 <meta property="og:site_name" content="Junedayday Blog">
-<meta property="og:description" content="Blog信息">
+<meta property="og:description" content="Leetcode-10 正则表达式匹配原题链接 https:&#x2F;&#x2F;leetcode-cn.com&#x2F;problems&#x2F;regular-expression-matching&#x2F; 12func isMatch(s string, p string) bool &amp;#123;&amp;#125;    总结Leetcode第五题的难度不高，也让我们初次接触了 动态规划 这个思路。 同时，我们也遇到了一个“失败的优化">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-02-18T09:47:04.000Z">
-<meta property="article:modified_time" content="2021-03-29T12:51:46.966Z">
+<meta property="og:image" content="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-06-19T14:52:26.499Z">
+<meta property="article:modified_time" content="2021-07-25T10:54:31.460Z">
 <meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Leetcode">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg">
 
 
-<link rel="canonical" href="http://example.com/tags/">
+<link rel="canonical" href="http://example.com/2021/06/19/go-leetcode/go-leetcode-6/">
 
 
 <script class="page-configurations">
@@ -43,13 +47,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>文章标签 | Junedayday Blog
-</title>
+  <title>Go算法实战 - 6.【正则表达式匹配LeetCode-10】 | Junedayday Blog</title>
   
 
 
@@ -138,7 +141,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -150,6 +153,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Leetcode-10-%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%8C%B9%E9%85%8D"><span class="nav-number">1.</span> <span class="nav-text">Leetcode-10 正则表达式匹配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -200,51 +204,118 @@
 </noscript>
 
 
-    <div class="main-inner page posts-expand">
+    <div class="main-inner post posts-expand">
       
 
       
 
     
-    
-    
-    <div class="post-block" lang="zh-CN">
-      <header class="post-header">
-
-<h1 class="post-title" itemprop="name headline">文章标签
-</h1>
-
-<div class="post-meta-container">
   
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/19/go-leetcode/go-leetcode-6/">
 
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go算法实战 - 6.【正则表达式匹配LeetCode-10】
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-06-19 22:52:26" itemprop="dateCreated datePublished" datetime="2021-06-19T22:52:26+08:00">2021-06-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-25 18:54:31" itemprop="dateModified" datetime="2021-07-25T18:54:31+08:00">2021-07-25</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
 </div>
 
-</header>
+        </div>
+      </header>
 
-      
-      
-      
-      <div class="post-body">
-          <div class="tag-cloud">
-  <div class="tag-cloud-title">
-    目前共计 6 个标签
-  </div>
-  <div class="tag-cloud-tags">
-    <a href="/tags/Go-Leetcode/" style="font-size: 16.5px;" class="tag-cloud-3">Go-Leetcode</a> <a href="/tags/Go-Programming-Patterns/" style="font-size: 21px;" class="tag-cloud-5">Go-Programming-Patterns</a> <a href="/tags/Go-Study/" style="font-size: 25.5px;" class="tag-cloud-8">Go-Study</a> <a href="/tags/Go-Tip/" style="font-size: 16.5px;" class="tag-cloud-3">Go-Tip</a> <a href="/tags/Kubernetes/" style="font-size: 30px;" class="tag-cloud-10">Kubernetes</a> <a href="/tags/gRPC/" style="font-size: 12px;" class="tag-cloud-0">gRPC</a>
-  </div>
-</div>
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-10-正则表达式匹配"><a href="#Leetcode-10-正则表达式匹配" class="headerlink" title="Leetcode-10 正则表达式匹配"></a>Leetcode-10 正则表达式匹配</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/regular-expression-matching/">https://leetcode-cn.com/problems/regular-expression-matching/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Leetcode第五题的难度不高，也让我们初次接触了 <strong>动态规划</strong> 这个思路。</p>
+<p>同时，我们也遇到了一个<strong>“失败的优化案例”</strong>。这也从侧面告诉了我们，<strong>抛开具体场景的优化都是不可靠的</strong>。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Leetcode/" rel="tag"># Go-Leetcode</a>
+          </div>
 
         
-      </div>
-      
-      
-      
-    </div>
-    
 
-    
-    
-    
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/19/go-study/go-study-8/" rel="prev" title="Go语言学习路线 - 8.高级篇:畅想Go工程师的未来发展">
+                  <i class="fa fa-chevron-left"></i> Go语言学习路线 - 8.高级篇:畅想Go工程师的未来发展
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/27/go-tip/go-tip-4/" rel="next" title="Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学">
+                  Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
 
 
       
