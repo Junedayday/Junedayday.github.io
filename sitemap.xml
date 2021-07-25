@@ -142,14 +142,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/index.html</loc>
+    <loc>http://example.com/categories/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/categories/index.html</loc>
+    <loc>http://example.com/tags/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -219,6 +219,13 @@
   </url>
   
   <url>
+    <loc>http://example.com/2021/02/20/grpc/grpc-3/</loc>
+    
+    <lastmod>2021-03-29</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://example.com/2021/02/20/grpc/grpc-4/</loc>
     
     <lastmod>2021-03-29</lastmod>
@@ -227,13 +234,6 @@
   
   <url>
     <loc>http://example.com/2021/02/18/k8s/k8s-001/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/02/20/grpc/grpc-3/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
