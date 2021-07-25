@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-count">44</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,6 +201,195 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/13/go-study/go-study-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/13/go-study/go-study-5/" class="post-title-link" itemprop="url">Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-13 12:00:00" itemprop="dateCreated datePublished" datetime="2021-05-13T12:00:00+08:00">2021-05-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-06-19 22:52:26" itemprop="dateModified" datetime="2021-06-19T22:52:26+08:00">2021-06-19</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="从一个Web项目开始"><a href="#从一个Web项目开始" class="headerlink" title="从一个Web项目开始"></a>从一个Web项目开始</h2><p>经过了 <strong>入门篇</strong> 的学习，大家已经初步了解Go语言的语法，也能写常见的代码了。接下来，我们就从一个Web项目入手，看看一些常见的技能与知识吧。</p>
+<p>我们先简单地聊一下这个Web项目的背景：我们要做的是一个简单的web系统 ，有前端同学负责界面的开发，后端不会考虑高并发等复杂情况。</p>
+<p>我们先从一个Web请求出发，看看会涉及到哪些模块。</p>
+<h2 id="前端的请求生命周期"><a href="#前端的请求生命周期" class="headerlink" title="前端的请求生命周期"></a>前端的请求生命周期</h2><p>用户在web界面上点击了一个按钮，就由前端发起了一个请求。那这个请求的生命周期是怎么样的呢？</p>
+<p>通常情况下，后端的工作是<strong>解析前端的数据，处理对应的业务逻辑，返回操作结果</strong>。</p>
+<p>这里，离不开三层概念：</p>
+<ul>
+<li>API层：解析来自前端的数据，转化成go的数据结构</li>
+<li>Service层：包含业务逻辑，是这个请求具体要做的事情</li>
+<li>Dao层：数据持久化，也就是更新到数据库等，保证不丢失</li>
+</ul>
+<blockquote>
+<p>不同框架有不同的命名方式，但我个人建议只关注这三层即可。</p>
+</blockquote>
+<p>当然，这三层逻辑并不绝对，会因为项目特点有所调整，但整体的<strong>分层思路</strong>是不会变化的。我认为，如果你能真正地理解web的分层，对项目的框架就能掌握得很棒了。</p>
+<p>接下来，我们自顶向下逐层聊聊。</p>
+<h2 id="第一层：API层"><a href="#第一层：API层" class="headerlink" title="第一层：API层"></a>第一层：API层</h2><p>通常来说，API层只做三件事：</p>
+<ol>
+<li><strong>根据路由规则，调用具体的处理函数</strong> ，常见的RESTful就是由<code>URL</code>+<code>Method</code>的作为路由规则；</li>
+<li><strong>解析文本或二进制数据到Go结构体</strong>，常见的是用<code>json</code>反序列化；</li>
+<li><strong>调用下一层Service的函数</strong></li>
+</ol>
+<p>抛开第三点暂且不谈，前两者比较容易理解，大家可以使用标准库里的<code>net/http</code>和<code>encoding/json</code>来完成。具体的代码我就不写了，网上示例非常多。</p>
+<p>那么，API层这么简单，有什么学问嘛？这里，我建议大家看看两个开源库：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/gin-gonic/gin">Gin</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/gorilla/mux">Mux</a></li>
+</ul>
+<p>看看上面的示例，对比一下原生的<code>net/http</code>库写出来的代码，是否感觉可读性大大提高？没错，API层关键点之一的就是<strong>可读性</strong>。</p>
+<p>不过Gin相对于Mux非常重量级，学习起来成本很大；而Mux虽然可读性提高，但在解析<code>http body</code>数据这块效果不佳，还是需要逐个手写结构体。</p>
+<blockquote>
+<p>所以，在我看来，这两个都并不是最佳方案，我非常建议有条件的项目能够直接引入 <strong>RPC级别的解决方案</strong>，例如gRPC。这块我会拿具体项目、花好几讲来好好说说。</p>
+</blockquote>
+<p>在开发的过程中，我对API层的开发会重点关注这几点：</p>
+<ul>
+<li>可读性：可以快速地根据命名了解功能，如<strong>RESTful</strong></li>
+<li>高度复用：如引入<code>mux</code> 中的各种 middleware，比如 <strong>防止panic</strong> 、<strong>用户认证</strong> 、日志打印等</li>
+<li>尽量薄：不做或少做业务逻辑处理，复杂处理都丢到service层</li>
+<li>文档化：将接口的相关参数通过文档给到前端或第三方，尽量做到自动化或半自动化</li>
+</ul>
+<p>我再强调一下API层的重要性：<strong>API层是程序最关键的入口和出口，能很好地追踪到数据的前后变化情况。</strong> 一个优秀的API层实现，不仅能让我们少写很多重复性代码，也能大幅度地降低我们排查问题的效率。</p>
+<h2 id="第二层：Service层"><a href="#第二层：Service层" class="headerlink" title="第二层：Service层"></a>第二层：Service层</h2><p>Service层可以理解为服务层，是整个项目中最复杂、也是代码比重往往是最多的。它是一个项目最核心的业务价值所在。</p>
+<p>Service是最灵活、也是最考验设计能力的，虽说<strong>没有一套固定的模式</strong>，但还是会有一定的<strong>套路</strong>。</p>
+<p>我分享一下个人的三个见解：</p>
+<ol>
+<li>单元测试覆盖率要尽量高，这是一个<strong>高频迭代与重构</strong>的模块，也是最容易出现问题的部分；</li>
+<li>深入实践 <strong>面向对象与DDD</strong> ，最锻炼工程师抽象、解耦等能力的模块；</li>
+<li>选择合适的 <strong>设计模式</strong> 可大幅度地提升研发效率；</li>
+</ol>
+<p>再提一句，请跃跃欲试的各位冷静一下，<strong>Service层是和业务一起成长的</strong>，前期没必要过度设计。我们把重点放在<strong>单元测试</strong>的编写上即可，适当地选用一些库来提高效率，如开源的<code>stretchr/testify</code>，内部的<code>reflect</code>等。</p>
+<h2 id="第三层：Dao层"><a href="#第三层：Dao层" class="headerlink" title="第三层：Dao层"></a>第三层：Dao层</h2><p>Dao层常被理解为数据持久化层，但我们可以将它进行一定的延伸：<strong>将RPC调用也当做Dao层</strong>（不妨认为将数据持久化到了另一个服务），来适配微服务架构的场景。</p>
+<blockquote>
+<p>严格意义上，RPC调用和普通的Dao差异有不少，但为了收敛话题，我们暂且不细分。</p>
+</blockquote>
+<p>今天，我们不关注分布式场景下的各种数据问题，也不考虑各种存储中间件的特点，而是聚焦于一个问题：<strong>如何将内存中的对象持久化到数据库中</strong>。在编程领域，这部分的工具被称为<strong>ORM</strong>。</p>
+<p>以Go语言对接MySQL为例，最常见的为<a target="_blank" rel="noopener" href="https://github.com/go-gorm/gorm">gorm</a>，它能很便捷地将一个Go语言中的结构体，映射到MySQL数据库某个表中的一行数据。</p>
+<blockquote>
+<p>请自行对比一下，用go官方的sql库写增删改查，与用gorm写增删改查的工作量差异。</p>
+</blockquote>
+<p>关于Dao层，我认为有部分的实践是比较通用的：</p>
+<ol>
+<li><strong>选用官方或社区高频使用的库</strong>，避免后期出现功能缺失或性能瓶颈的问题；</li>
+<li><strong>灵活性比易用性更重要</strong>，通过一层浅封装，往往能更适配项目，达到更棒的易用性；</li>
+<li><strong>关注数据库的原理、而不是ORM工具的实现方式</strong>，数据库的原理是长期的积累，对技术选型和排查故障很有帮助。</li>
+</ol>
+<blockquote>
+<p>至于不同的数据库ORM有不同的最佳实践，一一列举的工作量太大，我会在工程化的过程中选择性地讲解。</p>
+</blockquote>
+<h2 id="串联三层"><a href="#串联三层" class="headerlink" title="串联三层"></a>串联三层</h2><p>到这里，我们对这三层有了初步的了解，可以总结为**两边薄（API、Dao），中间厚（Service)**。</p>
+<p>这里的实践需要大家不断打磨，比如说：</p>
+<ul>
+<li>API与Dao会随着个人编程能力的提升，不断地总结出更好的编程实践；</li>
+<li>做性能优化时，优先考虑Dao，其次考虑API，这两部分的提效是最明显的；</li>
+<li>排查问题时，先分析API的出入口，再分析Dao的出入口，实在解决不了再去看Service（此时已经是严重的业务逻辑问题了）；</li>
+</ul>
+<p>到最后，相信大家对这三层认知会进一步提升：</p>
+<ul>
+<li>API：服务对外的门面，通过一个接口定义就能了解大致实现原理；</li>
+<li>Service：复杂的业务逻辑，非该服务的核心成员无需关注，而核心成员须重点维护；</li>
+<li>Dao：无论是调用<strong>ORM</strong>还是<strong>SDK</strong>，都视为一种<strong>工具集</strong>，是一个技术人员沉淀通用能力的重点。</li>
+</ul>
+<h2 id="CRUD程序员"><a href="#CRUD程序员" class="headerlink" title="CRUD程序员"></a>CRUD程序员</h2><p>很多程序员都戏称自己是一个只会<strong>CRUD</strong>的码农。让我们换个视角，看看CRUD背后有没有一些的技术点。</p>
+<ul>
+<li>API层：遵循<strong>RESTful</strong>的原则，提高可读性（最好能在一行代码中看到，如<code>mux</code>）<ul>
+<li>将操作（CRUD）对应到HTTP的Method</li>
+<li>将资源对象对应到HTTP的URL</li>
+</ul>
+</li>
+<li>Service层：<ul>
+<li>对于只是简单的修改，Service不用做复杂处理，透传到Dao层即可</li>
+<li>如果涉及到多个表的修改，进行事务处理（如mysql的transaction）</li>
+<li>在Dao层出现错误时，适当封装错误信息，提高可读性</li>
+</ul>
+</li>
+<li>Dao层：<ul>
+<li>选择并熟练运用ORM，快速实现基本的CRUD</li>
+<li>对复杂的ORM进行一层浅封装，方便Service层的调用</li>
+</ul>
+</li>
+</ul>
+<p>经过一段时间的磨练，CRUD的工作能大大提效，我们就能抽出更多的时间去学习其余技能了。</p>
+<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>Web项目是我们日常开发最常见的项目类型，也是很多面试考察点的基点。</p>
+<p>我建议大家从<strong>分层</strong>着手，明确各层职责，<strong>关注API与Dao层的提效工作，做好Service层的质量保障</strong>，更好地掌控全局。而在具体的开源库的使用过程中，<strong>选对比会用更重要</strong>，集中在<strong>API与Dao层</strong>。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -1541,175 +1730,6 @@
 <p>接下来是长度字段，我们有10个英文单词，所以长度为10，对应 <code>1010</code></p>
 <p>然后就是10个Byte表示”China Town”了</p>
 <h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>本次的分析到这里就暂时告一段落了，阅读protobuf的相关代码还是非常耗时耗力的。其实这块最主要的复杂度在于为了兼容新老版本，采用了大量的Interface实现。Interface带有面向对象特色，在重构代码时很有意义，不过也给阅读代码时，查找方法对应实现时带来了复杂度。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/grpc/grpc-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/20/grpc/grpc-3/" class="post-title-link" itemprop="url">gRPC源码分析(三)：从Github文档了解gRPC的项目细节</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-20 19:34:47" itemprop="dateCreated datePublished" datetime="2021-02-20T19:34:47+08:00">2021-02-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="官方Git总览"><a href="#官方Git总览" class="headerlink" title="官方Git总览"></a><a target="_blank" rel="noopener" href="https://github.com/grpc">官方Git总览</a></h2><p>我们先看看GRPC这个项目的总览，主要分三种：</p>
-<ul>
-<li>基于C实现，包括了 C++, Python, Ruby, Objective-C, PHP, C#</li>
-<li>其余语言实现的，最主要是go，java，node</li>
-<li>proposal，即grpc的RFC，关于实现、讨论的文档汇总</li>
-</ul>
-<p>从这里可以看出，gRPC虽然是支持多语言，但原生的实现并不多。如果想在一些小众语言里引入gRPC，还是有很大风险的，有兴趣的可以搜索下TiDB在探索rust的gRPC的经验分享。</p>
-<h2 id="gRPC-Go"><a href="#gRPC-Go" class="headerlink" title="gRPC-Go"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go">gRPC-Go</a></h2><p>作为一名Go语言开发者，我自然选择从最熟悉的语言入手。同时，值得注意的是，grpc-go是除了<code>C家族系列</code>以外使用量最大的repo，加上Go语言优秀的可读性，是一个很好的入门gRPC的阅读材料。</p>
-<p>进入项目，整个README.md文档也不长。通常情况下，如果你能啃完这个文档及相关链接，你对这个开源项目就已经超过99%的人了。</p>
-<p>对Repo的相关注意事项，大家逐行阅读即可，整体比较简单，我简单列举下关键点：</p>
-<ol>
-<li>建议阅读官网文档（恭喜你，上次我们已经读完了官方文档）</li>
-<li>在项目中的引入，建议用go mod</li>
-<li>优先支持3个Go语言最新发布的版本</li>
-<li>FAQ中的常见问题，主要关注<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go#io-timeout-errors">package下载问题</a>和<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go#how-to-turn-on-logging">如何开启追踪日志</a></li>
-</ol>
-<p>通读完成，我们再深入看看<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go#documentation">文档细节</a>，Example这块我们在官网的测试中已经看过，我们的接下来重点是godoc和具体细节的文档。</p>
-<h2 id="go-doc"><a href="#go-doc" class="headerlink" title="go doc"></a><a target="_blank" rel="noopener" href="https://godoc.org/google.golang.org/grpc">go doc</a></h2><h4 id="DefaultBackoffConfig"><a href="#DefaultBackoffConfig" class="headerlink" title="DefaultBackoffConfig"></a>DefaultBackoffConfig</h4><p>注意，这个变量被弃用，被挪到 <code>ConnectParams</code>里了(<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc/blob/master/doc/connection-backoff.md">详情链接</a>)。那这个所谓的连接参数是什么用呢？代码不长，我们选择几个比较重要的内容来阅读下，原链接可以<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/internal/backoff/backoff.go#L54">点击这里</a>。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Backoff returns the amount of time to wait before the next retry given the</span></span><br><span class="line"><span class="comment">// number of retries.</span></span><br><span class="line"><span class="comment">// 根据retries返回等待时间，可以认为是一种退避策略</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(bc Exponential)</span> <span class="title">Backoff</span><span class="params">(retries <span class="keyword">int</span>)</span> <span class="title">time</span>.<span class="title">Duration</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> retries == <span class="number">0</span> &#123;</span><br><span class="line">    <span class="comment">// 之前没有retries过，就返回BaseDelay</span></span><br><span class="line">		<span class="keyword">return</span> bc.Config.BaseDelay</span><br><span class="line">	&#125;</span><br><span class="line">	backoff, max := <span class="keyword">float64</span>(bc.Config.BaseDelay), <span class="keyword">float64</span>(bc.Config.MaxDelay)</span><br><span class="line">  <span class="comment">// 等待时间不能超过max，等待时间 = BaseDelay * Multiplier的retries次方</span></span><br><span class="line">  <span class="comment">// Multiplier默认1.6，并不是官方http包中的2</span></span><br><span class="line">	<span class="keyword">for</span> backoff &lt; max &amp;&amp; retries &gt; <span class="number">0</span> &#123;</span><br><span class="line">		backoff *= bc.Config.Multiplier</span><br><span class="line">		retries--</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> backoff &gt; max &#123;</span><br><span class="line">		backoff = max</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Randomize backoff delays so that if a cluster of requests start at</span></span><br><span class="line">	<span class="comment">// the same time, they won&#x27;t operate in lockstep.</span></span><br><span class="line">  <span class="comment">// 乘以一个随机因子，数值为(1-Jitter,1+Jitter)，默认为(0.8,1.2)，防止同一时刻有大量请求发出，引起锁的问题</span></span><br><span class="line">	backoff *= <span class="number">1</span> + bc.Config.Jitter*(grpcrand.Float64()*<span class="number">2</span><span class="number">-1</span>)</span><br><span class="line">	<span class="keyword">if</span> backoff &lt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> time.Duration(backoff)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="EnableTracing"><a href="#EnableTracing" class="headerlink" title="EnableTracing"></a>EnableTracing</h4><p>用来设置是否开启 trace，追踪日志</p>
-<h4 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h4><p>gRPC的错误码，原代码见<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/codes/codes.go#L29">链接</a>，我们大概了解其原因即可：</p>
-<ul>
-<li><strong>OK</strong> 正常</li>
-<li><strong>Canceled</strong> 客户端取消</li>
-<li><strong>Unknown</strong> 未知</li>
-<li><strong>InvalidArgument</strong> 未知参数</li>
-<li><strong>DeadlineExceeded</strong> 超时</li>
-<li><strong>NotFound</strong> 未找到资源</li>
-<li><strong>AlreadyExists</strong> 资源已经创建</li>
-<li><strong>PermissionDenied</strong> 权限不足</li>
-<li><strong>ResourceExhausted</strong> 资源耗尽</li>
-<li><strong>FailedPrecondition</strong> 前置条件不满足</li>
-<li><strong>Aborted</strong> 异常退出</li>
-<li><strong>OutOfRange</strong> 超出范围</li>
-<li><strong>Unimplemented</strong> 未实现方法</li>
-<li><strong>Internal</strong> 内部问题</li>
-<li><strong>Unavailable</strong> 不可用状态</li>
-<li><strong>DataLoss</strong> 数据丢失</li>
-<li><strong>Unauthenticated</strong> 未认证</li>
-</ul>
-<p>读完上面的内容，发现跟HTTP/1.1的Status Code非常相似。</p>
-<h4 id="CallOption"><a href="#CallOption" class="headerlink" title="CallOption"></a>CallOption</h4><p>调用在客户端 <code>Invoke</code> 方法中，包括before发送前，after为接收后。</p>
-<p>官方提供了几个常用的CallOption，按场景调用。</p>
-<h4 id="ClientConn"><a href="#ClientConn" class="headerlink" title="ClientConn"></a>ClientConn</h4><p>抽象的客户端连接。</p>
-<p>值得注意的是，conns是一个map，所以实际可能有多个tcp连接。</p>
-<h4 id="CodeC"><a href="#CodeC" class="headerlink" title="CodeC"></a>CodeC</h4><p>定义了Marshal和Unmarshal的接口，在grpc底层实现是proto，详细可见 <a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L39">codec</a></p>
-<h4 id="Compressor"><a href="#Compressor" class="headerlink" title="Compressor"></a>Compressor</h4><p>压缩相关的定义</p>
-<h4 id="MetaData"><a href="#MetaData" class="headerlink" title="MetaData"></a>MetaData</h4><p>元数据，也就是key-value，可以类比到http的header</p>
-<h4 id="DialOption"><a href="#DialOption" class="headerlink" title="DialOption"></a>DialOption</h4><p>客户端新建连接时的选项，按场景调用。</p>
-<h4 id="ServerOption"><a href="#ServerOption" class="headerlink" title="ServerOption"></a>ServerOption</h4><p>服务端监听时的选项，按场景调用。</p>
-<h2 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h2><p><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/tree/master/Documentation">文档链接</a></p>
-<h4 id="benchmark"><a href="#benchmark" class="headerlink" title="benchmark"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/benchmark.md">benchmark</a></h4><p>性能测试，有兴趣的可以细看gRPC是从哪几个维度做RPC性能测试的。</p>
-<h4 id="Compression"><a href="#Compression" class="headerlink" title="Compression"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/compression.md">Compression</a></h4><p>可用<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/encoding.go#L66">encoding.RegisterCompressor</a>实现自定义的压缩方法。</p>
-<p>注意，压缩算法应用于客户端和服务端两侧。</p>
-<h4 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/concurrency.md">Concurrency</a></h4><p>支持并发，从三个角度分析：</p>
-<ul>
-<li><code>ClientConn</code>支持多个Goroutine</li>
-<li><code>Steams</code>中，<code>SendMsg</code>/<code>RecvMsg</code>可分别在两个Goroutine中运行，但任何一个方法运行在多个Goroutine上是不安全的</li>
-<li><code>Server</code>每个客户端的invoke会对应一个Server端的Goroutine</li>
-</ul>
-<h4 id="Encoding"><a href="#Encoding" class="headerlink" title="Encoding"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/encoding.md">Encoding</a></h4><p>类似Compression，可用<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/encoding.go#L105">encoding.RegisterCodec</a>实现自定义的序列化方法。</p>
-<h4 id="go-mock"><a href="#go-mock" class="headerlink" title="go mock"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/gomock-example.md">go mock</a></h4><p>用mock生成测试代码，详细可细看。</p>
-<h4 id="Authentication"><a href="#Authentication" class="headerlink" title="Authentication"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-auth-support.md">Authentication</a></h4><p>认证的相关选项，包括 TLS/OAuth2/GCE/JWT ，一般用前两者即可。</p>
-<h4 id="Metadata"><a href="#Metadata" class="headerlink" title="Metadata"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md">Metadata</a></h4><p>介绍了Metadata的使用，类比于HTTP/1.1的Header。</p>
-<h4 id="Keepalive"><a href="#Keepalive" class="headerlink" title="Keepalive"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/keepalive.md">Keepalive</a></h4><p>长连接的参数分为3类：</p>
-<ul>
-<li>ClientParameters 客户端侧参数，主要用来探活</li>
-<li>SeverParameters 服务端参数，控制连接时间</li>
-<li>EnforcementPolicy 服务端加强型参数</li>
-</ul>
-<h4 id="log-level"><a href="#log-level" class="headerlink" title="log level"></a><a href="zhttps://github.com/grpc/grpc-go/blob/master/Documentation/log_levels.md">log level</a></h4><p>四个级别的log level，针对不同场景：</p>
-<ul>
-<li><code>Info</code> 用于debug问题</li>
-<li><code>Warning</code> 排查非关键性的问题</li>
-<li><code>Error</code> gRPC调用出现无法返回到客户端的问题</li>
-<li><code>Fatal</code>  导致程序无法恢复的致命问题</li>
-</ul>
-<h4 id="proxy"><a href="#proxy" class="headerlink" title="proxy"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/proxy.md">proxy</a></h4><p>使用默认的HTTP或HTTPS代理。</p>
-<h4 id="rpc-error"><a href="#rpc-error" class="headerlink" title="rpc error"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/rpc-errors.md">rpc error</a></h4><p>结合官方提供的错误码，用 <code>status.New</code> 或者 <code>status.Error</code> 创建错误。</p>
-<h4 id="server-reflection"><a href="#server-reflection" class="headerlink" title="server reflection"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/server-reflection-tutorial.md">server reflection</a></h4><p>服务端方法映射，跟着教程走即可。</p>
-<p>值得一提的是，采用c++中的grpc_cli模块，可以查看指定端口暴露出来的服务详情。</p>
-<h4 id="versioning"><a href="#versioning" class="headerlink" title="versioning"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/versioning.md">versioning</a></h4><p>版本演进，一般情况下每6周一个小版本，紧急修复会打补丁号。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
