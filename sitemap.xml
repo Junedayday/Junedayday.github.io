@@ -142,13 +142,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/categories/index.html</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/tags/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
@@ -156,7 +149,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-009/</loc>
+    <loc>http://example.com/categories/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -164,6 +157,13 @@
   
   <url>
     <loc>http://example.com/2021/02/18/k8s/k8s-008/</loc>
+    
+    <lastmod>2021-03-29</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/02/18/k8s/k8s-009/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -184,13 +184,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-004/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2021/02/18/k8s/k8s-003/</loc>
     
     <lastmod>2021-03-29</lastmod>
@@ -198,7 +191,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-006/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-004/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -212,14 +205,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-007/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-006/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/20/grpc/grpc-3/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-007/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -234,6 +227,13 @@
   
   <url>
     <loc>http://example.com/2021/02/18/k8s/k8s-001/</loc>
+    
+    <lastmod>2021-03-29</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/02/20/grpc/grpc-3/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -361,14 +361,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Study/</loc>
+    <loc>http://example.com/tags/Go-Tip/</loc>
     <lastmod>2021-07-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Tip/</loc>
+    <loc>http://example.com/tags/Go-Study/</loc>
     <lastmod>2021-07-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
