@@ -19,7 +19,7 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
   <meta name="description" content="Blog信息">
@@ -240,7 +240,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-11 21:53:40" itemprop="dateModified" datetime="2021-07-11T21:53:40+08:00">2021-07-11</time>
+        <time title="修改时间：2021-07-26 13:11:44" itemprop="dateModified" datetime="2021-07-26T13:11:44+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -271,103 +271,14 @@
 <li>参观老虎</li>
 <li>离开动物园</li>
 </ul>
-<h2 id="第一种风格-经典Go语言的处理模式"><a href="#第一种风格-经典Go语言的处理模式" class="headerlink" title="第一种风格 - 经典Go语言的处理模式"></a>第一种风格 - 经典Go语言的处理模式</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一次旅游</span></span><br><span class="line"><span class="keyword">type</span> ZooTour1 <span class="keyword">interface</span> &#123;</span><br><span class="line">	Enter() error <span class="comment">// 进入</span></span><br><span class="line">	VisitPanda(panda *Panda) error <span class="comment">// 看熊猫</span></span><br><span class="line">	VisitTiger(tiger *Tiger) error <span class="comment">// 看老虎</span></span><br><span class="line">	Leave() error <span class="comment">// 离开</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Tour1</span><span class="params">(t ZooTour1, panda *Panda, tiger *Tiger)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := t.Enter(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessage(err, <span class="string">&quot;Enter failed&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.VisitPanda(panda); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessagef(err, <span class="string">&quot;VisitPanda failed, panda is %v&quot;</span>, panda)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.VisitTiger(tiger); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessagef(err, <span class="string">&quot;VisitTiger failed, tiger is %v&quot;</span>, tiger)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.Leave(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessage(err, <span class="string">&quot;Leave failed&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个处理风格非常经典。我们先不深入讨论，看完下一种后再做对比。</p>
-<h2 id="第二种风格-类似Try-Catch的代码风格"><a href="#第二种风格-类似Try-Catch的代码风格" class="headerlink" title="第二种风格 - 类似Try-Catch的代码风格"></a>第二种风格 - 类似Try-Catch的代码风格</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ZooTour2 <span class="keyword">interface</span> &#123;</span><br><span class="line">	Enter()</span><br><span class="line">	VisitPanda(panda *Panda)</span><br><span class="line">	VisitTiger(tiger *Tiger)</span><br><span class="line">	Leave()</span><br><span class="line"></span><br><span class="line">	Err() error <span class="comment">// 统一处理</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Tour2</span><span class="params">(t ZooTour2, panda *Panda, tiger *Tiger)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	t.Enter()</span><br><span class="line">	t.VisitPanda(panda)</span><br><span class="line">	t.VisitTiger(tiger)</span><br><span class="line">	t.Leave()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.Err(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessage(err, <span class="string">&quot;ZooTour failed&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这一整块的代码风格非常类似<strong>Try Catch</strong>，即先写业务逻辑，在最后对错误进行集中处理。</p>
-<blockquote>
-<p>标准库中的<code>bufio.Scanner</code>就是参考这种方式实现的。</p>
-</blockquote>
-<p>不过，由于Go语言对error的处理没有往外抛的机制，所以需要专门针对error做处理：</p>
-<blockquote>
-<p>新手千万不要把panic的机制和错误处理混为一谈。</p>
-</blockquote>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ZooTour的具体实现，需要保存一个error</span></span><br><span class="line"><span class="keyword">type</span> myZooTour <span class="keyword">struct</span> &#123;</span><br><span class="line">	err error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *myZooTour)</span> <span class="title">VisitPanda</span><span class="params">(panda *Panda)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 遇到错误就要直接返回，再处理其余逻辑</span></span><br><span class="line">	<span class="keyword">if</span> t.err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="两种风格的对比"><a href="#两种风格的对比" class="headerlink" title="两种风格的对比"></a>两种风格的对比</h2><p>如果分别用一个词来形容前两种风格，我倾向于：</p>
-<ol>
-<li><strong>过程式的调用</strong></li>
-<li><strong>集中处理错误</strong></li>
-</ol>
-<p>两种风格无法说清孰优孰劣，但有各自适宜的场景，我们来列举两种：</p>
-<h3 id="不关注错误的发生，而关注错误发生后的统一处理"><a href="#不关注错误的发生，而关注错误发生后的统一处理" class="headerlink" title="不关注错误的发生，而关注错误发生后的统一处理"></a>不关注错误的发生，而关注错误发生后的统一处理</h3><p>内部存在大量的<code>VisitXXX</code>的函数，业务不关注发生错误的处理逻辑，而是关注整个流程完成后对error的处理。</p>
-<p>例如，调用过程中如果出现了某个动物不在的问题，我们不关心，继续访问下一个，最后统一处理一下，看看有多少动物是不在的，打印一下即可。</p>
-<p>这时，第二种处理方式明显会更简洁。</p>
-<blockquote>
-<p>一般推荐在工具类中采用这种方式，处理的内容比较直观，不会有太多异常case</p>
-</blockquote>
-<h3 id="错误有多种分类，会影响到程序的运行逻辑"><a href="#错误有多种分类，会影响到程序的运行逻辑" class="headerlink" title="错误有多种分类，会影响到程序的运行逻辑"></a>错误有多种分类，会影响到程序的运行逻辑</h3><p>例如<code>VisitPanda(panda *Panda)</code> 可能产生的错误分2类：</p>
-<ul>
-<li><p>不影响主流程：例如发现panda不见了，但还要接着继续参观其余动物</p>
-</li>
-<li><p>影响主流程：例如突然收到动物园闭园的通知，不能参观其余动物了</p>
-</li>
-</ul>
-<p>这时，如果我们采用第二种风格，就得在每个函数内部加上很多特殊的业务逻辑：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *myZooTour)</span> <span class="title">VisitTiger</span><span class="params">(tiger *Tiger)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 要针对特定error进行处理</span></span><br><span class="line">	<span class="keyword">if</span> t.err != <span class="literal">nil</span> &amp;&amp; t.err != ErrorPandaMissing &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>很有可能出现一个问题：<strong>把Panda相关的error放到了Tiger里</strong>。</p>
-<p>所以，<strong>当错误的类型会影响到代码的运行逻辑，更适合第一种方案</strong>。</p>
-<blockquote>
-<p>一般情况下，我们的业务代码都是复杂的，这时候更适合写过程性的代码。</p>
-</blockquote>
-<h2 id="第三种风格-函数式编程"><a href="#第三种风格-函数式编程" class="headerlink" title="第三种风格 - 函数式编程"></a>第三种风格 - 函数式编程</h2><p>借用1中的接口定义，我们将它改造成函数式的风格：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> MyFunc <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewEnterFunc</span><span class="params">()</span> <span class="title">MyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.Enter()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewVisitPandaFunc</span><span class="params">(panda *Panda)</span> <span class="title">MyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.VisitPanda(panda)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewVisitTigerFunc</span><span class="params">(tiger *Tiger)</span> <span class="title">MyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.VisitTiger(tiger)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewLeaveFunc</span><span class="params">()</span> <span class="title">MyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.Leave()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>然后调用代码示例如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Tour3</span><span class="params">(t ZooTour1, panda *Panda, tiger *Tiger)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> actions = []MyFunc&#123;</span><br><span class="line">		NewEnterFunc(),</span><br><span class="line">		NewVisitPandaFunc(panda),</span><br><span class="line">		NewVisitTigerFunc(tiger),</span><br><span class="line">		NewLeaveFunc(),</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> ContinueOnError(t, actions)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ContinueOnError</span><span class="params">(t ZooTour1, funcs []MyFunc)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="keyword">for</span> _, f := <span class="keyword">range</span> funcs &#123;</span><br><span class="line">    <span class="keyword">if</span> err := f(t);err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="comment">// continue</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BreakOnError</span><span class="params">(t ZooTour1, funcs []MyFunc)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="keyword">for</span> _, f := <span class="keyword">range</span> funcs &#123;</span><br><span class="line">    <span class="keyword">if</span> err := f(t);err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="comment">// break</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>值得一提的是</p>
-<ul>
-<li><code>ContinueOnError</code>表示遇到了error只记录下来，但整个流程继续往下跑</li>
-<li><code>BreakOnError</code>表示遇到了error就直接break，不再跑接下来的<code>MyFunc</code></li>
-</ul>
-<h2 id="方案三背后的思想与延伸"><a href="#方案三背后的思想与延伸" class="headerlink" title="方案三背后的思想与延伸"></a>方案三背后的思想与延伸</h2><p>函数式编程最直观的一个特点是 <strong>延迟执行</strong>，也就是在引用<code>MyFunc</code>处不运行，在<code>ContinueOnError</code>或<code>BreakOnError</code>里才是真正执行的地方。</p>
-<p>这个延迟执行的特性，在这里还能达到一个很有意思的效果 - <strong>分离关注点</strong>。</p>
-<h3 id="关注点1-数据结构"><a href="#关注点1-数据结构" class="headerlink" title="关注点1 - 数据结构"></a>关注点1 - 数据结构</h3><p>样例中的<code>[]MyFunc</code>是一个切片，可以简单地理解为<strong>串行执行</strong>，也就是<code>MyFunc</code>执行完一个，再执行下一个。</p>
-<p>我们可以引入更多的数据结构，例如<code>[][]MyFunc</code>，那就可以理解为增加了一层：</p>
-<p>每一层中的<code>[]MyFunc</code>，代表这里面的所有<code>MyFunc</code>是平级的，也就可以采用一定的并发模式来加速执行。</p>
-<h3 id="关注点2-执行逻辑"><a href="#关注点2-执行逻辑" class="headerlink" title="关注点2 - 执行逻辑"></a>关注点2 - 执行逻辑</h3><p>以<code>ContinueOnError</code>或<code>BreakOnError</code>为例，它们都是对各种<code>MyFunc</code>的处理逻辑。我们还可以引入更多的执行逻辑，比如：</p>
-<ul>
-<li>容忍特定错误的情况</li>
-<li>对错误发生的数量有容忍上限</li>
-<li>保证一定的并发模式</li>
-</ul>
-<h3 id="流水线的模式"><a href="#流水线的模式" class="headerlink" title="流水线的模式"></a>流水线的模式</h3><p>以我们常见的开发流水线为例，常见的包括：代码检查、单元测试、编译、CodeReview、自动化部署等。</p>
-<p>这时，数据结构可以用来表示<strong>流水线的结构</strong>，执行逻辑可以用来表示<strong>流水线对异常的处置</strong>。</p>
-<p>比如说，我们可以编排为一种串行执行的逻辑：</p>
-<ol>
-<li>代码检查</li>
-<li>单元测试</li>
-<li>编译</li>
-<li>CodeReview</li>
-<li>自动化部署</li>
-</ol>
-<p>我们想要加速整个流程，可以考虑修改为：</p>
-<ol>
-<li>检查<ol>
-<li>代码检查</li>
-<li>单元测试</li>
-<li>编译</li>
-</ol>
-</li>
-<li>CodeReview</li>
-<li>自动化部署</li>
-</ol>
-<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>本文介绍了三种对error的处理方式，代码实现相对简单，大家更需要关注背后的适用场景。</p>
-<p>其中，第三种方式是一个很有意思的设计模式，可以帮助大家理解函数式编程的价值。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/27/go-tip/go-tip-4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -423,7 +334,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-25 19:34:51" itemprop="dateModified" datetime="2021-07-25T19:34:51+08:00">2021-07-25</time>
+        <time title="修改时间：2021-07-26 13:12:49" itemprop="dateModified" datetime="2021-07-26T13:12:49+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -448,30 +359,14 @@
           <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
 <h2 id="Leetcode-10-正则表达式匹配"><a href="#Leetcode-10-正则表达式匹配" class="headerlink" title="Leetcode-10 正则表达式匹配"></a>Leetcode-10 正则表达式匹配</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/regular-expression-matching/">https://leetcode-cn.com/problems/regular-expression-matching/</a></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="基础解法"><a href="#基础解法" class="headerlink" title="基础解法"></a>基础解法</h2><p>我们先理一下正则匹配的大致思路：<strong>逐个对比s和p两个字符串，匹配则继续往后，发现不匹配直接退出</strong>。</p>
-<p>那么，我们先简化一下问题，看看代码的大致结构：</p>
-<h3 id="普通字符串匹配"><a href="#普通字符串匹配" class="headerlink" title="普通字符串匹配"></a>普通字符串匹配</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> || <span class="built_in">len</span>(p) == <span class="number">0</span> || s[<span class="number">0</span>] != p[<span class="number">0</span>] &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里的代码思路很清晰，我们重点要解决的是两个通配符<code>.</code>和<code>*</code>：</p>
-<h3 id="单个字符匹配"><a href="#单个字符匹配" class="headerlink" title="单个字符匹配"></a>单个字符匹配</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> || <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果p[0]为. ，则必定匹配</span></span><br><span class="line">    <span class="keyword">if</span> s[<span class="number">0</span>] != p[<span class="number">0</span>] &amp;&amp; p[<span class="number">0</span>] != <span class="string">&#x27;.&#x27;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Leetcode第五题的难度不高，也让我们初次接触了 <strong>动态规划</strong> 这个思路。</p>
-<p>同时，我们也遇到了一个<strong>“失败的优化案例”</strong>。这也从侧面告诉了我们，<strong>抛开具体场景的优化都是不可靠的</strong>。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/19/go-leetcode/go-leetcode-6/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -527,7 +422,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-06-19 22:52:26" itemprop="dateModified" datetime="2021-06-19T22:52:26+08:00">2021-06-19</time>
+        <time title="修改时间：2021-07-26 13:10:54" itemprop="dateModified" datetime="2021-07-26T13:10:54+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -553,114 +448,14 @@
 <h2 id="从一个Web项目开始"><a href="#从一个Web项目开始" class="headerlink" title="从一个Web项目开始"></a>从一个Web项目开始</h2><p>经过了 <strong>入门篇</strong> 的学习，大家已经初步了解Go语言的语法，也能写常见的代码了。接下来，我们就从一个Web项目入手，看看一些常见的技能与知识吧。</p>
 <p>我们先简单地聊一下这个Web项目的背景：我们要做的是一个简单的web系统 ，有前端同学负责界面的开发，后端不会考虑高并发等复杂情况。</p>
 <p>我们先从一个Web请求出发，看看会涉及到哪些模块。</p>
-<h2 id="前端的请求生命周期"><a href="#前端的请求生命周期" class="headerlink" title="前端的请求生命周期"></a>前端的请求生命周期</h2><p>用户在web界面上点击了一个按钮，就由前端发起了一个请求。那这个请求的生命周期是怎么样的呢？</p>
-<p>通常情况下，后端的工作是<strong>解析前端的数据，处理对应的业务逻辑，返回操作结果</strong>。</p>
-<p>这里，离不开三层概念：</p>
-<ul>
-<li>API层：解析来自前端的数据，转化成go的数据结构</li>
-<li>Service层：包含业务逻辑，是这个请求具体要做的事情</li>
-<li>Dao层：数据持久化，也就是更新到数据库等，保证不丢失</li>
-</ul>
-<blockquote>
-<p>不同框架有不同的命名方式，但我个人建议只关注这三层即可。</p>
-</blockquote>
-<p>当然，这三层逻辑并不绝对，会因为项目特点有所调整，但整体的<strong>分层思路</strong>是不会变化的。我认为，如果你能真正地理解web的分层，对项目的框架就能掌握得很棒了。</p>
-<p>接下来，我们自顶向下逐层聊聊。</p>
-<h2 id="第一层：API层"><a href="#第一层：API层" class="headerlink" title="第一层：API层"></a>第一层：API层</h2><p>通常来说，API层只做三件事：</p>
-<ol>
-<li><strong>根据路由规则，调用具体的处理函数</strong> ，常见的RESTful就是由<code>URL</code>+<code>Method</code>的作为路由规则；</li>
-<li><strong>解析文本或二进制数据到Go结构体</strong>，常见的是用<code>json</code>反序列化；</li>
-<li><strong>调用下一层Service的函数</strong></li>
-</ol>
-<p>抛开第三点暂且不谈，前两者比较容易理解，大家可以使用标准库里的<code>net/http</code>和<code>encoding/json</code>来完成。具体的代码我就不写了，网上示例非常多。</p>
-<p>那么，API层这么简单，有什么学问嘛？这里，我建议大家看看两个开源库：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/gin-gonic/gin">Gin</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/gorilla/mux">Mux</a></li>
-</ul>
-<p>看看上面的示例，对比一下原生的<code>net/http</code>库写出来的代码，是否感觉可读性大大提高？没错，API层关键点之一的就是<strong>可读性</strong>。</p>
-<p>不过Gin相对于Mux非常重量级，学习起来成本很大；而Mux虽然可读性提高，但在解析<code>http body</code>数据这块效果不佳，还是需要逐个手写结构体。</p>
-<blockquote>
-<p>所以，在我看来，这两个都并不是最佳方案，我非常建议有条件的项目能够直接引入 <strong>RPC级别的解决方案</strong>，例如gRPC。这块我会拿具体项目、花好几讲来好好说说。</p>
-</blockquote>
-<p>在开发的过程中，我对API层的开发会重点关注这几点：</p>
-<ul>
-<li>可读性：可以快速地根据命名了解功能，如<strong>RESTful</strong></li>
-<li>高度复用：如引入<code>mux</code> 中的各种 middleware，比如 <strong>防止panic</strong> 、<strong>用户认证</strong> 、日志打印等</li>
-<li>尽量薄：不做或少做业务逻辑处理，复杂处理都丢到service层</li>
-<li>文档化：将接口的相关参数通过文档给到前端或第三方，尽量做到自动化或半自动化</li>
-</ul>
-<p>我再强调一下API层的重要性：<strong>API层是程序最关键的入口和出口，能很好地追踪到数据的前后变化情况。</strong> 一个优秀的API层实现，不仅能让我们少写很多重复性代码，也能大幅度地降低我们排查问题的效率。</p>
-<h2 id="第二层：Service层"><a href="#第二层：Service层" class="headerlink" title="第二层：Service层"></a>第二层：Service层</h2><p>Service层可以理解为服务层，是整个项目中最复杂、也是代码比重往往是最多的。它是一个项目最核心的业务价值所在。</p>
-<p>Service是最灵活、也是最考验设计能力的，虽说<strong>没有一套固定的模式</strong>，但还是会有一定的<strong>套路</strong>。</p>
-<p>我分享一下个人的三个见解：</p>
-<ol>
-<li>单元测试覆盖率要尽量高，这是一个<strong>高频迭代与重构</strong>的模块，也是最容易出现问题的部分；</li>
-<li>深入实践 <strong>面向对象与DDD</strong> ，最锻炼工程师抽象、解耦等能力的模块；</li>
-<li>选择合适的 <strong>设计模式</strong> 可大幅度地提升研发效率；</li>
-</ol>
-<p>再提一句，请跃跃欲试的各位冷静一下，<strong>Service层是和业务一起成长的</strong>，前期没必要过度设计。我们把重点放在<strong>单元测试</strong>的编写上即可，适当地选用一些库来提高效率，如开源的<code>stretchr/testify</code>，内部的<code>reflect</code>等。</p>
-<h2 id="第三层：Dao层"><a href="#第三层：Dao层" class="headerlink" title="第三层：Dao层"></a>第三层：Dao层</h2><p>Dao层常被理解为数据持久化层，但我们可以将它进行一定的延伸：<strong>将RPC调用也当做Dao层</strong>（不妨认为将数据持久化到了另一个服务），来适配微服务架构的场景。</p>
-<blockquote>
-<p>严格意义上，RPC调用和普通的Dao差异有不少，但为了收敛话题，我们暂且不细分。</p>
-</blockquote>
-<p>今天，我们不关注分布式场景下的各种数据问题，也不考虑各种存储中间件的特点，而是聚焦于一个问题：<strong>如何将内存中的对象持久化到数据库中</strong>。在编程领域，这部分的工具被称为<strong>ORM</strong>。</p>
-<p>以Go语言对接MySQL为例，最常见的为<a target="_blank" rel="noopener" href="https://github.com/go-gorm/gorm">gorm</a>，它能很便捷地将一个Go语言中的结构体，映射到MySQL数据库某个表中的一行数据。</p>
-<blockquote>
-<p>请自行对比一下，用go官方的sql库写增删改查，与用gorm写增删改查的工作量差异。</p>
-</blockquote>
-<p>关于Dao层，我认为有部分的实践是比较通用的：</p>
-<ol>
-<li><strong>选用官方或社区高频使用的库</strong>，避免后期出现功能缺失或性能瓶颈的问题；</li>
-<li><strong>灵活性比易用性更重要</strong>，通过一层浅封装，往往能更适配项目，达到更棒的易用性；</li>
-<li><strong>关注数据库的原理、而不是ORM工具的实现方式</strong>，数据库的原理是长期的积累，对技术选型和排查故障很有帮助。</li>
-</ol>
-<blockquote>
-<p>至于不同的数据库ORM有不同的最佳实践，一一列举的工作量太大，我会在工程化的过程中选择性地讲解。</p>
-</blockquote>
-<h2 id="串联三层"><a href="#串联三层" class="headerlink" title="串联三层"></a>串联三层</h2><p>到这里，我们对这三层有了初步的了解，可以总结为**两边薄（API、Dao），中间厚（Service)**。</p>
-<p>这里的实践需要大家不断打磨，比如说：</p>
-<ul>
-<li>API与Dao会随着个人编程能力的提升，不断地总结出更好的编程实践；</li>
-<li>做性能优化时，优先考虑Dao，其次考虑API，这两部分的提效是最明显的；</li>
-<li>排查问题时，先分析API的出入口，再分析Dao的出入口，实在解决不了再去看Service（此时已经是严重的业务逻辑问题了）；</li>
-</ul>
-<p>到最后，相信大家对这三层认知会进一步提升：</p>
-<ul>
-<li>API：服务对外的门面，通过一个接口定义就能了解大致实现原理；</li>
-<li>Service：复杂的业务逻辑，非该服务的核心成员无需关注，而核心成员须重点维护；</li>
-<li>Dao：无论是调用<strong>ORM</strong>还是<strong>SDK</strong>，都视为一种<strong>工具集</strong>，是一个技术人员沉淀通用能力的重点。</li>
-</ul>
-<h2 id="CRUD程序员"><a href="#CRUD程序员" class="headerlink" title="CRUD程序员"></a>CRUD程序员</h2><p>很多程序员都戏称自己是一个只会<strong>CRUD</strong>的码农。让我们换个视角，看看CRUD背后有没有一些的技术点。</p>
-<ul>
-<li>API层：遵循<strong>RESTful</strong>的原则，提高可读性（最好能在一行代码中看到，如<code>mux</code>）<ul>
-<li>将操作（CRUD）对应到HTTP的Method</li>
-<li>将资源对象对应到HTTP的URL</li>
-</ul>
-</li>
-<li>Service层：<ul>
-<li>对于只是简单的修改，Service不用做复杂处理，透传到Dao层即可</li>
-<li>如果涉及到多个表的修改，进行事务处理（如mysql的transaction）</li>
-<li>在Dao层出现错误时，适当封装错误信息，提高可读性</li>
-</ul>
-</li>
-<li>Dao层：<ul>
-<li>选择并熟练运用ORM，快速实现基本的CRUD</li>
-<li>对复杂的ORM进行一层浅封装，方便Service层的调用</li>
-</ul>
-</li>
-</ul>
-<p>经过一段时间的磨练，CRUD的工作能大大提效，我们就能抽出更多的时间去学习其余技能了。</p>
-<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>Web项目是我们日常开发最常见的项目类型，也是很多面试考察点的基点。</p>
-<p>我建议大家从<strong>分层</strong>着手，明确各层职责，<strong>关注API与Dao层的提效工作，做好Service层的质量保障</strong>，更好地掌控全局。而在具体的开源库的使用过程中，<strong>选对比会用更重要</strong>，集中在<strong>API与Dao层</strong>。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/05/13/go-study/go-study-5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -716,7 +511,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-06-19 22:52:26" itemprop="dateModified" datetime="2021-06-19T22:52:26+08:00">2021-06-19</time>
+        <time title="修改时间：2021-07-26 13:11:41" itemprop="dateModified" datetime="2021-07-26T13:11:41+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -741,60 +536,14 @@
           <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
 <h2 id="Go-Error的工程化探索"><a href="#Go-Error的工程化探索" class="headerlink" title="Go Error的工程化探索"></a>Go Error的工程化探索</h2><p>在上一篇，我分享了对 <a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/master/design/29934-error-values.md">官方Proposal</a> 的一些见解，偏向于理论层面。</p>
 <p>本篇里，我会具体到代码层面，谈谈如何在一个工程化的项目中利用<code>github.com/pkg/errors</code>包，完整实现一套的错误处理机制。</p>
-<h2 id="全局定义的error实现-MyError"><a href="#全局定义的error实现-MyError" class="headerlink" title="全局定义的error实现 - MyError"></a>全局定义的error实现 - MyError</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 全局的 错误号 类型，用于API调用之间传递</span></span><br><span class="line"><span class="keyword">type</span> MyErrorCode <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 全局的 错误号 的具体定义</span></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	ErrorBookNotFoundCode MyErrorCode = <span class="literal">iota</span> + <span class="number">1</span></span><br><span class="line">	ErrorBookHasBeenBorrowedCode</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 内部的错误map，用来对应 错误号和错误信息</span></span><br><span class="line"><span class="keyword">var</span> errCodeMap = <span class="keyword">map</span>[MyErrorCode]<span class="keyword">string</span>&#123;</span><br><span class="line">	ErrorBookNotFoundCode:        <span class="string">&quot;Book was not found&quot;</span>,</span><br><span class="line">	ErrorBookHasBeenBorrowedCode: <span class="string">&quot;Book has been borrowed&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Sentinel Error： 即全局定义的Static错误变量</span></span><br><span class="line"><span class="comment">// 注意，这里的全局error是没有保存堆栈信息的，所以需要在初始调用处使用 errors.Wrap</span></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	ErrorBookNotFound        = NewMyError(ErrorBookNotFoundCode)</span><br><span class="line">	ErrorBookHasBeenBorrowed = NewMyError(ErrorBookHasBeenBorrowedCode)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewMyError</span><span class="params">(code MyErrorCode)</span> *<span class="title">MyError</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;MyError&#123;</span><br><span class="line">		Code:    code,</span><br><span class="line">		Message: errCodeMap[code],</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// error的具体实现</span></span><br><span class="line"><span class="keyword">type</span> MyError <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// 对外使用 - 错误码</span></span><br><span class="line">	Code MyErrorCode</span><br><span class="line">	<span class="comment">// 对外使用 - 错误信息</span></span><br><span class="line">	Message <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *MyError)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> e.Message</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="具体示例-借书的三种场景"><a href="#具体示例-借书的三种场景" class="headerlink" title="具体示例 - 借书的三种场景"></a>具体示例 - 借书的三种场景</h2><p>我们来模拟一个场景：</p>
-<p>我去图书馆借几本书，会存在三个场景，分别的处理逻辑如下</p>
-<ol>
-<li>找到书 - 不需要任何处理</li>
-<li>发现书被借走了 - 打印一下即可，不认为是错误</li>
-<li>发现图书馆不存在这本书 - 认为是错误，需要打印详细的错误信息</li>
-</ol>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	books := []<span class="keyword">string</span>&#123;</span><br><span class="line">		<span class="string">&quot;Hamlet&quot;</span>,</span><br><span class="line">		<span class="string">&quot;Jane Eyre&quot;</span>,</span><br><span class="line">		<span class="string">&quot;War and Peace&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, bookName := <span class="keyword">range</span> books &#123;</span><br><span class="line">		fmt.Printf(<span class="string">&quot;%s start\n===\n&quot;</span>, bookName)</span><br><span class="line"></span><br><span class="line">		err := borrowOne(bookName)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;%+v\n&quot;</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		fmt.Printf(<span class="string">&quot;===\n%s end\n\n&quot;</span>, bookName)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">borrowOne</span><span class="params">(bookName <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// Step1: 找书</span></span><br><span class="line">	err := searchBook(bookName)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Step2: 处理</span></span><br><span class="line">	<span class="comment">// 特殊业务场景：如果发现书被借走了，下次再来就行了，不需要作为错误处理</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// 提取error这个interface底层的错误码，一般在API的返回前才提取</span></span><br><span class="line">		<span class="comment">// As - 获取错误的具体实现</span></span><br><span class="line">		<span class="keyword">var</span> myError = <span class="built_in">new</span>(MyError)</span><br><span class="line">		<span class="keyword">if</span> errors.As(err, &amp;myError) &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;error code is %d, message is %s\n&quot;</span>, myError.Code, myError.Message)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 特殊逻辑: 对应场景2，指定错误(ErrorBookHasBeenBorrowed)时，打印即可，不返回错误</span></span><br><span class="line">		<span class="comment">// Is - 判断错误是否为指定类型</span></span><br><span class="line">		<span class="keyword">if</span> errors.Is(err, ErrorBookHasBeenBorrowed) &#123;</span><br><span class="line">			fmt.Printf(<span class="string">&quot;book %s has been borrowed, I will come back later!\n&quot;</span>, bookName)</span><br><span class="line">			err = <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">searchBook</span><span class="params">(bookName <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// 下面两个 error 都是不带堆栈信息的，所以初次调用得用Wrap方法</span></span><br><span class="line">	<span class="comment">// 如果已有堆栈信息，应调用WithMessage方法</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 3 发现图书馆不存在这本书 - 认为是错误，需要打印详细的错误信息</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(bookName) &gt; <span class="number">10</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.Wrapf(ErrorBookNotFound, <span class="string">&quot;bookName is %s&quot;</span>, bookName)</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(bookName) &gt; <span class="number">8</span> &#123;</span><br><span class="line">		<span class="comment">// 2 发现书被借走了 - 打印一下被接走的提示即可，不认为是错误</span></span><br><span class="line">		<span class="keyword">return</span> errors.Wrapf(ErrorBookHasBeenBorrowed, <span class="string">&quot;bookName is %s&quot;</span>, bookName)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 1 找到书 - 不需要任何处理</span></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h2><h3 id="1-找到书-Helmet"><a href="#1-找到书-Helmet" class="headerlink" title="1. 找到书 - Helmet"></a>1. 找到书 - Helmet</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Hamlet start</span><br><span class="line">===</span><br><span class="line">===</span><br><span class="line">Hamlet end</span><br></pre></td></tr></table></figure>
-
-<p>没有任何错误信息</p>
-<h3 id="2-发现书被借走了-Jane-Eyre"><a href="#2-发现书被借走了-Jane-Eyre" class="headerlink" title="2. 发现书被借走了 - Jane Eyre"></a>2. 发现书被借走了 - Jane Eyre</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Jane Eyre start</span><br><span class="line">===</span><br><span class="line">error code is 2, message is Book has been borrowed</span><br><span class="line">book Jane Eyre has been borrowed, I will come back later!</span><br><span class="line">===</span><br><span class="line">Jane Eyre end</span><br></pre></td></tr></table></figure>
-
-<p><strong>打印被借走的提示</strong>，而错误被 <code>err = nil</code> 屏蔽。</p>
-<h3 id="3-发现图书馆不存在这本书-War-and-Peace"><a href="#3-发现图书馆不存在这本书-War-and-Peace" class="headerlink" title="3. 发现图书馆不存在这本书 - War and Peace"></a>3. 发现图书馆不存在这本书 - War and Peace</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">War and Peace start</span><br><span class="line">===</span><br><span class="line">error code is 1, message is Book was not found</span><br><span class="line">Book was not found</span><br><span class="line">bookName is War and Peace</span><br><span class="line">main.searchBook</span><br><span class="line">        /GoProject/godemo/main.go:98</span><br><span class="line">main.borrowOne</span><br><span class="line">        /GoProject/godemo/main.go:71</span><br><span class="line">main.main</span><br><span class="line">        /GoProject/godemo/main.go:60</span><br><span class="line">runtime.main</span><br><span class="line">        /usr/local/go1.13.5/src/runtime/proc.go:203</span><br><span class="line">runtime.goexit</span><br><span class="line">        /usr/local/go1.13.5/src/runtime/asm_amd64.s:1357</span><br><span class="line">===</span><br><span class="line">War and Peace end</span><br></pre></td></tr></table></figure>
-
-<p><strong>打印了错误的详细堆栈</strong>，在IDE中调试非常方便，可以直接跳转到对应代码位置。</p>
-<h2 id="关键点"><a href="#关键点" class="headerlink" title="关键点"></a>关键点</h2><ol>
-<li><code>MyError</code> 作为全局 <code>error</code> 的底层实现，保存具体的错误码和错误信息；</li>
-<li><code>MyError</code>向上返回错误时，第一次先用<code>Wrap</code>初始化堆栈，后续用<code>WithMessage</code>增加堆栈信息；</li>
-<li>从<code>error</code>中解析具体错误时，用<code>errors.As</code>提取出<code>MyError</code>，其中的错误码和错误信息可以传入到具体的API接口中；</li>
-<li>要判断<code>error</code>是否为指定的错误时，用<code>errors.Is</code> + <code>Sentinel Error</code>的方法，处理一些特定情况下的逻辑；</li>
-</ol>
-<blockquote>
-<p>Tips：</p>
-<ol>
-<li>不要一直用errors.Wrap来反复包装错误，堆栈信息会爆炸，具体情况可自行测试了解</li>
-<li>利用go generate可以大量简化初始化Sentinel Error这块重复的工作</li>
-<li><code>github.com/pkg/errors</code>和标准库的<code>error</code>完全兼容，可以先替换、后续改造历史遗留的代码</li>
-<li>一定要注意打印<code>error</code>的堆栈需要用<code>%+v</code>，而原来的<code>%v</code>依旧为普通字符串方法；同时也要注意日志采集工具是否支持多行匹配</li>
-</ol>
-</blockquote>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>从现状来看，<code>Go</code> 语言的 <code>Error Handling</code> 已趋于共识，。</p>
-<p>后续差异点就在底层 <code>MyError</code> 这块的实现，我个人认为会有如下三个方向：</p>
-<ul>
-<li>增加一些其余业务或系统的字段</li>
-<li>对<code>Is</code>，<code>As</code> 等函数再进行一定的封装，使用起来更方便</li>
-<li>区分不同的错误类型，来告诉调用方该如何处理，如 <strong>普通错误</strong>、<strong>重试错误</strong> 、<strong>服务降级错误</strong> 等</li>
-</ul>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/05/07/go-tip/go-tip-3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -850,7 +599,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-06-19 22:51:46" itemprop="dateModified" datetime="2021-06-19T22:51:46+08:00">2021-06-19</time>
+        <time title="修改时间：2021-07-26 13:11:35" itemprop="dateModified" datetime="2021-07-26T13:11:35+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -876,85 +625,14 @@
 <h2 id="从Go-2-Error-Proposal谈起"><a href="#从Go-2-Error-Proposal谈起" class="headerlink" title="从Go 2 Error Proposal谈起"></a>从Go 2 Error Proposal谈起</h2><p><code>Go</code>对<code>error</code>的处理一直都是很大的争议点，这点官方也已多次发文，并在2019年1月推出了一篇Proposal，有兴趣的可以点击链接细细品读。</p>
 <p><a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/master/design/29934-error-values.md">官方原文链接</a></p>
 <p>下面，我会结合Proposal原文，发表一些自己的看法（会带上主观意见），欢迎讨论。</p>
-<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>这篇Proposal有一句话很好地解释了对<code>error</code>的期许：</p>
-<p><strong>making errors more informative for both programs and people</strong></p>
-<p>错误不仅是告诉机器怎么做的，也是告诉人发生了什么问题。</p>
-<h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><p>先让我们一起简单地回顾一下<code>error</code>的现状，来更好地理解这个 <strong>more informative</strong> 指的是什么。</p>
-<p>原始的error定义为：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> error <span class="keyword">interface</span> &#123;</span><br><span class="line">  Error() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里面的包含信息很少：一个Error() 的方法，即用字符串返回对应的错误信息。</p>
-<p>最常用的<code>error</code>相关方法是2种：</p>
-<ol>
-<li>创建<code>error</code> - <code>fmt.Errorf</code>，它是针对<code>Error() </code>方法返回的字符串进行加工，如附带一些参数信息（暂不讨论%w这个wrap错误的实现）</li>
-<li>使用<code>error</code> - 由于我们将<code>error</code>的输出结果定义为字符串，所以使用<code>error</code>时，一旦涉及到细节，就只能使用一些<code>string</code>的方法了</li>
-</ol>
-<p>举个具体的例子：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 假设 readFile 存在于第三方或公用的库，我们没有权限修改、或者修改它的影响面很大</span></span><br><span class="line">	_, err := readFile(<span class="string">&quot;test&quot;</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 错误中包含业务逻辑:</span></span><br><span class="line">	<span class="comment">// 1. 文件不存在时，认为是 正常</span></span><br><span class="line">	<span class="comment">// 2. 其余报错时，认为是 异常</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> strings.Index(err.Error(), <span class="string">&quot;no such file or directory&quot;</span>) &gt;= <span class="number">0</span> &#123;</span><br><span class="line">			log.Println(<span class="string">&quot;file not exist&quot;</span>)</span><br><span class="line">			os.Exit(<span class="number">0</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		log.Println(<span class="string">&quot;open file error&quot;</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">readFile</span><span class="params">(fileName <span class="keyword">string</span>)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	b, err := ioutil.ReadFile(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里存在3个明显的问题：</p>
-<ol>
-<li><strong>破坏性</strong> - <code>fmt.Errorf</code> 破坏了原有的error，将它从一个 <strong>具体对象</strong> 转化为 <strong>扁平的</strong> <code>string</code>，再填充到了新的<code>error</code>中。所以，通过<code>fmt.Errorf</code>处理后的error，都只传递了一个<code>string</code>的信息</li>
-<li><strong>实现僵化</strong> - <strong>“no such file or directory”</strong> 这个错误信息用的是<strong>硬编码</strong>，对第三方<code>readFile</code>的内容有强依赖，不灵活</li>
-<li><strong>排查问题效率低</strong> - 可以通过日志组件了解到error在<code>main</code>函数哪行发生，但无法知道错误从<code>readFile</code>中的哪行返回过来的</li>
-</ol>
-<blockquote>
-<p>其中第一个破坏性的问题，其实就是破坏了error这个interface背后的具体实现，违背了面向对象的继承原则。</p>
-</blockquote>
-<h2 id="Handle-Errors-Only-Once"><a href="#Handle-Errors-Only-Once" class="headerlink" title="Handle Errors Only Once"></a>Handle Errors Only Once</h2><p>在工程中，为了解决 <strong>排查问题效率低</strong> 这个问题，有一个很常见的做法（以上面的readFile为例）:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">readFile</span><span class="params">(fileName <span class="keyword">string</span>)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	b, err := ioutil.ReadFile(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Printf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>没错，就是 <strong>打印错误并返回</strong>。有大量排查问题经验的同学，对此肯定是深恶痛绝： <strong>一个错误能找到N处打印，看得人眼花缭乱</strong>。</p>
-<p>这里违背了一个关键性的原则：<strong>对错误只进行一次处理，处理完之后就不要再往上抛了，而打印错误也是一种处理。</strong></p>
-<p>结合三种具体的场景，我们分析一下：</p>
-<ol>
-<li>一个程序模块内，<code>error</code>不断往上抛，最上层处理；</li>
-<li>一个公共的工具包中，<code>error</code>不记录，传给调用方处理；</li>
-<li>一个RPC模块的调用中，<code>error</code>可以记录，作为<code>debug</code>信息，而具体的处理仍应交给调用方。</li>
-</ol>
-<p>示例参考文章</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully">https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.orsolabs.com/post/go-errors-and-logs/">https://www.orsolabs.com/post/go-errors-and-logs/</a></li>
-</ul>
-<h2 id="理论实现"><a href="#理论实现" class="headerlink" title="理论实现"></a>理论实现</h2><p>那么，怎么样的<code>error</code>才是合适的呢？我们分两个角度来看这个<code>error</code>：</p>
-<ol>
-<li>对程序来说，<code>error</code>要包含<strong>错误细节</strong>：如错误类型、错误码等，方便在模块间传递；</li>
-<li>对人来说，<code>error</code>要包含<strong>代码信息</strong>：如相关的调用参数、运行信息，方便查问题；</li>
-</ol>
-<p>用原文一句话来归纳：<strong>hide implementation details from programs while displaying them for diagnosis</strong></p>
-<ul>
-<li>Wrap - 隐藏实现，针对代码调用时的堆栈信息</li>
-<li>Is/As - 展示细节，针对底层真正实现的数据结构</li>
-</ul>
-<h2 id="当前实现"><a href="#当前实现" class="headerlink" title="当前实现"></a>当前实现</h2><p><code>Go</code>语言发展多年，已经有了很多关于<code>error</code>的处理方法，但大多为过渡方案，我就不一一分析了。</p>
-<p>这里我以 github.com/pkg/errors 为例，也是这个<strong>官方Proposal</strong>的重点参考对象，简单地分享一下大致实现思路。</p>
-<p>代码量并不多，大家可以自行阅读源码：</p>
-<h3 id="New-产生错误的堆栈信息"><a href="#New-产生错误的堆栈信息" class="headerlink" title="New 产生错误的堆栈信息"></a>New 产生错误的堆栈信息</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;fundamental&#123;</span><br><span class="line">		msg:   message,</span><br><span class="line">		stack: callers(),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> fundamental <span class="keyword">struct</span> &#123;</span><br><span class="line">	msg <span class="keyword">string</span></span><br><span class="line">	*stack</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> stack保存了错误产生的堆栈信息，如函数名、代码行</p>
-<h3 id="Wrap-包装错误"><a href="#Wrap-包装错误" class="headerlink" title="Wrap 包装错误"></a>Wrap 包装错误</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Wrap</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	err = &amp;withMessage&#123;</span><br><span class="line">		cause: err,</span><br><span class="line">		msg:   message,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;withStack&#123;</span><br><span class="line">		err,</span><br><span class="line">		callers(),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> 将错误包装出一个全新的堆栈。一般只用于对外接口产生错误时，包括标准库、RPC。</p>
-<h3 id="WithMessage-添加普通信息"><a href="#WithMessage-添加普通信息" class="headerlink" title="WithMessage 添加普通信息"></a>WithMessage 添加普通信息</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithMessage</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;withMessage&#123;</span><br><span class="line">		cause: err,</span><br><span class="line">		msg:   message,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> 添加错误信息，增加一个普通的堆栈打印</p>
-<h3 id="Is-解析Sentinel错误、即全局错误变量"><a href="#Is-解析Sentinel错误、即全局错误变量" class="headerlink" title="Is 解析Sentinel错误、即全局错误变量"></a>Is 解析Sentinel错误、即全局错误变量</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Is</span><span class="params">(err, target error)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> stderrors.Is(err, target) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Is</span><span class="params">(err, target error)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> target == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err == target</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	isComparable := reflectlite.TypeOf(target).Comparable()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> isComparable &amp;&amp; err == target &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> x, ok := err.(<span class="keyword">interface</span>&#123; Is(error) <span class="keyword">bool</span> &#125;); ok &amp;&amp; x.Is(target) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// <span class="doctag">TODO:</span> consider supporing target.Is(err). This would allow</span></span><br><span class="line">		<span class="comment">// user-definable predicates, but also may allow for coping with sloppy</span></span><br><span class="line">		<span class="comment">// APIs, thereby making it easier to get away with them.</span></span><br><span class="line">		<span class="keyword">if</span> err = Unwrap(err); err == <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> 反复Unwrap、提取错误，解析并对比错误类型</p>
-<h2 id="As-提取出具体的错误数据结构"><a href="#As-提取出具体的错误数据结构" class="headerlink" title="As - 提取出具体的错误数据结构"></a>As - 提取出具体的错误数据结构</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">As</span><span class="params">(err error, target <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> stderrors.As(err, target) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">As</span><span class="params">(err error, target <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> target == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: target cannot be nil&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	val := reflectlite.ValueOf(target)</span><br><span class="line">	typ := val.Type()</span><br><span class="line">	<span class="keyword">if</span> typ.Kind() != reflectlite.Ptr || val.IsNil() &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: target must be a non-nil pointer&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> e := typ.Elem(); e.Kind() != reflectlite.Interface &amp;&amp; !e.Implements(errorType) &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: *target must be interface or implement error&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	targetType := typ.Elem()</span><br><span class="line">	<span class="keyword">for</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> reflectlite.TypeOf(err).AssignableTo(targetType) &#123;</span><br><span class="line">			val.Elem().Set(reflectlite.ValueOf(err))</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> x, ok := err.(<span class="keyword">interface</span>&#123; As(<span class="keyword">interface</span>&#123;&#125;) <span class="keyword">bool</span> &#125;); ok &amp;&amp; x.As(target) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		err = Unwrap(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> 反复Unwrap、提取错误，提取底层的实现类型</p>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><code>Go</code>语言对<code>error</code>的定义很简单，虽然带来了灵活性，但也导致处理方式泛滥，一如当年的<strong>Go语言的版本管理</strong>。如今的<strong>go mod</strong>版本管理机制已经”一统江湖“，随着大家对<code>error</code>这块的不断深入，<code>Error Handling</code>也总会达成共识。</p>
-<p>接下来，我会结合实际代码样例，写一个具体工程中 <strong>Error Handling</strong> 的操作方法，提供一定的参考。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/05/05/go-tip/go-tip-2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1010,7 +688,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-04-19 11:36:19" itemprop="dateModified" datetime="2021-04-19T11:36:19+08:00">2021-04-19</time>
+        <time title="修改时间：2021-07-26 13:10:58" itemprop="dateModified" datetime="2021-07-26T13:10:58+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1049,79 +727,14 @@
 <blockquote>
 <p>基础因人而异，根据自己的实际情况适当提高或降低预期。</p>
 </blockquote>
-<h2 id="1-了解背景"><a href="#1-了解背景" class="headerlink" title="1. 了解背景"></a>1. 了解背景</h2><h3 id="范围"><a href="#范围" class="headerlink" title="范围"></a>范围</h3><ul>
-<li><p>出版者的话、译者序、前言</p>
-</li>
-<li><p>第1章 入门 （不需要对着示例敲代码）</p>
-</li>
-</ul>
-<h3 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h3><p>每门编程语言都有自己的背景和思想，了解这块对新手来说很有必要。如果上来就直接看一些基础语法，就会感觉是在 <strong>拼凑知识点</strong>。</p>
-<p>所以，好好读一读这部分内容，<strong>建立自己在整体上对Go语言的认识</strong> 。</p>
-<h2 id="2-基础语法点"><a href="#2-基础语法点" class="headerlink" title="2. 基础语法点"></a>2. 基础语法点</h2><h3 id="范围-1"><a href="#范围-1" class="headerlink" title="范围"></a>范围</h3><ul>
-<li>第2章 程序结构 （难点：指针、引用）</li>
-<li>第3章 基本数据 （难点：字符串的编码UTF-8相关知识）</li>
-<li>第4章 复合数据类型</li>
-<li>第5章 函数（跳过：函数变量、匿名函数）</li>
-</ul>
-<h3 id="导读-1"><a href="#导读-1" class="headerlink" title="导读"></a>导读</h3><p>这块内容是最基础的，需要对着具体例子敲代码、并跑通。</p>
-<p>上面指出的难点，如果不能快速掌握就跳过，<strong>入门学习没必要扣每个细节</strong> 。</p>
-<p>至此，你已经掌握了最常见的Go语言用法了。</p>
-<h2 id="3-面向对象编程"><a href="#3-面向对象编程" class="headerlink" title="3.面向对象编程"></a>3.面向对象编程</h2><h3 id="范围-2"><a href="#范围-2" class="headerlink" title="范围"></a>范围</h3><ul>
-<li>第6章 方法</li>
-<li>第7章 接口</li>
-</ul>
-<h3 id="导读-2"><a href="#导读-2" class="headerlink" title="导读"></a>导读</h3><p>这部分的语法并不难，关键点在于慢慢接触 <strong>学习面向对象编程的理念</strong>。</p>
-<p><strong>面向对象</strong> 是一个博大精深的话题，这点需要长期的实践与体验，不用急于一时。</p>
-<blockquote>
-<p>如果对 <strong>面向对象</strong> 这个名词不熟悉的，先去搜搜科普贴，再回头理解这2章的内容。</p>
-<p>建议Go语言入门后，跳出具体编程语言的视角，好好地理解一下面向对象的思想。</p>
-</blockquote>
-<h2 id="4-并发编程"><a href="#4-并发编程" class="headerlink" title="4. 并发编程"></a>4. 并发编程</h2><h2 id="范围-3"><a href="#范围-3" class="headerlink" title="范围"></a>范围</h2><ul>
-<li>第8章 goroutine和通道</li>
-<li>第9章 使用共享变量实现并发</li>
-</ul>
-<h3 id="导读-3"><a href="#导读-3" class="headerlink" title="导读"></a>导读</h3><p>并发编程一直都是各编程语言的一大难点，而Go语言将其语法设计得非常简洁，相对更容易学习。</p>
-<p>学习并发这块，不仅仅需要大家去 <strong>扣每行代码的逻辑</strong> ，更要了解 <strong>这些并发语法是为了解决什么问题</strong>。</p>
-<blockquote>
-<p>纯编程新手对并发编程的理解需要一个过程，如果不能快速掌握也不用心浮气躁。</p>
-<p>要真正地了解并发，那就得学习操作系统的相关知识。</p>
-</blockquote>
-<h2 id="5-函数式编程"><a href="#5-函数式编程" class="headerlink" title="5. 函数式编程"></a>5. 函数式编程</h2><h3 id="范围-4"><a href="#范围-4" class="headerlink" title="范围"></a>范围</h3><ul>
-<li>第5章 函数（函数变量、匿名函数）</li>
-</ul>
-<h3 id="导读-4"><a href="#导读-4" class="headerlink" title="导读"></a>导读</h3><p>Go语言支持一定的函数式编程能力。函数式编程是对<strong>传统过程性编码思维的一种突破</strong>，新手了解基本使用方法即可。</p>
-<p>匿名函数这块的玩法很有意思，也是面试的高频考点。</p>
-<h2 id="6-Go语言的工程化"><a href="#6-Go语言的工程化" class="headerlink" title="6. Go语言的工程化"></a>6. Go语言的工程化</h2><h3 id="范围-5"><a href="#范围-5" class="headerlink" title="范围"></a>范围</h3><ul>
-<li>第10章 包和go工具（简单通读里面的一些思想即可，最新的包管理已经完全采用<code>go mod</code>）</li>
-<li>第11章 测试</li>
-</ul>
-<h3 id="导读-5"><a href="#导读-5" class="headerlink" title="导读"></a>导读</h3><p>Go的包管理工具几经波折，目前已经由<code>go mod</code>一统江湖了。<code>go mod</code>的资料可以参考 <a target="_blank" rel="noopener" href="https://blog.golang.org/using-go-modules">官方博客</a>。但由于国内下载部分库有限制，可以参考搜索引擎进行配置。</p>
-<p>而对于测试部分，我个人觉得 <em>官方提供的原始功能并不好用</em>，初学者写几个示例了解即可，后续在大型项目中还是需要一定的工具辅助。</p>
-<h2 id="7-底层知识"><a href="#7-底层知识" class="headerlink" title="7. 底层知识"></a>7. 底层知识</h2><h3 id="范围-6"><a href="#范围-6" class="headerlink" title="范围"></a>范围</h3><ul>
-<li>第12章 反射</li>
-<li>第13章 低级编程（cgo直接忽略）</li>
-</ul>
-<h3 id="导读-6"><a href="#导读-6" class="headerlink" title="导读"></a>导读</h3><p>入门的新手<strong>浏览一遍即可，无需深入思考</strong>。大家需要了解的就是2点：</p>
-<ol>
-<li><strong>反射reflect</strong> 是将 <strong>数据和程序结构</strong> 互相转换的工具</li>
-<li><strong>unsafe</strong> 是直接操作 <strong>计算机地址</strong> 的工具</li>
-</ol>
-<p>在实践中遇到具体问题时，再去针对性地学习。</p>
-<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>总体来看，入门Go语言的关键放在 2、3、4 三点即可，也就是 第2~9章，多敲代码、反复品读。</p>
-<p>为了让大家更好地阅读书籍，我再补充三个建议：</p>
-<ol>
-<li><strong>结合上下文理解难点</strong> - 每个知识点都不是独立的，一定要了解上下文，切忌上来就敲代码；</li>
-<li><strong>用文字背后的思想组织成体系化</strong> - 串联知识点的，并不是具体代码，而是相关的文字说明，多多琢磨背后的思想；</li>
-<li><strong>对复杂知识点，暂时降低预期，做长期建设</strong> - 像面向对象、并发编程、函数式编程等 高阶内容，不可能只通过学习Go语言就能掌握；</li>
-</ol>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/04/17/go-study/go-study-4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1177,7 +790,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-04-19 11:36:19" itemprop="dateModified" datetime="2021-04-19T11:36:19+08:00">2021-04-19</time>
+        <time title="修改时间：2021-07-26 13:11:02" itemprop="dateModified" datetime="2021-07-26T13:11:02+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1203,106 +816,14 @@
 <h2 id="为何我们需要持续学习"><a href="#为何我们需要持续学习" class="headerlink" title="为何我们需要持续学习"></a>为何我们需要持续学习</h2><p><strong>终身成长</strong> 一词已被广泛认可，意味着我们将比前人花费更多的时间在 <strong>学习成长</strong> 中，才能将个人的认知跟上社会的步伐。且不论是否应该放慢脚步，但我们大部分人不得不跟随社会的节奏，<strong>持续学习并提高自己</strong>。</p>
 <p>相信有不少朋友跟我一样，在学习的过程中经常会 <strong>半途而废</strong>。那么我在这里分享一些方法和技巧（包括但不仅限于Go语言），希望能给大家带来一些启发。</p>
 <p>这部分内容依旧会带有一些强烈的个人主观色彩，大家按需选用~</p>
-<h2 id="心理建设"><a href="#心理建设" class="headerlink" title="心理建设"></a>心理建设</h2><p>在正式开始聊工具和方法前，我先聊聊自己学习前的心理建设。这一点看过去 <strong>很“软”</strong> ，但我吃过很多次亏：</p>
-<p><strong>与其在学习的过程中，给自己找100个理由放弃，还不如在一开始就否定这些理由。</strong> </p>
-<p>以Go语言为例，常见的放弃理由如下：</p>
-<ul>
-<li>Go真的能长期“火”下去吗？</li>
-<li>Go的就业面不广，是否另选其它编程语言</li>
-<li>学了基础的Go语法后，没有实践的机会</li>
-<li>一段时间提升很不明显，感觉什么都懂、但什么都不精通</li>
-</ul>
-<p>我就是抱着这样的想法，走走停停，错过了很多快速提升的时期；不过也是由于这段经历，让我对许多朋友的想法有切身体会。今天我不会对着上面的问题一一回复，只强调一个重点：</p>
-<p><strong>学技术带着功利心（跳槽、升职）是正常且必要的，毕竟只有解决问题的技术才是有价值的。Go语言是非常依赖“云原生”这一体系的：它实现了云原生的基石-Kubernetes及其余组件，也依赖云原生、提供了非常优雅的微服务解决方案。如今公有云和私有云的建设如火如荼，注定是一个不可逆的过程，所以Go语言是一个需求很大的方向。</strong></p>
-<h2 id="学习环境的准备"><a href="#学习环境的准备" class="headerlink" title="学习环境的准备"></a>学习环境的准备</h2><p>下面，正式进入准备的细节：</p>
-<h3 id="操作系统"><a href="#操作系统" class="headerlink" title="操作系统"></a>操作系统</h3><p>尽管Go语言支持跨操作系统，但我还是强烈建议大家使用Mac OS，关键在于 <strong>提效</strong>。</p>
-<blockquote>
-<p> 既然可以花7分力气做一件事，为什么需要10分呢？</p>
-</blockquote>
-<p>不排除后期Windows系统越来越完善，但目前来看，所有的大厂提供给开发者都是Macbook，这点就不言而喻了吧。如果你有在windows/Linux环境上高效开发的经验，欢迎与大家分享~</p>
-<h3 id="Go语言版本"><a href="#Go语言版本" class="headerlink" title="Go语言版本"></a>Go语言版本</h3><p>在<a target="_blank" rel="noopener" href="https://golang.google.cn/dl/">官网</a>任意挑选。</p>
-<p>如果公司没有要求，那就直接上最新的版本吧~</p>
-<blockquote>
-<p>如果公司还在用1.13之前的版本，可以尝试着跟领导沟通，升级到较新的版本。</p>
-<p>使用低版本会不断发现不兼容某些开源库的情况，比如有些依赖库引入了context的特性</p>
-</blockquote>
-<h3 id="代码编辑器"><a href="#代码编辑器" class="headerlink" title="代码编辑器"></a>代码编辑器</h3><p>强烈建议准备 VSCode + Goland ！对，不用二选一，而是两个都要！</p>
-<ul>
-<li><p>VSCode对各类语言、组件兼容都很好，面对<strong>轻量级</strong>的开发时完全可以胜任</p>
-</li>
-<li><p>Goland在面对<strong>重量级</strong>项目时效果很棒，尤其是对重构项目时，效率能提升一大截</p>
-</li>
-</ul>
-<p>这里提供两个官网： <a target="_blank" rel="noopener" href="https://code.visualstudio.com/">VSCode</a> / <a target="_blank" rel="noopener" href="https://www.jetbrains.com/go/">Goland</a></p>
-<blockquote>
-<p>这两款软件的配置，前期尽量用默认的即可。</p>
-<p>而如果有大量私人化的配置，记得将整个配置方案导出并保存。</p>
-</blockquote>
-<h3 id="其余提效工具"><a href="#其余提效工具" class="headerlink" title="其余提效工具"></a>其余提效工具</h3><ul>
-<li><a target="_blank" rel="noopener" href="https://git-scm.com/">git</a> 不要把git单纯地当作公司的版本管理工具，它更是你私人代码的管理工具</li>
-<li><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000014992947">iTerm2 + Oh My Zsh</a> 这是在Mac下我非常喜欢的一套终端配置方案，大家可以借鉴</li>
-<li>笔记类：这块大家按自己的习惯选用，常见的如 印象笔记、Microsoft TODO、typora、幕布、系统自带的笔记本等</li>
-<li>上网助手：技术渠道有不少是在国外的网站上，不清楚具体访问方法的话，可以多和周围的开发者交流</li>
-</ul>
-<blockquote>
-<p>欢迎大家留言谈谈自己最喜爱的工具，分享给我~</p>
-</blockquote>
-<h2 id="Markdown技术写作"><a href="#Markdown技术写作" class="headerlink" title="Markdown技术写作"></a>Markdown技术写作</h2><p>作为一个技术工作者，文档是一个必备技能。我们不应把写文档当作一个负担，大部分的时候它是一种沟通与协作上的提效工具。</p>
-<p>这里不得不提一下Markdown，它的语法简单，产出的文档样式也满足基本的场景。大家可以根据<a target="_blank" rel="noopener" href="https://www.markdown.xyz/basic-syntax/">这个链接</a>或者自行搜索教程。</p>
-<blockquote>
-<p>学习Markdown就是一个很小且价值很高的技术点，可以拿这个作为练手，先使用起来。</p>
-<p>补充一句：Markdown在社区中的支持度不同，但基本大同小异。为了兼容性，少用html的相关特性。</p>
-</blockquote>
-<p>Markdown尽管简单，也有很多语法点，建议大家分阶段使用：</p>
-<ol>
-<li>标题、粗体、代码、链接、列表</li>
-<li>图片、引用、分隔线、表格</li>
-<li>其它</li>
-</ol>
-<p>第一阶段的5种语法已经可以满足日常的文档协作，第二阶段的特性可以让文档更具专业性，而其余特性完全可以在使用到时再去查询。</p>
-<p><strong>切忌一次性想掌握全部，分阶段使用才是最有效的学习路径。</strong></p>
-<p>这里推荐一个我常用的本地Markdown文档写作工具 - <a target="_blank" rel="noopener" href="https://typora.io/">typora</a> 。尽管有Web文档工具支持在线编辑，但我更喜欢本地编辑后再复制过去，这样也方便留档。</p>
-<h2 id="个人博客系统"><a href="#个人博客系统" class="headerlink" title="个人博客系统"></a>个人博客系统</h2><h3 id="为什么要玩博客"><a href="#为什么要玩博客" class="headerlink" title="为什么要玩博客"></a>为什么要玩博客</h3><ol>
-<li><strong>根本价值</strong> - 作为个人的知识输出，沉淀到文档</li>
-<li><strong>附带价值</strong> - 面试前后，让心仪的公司更好地了解你</li>
-<li><strong>持续价值</strong> - 形成 <strong>正反馈</strong>，持续激励自我</li>
-</ol>
-<blockquote>
-<p>有些人玩博客会将价值颠倒，比如将面试筹码作为根本价值，那么这个技术博客就会明显变味。</p>
-</blockquote>
-<h3 id="搭建教程"><a href="#搭建教程" class="headerlink" title="搭建教程"></a>搭建教程</h3><p>搭建博客系统的方法有很多，我这边推荐一个 <a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000017986794">hexo + github pages</a> 的。</p>
-<p>这种博客的优点在于2点：</p>
-<ol>
-<li>发布非常方便、非常方便、非常方便！</li>
-<li>原始文档为Markdown，可在本地编辑、存档</li>
-</ol>
-<h3 id="写博客的Tips"><a href="#写博客的Tips" class="headerlink" title="写博客的Tips"></a>写博客的Tips</h3><ol>
-<li><strong>降低“成本”</strong> - 让一篇博客从创作到发布变得简单，这点比较依赖博客系统，例如上面的 hexo+github pages</li>
-<li><strong>分享作品</strong> - 分享个人的文章，有利于形成“正反馈”；对于比较腼腆的朋友，可以在小规模的圈子中先进行尝试</li>
-<li><strong>多元化</strong> - 博客不仅仅停留在技术上，工作上的心得或者生活上的感悟，都可以写进来</li>
-<li><strong>适当拆分</strong> - 不要过分追求长篇大作或者系列形式的文章，<em>小步快走</em> 在这里也适用</li>
-</ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>打造个人专属的学习环境，我认为主要包括三块：</p>
-<ol>
-<li>个人心态 - 坚持</li>
-<li>开发环境 - 快速便捷</li>
-<li>正反馈路线 - 文档博客</li>
-</ol>
-<p>当然，你可以根据实际情况，添加一些个人专属的内容：</p>
-<ul>
-<li>如果你是windows用户，你需要搞一套虚拟机</li>
-<li>如果你已有一套成熟的文档系统，那就继续使用</li>
-<li>如果你想快速地了解Go而不计划深入，那么没必要过于完善学习环境</li>
-</ul>
-<p>希望大家在 <strong>心理</strong> 和 <strong>环境</strong> 都做好充分的准备后，再去走这条长期的技术学习路线，并能坚持下来。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/04/05/go-study/go-study-3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1358,7 +879,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+        <time title="修改时间：2021-07-26 13:11:05" itemprop="dateModified" datetime="2021-07-26T13:11:05+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1385,77 +906,14 @@
 <p>我这边抛出自己的观点，希望能引起大家的思考：</p>
 <p><strong>掌握基础，熟悉生态，集百家长，深耕领域</strong></p>
 <p>接下来，我将围绕这四个词展开今天的分享。</p>
-<h2 id="1-掌握基础"><a href="#1-掌握基础" class="headerlink" title="1. 掌握基础"></a>1. 掌握基础</h2><p>首先，我们来聊聊这个老生常谈的话题 - <strong>掌握基础</strong>。关于基础的学习路线我会在后面细讲，今天我们先来谈点别的。</p>
-<p><strong>所谓基础，会根据工作的不同阶段而不断变化。</strong> 也就是要用 <strong>发展</strong> 的眼光来看问题。</p>
-<p>举个例子，就以 <strong>编程语言</strong> 的作为切入点：</p>
-<ul>
-<li>一名合格的业务开发者，会熟练地应用<strong>编程语言</strong>去实现功能需求，熟练掌握常见的<strong>开源工具库</strong>；</li>
-<li>进一步，如果作为一名模块的负责人，那就需要考虑<strong>设计模式</strong>来抽象复杂业务，熟悉编程语言底层的<strong>运行原理</strong>；</li>
-<li>再进一步，作为一名架构师，就得思考如何用 <strong>工程化</strong> 来控制复杂度和约束规范性；</li>
-<li>而如果是更高一层的角色，如CTO，就需要从编程语言或框架的 <strong>成熟度、前瞻性</strong> 的角度来决定路线。</li>
-</ul>
-<h2 id="2-熟悉生态"><a href="#2-熟悉生态" class="headerlink" title="2. 熟悉生态"></a>2. 熟悉生态</h2><p><strong>生态</strong> 这个词很微妙，社区里有不同的见解，我也无法抛出一个准确的定义，这块需要大家自行摸索。不过，我倒是可以分享几个踩坑经历：</p>
-<ol>
-<li><strong>语言生态</strong> ：编程语言都是有对应的应用领域的，我在上一讲已经说过，这里不再细谈；</li>
-<li><strong>框架生态</strong> ：编程语言往往提供多种框架，不同框架的设计理念和使用场景不同，甚至会有一定的矛盾。例如有的框架提供了重量级的解决方案，可以快速生成一套代码，但对应的灵活性就大大降低；对应的，另一个框架能提供轻量级的插件化解决方案，需要你自行挑选、组装、调试，以提升复杂度的代价换来了灵活性；</li>
-<li><strong>社区生态</strong> ：除了极少的探索性的工作，绝大部分的开发工作都能在社区中找到同路人，经常能发现很有价值的建议。但社区里的声音很杂，筛选信息是最大障碍，这一点很容易反复踩坑。</li>
-</ol>
-<blockquote>
-<p>比起一些告诉你 <strong>该怎么做</strong> 的建议，我更倾向于那些 <strong>不该怎么做</strong> 的建议。</p>
-<p>一次成功往往有大量的偶然因素，而从失败中分析出原因更有长期价值。</p>
-</blockquote>
-<h2 id="3-集百家长"><a href="#3-集百家长" class="headerlink" title="3.集百家长"></a>3.集百家长</h2><p>接下来的这点，是本章的重点，希望大家看完之后能重点思考。</p>
-<p><strong>Go</strong> 语言是一个以简单著称的编程语言，又被号称是 <strong>云时代的编程语言</strong>。这背后蕴含了两层含义。</p>
-<h3 id="简单"><a href="#简单" class="headerlink" title="简单"></a>简单</h3><p>第一点，也就是 <strong>简单</strong> 带来的副作用。一种编程语言如果被冠以 <strong>简单</strong> 的头衔，那么它的设计核心就是 <strong>可读性</strong>。</p>
-<p>但是，无论是模板、元编程、泛型这些语法上的高端特性，还是继承、多态、函数式等编程范式上的特性，虽然很复杂（或者说是学习曲线很陡峭），但不得不承认它们在特定的场景中，达到了很好的抽象效果，大幅度地提升了程序的效率。</p>
-<p>所以，<strong>Go</strong> 语言决定了在单个程序中支持的复杂度有限，进一步则需要 <strong>JAVA、C++为代表的工业级编程语言</strong> 的一些特性。</p>
-<h3 id="云时代的编程语言"><a href="#云时代的编程语言" class="headerlink" title="云时代的编程语言"></a>云时代的编程语言</h3><p>从上一点来看，<strong>Go</strong> 语言支持的单个程序复杂度有限，那就非常依赖 <strong>微服务</strong> 的核心理念 - 拆。通过拆解，可以将单个程序的复杂度转移到架构层面，也更好地契合了<strong>服务内聚</strong>的理念。</p>
-<p>但是，即便进行了很好的设计与拆分，<strong>微服务</strong> 依然有两个比较重要的前置要求：<strong>服务间通信</strong> 和 <strong>微服务治理</strong>。前者相对容易解决，统一采用 <strong>RESTful</strong> 风格或 <strong>gRPC</strong> 等框架进行通信，就能满足基本要求；而微服务的治理问题就非常复杂了，很长一段时间都没有一套成熟的解决方案。近几年，随着 <strong>Docker容器化</strong> + <strong>Kubernetes调度平台</strong> 的出现与推广，已经成为了 <strong>微服务的Best Practice</strong> 。</p>
-<p>以 <strong>K8s为核心的云原生生态</strong>，涵盖了<strong>监控、日志采集、链路追踪、Service Mesh</strong>等各类子领域的解决方案，均得到了快速迭代。其中，各种核心组件均是通过 <strong>Go</strong> 语言开发而成，像 <strong>Kubernetes、Prometheus、Etcd</strong> 等。</p>
-<p>至此，我们开发的服务不再需要过分关注基础组件，而是更聚焦于业务领域。</p>
-<h3 id="CNCF"><a href="#CNCF" class="headerlink" title="CNCF"></a>CNCF</h3><p>再回到这一个话题的核心 - <strong>集百家长</strong>。</p>
-<p>云原生的社区<strong>CNCF</strong>提供了大量的组件，大家可以通过<a target="_blank" rel="noopener" href="https://landscape.cncf.io/images/landscape.png">这个链接</a>看到对应的全景图。它提供了是一整套<strong>插件化</strong>的组合方案，需要开发人员按需组合（后面我也会给出一些建议）。</p>
-<p>我非常不建议大家去自己从头开发一个模块，主要有两点（巨型互联网的基础团队除外）：</p>
-<ol>
-<li>自建轮子跟不上社区迭代，投入产出比价值低；</li>
-<li>很多时候某些功能已经在某个组件中实现，或者正在实现，只是没正确使用。</li>
-</ol>
-<blockquote>
-<p>如果真要新增某个重要功能，优先去找个现有CNCF项目的负责人聊聊，提交PR合入，或者自行fork开发。</p>
-<p>相信我，在一个成熟产品中新增特性，比你重写一个轮子更有价值！无论是对技术的提升、还是投递简历时的效果，都更有意义。</p>
-</blockquote>
-<p>举一个场景，当我们发现需要在程序中用<code>map</code>保存大量结果时，用默认的数据结构效率很低：</p>
-<ul>
-<li>如果在<strong>JAVA</strong>生态里，那么内部就有丰富的容器库可供选择，放在一个服务中即可；</li>
-<li>而在<strong>Go</strong>中，自然也可以借用<strong>github</strong>上面搜索的三方库来解决，但更建议根据场景选用开源的K-V组件，通过RPC调用来解决问题，也就是拆成了 <strong>业务功能</strong> 与 <strong>map数据存储</strong> 两个服务</li>
-<li>专业的事交给专业的组件</li>
-</ul>
-<h2 id="4-深耕领域"><a href="#4-深耕领域" class="headerlink" title="4. 深耕领域"></a>4. 深耕领域</h2><p>在工作三年以上，我越来越感受到 <strong>领域</strong> 是一个很重要的概念，也是各公司考验高端人才的重要素质。</p>
-<p>举几个例子：</p>
-<ul>
-<li><p>作为一名 <strong>电商支付领域</strong> 的开发专家，需要在编程语言的 <strong>如何保证数据一致性</strong> 的相关特性有深入研究；</p>
-</li>
-<li><p>如果是 <strong>物流订单领域</strong> 的专家，则要考虑 <strong>如何合理抽象各类物流类型</strong> 的问题，来支持复杂的场景；</p>
-</li>
-<li><p>当你负责的是一个 <strong>秒杀系统</strong>，那么需要对 <strong>高并发场景与异常兜底</strong> 有足够的经验。</p>
-</li>
-</ul>
-<p>每一块 <strong>领域</strong> 都需要有大量的 <strong>专业技能</strong> 与 <strong>行业经验</strong> 沉淀，这是高端人才的核心竞争力。</p>
-<p>虽说两者缺一不可，但还是具有一定的倾向性</p>
-<ul>
-<li>偏技术的领域更需要 <strong>专业技能</strong> ，瓶颈往往是某一个垂直领域的技术深度；</li>
-<li>偏业务的领域更要求 <strong>行业经验</strong> ，要求负责人能 <strong>带领团队避开坑，走对路</strong> 。</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>回顾一下这四个点： <strong>掌握基础，熟悉生态，集百家长，深耕领域</strong> 。这一整个过程，也可以说是：<strong>修炼内功，学习并合理使用外部资源，沉淀于特定领域</strong> 。</p>
-<p>纵观周围环境，我发现大部分的开发者都热衷于 <strong>修炼内功和领域沉淀</strong>，而过于轻视了 <strong>外部资源</strong> 的作用，就错失了一个快速提升个人能力的手段，技术视野也非常有限。这一块，将是我后续分享的重点，也是区别于其余教程的一大特点。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/28/go-study/go-study-2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1511,7 +969,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-05-08 17:31:04" itemprop="dateModified" datetime="2021-05-08T17:31:04+08:00">2021-05-08</time>
+        <time title="修改时间：2021-07-26 13:11:30" itemprop="dateModified" datetime="2021-07-26T13:11:30+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1546,86 +1004,14 @@
 
 <p>但有一个问题：</p>
 <p><strong>如果程序因为代码问题而意外退出（例如panic），无法和kill这种人为强制杀死的情况进行区分</strong></p>
-<h2 id="引入signal"><a href="#引入signal" class="headerlink" title="引入signal"></a>引入signal</h2><p><code>kill</code>工具是<code>Linux</code>系统中，往进程发送一个信号。所以，我们的关键是去实现 <strong>捕获信号</strong> 的功能。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http服务</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 创建一个 sig 的 channel，捕获系统的信号，传递到sig中</span></span><br><span class="line">	sig := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</span><br><span class="line">	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)</span><br><span class="line"></span><br><span class="line">	mux := http.NewServeMux()</span><br><span class="line">	mux.HandleFunc(<span class="string">&quot;/hello&quot;</span>, hello)</span><br><span class="line">	<span class="comment">// http服务改造成异步</span></span><br><span class="line">	<span class="keyword">go</span> http.ListenAndServe(<span class="string">&quot;:8080&quot;</span>, mux)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 程序阻塞在这里，除非收到了interrupt或者kill信号</span></span><br><span class="line">	fmt.Println(&lt;-sig)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>至此，我们的主函数已经能区分正常的信号退出了。</p>
-<h2 id="优雅退出的需求"><a href="#优雅退出的需求" class="headerlink" title="优雅退出的需求"></a>优雅退出的需求</h2><p>服务端程序经常会处理各种各样的逻辑，如操作数据库、读写文件、RPC调用等。根据其对 <strong>原子性</strong> 的要求，我将处理逻辑区分为两种：</p>
-<ul>
-<li>一种是<strong>无严格数据质量</strong>要求的，即程序直接崩溃也没有问题，比如一个普通查询；</li>
-<li>另一种是有 <strong>原子性</strong> 要求的，即不希望运行到一半就退出，例如写文件、修改数据等，<strong>最好是程序提供一定的缓冲时间</strong>，等待这部分的逻辑处理完，优雅地退出。</li>
-</ul>
-<p>在复杂系统中，为了保证数据质量，<strong>优雅退出</strong> 是一个必要特性。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	sig := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</span><br><span class="line">	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 模拟并发进行的处理业务逻辑</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(i <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">			<span class="keyword">for</span> &#123;</span><br><span class="line">				<span class="comment">// 我们希望程序能等当前这个周期休眠完，再优雅退出</span></span><br><span class="line">				time.Sleep(time.Duration(i) * time.Second)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;(i)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	fmt.Println(&lt;-sig)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里是一个简单的示例，开启了10个<code>goroutine</code>并发处理，那么这时捕获信号后，这10个协程就立刻停止。而<strong>优雅退出</strong>，则是希望能执行完当前的<code>Sleep</code>再退出。</p>
-<h2 id="一对一的解决方案"><a href="#一对一的解决方案" class="headerlink" title="一对一的解决方案"></a>一对一的解决方案</h2><p>我们先简化问题：主函数对应的是一个需要优雅关闭的协程。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	sig := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</span><br><span class="line">	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			time.Sleep(time.Second)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	fmt.Println(&lt;-sig)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>整体操作如下：</p>
-<ul>
-<li>父<code>goroutine</code>通知子<code>goroutine</code>准备优雅地关闭</li>
-<li>子<code>goroutine</code>通知父<code>goroutine</code>已经关闭完成</li>
-</ul>
-<p>我们回忆下在<code>goroutine</code>传递消息的几个方案（排除共享的全局变量这种方式）。</p>
-<h3 id="最直观的解决方案-2个channel"><a href="#最直观的解决方案-2个channel" class="headerlink" title="最直观的解决方案 - 2个channel"></a>最直观的解决方案 - 2个channel</h3><p>既然我们要在父子goroutine中传递消息，最直接的想法是启用2个 <code>channel</code> 用来通信，对应到代码：</p>
-<ul>
-<li><p>父<code>goroutine</code>通知子<code>goroutine</code>准备优雅地关闭，也就是<code>stopCh</code></p>
-</li>
-<li><p>子<code>goroutine</code>通知父<code>goroutine</code>已经关闭完成，也就是<code>finishedCh</code></p>
-<p>具体代码实现如下</p>
-</li>
-</ul>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	sig := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</span><br><span class="line">	stopCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">	finishedCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(stopCh, finishedCh <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-stopCh:</span><br><span class="line">				fmt.Println(<span class="string">&quot;stopped&quot;</span>)</span><br><span class="line">				finishedCh &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				time.Sleep(time.Second)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;(stopCh, finishedCh)</span><br><span class="line"></span><br><span class="line">	&lt;-sig</span><br><span class="line">	stopCh &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">	&lt;-finishedCh</span><br><span class="line">	fmt.Println(<span class="string">&quot;finished&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="华丽的解决方案-channel嵌套channel"><a href="#华丽的解决方案-channel嵌套channel" class="headerlink" title="华丽的解决方案 - channel嵌套channel"></a>华丽的解决方案 - channel嵌套channel</h3><p>这个解决方案不太容易想到（看过Rob Pike的演讲视频除外，可在go官网看到）。</p>
-<p>这个方案的核心结构为<code>chan chan</code>。</p>
-<p>示例代码如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	sig := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</span><br><span class="line">	stopCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(stopChh <span class="keyword">chan</span> <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> ch := &lt;-stopCh:</span><br><span class="line">				<span class="comment">// 结束后，通过ch通知主goroutine</span></span><br><span class="line">				fmt.Println(<span class="string">&quot;stopped&quot;</span>)</span><br><span class="line">				ch &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				time.Sleep(time.Second)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;(stopCh)</span><br><span class="line"></span><br><span class="line">	&lt;-sig</span><br><span class="line">	<span class="comment">// ch作为一个channel，传递给子goroutine，待其结束后从中返回</span></span><br><span class="line">	ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">	stopCh &lt;- ch</span><br><span class="line">	&lt;-ch</span><br><span class="line">	fmt.Println(<span class="string">&quot;finished&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>这个方案很酷，建议大家多思考思考，尤其是channel中传递的数据为error时，就能有更多信息了</p>
-</blockquote>
-<h3 id="标准解决方案-引入上下文context"><a href="#标准解决方案-引入上下文context" class="headerlink" title="标准解决方案 - 引入上下文context"></a>标准解决方案 - 引入上下文context</h3><p><code>go</code>语言里的上下文<code>context</code>不仅仅可以传递数值，也可以控制子<code>goroutine</code>的生命周期，很自然地有了如下解决方案。</p>
-<p>实例代码如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	sig := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</span><br><span class="line">	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)</span><br><span class="line">	ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line">	finishedCh := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context, finishedCh <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">				<span class="comment">// 结束后，通过ch通知主goroutine</span></span><br><span class="line">				fmt.Println(<span class="string">&quot;stopped&quot;</span>)</span><br><span class="line">				finishedCh &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				time.Sleep(time.Second)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;(ctx, finishedCh)</span><br><span class="line"></span><br><span class="line">	&lt;-sig</span><br><span class="line">	cancel()</span><br><span class="line">	&lt;-finishedCh</span><br><span class="line">	fmt.Println(<span class="string">&quot;finished&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<blockquote>
-<p>有兴趣的朋友可以空闲时想一个问题：社区里有人认为context是一个很不好的实现：</p>
-<p>context意思为上下文，最初的设计意为传递数值，也就是一个 <strong>数据流</strong> ；</p>
-<p>而go中的context又延伸出了 控制goroutine生命周期的功能，也就成了 <strong>控制流</strong> 。</p>
-<p>这么看下来，其实context就有 角色不清晰 的味道了。</p>
-<p>但不可否认，context已经在go语言中大量被采用，这个问题可以作为大家自己设计模块时的参考。</p>
-</blockquote>
-<h2 id="一对多的解决方案"><a href="#一对多的解决方案" class="headerlink" title="一对多的解决方案"></a>一对多的解决方案</h2><p>一对多的解决方案可以复用 <strong>一对一解决方案</strong> 中的思想。我这边也给出另外一个 <code>context</code> + <code>sync.WaitGroup</code> 的解决方案。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	sig := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</span><br><span class="line">	signal.Notify(sig, syscall.SIGINT, syscall.SIGKILL)</span><br><span class="line">	ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line">	num := <span class="number">10</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 用wg来控制多个子goroutine的生命周期</span></span><br><span class="line">	wg := sync.WaitGroup&#123;&#125;</span><br><span class="line">	wg.Add(num)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; num; i++ &#123;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">			<span class="keyword">defer</span> wg.Done()</span><br><span class="line">			<span class="keyword">for</span> &#123;</span><br><span class="line">				<span class="keyword">select</span> &#123;</span><br><span class="line">				<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">					fmt.Println(<span class="string">&quot;stopped&quot;</span>)</span><br><span class="line">					<span class="keyword">return</span></span><br><span class="line">				<span class="keyword">default</span>:</span><br><span class="line">					time.Sleep(time.Duration(i) * time.Second)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;(ctx)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	&lt;-sig</span><br><span class="line">	cancel()</span><br><span class="line">	<span class="comment">// 等待所有的子goroutine都优雅退出</span></span><br><span class="line">	wg.Wait()</span><br><span class="line">	fmt.Println(<span class="string">&quot;finished&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>大家要注意一下，在追求 <strong>优雅退出</strong> 时要注意 <strong>控制细粒度</strong> 。</p>
-<blockquote>
-<p>比如一个<code>http</code>服务器，我们要控制整个<code>http server</code>的优雅退出。</p>
-<p>千万不要去想着在主函数层面去控制每个<code>http handler</code>，也就是每个<code>http</code>请求的优雅退出，这样很难控制代码的复杂度。对于每个<code>http</code>请求的控制，应该交给<code>http server</code>这个框架去实现。</p>
-<p>所以，在主函数中，其实需要优雅退出的选项其实很有限。</p>
-</blockquote>
-<h2 id="延伸思考"><a href="#延伸思考" class="headerlink" title="延伸思考"></a>延伸思考</h2><p>本次我们讲的是<code>main</code>函数控制其<code>goroutine</code>的优雅退出，其实我们延伸开来，就是 <strong>父Goroutine怎么保证子Goroutine优雅退出</strong> 这个问题。</p>
-<p>虽然有解决方案，但我这是想泼一盆冷水，希望大家想想一个问题：<strong>既然这个子Goroutine是有价值的，不想轻易丢失，那么为什么不放到主Goroutine中呢？</strong> 其实，很多时候，我们都在 <strong>滥用Goroutine</strong> 。我希望大家更多地抛开语言特性，从整体思考以下三个问题：</p>
-<ol>
-<li><strong>明确调用链路</strong> - 梳理整个调用流程，区分关键和非关键的步骤，以及在对应步骤上发生错误时的处理方法</li>
-<li><strong>用MQ解耦服务</strong> - 跨服务的调用如果比较费时，大部分时候更建议采用消息队列解耦</li>
-<li><strong>面向错误编程</strong> - 关键业务的<code>Goroutine</code> 里代码要考虑所有可能发生错误的点，保证程序退出或<code>panic/recover</code>也不要出现 <strong>脏数据</strong>。</li>
-</ol>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>main</code>函数是<code>go</code>程序的入口，如果在这里写出一段优雅的代码，很容易给阅读自己源码的朋友留下良好的印象。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/07/go-tip/go-tip-1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1681,7 +1067,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+        <time title="修改时间：2021-07-26 13:11:09" itemprop="dateModified" datetime="2021-07-26T13:11:09+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1712,69 +1098,14 @@
 <p>目前主流的云平台，其实是包装成一套业务系统的基础平台，比如阿里云的ECS。</p>
 <p>这类云平台是大型公司将自己的基础平台能力沉淀下来后，包装成一套业务系统对外销售，内部也是分成了两类开发人员：上层开发一些多语言接口、计费等业务系统；下层开发对应的基础平台。</p>
 </blockquote>
-<h2 id="Go语言的劣势"><a href="#Go语言的劣势" class="headerlink" title="Go语言的劣势"></a>Go语言的劣势</h2><p>很遗憾，我依然在这里不得不进行一些编程语言间的对比。毕竟，如果不清楚一些技术的优劣势，我们很难明确自己的定位和发展方向。</p>
-<h3 id="并不是所有编程语言适合各个领域"><a href="#并不是所有编程语言适合各个领域" class="headerlink" title="并不是所有编程语言适合各个领域"></a>并不是所有编程语言适合各个领域</h3><p>我先简单地抛出几个例子：</p>
-<ul>
-<li>游戏、音视频领域主流是<code>C/C++</code></li>
-<li>测试、人工智能的主流是<code>Python</code></li>
-<li>大数据平台的主流是<code>Java</code></li>
-<li>前端的主流是<code>JavaScript</code></li>
-</ul>
-<p>这里的说法并不是绝对的，但选对了语言，能大量地复用业界现有的资源，少走很多弯路。</p>
-<h3 id="语言特点决定“轮子”不会太多"><a href="#语言特点决定“轮子”不会太多" class="headerlink" title="语言特点决定“轮子”不会太多"></a>语言特点决定“轮子”不会太多</h3><p><code>Go</code>的生命已有十年多，但新增的特性很少，主要是语言创建者的核心理念 - <strong>简洁</strong>。这个理念导致了现成可用的轮子少：以<code>map</code>容器来说，<code>Java</code>至少提供了数十种，可根据不同的场景选择不同的实现，达到性能极致化，而<code>Go</code>只提供了一种通用的基本数据结构。</p>
-<blockquote>
-<p>Go 的设计哲学可以类比为 Unix </p>
-</blockquote>
-<p>那么，我们是否可以采用开源社区中<code>Go</code>的现成库呢？当然可以！那我们来继续拿<code>Java</code>中的容器对比一下，看看改造的成本：</p>
-<ul>
-<li>在<code>Java</code>中，容器是一个对象类型，已定义对应的接口<code>interface</code><ul>
-<li>新的容器类实现对应的接口</li>
-<li>改造成本：在创建容器的地方(如<code>beans</code>)替换即可</li>
-</ul>
-</li>
-<li>而<code>Go</code>里的容器是基本类型，它的操作是定义在基本语法中，并没有抽象出接口<code>interface</code><ul>
-<li>改造成本：新的容器实现后，所有的增删改查代码都需要修改</li>
-</ul>
-</li>
-<li>在复杂的嵌套数据结构中，<code>Go</code>的改造成本更大</li>
-</ul>
-<blockquote>
-<p>我们自然可以在自己的项目中，对map/slice操作先封装成一个方法，这样后续改造成本也很低了，但这种思想就很偏向于Java体系了：</p>
-<ol>
-<li>Go 崇尚的是简洁，map/slice能满足99%以上的使用场景</li>
-<li>无法在语言层面将 map/slice 封装成方法，就不能发展成一个语言层面的通用标准，很难推广</li>
-</ol>
-</blockquote>
-<h3 id="没有一套成熟的复杂系统开发方法论"><a href="#没有一套成熟的复杂系统开发方法论" class="headerlink" title="没有一套成熟的复杂系统开发方法论"></a>没有一套成熟的复杂系统开发方法论</h3><p>细心的读者可以注意到我这边用到的两个关键词：<strong>成熟</strong> 和 <strong>复杂系统</strong> 。用 <code>Go</code> 语言开发的系统自然有不少，但我认为至今为止，业界还没有一套非常适配 <code>Go</code> 语言的系统开发方法论，包括大厂们也是在摸索的过程中（或者说没有公开）。</p>
-<p>这里，我列举四个我比较关注的点：</p>
-<ol>
-<li>引入<code>DDD</code>设计思想拆分微服务后，如何保证实践与设计一致</li>
-<li>如何借用 <strong>面向对象UML设计图</strong> 类似的实践，梳理复杂系统内的关系</li>
-<li>如何组织代码的仓库、目录与分层，适配业务场景</li>
-<li>一整套覆盖开发各模块的工具集和最佳实践：如监控埋点、日志链路追踪、测试套件</li>
-</ol>
-<blockquote>
-<p>以上四点业界都有一定的实践，但没有如Spring那般形成一个生态圈，达到一致。</p>
-<p>如果达不到一致认可，就无法用工具去强制约束，那么软件工程的复杂度就无法控制了。</p>
-</blockquote>
-<h2 id="明确Go语言的核心成长方向"><a href="#明确Go语言的核心成长方向" class="headerlink" title="明确Go语言的核心成长方向"></a>明确Go语言的核心成长方向</h2><ol>
-<li><strong>掌握计算机基础</strong> <code>Go</code> 官方包覆盖了操作系统、网络、数据库等各类常用操作，我们不能停留在 <strong>使用</strong> 上，而是通过代码去了解它们的 <strong>底层实现</strong> ，为后续遇上相关瓶颈时做好基础的知识储备。由于 <code>Go</code> 的源码简洁，所以阅读起来相对其它语言轻松不少。</li>
-<li><strong>常用工具库的储备</strong> <code>Go</code> 在开源上存在一些 <strong>优秀的轮子</strong>，常常能达到事半功倍的效果。我建议分三步走： <strong>会用</strong> 、 <strong>用好</strong> 、<strong>体系化</strong> 。其中体系化是指要将这些库串联起来，根据场景选择，形成一整套灵活的解决方案。</li>
-<li><strong>项目/工程化</strong> 将<code>Go</code>的项目与公司的整个研发流程、甚至是产品周期结合起来：小到如何保证一个需求的准确实现，大到如何保证研发架构的合理落地，都是比较有挑战的内容。</li>
-</ol>
-<blockquote>
-<p>也许不少人会认为第三点是一个远超编程语言的话题，在这里讲意义不大。确实，项目工程化更多地是看团队结构、工作流程等上层机制的约束，编程语言能做的不多。</p>
-<p>然而，目前<code>Java</code>编程语言已经产生了一个成熟的生态圈，从单纯的代码实现功能，慢慢影响到了开发的各个流程，这样就或多或少地具备了 <strong>项目工程化</strong> 的一些特征。其它的编程语言如果希望能支持复杂的开发场景，必须得有一套初步的系统化方法论（成熟度暂且不论），才有可能分得一杯羹。当然，由于不同编程语言背后的编程范式、设计理念不同，方法论也各具特色，很有可能随着时间推移而变化。</p>
-</blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>今天跟大家聊的话题挺广的，也结合了很多我的个人感受，希望能给大家带来启发。下一篇，我会继续 <strong>方向篇</strong> 的话题，细化到具体工作上，和大家谈谈具体工作上的内容。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/05/go-study/go-study-1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1841,7 +1172,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">Junedayday</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
 
 <div class=BbeiAn-info">
@@ -1855,7 +1186,7 @@
 
   
   <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
 
   
 

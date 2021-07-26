@@ -2,128 +2,149 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://example.com/2021/07/26/go-study/go-study-8/</loc>
+    <loc>http://example.com/2021/06/19/go-leetcode/go-leetcode-6/</loc>
     
     <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/06/19/go-leetcode/go-leetcode-6/</loc>
-    
-    <lastmod>2021-07-25</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/07/25/go-study/go-study-7/</loc>
-    
-    <lastmod>2021-07-25</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/07/21/go-study/go-study-6/</loc>
-    
-    <lastmod>2021-07-25</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2021/07/19/go-leetcode/go-leetcode-5/</loc>
     
-    <lastmod>2021-07-21</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/07/19/go-leetcode/go-leetcode-4/</loc>
     
-    <lastmod>2021-07-19</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/07/14/go-leetcode/go-leetcode-3/</loc>
     
-    <lastmod>2021-07-15</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/07/10/go-leetcode/go-leetcode-2/</loc>
     
-    <lastmod>2021-07-13</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/06/27/go-tip/go-tip-4/</loc>
-    
-    <lastmod>2021-07-11</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/07/10/go-leetcode/go-leetcode-1/</loc>
     
-    <lastmod>2021-07-11</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/07/09/go-tip/go-tip-6/</loc>
     
-    <lastmod>2021-07-10</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/07/03/go-tip/go-tip-5/</loc>
     
-    <lastmod>2021-07-03</lastmod>
+    <lastmod>2021-07-26</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/06/27/go-tip/go-tip-4/</loc>
+    
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/05/07/go-tip/go-tip-3/</loc>
     
-    <lastmod>2021-06-19</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/05/13/go-study/go-study-5/</loc>
-    
-    <lastmod>2021-06-19</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/05/05/go-tip/go-tip-2/</loc>
     
-    <lastmod>2021-06-19</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/03/07/go-tip/go-tip-1/</loc>
     
-    <lastmod>2021-05-08</lastmod>
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/04/17/go-study/go-study-4/</loc>
+    <loc>http://example.com/2021/02/21/go-study/go-study-0/</loc>
     
-    <lastmod>2021-04-19</lastmod>
+    <lastmod>2021-07-26</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/03/05/go-study/go-study-1/</loc>
+    
+    <lastmod>2021-07-26</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/03/28/go-study/go-study-2/</loc>
+    
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
   <url>
     <loc>http://example.com/2021/04/05/go-study/go-study-3/</loc>
     
-    <lastmod>2021-04-19</lastmod>
+    <lastmod>2021-07-26</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/04/17/go-study/go-study-4/</loc>
+    
+    <lastmod>2021-07-26</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/05/13/go-study/go-study-5/</loc>
+    
+    <lastmod>2021-07-26</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/07/21/go-study/go-study-6/</loc>
+    
+    <lastmod>2021-07-26</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/07/25/go-study/go-study-7/</loc>
+    
+    <lastmod>2021-07-26</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/07/26/go-study/go-study-8/</loc>
+    
+    <lastmod>2021-07-26</lastmod>
     
   </url>
   
@@ -142,14 +163,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/index.html</loc>
+    <loc>http://example.com/categories/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/categories/index.html</loc>
+    <loc>http://example.com/tags/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -184,14 +205,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-004/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-003/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-003/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-004/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -262,27 +283,6 @@
   
   <url>
     <loc>http://example.com/2021/02/20/go-patterns/go-patterns-8/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/02/21/go-study/go-study-0/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/03/05/go-study/go-study-1/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/03/28/go-study/go-study-2/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -361,14 +361,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Tip/</loc>
+    <loc>http://example.com/tags/Go-Study/</loc>
     <lastmod>2021-07-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Study/</loc>
+    <loc>http://example.com/tags/Go-Tip/</loc>
     <lastmod>2021-07-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>

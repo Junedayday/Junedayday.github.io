@@ -19,20 +19,20 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="背景介绍通过前面两讲，我们对错误的认知已经超过很多人了。让我们继续去看看常见项目中对错误的处理方式，探索背后的深意。 在介绍具体的处理方式前，我们先来模拟一个场景：我们要去动物园进行一次游玩，主要行为有  进入动物园 参观熊猫 参观老虎 离开动物园  第一种风格 - 经典Go语言的处理模式123456789101112131415161718192021222324252627&#x2F;&#x2F; 一次旅游ty">
+  <meta name="description" content="背景介绍通过前面两讲，我们对错误的认知已经超过很多人了。让我们继续去看看常见项目中对错误的处理方式，探索背后的深意。 在介绍具体的处理方式前，我们先来模拟一个场景：我们要去动物园进行一次游玩，主要行为有  进入动物园 参观熊猫 参观老虎 离开动物园">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学">
 <meta property="og:url" content="http://example.com/2021/06/27/go-tip/go-tip-4/index.html">
 <meta property="og:site_name" content="Junedayday Blog">
-<meta property="og:description" content="背景介绍通过前面两讲，我们对错误的认知已经超过很多人了。让我们继续去看看常见项目中对错误的处理方式，探索背后的深意。 在介绍具体的处理方式前，我们先来模拟一个场景：我们要去动物园进行一次游玩，主要行为有  进入动物园 参观熊猫 参观老虎 离开动物园  第一种风格 - 经典Go语言的处理模式123456789101112131415161718192021222324252627&#x2F;&#x2F; 一次旅游ty">
+<meta property="og:description" content="背景介绍通过前面两讲，我们对错误的认知已经超过很多人了。让我们继续去看看常见项目中对错误的处理方式，探索背后的深意。 在介绍具体的处理方式前，我们先来模拟一个场景：我们要去动物园进行一次游玩，主要行为有  进入动物园 参观熊猫 参观老虎 离开动物园">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 <meta property="article:published_time" content="2021-06-27T04:00:00.000Z">
-<meta property="article:modified_time" content="2021-07-11T13:53:40.547Z">
+<meta property="article:modified_time" content="2021-07-26T05:11:44.459Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Go-Tip">
 <meta name="twitter:card" content="summary">
@@ -247,7 +247,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-11 21:53:40" itemprop="dateModified" datetime="2021-07-11T21:53:40+08:00">2021-07-11</time>
+        <time title="修改时间：2021-07-26 13:11:44" itemprop="dateModified" datetime="2021-07-26T13:11:44+08:00">2021-07-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -278,6 +278,8 @@
 <li>参观老虎</li>
 <li>离开动物园</li>
 </ul>
+<span id="more"></span>
+
 <h2 id="第一种风格-经典Go语言的处理模式"><a href="#第一种风格-经典Go语言的处理模式" class="headerlink" title="第一种风格 - 经典Go语言的处理模式"></a>第一种风格 - 经典Go语言的处理模式</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一次旅游</span></span><br><span class="line"><span class="keyword">type</span> ZooTour1 <span class="keyword">interface</span> &#123;</span><br><span class="line">	Enter() error <span class="comment">// 进入</span></span><br><span class="line">	VisitPanda(panda *Panda) error <span class="comment">// 看熊猫</span></span><br><span class="line">	VisitTiger(tiger *Tiger) error <span class="comment">// 看老虎</span></span><br><span class="line">	Leave() error <span class="comment">// 离开</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Tour1</span><span class="params">(t ZooTour1, panda *Panda, tiger *Tiger)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := t.Enter(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessage(err, <span class="string">&quot;Enter failed&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.VisitPanda(panda); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessagef(err, <span class="string">&quot;VisitPanda failed, panda is %v&quot;</span>, panda)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.VisitTiger(tiger); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessagef(err, <span class="string">&quot;VisitTiger failed, tiger is %v&quot;</span>, tiger)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.Leave(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessage(err, <span class="string">&quot;Leave failed&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这个处理风格非常经典。我们先不深入讨论，看完下一种后再做对比。</p>
@@ -450,7 +452,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">Junedayday</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
 
 <div class=BbeiAn-info">
@@ -464,7 +466,7 @@
 
   
   <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
 
   
 
