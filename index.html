@@ -205,6 +205,152 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/26/go-study/go-study-8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/26/go-study/go-study-8/" class="post-title-link" itemprop="url">Go语言学习路线 - 8.高级篇:从五个问题来畅想Go工程师的未来发展</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-07-26 12:00:00 / 修改时间：12:54:17" itemprop="dateCreated datePublished" datetime="2021-07-26T12:00:00+08:00">2021-07-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="编程语言对软件工程师的意义"><a href="#编程语言对软件工程师的意义" class="headerlink" title="编程语言对软件工程师的意义"></a>编程语言对软件工程师的意义</h2><p>有人常说，编程语言对软件工程师来说并不重要，更重要的是<strong>软件工程思想</strong>、<strong>架构设计能力</strong>等更高层面的内容。</p>
+<p>这个观点本身没有问题，但它更多的是针对有相当工作经验的程序员。对于绝大多数的人，<strong>编程语言依然是最重要、最核心的技能，也是通往更高层面的敲门砖</strong>。所以，<strong>精通一门编程语言，不仅仅要熟悉其语法与原理，更要了解其周边的生态，包括框架、开源库、中间件等，以及掌握它适用的业务场景</strong>。</p>
+<p>所以，作为一名将Go语言作为主要开发语言的工程师，如果你能合理地利用好这个敲门砖，你的职业发展必将更加通畅。下面，我会从几个常见问题谈起，分享我的经验与见解，希望能给各位带来启发。</p>
+<h2 id="问题1：需要关注编程语言之争吗？"><a href="#问题1：需要关注编程语言之争吗？" class="headerlink" title="问题1：需要关注编程语言之争吗？"></a>问题1：需要关注编程语言之争吗？</h2><p>需要，而且非常有意义。但是，我们的精力毕竟有限，更应该关注哪些内容呢？我推荐三点：</p>
+<ol>
+<li><strong>编程语言常见特性的设计理念，能解决什么样的问题</strong>，如<code>try-catch</code></li>
+<li><strong>编程范式所包含的思想</strong>，如<code>面向对象编程</code>、<code>函数式编程</code>、<code>依赖注入</code></li>
+<li><strong>特定领域中语言的现状</strong>，如<code>Julia</code>在大数据体系中对<code>Java</code>的冲击</li>
+</ol>
+<p>上面这些例子是一些很发散的内容，但能证明你的<strong>视野足够广阔</strong>。不过，在关注编程语言之争的同时，我们仍应把主要精力聚焦于一门语言的深入学习，这才是我们的核心竞争力。</p>
+<h2 id="问题2：Go语言工程师有什么其余语言无法替代的呢？"><a href="#问题2：Go语言工程师有什么其余语言无法替代的呢？" class="headerlink" title="问题2：Go语言工程师有什么其余语言无法替代的呢？"></a>问题2：Go语言工程师有什么其余语言无法替代的呢？</h2><p>说到一门语言的<strong>不可替代性</strong>，核心关注两点：</p>
+<ol>
+<li>现状：即<strong>一门语言在特定的领域中已沉淀的积累</strong>，包括开源软件、SDK库、文档、社区、用户等</li>
+<li>未来：<strong>各公司或组织对这门语言的投入</strong>，如建立基金会、形成规范、招聘人才趋势等</li>
+</ol>
+<p>上面这两点，也间接地回答了一个很常见的问题：<code>Go</code>能替代<code>Java</code>成为主流业务开发语言吗？我个人短期内并不看好。</p>
+<p>回到问题，那么Go最擅长的领域是什么呢？答案也是大家耳熟能详的<strong>云原生技术</strong>。</p>
+<ol>
+<li>现状：云原生的核心技术<code>Kubernetes</code>与大量相关套件都是用Go语言开发的，短期内无法被替换</li>
+<li>未来：云原生在<code>CNCF</code>的推动下，已经在各类云厂商中形成事实标准</li>
+</ol>
+<h2 id="问题3：Go语法简洁，做业务开发很方便，可以用吗？"><a href="#问题3：Go语法简洁，做业务开发很方便，可以用吗？" class="headerlink" title="问题3：Go语法简洁，做业务开发很方便，可以用吗？"></a>问题3：Go语法简洁，做业务开发很方便，可以用吗？</h2><p>当然可以使用！Go语法简洁的特性能让代码更容易阅读，但我们要清楚地认识到其弊端，才能长期地坚持走这条路：</p>
+<ol>
+<li>由于不存在类似<code>Spring</code>的编程框架做强限制，不同人的代码风格差异还是很大，最好前期有个资深专家 <strong>做好前期框架规划</strong>，才能更好地体现Go的优势</li>
+<li><strong>对接部分技术体系的开源库缺失或不够成熟</strong>，尤其是对接<code>Hive</code>、<code>Flink</code>等大数据体系时，<code>Java</code>仍是第一选择</li>
+<li>Go的标准库中往往<strong>为了通用性而牺牲了定制化</strong>，例如排序函数采用的是一个工业级混合多种排序的方法，而无法灵活地按需选择冒泡、快排等，这就需要一定的二次开发</li>
+</ol>
+<p>也许你看完这三个问题，会觉得自己学Go语言的热情被劝退了，但其实换个角度来看问题，其实答案也很有意思：</p>
+<ol>
+<li>Go语言官方只做最基础的底层，而上层的业务框架由各家在实践中探索，发展空间很大</li>
+<li>Google推出Go之后又推出的gRPC、云原生理念，就是希望编程语言百家齐鸣，各自有各自擅长的领域</li>
+<li>一方面，通用性能降低编程语言学习的复杂度；另一方面，我们也是希望把一部分的复杂度从编程语言转移到各类中间件中，可以减少很多重复建设</li>
+</ol>
+<h2 id="问题4：从目前来看，Go业务开发工程师的前途不行吗？"><a href="#问题4：从目前来看，Go业务开发工程师的前途不行吗？" class="headerlink" title="问题4：从目前来看，Go业务开发工程师的前途不行吗？"></a>问题4：从目前来看，Go业务开发工程师的前途不行吗？</h2><p>综合上面讨论的问题来看，现有阶段用Go语言做业务开发并不是最快的。</p>
+<p>但是，从目前<strong>云原生</strong>理念被越来越多的人接受，我相信Go语言做业务开发也是一个很棒的选择。这里，我强调一个点：<strong>借势</strong>。怎么理解这个词呢？</p>
+<ol>
+<li><strong>承认短板</strong>：既然需要”借”，那就先得承认自己有不足。如果幻想毕其功于一役，那这条路很容易走到尽头。</li>
+<li><strong>善假于物</strong>：对于Go语言来说，借势的关键对象是两个：<strong>云原生</strong> 与 <strong>其余编程语言的生态</strong><ol>
+<li>云原生：有大量优秀的基础组件与中间件，尽可能地复用这部分的能力（基本上覆盖了所有的基础设施）</li>
+<li>其余编程语言：根据业务需要自行使用，建议在非熟悉的领域尽可能地做到简单，把复杂的业务逻辑放到最熟悉的编程语言中</li>
+</ol>
+</li>
+</ol>
+<p>上面聊的比较抽象，我再举两个具体的例子：</p>
+<ol>
+<li>对某个服务做网络的限流，更推荐放在<code>Istio</code>上，而不需要在应用程序中加上一堆计算流量的代码</li>
+<li>某个Go服务想对接<code>Flink</code>计算业务数据，那就用利用JAVA的SDK开发一个对接的小服务，通过HTTP或MQ对外输出结果，而复杂的业务逻辑放在Go服务中</li>
+</ol>
+<h2 id="问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？"><a href="#问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？" class="headerlink" title="问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？"></a>问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？</h2><p>从能力层面来说，我认为Go语言工程师的核心技能点分为四层：</p>
+<ol>
+<li>基础层：计算机基础、网络、操作系统、算法</li>
+<li>语言层：<strong>Go语言原理与实践</strong>，其它语言的优秀特性</li>
+<li>应用层：中间件、软件工程、架构设计</li>
+<li>业务层：业务逻辑、<strong>云原生生态与解决方案</strong></li>
+</ol>
+<blockquote>
+<p>加粗的为Go语言特别关注</p>
+</blockquote>
+<p>这四层的内容极多，我建议围绕着两个重点进行学习：</p>
+<ol>
+<li><strong>系统性的学习Go语言原理与实践</strong>，向下即阅读源码，掌握操作系统、网络等基础原理；向上则结合项目，对接各类中间件，学习软件架构设计</li>
+<li><strong>利用碎片时间了解云原生</strong>，云原生是一个日新月异的研发生态，对于非资深的开发者没必要前期就投入大量精力、导致基础不扎实，关注发展趋势、了解大致原理即可（技术的底层往往互通）</li>
+</ol>
+<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>整个Go语言学习路线到此已经更新完毕，很高兴有朋友陪我走到最后。后续我也会持续更新这个系列的文章，保证内容的实时性。</p>
+<p>学习技术是一个长期的过程，敝帚自珍很容易中途失去信心而放弃，大家一起鼓励、探讨，就能走得更远。</p>
+<p>欢迎大家私聊我探讨问题，也可以通过公众号加入到Go学习小组中交流更多日常问题。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/25/go-study/go-study-7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -878,6 +1024,138 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/10/go-leetcode/go-leetcode-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/10/go-leetcode/go-leetcode-1/" class="post-title-link" itemprop="url">Go算法实战 - 1.【两数相加LeetCode-2】递归解法</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-10 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-10T12:00:00+08:00">2021-07-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-11 12:32:17" itemprop="dateModified" datetime="2021-07-11T12:32:17+08:00">2021-07-11</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为了能保证代码都能执行，我会贴出所有代码，<strong>重点会用注释着重说明</strong>。</p>
+<h2 id="递归实现的思路"><a href="#递归实现的思路" class="headerlink" title="递归实现的思路"></a>递归实现的思路</h2><h3 id="简化问题"><a href="#简化问题" class="headerlink" title="简化问题"></a>简化问题</h3><p>这道题的难点在于处理<strong>进位</strong>。那我们就先<strong>简化问题、把框架搭起来</strong>，看看先不考虑进位的大致代码怎么写的：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="comment">// 先判断边界情况</span></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val</span><br><span class="line">        node.Next = addTwoNumbers(l1.Next, l2.Next)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val </span><br><span class="line">        node.Next = addTwoNumbers(l1.Next, l2)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val </span><br><span class="line">        node.Next = addTwoNumbers(l1, l2.Next)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但这块代码有个问题- 当<code>l1</code>和<code>l2</code>都为空时，还会进入一次<code>addTwoNumbers</code>，导致最高位必定是0。</p>
+<p>所以，我们需要保证<strong>最高位不要产生一个冗余，也就是l1和l2都为nil时，不要再进入addTwoNumbers函数</strong>。</p>
+<h3 id="修复最高位的问题"><a href="#修复最高位的问题" class="headerlink" title="修复最高位的问题"></a>修复最高位的问题</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="comment">// 这里l1和l2作为指针传递下去</span></span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val </span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果都为空，无需继续处理</span></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 继续处理下一个节点</span></span><br><span class="line">    node.Next = addTwoNumbers(l1, l2)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="递归函数增加进位参数carry"><a href="#递归函数增加进位参数carry" class="headerlink" title="递归函数增加进位参数carry"></a>递归函数增加进位参数carry</h3><p>进位carry是一个在不同位中传递的参数，所以必须要加到函数签名中，所以我们得对递归函数进行改造。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 新的函数参数 carry</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> newCarry <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        newCarry = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; newCarry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, newCarry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="边界条件修复"><a href="#边界条件修复" class="headerlink" title="边界条件修复"></a>边界条件修复</h3><p>到了这里，我们看似完成了功能，但还有个边界条件没有修复：引入进位后，当<code>l1/l2</code>为nil，carry为1时，我们很容易就修复了</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; </span><br><span class="line">        node.Val = carry <span class="comment">// 修复进位的边界问题</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> newCarry <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        newCarry = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; newCarry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, newCarry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="持续优化"><a href="#持续优化" class="headerlink" title="持续优化"></a>持续优化</h2><p>首先，先明确一下优化的原则：</p>
+<p><strong>我并不是单纯地为了提升性能而去优化，而是更应该从全局入手，考虑代码的可读性和扩展性！</strong></p>
+<p>所以，下面的优化并不一定是性能最优的，但或多或少可能让你感受到代码的迭代升级。</p>
+<h3 id="A-复用变量"><a href="#A-复用变量" class="headerlink" title="A - 复用变量"></a>A - 复用变量</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.Val = carry</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        carry = <span class="number">1</span> <span class="comment">// 复用carry变量</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        carry = <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>删除<code>newCarry</code>变量，节省了内存。</p>
+<p>虽然这点改进很小，但我想表达的重点是：<strong>大家不要小看变量的复用，尤其是在一些递归调用的场景下，能节省大量的空间。</strong>上面的<code>l1</code>与<code>l2</code>这两个指针也进行了变量的复用。</p>
+<h3 id="B-增加位操作，去除if-else分支"><a href="#B-增加位操作，去除if-else分支" class="headerlink" title="B - 增加位操作，去除if-else分支"></a>B - 增加位操作，去除if-else分支</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.Val = carry</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="C-增加代码的扩展性（推荐）"><a href="#C-增加代码的扩展性（推荐）" class="headerlink" title="C - 增加代码的扩展性（推荐）"></a>C - 增加代码的扩展性（推荐）</h3><p>在这个代码里，我们只支持2个<code>ListNode</code>的相加，就引入了4个<code>if-else</code>的分支，这就很难支持大量<code>ListNode</code>的扩展。</p>
+<p><strong>总体来说，我个人推荐这个解法，它的思路很清晰，也不会出现边界问题。</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val += l1.Val</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val += l2.Val</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Val += carry</span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="实战化特性"><a href="#实战化特性" class="headerlink" title="实战化特性"></a>实战化特性</h2><p>在实际的项目中，我们会希望这个函数的扩展性能更好，例如支持多个输入参数。</p>
+<h3 id="引入不定参数的特性"><a href="#引入不定参数的特性" class="headerlink" title="引入不定参数的特性"></a>引入不定参数的特性</h3><p>我们进一步改造成<strong>不定参数</strong>形式的函数签名：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(<span class="number">0</span>, l1, l2)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不定参数必须是最后一个函数签名</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(carry <span class="keyword">int</span>, nodes ...*ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">        <span class="keyword">if</span> nodes[k] != <span class="literal">nil</span> &#123;</span><br><span class="line">            node.Val += nodes[k].Val</span><br><span class="line">            nodes[k] = nodes[k].Next</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Val += carry</span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断所有node是否为空</span></span><br><span class="line">    <span class="keyword">var</span> isEnd = <span class="literal">true</span></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">        <span class="keyword">if</span> nodes[k] != <span class="literal">nil</span> &#123;</span><br><span class="line">            isEnd = <span class="literal">false</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> isEnd &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(carry, nodes...)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/10/go-leetcode/go-leetcode-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -986,138 +1264,6 @@
 <li><code>Walker</code>是一个遍历指针，聚焦于<code>walker = walker.Next</code>这个关键的移动操作</li>
 </ul>
 <p>总体来说，非递归的代码可读性会比递归的差一点，比较考验程序员的解题思路。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/10/go-leetcode/go-leetcode-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/10/go-leetcode/go-leetcode-1/" class="post-title-link" itemprop="url">Go算法实战 - 1.【两数相加LeetCode-2】递归解法</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-10 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-10T12:00:00+08:00">2021-07-10</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-11 12:32:17" itemprop="dateModified" datetime="2021-07-11T12:32:17+08:00">2021-07-11</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>为了能保证代码都能执行，我会贴出所有代码，<strong>重点会用注释着重说明</strong>。</p>
-<h2 id="递归实现的思路"><a href="#递归实现的思路" class="headerlink" title="递归实现的思路"></a>递归实现的思路</h2><h3 id="简化问题"><a href="#简化问题" class="headerlink" title="简化问题"></a>简化问题</h3><p>这道题的难点在于处理<strong>进位</strong>。那我们就先<strong>简化问题、把框架搭起来</strong>，看看先不考虑进位的大致代码怎么写的：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="comment">// 先判断边界情况</span></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val</span><br><span class="line">        node.Next = addTwoNumbers(l1.Next, l2.Next)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val </span><br><span class="line">        node.Next = addTwoNumbers(l1.Next, l2)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val </span><br><span class="line">        node.Next = addTwoNumbers(l1, l2.Next)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但这块代码有个问题- 当<code>l1</code>和<code>l2</code>都为空时，还会进入一次<code>addTwoNumbers</code>，导致最高位必定是0。</p>
-<p>所以，我们需要保证<strong>最高位不要产生一个冗余，也就是l1和l2都为nil时，不要再进入addTwoNumbers函数</strong>。</p>
-<h3 id="修复最高位的问题"><a href="#修复最高位的问题" class="headerlink" title="修复最高位的问题"></a>修复最高位的问题</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="comment">// 这里l1和l2作为指针传递下去</span></span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val </span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果都为空，无需继续处理</span></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 继续处理下一个节点</span></span><br><span class="line">    node.Next = addTwoNumbers(l1, l2)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="递归函数增加进位参数carry"><a href="#递归函数增加进位参数carry" class="headerlink" title="递归函数增加进位参数carry"></a>递归函数增加进位参数carry</h3><p>进位carry是一个在不同位中传递的参数，所以必须要加到函数签名中，所以我们得对递归函数进行改造。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 新的函数参数 carry</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> newCarry <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        newCarry = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; newCarry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, newCarry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="边界条件修复"><a href="#边界条件修复" class="headerlink" title="边界条件修复"></a>边界条件修复</h3><p>到了这里，我们看似完成了功能，但还有个边界条件没有修复：引入进位后，当<code>l1/l2</code>为nil，carry为1时，我们很容易就修复了</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; </span><br><span class="line">        node.Val = carry <span class="comment">// 修复进位的边界问题</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> newCarry <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        newCarry = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; newCarry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, newCarry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="持续优化"><a href="#持续优化" class="headerlink" title="持续优化"></a>持续优化</h2><p>首先，先明确一下优化的原则：</p>
-<p><strong>我并不是单纯地为了提升性能而去优化，而是更应该从全局入手，考虑代码的可读性和扩展性！</strong></p>
-<p>所以，下面的优化并不一定是性能最优的，但或多或少可能让你感受到代码的迭代升级。</p>
-<h3 id="A-复用变量"><a href="#A-复用变量" class="headerlink" title="A - 复用变量"></a>A - 复用变量</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.Val = carry</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        carry = <span class="number">1</span> <span class="comment">// 复用carry变量</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        carry = <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>删除<code>newCarry</code>变量，节省了内存。</p>
-<p>虽然这点改进很小，但我想表达的重点是：<strong>大家不要小看变量的复用，尤其是在一些递归调用的场景下，能节省大量的空间。</strong>上面的<code>l1</code>与<code>l2</code>这两个指针也进行了变量的复用。</p>
-<h3 id="B-增加位操作，去除if-else分支"><a href="#B-增加位操作，去除if-else分支" class="headerlink" title="B - 增加位操作，去除if-else分支"></a>B - 增加位操作，去除if-else分支</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.Val = carry</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="C-增加代码的扩展性（推荐）"><a href="#C-增加代码的扩展性（推荐）" class="headerlink" title="C - 增加代码的扩展性（推荐）"></a>C - 增加代码的扩展性（推荐）</h3><p>在这个代码里，我们只支持2个<code>ListNode</code>的相加，就引入了4个<code>if-else</code>的分支，这就很难支持大量<code>ListNode</code>的扩展。</p>
-<p><strong>总体来说，我个人推荐这个解法，它的思路很清晰，也不会出现边界问题。</strong></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val += l1.Val</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val += l2.Val</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Val += carry</span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="实战化特性"><a href="#实战化特性" class="headerlink" title="实战化特性"></a>实战化特性</h2><p>在实际的项目中，我们会希望这个函数的扩展性能更好，例如支持多个输入参数。</p>
-<h3 id="引入不定参数的特性"><a href="#引入不定参数的特性" class="headerlink" title="引入不定参数的特性"></a>引入不定参数的特性</h3><p>我们进一步改造成<strong>不定参数</strong>形式的函数签名：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(<span class="number">0</span>, l1, l2)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不定参数必须是最后一个函数签名</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(carry <span class="keyword">int</span>, nodes ...*ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">        <span class="keyword">if</span> nodes[k] != <span class="literal">nil</span> &#123;</span><br><span class="line">            node.Val += nodes[k].Val</span><br><span class="line">            nodes[k] = nodes[k].Next</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Val += carry</span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断所有node是否为空</span></span><br><span class="line">    <span class="keyword">var</span> isEnd = <span class="literal">true</span></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">        <span class="keyword">if</span> nodes[k] != <span class="literal">nil</span> &#123;</span><br><span class="line">            isEnd = <span class="literal">false</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> isEnd &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(carry, nodes...)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
@@ -1456,189 +1602,6 @@
 </blockquote>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本讲的内容到这里就告一段落了，相信通过这篇文章，大家已经能应对绝大部分Go Module的场景。</p>
 <p>下一讲，我会重点讲Go Module最核心的 <strong>Minimal version selection (MVS)</strong> 机制。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/27/go-tip/go-tip-4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/06/27/go-tip/go-tip-4/" class="post-title-link" itemprop="url">Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-06-27 12:00:00" itemprop="dateCreated datePublished" datetime="2021-06-27T12:00:00+08:00">2021-06-27</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-11 21:53:40" itemprop="dateModified" datetime="2021-07-11T21:53:40+08:00">2021-07-11</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
-<h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>通过前面两讲，我们对错误的认知已经超过很多人了。让我们继续去看看常见项目中对错误的处理方式，探索背后的深意。</p>
-<p>在介绍具体的处理方式前，我们先来模拟一个场景：我们要去动物园进行一次游玩，主要行为有</p>
-<ul>
-<li>进入动物园</li>
-<li>参观熊猫</li>
-<li>参观老虎</li>
-<li>离开动物园</li>
-</ul>
-<h2 id="第一种风格-经典Go语言的处理模式"><a href="#第一种风格-经典Go语言的处理模式" class="headerlink" title="第一种风格 - 经典Go语言的处理模式"></a>第一种风格 - 经典Go语言的处理模式</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一次旅游</span></span><br><span class="line"><span class="keyword">type</span> ZooTour1 <span class="keyword">interface</span> &#123;</span><br><span class="line">	Enter() error <span class="comment">// 进入</span></span><br><span class="line">	VisitPanda(panda *Panda) error <span class="comment">// 看熊猫</span></span><br><span class="line">	VisitTiger(tiger *Tiger) error <span class="comment">// 看老虎</span></span><br><span class="line">	Leave() error <span class="comment">// 离开</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Tour1</span><span class="params">(t ZooTour1, panda *Panda, tiger *Tiger)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := t.Enter(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessage(err, <span class="string">&quot;Enter failed&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.VisitPanda(panda); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessagef(err, <span class="string">&quot;VisitPanda failed, panda is %v&quot;</span>, panda)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.VisitTiger(tiger); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessagef(err, <span class="string">&quot;VisitTiger failed, tiger is %v&quot;</span>, tiger)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.Leave(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessage(err, <span class="string">&quot;Leave failed&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个处理风格非常经典。我们先不深入讨论，看完下一种后再做对比。</p>
-<h2 id="第二种风格-类似Try-Catch的代码风格"><a href="#第二种风格-类似Try-Catch的代码风格" class="headerlink" title="第二种风格 - 类似Try-Catch的代码风格"></a>第二种风格 - 类似Try-Catch的代码风格</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ZooTour2 <span class="keyword">interface</span> &#123;</span><br><span class="line">	Enter()</span><br><span class="line">	VisitPanda(panda *Panda)</span><br><span class="line">	VisitTiger(tiger *Tiger)</span><br><span class="line">	Leave()</span><br><span class="line"></span><br><span class="line">	Err() error <span class="comment">// 统一处理</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Tour2</span><span class="params">(t ZooTour2, panda *Panda, tiger *Tiger)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	t.Enter()</span><br><span class="line">	t.VisitPanda(panda)</span><br><span class="line">	t.VisitTiger(tiger)</span><br><span class="line">	t.Leave()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := t.Err(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.WithMessage(err, <span class="string">&quot;ZooTour failed&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这一整块的代码风格非常类似<strong>Try Catch</strong>，即先写业务逻辑，在最后对错误进行集中处理。</p>
-<blockquote>
-<p>标准库中的<code>bufio.Scanner</code>就是参考这种方式实现的。</p>
-</blockquote>
-<p>不过，由于Go语言对error的处理没有往外抛的机制，所以需要专门针对error做处理：</p>
-<blockquote>
-<p>新手千万不要把panic的机制和错误处理混为一谈。</p>
-</blockquote>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ZooTour的具体实现，需要保存一个error</span></span><br><span class="line"><span class="keyword">type</span> myZooTour <span class="keyword">struct</span> &#123;</span><br><span class="line">	err error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *myZooTour)</span> <span class="title">VisitPanda</span><span class="params">(panda *Panda)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 遇到错误就要直接返回，再处理其余逻辑</span></span><br><span class="line">	<span class="keyword">if</span> t.err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="两种风格的对比"><a href="#两种风格的对比" class="headerlink" title="两种风格的对比"></a>两种风格的对比</h2><p>如果分别用一个词来形容前两种风格，我倾向于：</p>
-<ol>
-<li><strong>过程式的调用</strong></li>
-<li><strong>集中处理错误</strong></li>
-</ol>
-<p>两种风格无法说清孰优孰劣，但有各自适宜的场景，我们来列举两种：</p>
-<h3 id="不关注错误的发生，而关注错误发生后的统一处理"><a href="#不关注错误的发生，而关注错误发生后的统一处理" class="headerlink" title="不关注错误的发生，而关注错误发生后的统一处理"></a>不关注错误的发生，而关注错误发生后的统一处理</h3><p>内部存在大量的<code>VisitXXX</code>的函数，业务不关注发生错误的处理逻辑，而是关注整个流程完成后对error的处理。</p>
-<p>例如，调用过程中如果出现了某个动物不在的问题，我们不关心，继续访问下一个，最后统一处理一下，看看有多少动物是不在的，打印一下即可。</p>
-<p>这时，第二种处理方式明显会更简洁。</p>
-<blockquote>
-<p>一般推荐在工具类中采用这种方式，处理的内容比较直观，不会有太多异常case</p>
-</blockquote>
-<h3 id="错误有多种分类，会影响到程序的运行逻辑"><a href="#错误有多种分类，会影响到程序的运行逻辑" class="headerlink" title="错误有多种分类，会影响到程序的运行逻辑"></a>错误有多种分类，会影响到程序的运行逻辑</h3><p>例如<code>VisitPanda(panda *Panda)</code> 可能产生的错误分2类：</p>
-<ul>
-<li><p>不影响主流程：例如发现panda不见了，但还要接着继续参观其余动物</p>
-</li>
-<li><p>影响主流程：例如突然收到动物园闭园的通知，不能参观其余动物了</p>
-</li>
-</ul>
-<p>这时，如果我们采用第二种风格，就得在每个函数内部加上很多特殊的业务逻辑：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *myZooTour)</span> <span class="title">VisitTiger</span><span class="params">(tiger *Tiger)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 要针对特定error进行处理</span></span><br><span class="line">	<span class="keyword">if</span> t.err != <span class="literal">nil</span> &amp;&amp; t.err != ErrorPandaMissing &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>很有可能出现一个问题：<strong>把Panda相关的error放到了Tiger里</strong>。</p>
-<p>所以，<strong>当错误的类型会影响到代码的运行逻辑，更适合第一种方案</strong>。</p>
-<blockquote>
-<p>一般情况下，我们的业务代码都是复杂的，这时候更适合写过程性的代码。</p>
-</blockquote>
-<h2 id="第三种风格-函数式编程"><a href="#第三种风格-函数式编程" class="headerlink" title="第三种风格 - 函数式编程"></a>第三种风格 - 函数式编程</h2><p>借用1中的接口定义，我们将它改造成函数式的风格：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> MyFunc <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewEnterFunc</span><span class="params">()</span> <span class="title">MyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.Enter()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewVisitPandaFunc</span><span class="params">(panda *Panda)</span> <span class="title">MyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.VisitPanda(panda)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewVisitTigerFunc</span><span class="params">(tiger *Tiger)</span> <span class="title">MyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.VisitTiger(tiger)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewLeaveFunc</span><span class="params">()</span> <span class="title">MyFunc</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(t ZooTour1)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> t.Leave()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>然后调用代码示例如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Tour3</span><span class="params">(t ZooTour1, panda *Panda, tiger *Tiger)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> actions = []MyFunc&#123;</span><br><span class="line">		NewEnterFunc(),</span><br><span class="line">		NewVisitPandaFunc(panda),</span><br><span class="line">		NewVisitTigerFunc(tiger),</span><br><span class="line">		NewLeaveFunc(),</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> ContinueOnError(t, actions)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ContinueOnError</span><span class="params">(t ZooTour1, funcs []MyFunc)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="keyword">for</span> _, f := <span class="keyword">range</span> funcs &#123;</span><br><span class="line">    <span class="keyword">if</span> err := f(t);err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="comment">// continue</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BreakOnError</span><span class="params">(t ZooTour1, funcs []MyFunc)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="keyword">for</span> _, f := <span class="keyword">range</span> funcs &#123;</span><br><span class="line">    <span class="keyword">if</span> err := f(t);err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="comment">// break</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>值得一提的是</p>
-<ul>
-<li><code>ContinueOnError</code>表示遇到了error只记录下来，但整个流程继续往下跑</li>
-<li><code>BreakOnError</code>表示遇到了error就直接break，不再跑接下来的<code>MyFunc</code></li>
-</ul>
-<h2 id="方案三背后的思想与延伸"><a href="#方案三背后的思想与延伸" class="headerlink" title="方案三背后的思想与延伸"></a>方案三背后的思想与延伸</h2><p>函数式编程最直观的一个特点是 <strong>延迟执行</strong>，也就是在引用<code>MyFunc</code>处不运行，在<code>ContinueOnError</code>或<code>BreakOnError</code>里才是真正执行的地方。</p>
-<p>这个延迟执行的特性，在这里还能达到一个很有意思的效果 - <strong>分离关注点</strong>。</p>
-<h3 id="关注点1-数据结构"><a href="#关注点1-数据结构" class="headerlink" title="关注点1 - 数据结构"></a>关注点1 - 数据结构</h3><p>样例中的<code>[]MyFunc</code>是一个切片，可以简单地理解为<strong>串行执行</strong>，也就是<code>MyFunc</code>执行完一个，再执行下一个。</p>
-<p>我们可以引入更多的数据结构，例如<code>[][]MyFunc</code>，那就可以理解为增加了一层：</p>
-<p>每一层中的<code>[]MyFunc</code>，代表这里面的所有<code>MyFunc</code>是平级的，也就可以采用一定的并发模式来加速执行。</p>
-<h3 id="关注点2-执行逻辑"><a href="#关注点2-执行逻辑" class="headerlink" title="关注点2 - 执行逻辑"></a>关注点2 - 执行逻辑</h3><p>以<code>ContinueOnError</code>或<code>BreakOnError</code>为例，它们都是对各种<code>MyFunc</code>的处理逻辑。我们还可以引入更多的执行逻辑，比如：</p>
-<ul>
-<li>容忍特定错误的情况</li>
-<li>对错误发生的数量有容忍上限</li>
-<li>保证一定的并发模式</li>
-</ul>
-<h3 id="流水线的模式"><a href="#流水线的模式" class="headerlink" title="流水线的模式"></a>流水线的模式</h3><p>以我们常见的开发流水线为例，常见的包括：代码检查、单元测试、编译、CodeReview、自动化部署等。</p>
-<p>这时，数据结构可以用来表示<strong>流水线的结构</strong>，执行逻辑可以用来表示<strong>流水线对异常的处置</strong>。</p>
-<p>比如说，我们可以编排为一种串行执行的逻辑：</p>
-<ol>
-<li>代码检查</li>
-<li>单元测试</li>
-<li>编译</li>
-<li>CodeReview</li>
-<li>自动化部署</li>
-</ol>
-<p>我们想要加速整个流程，可以考虑修改为：</p>
-<ol>
-<li>检查<ol>
-<li>代码检查</li>
-<li>单元测试</li>
-<li>编译</li>
-</ol>
-</li>
-<li>CodeReview</li>
-<li>自动化部署</li>
-</ol>
-<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>本文介绍了三种对error的处理方式，代码实现相对简单，大家更需要关注背后的适用场景。</p>
-<p>其中，第三种方式是一个很有意思的设计模式，可以帮助大家理解函数式编程的价值。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>

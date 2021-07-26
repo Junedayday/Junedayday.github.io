@@ -22,17 +22,17 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="Leetcode-10 正则表达式匹配原题链接 https:&#x2F;&#x2F;leetcode-cn.com&#x2F;problems&#x2F;regular-expression-matching&#x2F; 12func isMatch(s string, p string) bool &amp;#123;&amp;#125;    总结Leetcode第五题的难度不高，也让我们初次接触了 动态规划 这个思路。 同时，我们也遇到了一个“失败的优化">
+  <meta name="description" content="Leetcode-10 正则表达式匹配原题链接 https:&#x2F;&#x2F;leetcode-cn.com&#x2F;problems&#x2F;regular-expression-matching&#x2F; 12func isMatch(s string, p string) bool &amp;#123;&amp;#125;    基础解法我们先理一下正则匹配的大致思路：逐个对比s和p两个字符串，匹配则继续往后，发现不匹配直接退出。 那么，我们">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go算法实战 - 6.【正则表达式匹配LeetCode-10】">
 <meta property="og:url" content="http://example.com/2021/06/19/go-leetcode/go-leetcode-6/index.html">
 <meta property="og:site_name" content="Junedayday Blog">
-<meta property="og:description" content="Leetcode-10 正则表达式匹配原题链接 https:&#x2F;&#x2F;leetcode-cn.com&#x2F;problems&#x2F;regular-expression-matching&#x2F; 12func isMatch(s string, p string) bool &amp;#123;&amp;#125;    总结Leetcode第五题的难度不高，也让我们初次接触了 动态规划 这个思路。 同时，我们也遇到了一个“失败的优化">
+<meta property="og:description" content="Leetcode-10 正则表达式匹配原题链接 https:&#x2F;&#x2F;leetcode-cn.com&#x2F;problems&#x2F;regular-expression-matching&#x2F; 12func isMatch(s string, p string) bool &amp;#123;&amp;#125;    基础解法我们先理一下正则匹配的大致思路：逐个对比s和p两个字符串，匹配则继续往后，发现不匹配直接退出。 那么，我们">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 <meta property="article:published_time" content="2021-06-19T14:52:26.499Z">
-<meta property="article:modified_time" content="2021-07-25T10:54:31.460Z">
+<meta property="article:modified_time" content="2021-07-25T11:34:51.593Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Go-Leetcode">
 <meta name="twitter:card" content="summary">
@@ -153,7 +153,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Leetcode-10-%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%8C%B9%E9%85%8D"><span class="nav-number">1.</span> <span class="nav-text">Leetcode-10 正则表达式匹配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Leetcode-10-%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%8C%B9%E9%85%8D"><span class="nav-number">1.</span> <span class="nav-text">Leetcode-10 正则表达式匹配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E8%A7%A3%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">基础解法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8C%B9%E9%85%8D"><span class="nav-number">2.1.</span> <span class="nav-text">普通字符串匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E4%B8%AA%E5%AD%97%E7%AC%A6%E5%8C%B9%E9%85%8D"><span class="nav-number">2.2.</span> <span class="nav-text">单个字符匹配</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -247,7 +247,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-25 18:54:31" itemprop="dateModified" datetime="2021-07-25T18:54:31+08:00">2021-07-25</time>
+        <time title="修改时间：2021-07-25 19:34:51" itemprop="dateModified" datetime="2021-07-25T19:34:51+08:00">2021-07-25</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -272,6 +272,17 @@
         <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
 <h2 id="Leetcode-10-正则表达式匹配"><a href="#Leetcode-10-正则表达式匹配" class="headerlink" title="Leetcode-10 正则表达式匹配"></a>Leetcode-10 正则表达式匹配</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/regular-expression-matching/">https://leetcode-cn.com/problems/regular-expression-matching/</a></p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="基础解法"><a href="#基础解法" class="headerlink" title="基础解法"></a>基础解法</h2><p>我们先理一下正则匹配的大致思路：<strong>逐个对比s和p两个字符串，匹配则继续往后，发现不匹配直接退出</strong>。</p>
+<p>那么，我们先简化一下问题，看看代码的大致结构：</p>
+<h3 id="普通字符串匹配"><a href="#普通字符串匹配" class="headerlink" title="普通字符串匹配"></a>普通字符串匹配</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> || <span class="built_in">len</span>(p) == <span class="number">0</span> || s[<span class="number">0</span>] != p[<span class="number">0</span>] &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的代码思路很清晰，我们重点要解决的是两个通配符<code>.</code>和<code>*</code>：</p>
+<h3 id="单个字符匹配"><a href="#单个字符匹配" class="headerlink" title="单个字符匹配"></a>单个字符匹配</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> || <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果p[0]为. ，则必定匹配</span></span><br><span class="line">    <span class="keyword">if</span> s[<span class="number">0</span>] != p[<span class="number">0</span>] &amp;&amp; p[<span class="number">0</span>] != <span class="string">&#x27;.&#x27;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
 
 
 
@@ -300,8 +311,8 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/06/19/go-study/go-study-8/" rel="prev" title="Go语言学习路线 - 8.高级篇:畅想Go工程师的未来发展">
-                  <i class="fa fa-chevron-left"></i> Go语言学习路线 - 8.高级篇:畅想Go工程师的未来发展
+                <a href="/2021/05/13/go-study/go-study-5/" rel="prev" title="Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点">
+                  <i class="fa fa-chevron-left"></i> Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点
                 </a>
             </div>
             <div class="post-nav-item">

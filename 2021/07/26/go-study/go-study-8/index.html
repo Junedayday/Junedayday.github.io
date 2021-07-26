@@ -24,22 +24,22 @@
 
   <meta name="description" content="编程语言对软件工程师的意义有人常说，编程语言对软件工程师来说并不重要，更重要的是软件工程思想、架构设计能力等更高层面的内容。 这个观点本身没有问题，但它更多的是针对有相当工作经验的程序员。对于绝大多数的人，编程语言依然是最重要、最核心的技能，也是通往更高层面的敲门砖。所以，精通一门编程语言，不仅仅要熟悉其语法与原理，更要了解其周边的生态，包括框架、开源库、中间件等，以及掌握它适用的业务场景。 所">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Go语言学习路线 - 8.高级篇:畅想Go工程师的未来发展">
-<meta property="og:url" content="http://example.com/2021/06/19/go-study/go-study-8/index.html">
+<meta property="og:title" content="Go语言学习路线 - 8.高级篇:从五个问题来畅想Go工程师的未来发展">
+<meta property="og:url" content="http://example.com/2021/07/26/go-study/go-study-8/index.html">
 <meta property="og:site_name" content="Junedayday Blog">
 <meta property="og:description" content="编程语言对软件工程师的意义有人常说，编程语言对软件工程师来说并不重要，更重要的是软件工程思想、架构设计能力等更高层面的内容。 这个观点本身没有问题，但它更多的是针对有相当工作经验的程序员。对于绝大多数的人，编程语言依然是最重要、最核心的技能，也是通往更高层面的敲门砖。所以，精通一门编程语言，不仅仅要熟悉其语法与原理，更要了解其周边的生态，包括框架、开源库、中间件等，以及掌握它适用的业务场景。 所">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
-<meta property="article:published_time" content="2021-06-19T14:52:26.473Z">
-<meta property="article:modified_time" content="2021-07-25T10:54:53.479Z">
+<meta property="article:published_time" content="2021-07-26T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-26T04:54:17.832Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Go-Study">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
 
 
-<link rel="canonical" href="http://example.com/2021/06/19/go-study/go-study-8/">
+<link rel="canonical" href="http://example.com/2021/07/26/go-study/go-study-8/">
 
 
 <script class="page-configurations">
@@ -52,7 +52,7 @@
   };
 </script>
 
-  <title>Go语言学习路线 - 8.高级篇:畅想Go工程师的未来发展 | Junedayday Blog</title>
+  <title>Go语言学习路线 - 8.高级篇:从五个问题来畅想Go工程师的未来发展 | Junedayday Blog</title>
   
 
 
@@ -153,7 +153,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%AF%B9%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%9A%84%E6%84%8F%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">编程语言对软件工程师的意义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9D%9F%E8%AF%AD"><span class="nav-number">2.</span> <span class="nav-text">结束语</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E5%AF%B9%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%9A%84%E6%84%8F%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">编程语言对软件工程师的意义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%981%EF%BC%9A%E9%9C%80%E8%A6%81%E5%85%B3%E6%B3%A8%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E4%B9%8B%E4%BA%89%E5%90%97%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">问题1：需要关注编程语言之争吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%982%EF%BC%9AGo%E8%AF%AD%E8%A8%80%E5%B7%A5%E7%A8%8B%E5%B8%88%E6%9C%89%E4%BB%80%E4%B9%88%E5%85%B6%E4%BD%99%E8%AF%AD%E8%A8%80%E6%97%A0%E6%B3%95%E6%9B%BF%E4%BB%A3%E7%9A%84%E5%91%A2%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">问题2：Go语言工程师有什么其余语言无法替代的呢？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%983%EF%BC%9AGo%E8%AF%AD%E6%B3%95%E7%AE%80%E6%B4%81%EF%BC%8C%E5%81%9A%E4%B8%9A%E5%8A%A1%E5%BC%80%E5%8F%91%E5%BE%88%E6%96%B9%E4%BE%BF%EF%BC%8C%E5%8F%AF%E4%BB%A5%E7%94%A8%E5%90%97%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">问题3：Go语法简洁，做业务开发很方便，可以用吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%984%EF%BC%9A%E4%BB%8E%E7%9B%AE%E5%89%8D%E6%9D%A5%E7%9C%8B%EF%BC%8CGo%E4%B8%9A%E5%8A%A1%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%9A%84%E5%89%8D%E9%80%94%E4%B8%8D%E8%A1%8C%E5%90%97%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">问题4：从目前来看，Go业务开发工程师的前途不行吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%985%EF%BC%9AGo%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%9A%84%E9%95%BF%E6%9C%9F%E5%8F%91%E5%B1%95%E7%9B%AE%E6%A0%87%E6%80%8E%E4%B9%88%E5%AE%9A%EF%BC%8C%E6%89%8D%E6%9B%B4%E6%9C%89%E7%AB%9E%E4%BA%89%E5%8A%9B%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9D%9F%E8%AF%AD"><span class="nav-number">7.</span> <span class="nav-text">结束语</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -213,7 +213,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/19/go-study/go-study-8/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/26/go-study/go-study-8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -229,7 +229,7 @@
     
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Go语言学习路线 - 8.高级篇:畅想Go工程师的未来发展
+          Go语言学习路线 - 8.高级篇:从五个问题来畅想Go工程师的未来发展
         </h1>
 
         <div class="post-meta-container">
@@ -239,16 +239,10 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2021-06-19 22:52:26" itemprop="dateCreated datePublished" datetime="2021-06-19T22:52:26+08:00">2021-06-19</time>
+      <time title="创建时间：2021-07-26 12:00:00 / 修改时间：12:54:17" itemprop="dateCreated datePublished" datetime="2021-07-26T12:00:00+08:00">2021-07-26</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-25 18:54:53" itemprop="dateModified" datetime="2021-07-25T18:54:53+08:00">2021-07-25</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -273,7 +267,70 @@
 <h2 id="编程语言对软件工程师的意义"><a href="#编程语言对软件工程师的意义" class="headerlink" title="编程语言对软件工程师的意义"></a>编程语言对软件工程师的意义</h2><p>有人常说，编程语言对软件工程师来说并不重要，更重要的是<strong>软件工程思想</strong>、<strong>架构设计能力</strong>等更高层面的内容。</p>
 <p>这个观点本身没有问题，但它更多的是针对有相当工作经验的程序员。对于绝大多数的人，<strong>编程语言依然是最重要、最核心的技能，也是通往更高层面的敲门砖</strong>。所以，<strong>精通一门编程语言，不仅仅要熟悉其语法与原理，更要了解其周边的生态，包括框架、开源库、中间件等，以及掌握它适用的业务场景</strong>。</p>
 <p>所以，作为一名将Go语言作为主要开发语言的工程师，如果你能合理地利用好这个敲门砖，你的职业发展必将更加通畅。下面，我会从几个常见问题谈起，分享我的经验与见解，希望能给各位带来启发。</p>
-<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><blockquote>
+<h2 id="问题1：需要关注编程语言之争吗？"><a href="#问题1：需要关注编程语言之争吗？" class="headerlink" title="问题1：需要关注编程语言之争吗？"></a>问题1：需要关注编程语言之争吗？</h2><p>需要，而且非常有意义。但是，我们的精力毕竟有限，更应该关注哪些内容呢？我推荐三点：</p>
+<ol>
+<li><strong>编程语言常见特性的设计理念，能解决什么样的问题</strong>，如<code>try-catch</code></li>
+<li><strong>编程范式所包含的思想</strong>，如<code>面向对象编程</code>、<code>函数式编程</code>、<code>依赖注入</code></li>
+<li><strong>特定领域中语言的现状</strong>，如<code>Julia</code>在大数据体系中对<code>Java</code>的冲击</li>
+</ol>
+<p>上面这些例子是一些很发散的内容，但能证明你的<strong>视野足够广阔</strong>。不过，在关注编程语言之争的同时，我们仍应把主要精力聚焦于一门语言的深入学习，这才是我们的核心竞争力。</p>
+<h2 id="问题2：Go语言工程师有什么其余语言无法替代的呢？"><a href="#问题2：Go语言工程师有什么其余语言无法替代的呢？" class="headerlink" title="问题2：Go语言工程师有什么其余语言无法替代的呢？"></a>问题2：Go语言工程师有什么其余语言无法替代的呢？</h2><p>说到一门语言的<strong>不可替代性</strong>，核心关注两点：</p>
+<ol>
+<li>现状：即<strong>一门语言在特定的领域中已沉淀的积累</strong>，包括开源软件、SDK库、文档、社区、用户等</li>
+<li>未来：<strong>各公司或组织对这门语言的投入</strong>，如建立基金会、形成规范、招聘人才趋势等</li>
+</ol>
+<p>上面这两点，也间接地回答了一个很常见的问题：<code>Go</code>能替代<code>Java</code>成为主流业务开发语言吗？我个人短期内并不看好。</p>
+<p>回到问题，那么Go最擅长的领域是什么呢？答案也是大家耳熟能详的<strong>云原生技术</strong>。</p>
+<ol>
+<li>现状：云原生的核心技术<code>Kubernetes</code>与大量相关套件都是用Go语言开发的，短期内无法被替换</li>
+<li>未来：云原生在<code>CNCF</code>的推动下，已经在各类云厂商中形成事实标准</li>
+</ol>
+<h2 id="问题3：Go语法简洁，做业务开发很方便，可以用吗？"><a href="#问题3：Go语法简洁，做业务开发很方便，可以用吗？" class="headerlink" title="问题3：Go语法简洁，做业务开发很方便，可以用吗？"></a>问题3：Go语法简洁，做业务开发很方便，可以用吗？</h2><p>当然可以使用！Go语法简洁的特性能让代码更容易阅读，但我们要清楚地认识到其弊端，才能长期地坚持走这条路：</p>
+<ol>
+<li>由于不存在类似<code>Spring</code>的编程框架做强限制，不同人的代码风格差异还是很大，最好前期有个资深专家 <strong>做好前期框架规划</strong>，才能更好地体现Go的优势</li>
+<li><strong>对接部分技术体系的开源库缺失或不够成熟</strong>，尤其是对接<code>Hive</code>、<code>Flink</code>等大数据体系时，<code>Java</code>仍是第一选择</li>
+<li>Go的标准库中往往<strong>为了通用性而牺牲了定制化</strong>，例如排序函数采用的是一个工业级混合多种排序的方法，而无法灵活地按需选择冒泡、快排等，这就需要一定的二次开发</li>
+</ol>
+<p>也许你看完这三个问题，会觉得自己学Go语言的热情被劝退了，但其实换个角度来看问题，其实答案也很有意思：</p>
+<ol>
+<li>Go语言官方只做最基础的底层，而上层的业务框架由各家在实践中探索，发展空间很大</li>
+<li>Google推出Go之后又推出的gRPC、云原生理念，就是希望编程语言百家齐鸣，各自有各自擅长的领域</li>
+<li>一方面，通用性能降低编程语言学习的复杂度；另一方面，我们也是希望把一部分的复杂度从编程语言转移到各类中间件中，可以减少很多重复建设</li>
+</ol>
+<h2 id="问题4：从目前来看，Go业务开发工程师的前途不行吗？"><a href="#问题4：从目前来看，Go业务开发工程师的前途不行吗？" class="headerlink" title="问题4：从目前来看，Go业务开发工程师的前途不行吗？"></a>问题4：从目前来看，Go业务开发工程师的前途不行吗？</h2><p>综合上面讨论的问题来看，现有阶段用Go语言做业务开发并不是最快的。</p>
+<p>但是，从目前<strong>云原生</strong>理念被越来越多的人接受，我相信Go语言做业务开发也是一个很棒的选择。这里，我强调一个点：<strong>借势</strong>。怎么理解这个词呢？</p>
+<ol>
+<li><strong>承认短板</strong>：既然需要”借”，那就先得承认自己有不足。如果幻想毕其功于一役，那这条路很容易走到尽头。</li>
+<li><strong>善假于物</strong>：对于Go语言来说，借势的关键对象是两个：<strong>云原生</strong> 与 <strong>其余编程语言的生态</strong><ol>
+<li>云原生：有大量优秀的基础组件与中间件，尽可能地复用这部分的能力（基本上覆盖了所有的基础设施）</li>
+<li>其余编程语言：根据业务需要自行使用，建议在非熟悉的领域尽可能地做到简单，把复杂的业务逻辑放到最熟悉的编程语言中</li>
+</ol>
+</li>
+</ol>
+<p>上面聊的比较抽象，我再举两个具体的例子：</p>
+<ol>
+<li>对某个服务做网络的限流，更推荐放在<code>Istio</code>上，而不需要在应用程序中加上一堆计算流量的代码</li>
+<li>某个Go服务想对接<code>Flink</code>计算业务数据，那就用利用JAVA的SDK开发一个对接的小服务，通过HTTP或MQ对外输出结果，而复杂的业务逻辑放在Go服务中</li>
+</ol>
+<h2 id="问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？"><a href="#问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？" class="headerlink" title="问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？"></a>问题5：Go开发工程师的长期发展目标怎么定，才更有竞争力？</h2><p>从能力层面来说，我认为Go语言工程师的核心技能点分为四层：</p>
+<ol>
+<li>基础层：计算机基础、网络、操作系统、算法</li>
+<li>语言层：<strong>Go语言原理与实践</strong>，其它语言的优秀特性</li>
+<li>应用层：中间件、软件工程、架构设计</li>
+<li>业务层：业务逻辑、<strong>云原生生态与解决方案</strong></li>
+</ol>
+<blockquote>
+<p>加粗的为Go语言特别关注</p>
+</blockquote>
+<p>这四层的内容极多，我建议围绕着两个重点进行学习：</p>
+<ol>
+<li><strong>系统性的学习Go语言原理与实践</strong>，向下即阅读源码，掌握操作系统、网络等基础原理；向上则结合项目，对接各类中间件，学习软件架构设计</li>
+<li><strong>利用碎片时间了解云原生</strong>，云原生是一个日新月异的研发生态，对于非资深的开发者没必要前期就投入大量精力、导致基础不扎实，关注发展趋势、了解大致原理即可（技术的底层往往互通）</li>
+</ol>
+<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>整个Go语言学习路线到此已经更新完毕，很高兴有朋友陪我走到最后。后续我也会持续更新这个系列的文章，保证内容的实时性。</p>
+<p>学习技术是一个长期的过程，敝帚自珍很容易中途失去信心而放弃，大家一起鼓励、探讨，就能走得更远。</p>
+<p>欢迎大家私聊我探讨问题，也可以通过公众号加入到Go学习小组中交流更多日常问题。</p>
+<blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
 <p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
@@ -296,14 +353,11 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/05/13/go-study/go-study-5/" rel="prev" title="Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点">
-                  <i class="fa fa-chevron-left"></i> Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点
+                <a href="/2021/07/25/go-study/go-study-7/" rel="prev" title="Go语言学习路线 - 7.进阶篇:一名软件工程师的价值沉淀">
+                  <i class="fa fa-chevron-left"></i> Go语言学习路线 - 7.进阶篇:一名软件工程师的价值沉淀
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/06/19/go-leetcode/go-leetcode-6/" rel="next" title="Go算法实战 - 6.【正则表达式匹配LeetCode-10】">
-                  Go算法实战 - 6.【正则表达式匹配LeetCode-10】 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
