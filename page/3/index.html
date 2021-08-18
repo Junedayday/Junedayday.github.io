@@ -294,6 +294,95 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/29/go-framework/go-framework-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/29/go-framework/go-framework-2/" class="post-title-link" itemprop="url">Go语言微服务框架 - 2.实现加载静态配置文件</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-29 20:51:46" itemprop="dateCreated datePublished" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-17 14:40:59" itemprop="dateModified" datetime="2021-08-17T14:40:59+08:00">2021-08-17</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>我们的基础RPC服务已经正常运行，我们再来看下一个特性：配置文件的加载。</p>
+<p>首先，我们要正确地认识到配置文件的重要性：<strong>在程序交付后，变更代码的成本很大；相对而言，变更配置文件的成本就比较小</strong>。但有的同学又走了另一个极端，也就是将大量的逻辑放入到配置文件中，导致<strong>配置文件膨胀</strong>，本质上就是将部分本应在代码中维护的内容转移到了配置文件，导致配置文件也很难维护。</p>
+<p>今天，我们先将重点放到加载配置文件库的技术选型，顺便分享一些常见的问题。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/29/go-framework/go-framework-2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/29/go-framework/go-framework-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -361,95 +450,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/03/29/go-framework/go-framework-1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/29/go-framework/go-framework-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/29/go-framework/go-framework-2/" class="post-title-link" itemprop="url">Go语言微服务框架 - 2.实现加载静态配置文件</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-03-29 20:51:46" itemprop="dateCreated datePublished" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-17 14:40:59" itemprop="dateModified" datetime="2021-08-17T14:40:59+08:00">2021-08-17</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>我们的基础RPC服务已经正常运行，我们再来看下一个特性：配置文件的加载。</p>
-<p>首先，我们要正确地认识到配置文件的重要性：<strong>在程序交付后，变更代码的成本很大；相对而言，变更配置文件的成本就比较小</strong>。但有的同学又走了另一个极端，也就是将大量的逻辑放入到配置文件中，导致<strong>配置文件膨胀</strong>，本质上就是将部分本应在代码中维护的内容转移到了配置文件，导致配置文件也很难维护。</p>
-<p>今天，我们先将重点放到加载配置文件库的技术选型，顺便分享一些常见的问题。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/29/go-framework/go-framework-2/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

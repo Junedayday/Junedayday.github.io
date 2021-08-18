@@ -338,13 +338,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-4/</loc>
-    
-    <lastmod>2021-03-29</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2021/02/20/go-patterns/go-patterns-5/</loc>
     
     <lastmod>2021-03-29</lastmod>
@@ -352,7 +345,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-7/</loc>
+    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-4/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -360,6 +353,13 @@
   
   <url>
     <loc>http://example.com/2021/02/20/go-patterns/go-patterns-6/</loc>
+    
+    <lastmod>2021-03-29</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/02/20/go-patterns/go-patterns-7/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -403,14 +403,21 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Study/</loc>
+    <loc>http://example.com/tags/Go-Tip/</loc>
     <lastmod>2021-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Tip/</loc>
+    <loc>http://example.com/tags/Go-Leetcode/</loc>
+    <lastmod>2021-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/Go-Study/</loc>
     <lastmod>2021-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -424,13 +431,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Kubernetes/</loc>
-    <lastmod>2021-08-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://example.com/tags/Digest/</loc>
     <lastmod>2021-08-18</lastmod>
     <changefreq>daily</changefreq>
@@ -438,7 +438,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Leetcode/</loc>
+    <loc>http://example.com/tags/Kubernetes/</loc>
     <lastmod>2021-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
