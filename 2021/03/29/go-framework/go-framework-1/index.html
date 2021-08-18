@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="大家好，我是六月天天。如题所述，从今天开始，我将和大家一起逐步完成一个微服务框架。 整个迭代过程会围绕着两个核心思想进行：  关注技术选型背后的思想。虽然最终某个技术选型的并不是你喜欢的方案（如RPC、日志、数据库等，你可以fork后自行调整），但我们更关注各个技术组件背后的原理与思想； 聚焦于简单，关注可维护性。技术框架是项目的基础设施，也是排查复杂业务问题的根本，所以框架层的功能会尽量考虑简">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务">
+<meta property="og:url" content="http://example.com/2021/03/29/go-framework/go-framework-1/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="大家好，我是六月天天。如题所述，从今天开始，我将和大家一起逐步完成一个微服务框架。 整个迭代过程会围绕着两个核心思想进行：  关注技术选型背后的思想。虽然最终某个技术选型的并不是你喜欢的方案（如RPC、日志、数据库等，你可以fork后自行调整），但我们更关注各个技术组件背后的原理与思想； 聚焦于简单，关注可维护性。技术框架是项目的基础设施，也是排查复杂业务问题的根本，所以框架层的功能会尽量考虑简">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-03-29T12:51:46.961Z">
+<meta property="article:modified_time" content="2021-08-17T02:31:24.661Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Framework">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/03/29/go-framework/go-framework-1/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#v0-1-0%EF%BC%9A%E6%90%AD%E5%BB%BAgRPC-HTTP%E7%9A%84%E5%8F%8C%E9%87%8D%E7%BD%91%E5%85%B3%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">v0.1.0：搭建gRPC+HTTP的双重网关服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">1.1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9"><span class="nav-number">1.2.</span> <span class="nav-text">关键技术点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95%E6%9E%84%E9%80%A0"><span class="nav-number">1.3.</span> <span class="nav-text">目录构造</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-protobuffer%E5%AE%9A%E4%B9%89IDL"><span class="nav-number">2.</span> <span class="nav-text">1. protobuffer定义IDL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-buf%E5%B7%A5%E5%85%B7%E7%94%9F%E6%88%90Go%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">2. buf工具生成Go代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Go%E9%A1%B9%E7%9B%AE%E5%AE%9E%E7%8E%B0RPC%E6%9C%8D%E5%8A%A1"><span class="nav-number">4.</span> <span class="nav-text">3.Go项目实现RPC服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C"><span class="nav-number">5.</span> <span class="nav-text">项目运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%9A%84%E7%A7%81%E6%9C%89%E5%8C%96"><span class="nav-number">6.</span> <span class="nav-text">项目的私有化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B0%E5%A2%9E%E6%8E%A5%E5%8F%A3%E7%A4%BA%E4%BE%8B"><span class="nav-number">7.</span> <span class="nav-text">新增接口示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0proto%E5%AE%9A%E4%B9%89"><span class="nav-number">7.1.</span> <span class="nav-text">添加proto定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90Go%E6%96%87%E4%BB%B6"><span class="nav-number">7.2.</span> <span class="nav-text">生成Go文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%8E%A5%E5%8F%A3%E5%AE%9A%E4%B9%89"><span class="nav-number">7.3.</span> <span class="nav-text">添加接口定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E6%96%B0%E6%8E%A5%E5%8F%A3"><span class="nav-number">7.4.</span> <span class="nav-text">测试新接口</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/29/go-framework/go-framework-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-29 20:51:46" itemprop="dateCreated datePublished" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-17 10:31:24" itemprop="dateModified" datetime="2021-08-17T10:31:24+08:00">2021-08-17</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>大家好，我是六月天天。如题所述，从今天开始，我将和大家一起逐步完成一个微服务框架。</p>
+<p>整个迭代过程会围绕着两个核心思想进行：</p>
+<ol>
+<li><strong>关注技术选型背后的思想</strong>。虽然最终某个技术选型的并不是你喜欢的方案（如RPC、日志、数据库等，你可以fork后自行调整），但我们更关注各个技术组件背后的原理与思想；</li>
+<li><strong>聚焦于简单，关注可维护性</strong>。技术框架是项目的基础设施，也是排查复杂业务问题的根本，所以框架层的功能会尽量考虑简单易用，可以让我们花更多的心思在业务开发中。许多开源库提供了大量扩展功能，但我们使用时会尽量<strong>克制</strong>，减少学习和排查问题时的成本。</li>
+</ol>
+<span id="more"></span>
+
+
+
+<h2 id="v0-1-0：搭建gRPC-HTTP的双重网关服务"><a href="#v0-1-0：搭建gRPC-HTTP的双重网关服务" class="headerlink" title="v0.1.0：搭建gRPC+HTTP的双重网关服务"></a>v0.1.0：搭建gRPC+HTTP的双重网关服务</h2><p><a target="_blank" rel="noopener" href="https://github.com/Junedayday/micro_web_service/tree/v0.1.0">项目链接</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/grpc-ecosystem/grpc-gateway">gRPC-gateway官方Github</a></p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>完成RPC服务的框架的搭建</p>
+<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
+<li><code>protobuffer</code>定义IDL（Interface Define Language 接口定义语言）</li>
+<li><code>buf</code>工具生成<code>Go</code>代码（包括数据结构和RPC相关服务）</li>
+<li><code>Go</code>项目实现RPC服务（实现RPC接口）</li>
+</ol>
+<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具</span><br><span class="line">	|-- gen.sh                         buf生成的shell脚本</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-protobuffer定义IDL"><a href="#1-protobuffer定义IDL" class="headerlink" title="1. protobuffer定义IDL"></a>1. protobuffer定义IDL</h2><p>我们先看一下项目中的<code>demo.proto</code>文件，重点关注 <strong>rpc Echo(DemoRequest) returns (DemoResponse)</strong> 这个定义。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">message DemoRequest &#123;</span><br><span class="line">   string value = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message DemoResponse &#123;</span><br><span class="line">   int32 code = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 样例服务</span><br><span class="line">service DemoService &#123;</span><br><span class="line">  // Echo 样例接口</span><br><span class="line">  rpc Echo(DemoRequest) returns (DemoResponse) &#123;</span><br><span class="line">    option (google.api.http) = &#123;</span><br><span class="line">      post : &quot;/apis/demo&quot;</span><br><span class="line">      body : &quot;*&quot;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>今天我们暂时不对<code>protobuffer</code>的语法做扩展讲解，只需要简单地了解下它的请求结构体<code>DemoRequest</code>和响应结构体<code>DemoResponse</code>。</p>
+<h2 id="2-buf工具生成Go代码"><a href="#2-buf工具生成Go代码" class="headerlink" title="2. buf工具生成Go代码"></a>2. buf工具生成Go代码</h2><p>我们通过运行项目根目录中的<code>gen.sh</code>，会在<code>gen</code>目录下生成对应的Go语言代码。</p>
+<p>这部分是自动化的工作，每次修改<code>proto</code>文件后需要运行。</p>
+<blockquote>
+<p>buf工具的安装请参考README.md，它是protoc的演进版本，不再需要大量flag参数，更加简单易用。</p>
+<p>注意，如果修改了模块名，buf工具第一次初始化建议使用 buf beta mod init 指令</p>
+</blockquote>
+<h2 id="3-Go项目实现RPC服务"><a href="#3-Go项目实现RPC服务" class="headerlink" title="3.Go项目实现RPC服务"></a>3.Go项目实现RPC服务</h2><p>我们梳理一下整个逻辑，来看看这个<code>Go</code>程序是怎么提供RPC服务的。</p>
+<ol>
+<li>在<code>buf.gen.yaml</code>中定义了生成的2种服务， <code>go-grpc</code>和 <code>grpc-gateway</code>，分别表示<code>gRPC</code>和<code>HTTP</code></li>
+<li><code>demo.proto</code>通过脚本，在<code>gen/idl/demo</code>生成了2个文件，<code>*_grpc.pb.go</code>和<code>*.pb.gw.go</code>，分别表示<code>gRPC</code>和<code>HTTP</code></li>
+<li>在<code>main</code>函数中注册两个服务，分别为：<ol>
+<li>gRPC - <code>demo.RegisterDemoServiceServer(s, &amp;server.Server&#123;&#125;)</code></li>
+<li>HTTP - <code>demo.RegisterDemoServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)</code></li>
+</ol>
+</li>
+<li>在<code>internal/server/server.go</code>中，<code>server.Server</code>需要实现<code>proto</code>中定义的方法，所以我们加入接口定义<code>demo.UnsafeDemoServiceServer</code></li>
+<li>在<code>internal/server/demo.go</code>中，实现一个<code>func (s *Server) Echo(ctx context.Context, req *demo.DemoRequest) (*demo.DemoResponse, error)</code>方法</li>
+</ol>
+<h2 id="项目运行"><a href="#项目运行" class="headerlink" title="项目运行"></a>项目运行</h2><p>我们用简单的命令来运行，并用RPC访问</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 编译并运行</span></span><br><span class="line">go build &amp;&amp; ./micro_web_service </span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 模拟HTTP请求</span></span><br><span class="line">curl --location --request POST &#x27;http://127.0.0.1:8081/apis/demo&#x27;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 收到返回值 &#123;<span class="string">&quot;code&quot;</span>:0&#125;</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 而gRPC比较麻烦，是私有协议，我们查看一下对应的网络端口，发现正在监听，也就意味着正常运行</span></span><br><span class="line">netstat -an | grep 9090</span><br><span class="line">tcp4       0      0  127.0.0.1.9090         127.0.0.1.49266        ESTABLISHED</span><br><span class="line">tcp4       0      0  127.0.0.1.49266        127.0.0.1.9090         ESTABLISHED</span><br><span class="line">tcp46      0      0  *.9090                 *.*                    LISTEN </span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="项目的私有化"><a href="#项目的私有化" class="headerlink" title="项目的私有化"></a>项目的私有化</h2><p>由于本项目只是一个框架，如果你希望修改为个人的项目，主要改动点在两处：</p>
+<ol>
+<li><code>go.mod</code>里的模块名，以及<code>Go</code>代码内部的import</li>
+<li><code>proto</code>文件中定义的<code>go_package</code></li>
+</ol>
+<blockquote>
+<p>建议用编辑工具全量替换</p>
+</blockquote>
+<h2 id="新增接口示例"><a href="#新增接口示例" class="headerlink" title="新增接口示例"></a>新增接口示例</h2><h3 id="添加proto定义"><a href="#添加proto定义" class="headerlink" title="添加proto定义"></a>添加proto定义</h3><figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">EmptyMessage</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Empty 空接口</span></span><br><span class="line"><span class="function"><span class="keyword">rpc</span> Empty(EmptyMessage) <span class="keyword">returns</span> (EmptyMessage) </span>&#123;</span><br><span class="line">  <span class="keyword">option</span> (google.api.http) = &#123;</span><br><span class="line">    post : <span class="string">&quot;/apis/empty&quot;</span></span><br><span class="line">    body : <span class="string">&quot;*&quot;</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成Go文件"><a href="#生成Go文件" class="headerlink" title="生成Go文件"></a>生成Go文件</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash gen.sh</span><br></pre></td></tr></table></figure>
+
+<h3 id="添加接口定义"><a href="#添加接口定义" class="headerlink" title="添加接口定义"></a>添加接口定义</h3><p>这时候，我们会发现<code>main.go</code>中有报错，即提示<code>server.Server</code>这个对象需要实现<code>Empty</code>方法。于是，我们在<code>internal/server/demo.go</code>里添加</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">Empty</span><span class="params">(ctx context.Context, req *demo.EmptyMessage)</span> <span class="params">(*demo.EmptyMessage, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;demo.EmptyMessage&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试新接口"><a href="#测试新接口" class="headerlink" title="测试新接口"></a>测试新接口</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 编译并运行</span></span><br><span class="line">go build &amp;&amp; ./micro_web_service </span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 模拟HTTP请求</span></span><br><span class="line">curl --location --request POST &#x27;http://127.0.0.1:8081/apis/empty&#x27;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 返回 &#123;&#125;</span> </span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>v0.1.0</code>版本是一个非常简单的web框架，只有样例的RPC接口。</p>
+<p>开放<code>HTTP</code>接口是为了兼容传统方案，而<code>gRPC</code>则提供了高性能、跨语言的通信方案。从整个实现过程来看，我们只编写了一个具体的实现、也就是<code>Echo</code>这个方法，就完成了两种通信方式的兼容。</p>
+<p><code>gRPC-Gateway</code>方案还有很多很棒的特性，我会在后续逐一介绍并引入。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Framework/" rel="tag"># Go-Framework</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/28/go-study/go-study-2/" rel="prev" title="Go语言学习路线 - 2.方向篇:如何成为一名优秀的Go语言工程师">
+                  <i class="fa fa-chevron-left"></i> Go语言学习路线 - 2.方向篇:如何成为一名优秀的Go语言工程师
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/03/29/go-framework/go-framework-2/" rel="next" title="Go语言微服务框架 - 2.实现加载静态配置文件">
+                  Go语言微服务框架 - 2.实现加载静态配置文件 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

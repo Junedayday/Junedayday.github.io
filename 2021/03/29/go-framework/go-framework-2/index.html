@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="我们的基础RPC服务已经正常运行，我们再来看下一个特性：配置文件的加载。 首先，我们要正确地认识到配置文件的重要性：在程序交付后，变更代码的成本很大；相对而言，变更配置文件的成本就比较小。但有的同学又走了另一个极端，也就是将大量的逻辑放入到配置文件中，导致配置文件膨胀，本质上就是将部分本应在代码中维护的内容转移到了配置文件，导致配置文件也很难维护。 今天，我们先将重点放到加载配置文件库的技术选型">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言微服务框架 - 2.实现加载静态配置文件">
+<meta property="og:url" content="http://example.com/2021/03/29/go-framework/go-framework-2/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="我们的基础RPC服务已经正常运行，我们再来看下一个特性：配置文件的加载。 首先，我们要正确地认识到配置文件的重要性：在程序交付后，变更代码的成本很大；相对而言，变更配置文件的成本就比较小。但有的同学又走了另一个极端，也就是将大量的逻辑放入到配置文件中，导致配置文件膨胀，本质上就是将部分本应在代码中维护的内容转移到了配置文件，导致配置文件也很难维护。 今天，我们先将重点放到加载配置文件库的技术选型">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-03-29T12:51:46.961Z">
+<meta property="article:modified_time" content="2021-08-17T06:40:59.024Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Framework">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/03/29/go-framework/go-framework-2/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言微服务框架 - 2.实现加载静态配置文件 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E5%9F%BA%E7%A1%80%E7%9A%84%E5%8A%A0%E8%BD%BD%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.</span> <span class="nav-text">一个基础的加载配置文件示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#v0-2-0%EF%BC%9A%E5%AE%9E%E7%8E%B0%E5%8A%A0%E8%BD%BD%E9%9D%99%E6%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">v0.2.0：实现加载静态配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">2.1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">关键技术点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95%E6%9E%84%E9%80%A0"><span class="nav-number">2.3.</span> <span class="nav-text">目录构造</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0%E4%B8%8E%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%B7%AE%E5%BC%82"><span class="nav-number">4.</span> <span class="nav-text">1.命令行参数与配置文件的差异</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-github-com-spf13-viper%E7%9A%84%E4%BB%8B%E7%BB%8D"><span class="nav-number">5.</span> <span class="nav-text">2.github.com&#x2F;spf13&#x2F;viper的介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E9%80%89%E7%9A%84%E5%8F%82%E6%95%B0%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">5.1.</span> <span class="nav-text">可选的参数序列化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E6%89%A9%E5%B1%95%E7%9A%84%E8%8E%B7%E5%8F%96%E5%8F%82%E6%95%B0%E6%96%B9%E6%B3%95"><span class="nav-number">5.2.</span> <span class="nav-text">可扩展的获取参数方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E4%BD%BF%E7%94%A8viper%E5%BA%93%E7%9A%84%E6%8E%A8%E8%8D%90%E6%96%B9%E5%BC%8F"><span class="nav-number">6.</span> <span class="nav-text">3.使用viper库的推荐方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%BD%E9%87%8F%E9%81%BF%E5%85%8D%E6%89%8B%E5%8A%A8%E8%AE%BE%E7%BD%AE%E7%9A%84%E5%8F%82%E6%95%B0%E5%80%BC"><span class="nav-number">6.1.</span> <span class="nav-text">尽量避免手动设置的参数值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%8E%E7%A1%AE%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E6%9D%A5%E6%BA%90"><span class="nav-number">6.2.</span> <span class="nav-text">明确配置文件的来源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E9%85%8D%E7%BD%AE%E4%B8%8E%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AE%E7%9A%84%E5%88%86%E7%A6%BB"><span class="nav-number">6.3.</span> <span class="nav-text">静态配置与动态配置的分离</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-number">7.</span> <span class="nav-text">核心代码示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#main-go"><span class="nav-number">7.1.</span> <span class="nav-text">main.go</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#internal-config-viper-go"><span class="nav-number">7.2.</span> <span class="nav-text">internal&#x2F;config&#x2F;viper.go</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%94%A8%E6%96%B9"><span class="nav-number">7.3.</span> <span class="nav-text">配置使用方</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8viper%E5%BA%93%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">8.</span> <span class="nav-text">使用viper库的注意事项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/29/go-framework/go-framework-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言微服务框架 - 2.实现加载静态配置文件
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-03-29 20:51:46" itemprop="dateCreated datePublished" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-17 14:40:59" itemprop="dateModified" datetime="2021-08-17T14:40:59+08:00">2021-08-17</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>我们的基础RPC服务已经正常运行，我们再来看下一个特性：配置文件的加载。</p>
+<p>首先，我们要正确地认识到配置文件的重要性：<strong>在程序交付后，变更代码的成本很大；相对而言，变更配置文件的成本就比较小</strong>。但有的同学又走了另一个极端，也就是将大量的逻辑放入到配置文件中，导致<strong>配置文件膨胀</strong>，本质上就是将部分本应在代码中维护的内容转移到了配置文件，导致配置文件也很难维护。</p>
+<p>今天，我们先将重点放到加载配置文件库的技术选型，顺便分享一些常见的问题。</p>
+<span id="more"></span>
+
+<h2 id="一个基础的加载配置文件示例"><a href="#一个基础的加载配置文件示例" class="headerlink" title="一个基础的加载配置文件示例"></a>一个基础的加载配置文件示例</h2><p>在<code>Go</code>语言中，用官方库就能快速实现配置文件的加载，下面就是一个简单的代码实现：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">b, err := ioutil.ReadFile(<span class="string">&quot;config.json&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> config MyConfig</span><br><span class="line">err = json.Unmarshal(b, &amp;config)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键的实现分为两块：</p>
+<ol>
+<li>读取文件中的数据</li>
+<li>将数据解析到Go程序的对象中，作为可识别的数据结构，这里指定了数据类型为<code>json</code></li>
+</ol>
+<h2 id="v0-2-0：实现加载静态配置文件"><a href="#v0-2-0：实现加载静态配置文件" class="headerlink" title="v0.2.0：实现加载静态配置文件"></a>v0.2.0：实现加载静态配置文件</h2><h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>从配置文件中解析数据到程序中，并具备更高的可读性和扩展性。</p>
+<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
+<li>命令行参数与配置文件的差异</li>
+<li>github.com/spf13/viper的介绍</li>
+<li>使用viper库的推荐方式</li>
+</ol>
+<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><p><code>github.com/spf13/viper</code>中存在一个全局变量<code>var v *Viper</code>（<a target="_blank" rel="noopener" href="https://github.com/spf13/viper/blob/v1.7.0/viper.go#L62">点击查看</a>），如果我们调用默认的viper包，其实就是将参数解析到这个全局变量中。</p>
+<p>在具体的项目中，更推荐的方式是将这个变量保存到内部项目中，作为一个项目中的全局变量，所以我们会新建一个<code>viper.New()</code>。配置参数会被全局调用，为了保证不会发生<strong>循环依赖</strong>，我们就需要一个专门的<code>package</code>来保存这个全局变量，这里对应项目中的<code>internal/config/viper.go</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	   |-- config                          新增：配置相关的文件夹</span><br><span class="line">	      |-- viper.go                         新增：viper的相关加载逻辑</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具</span><br><span class="line">	|-- gen.sh                         buf生成的shell脚本</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
+
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="1-命令行参数与配置文件的差异"><a href="#1-命令行参数与配置文件的差异" class="headerlink" title="1.命令行参数与配置文件的差异"></a>1.命令行参数与配置文件的差异</h2><p>命令行参数类似于<code>./demo --config=a.yaml --http_port=8080 --grpc_port=8081</code>，<code>Go</code>语言中自带<code>flag</code>包可供解析，开源的有<code>pflag</code>和相关的扩展工具，如<code>cobra</code>。</p>
+<p>而配置文件则是<strong>将参数从文件解析到内存中</strong>，一般用读取文件+反序列化工具来使用。</p>
+<p>同样是解析参数到程序里，我们该选择哪种方案呢？我们从可读性和可维护性来对比下：</p>
+<ul>
+<li>可读性：命令行参数是扁平化的，可读性远不如格式化后的配置文件</li>
+<li>可维护性：配置文件增加了一个维护项，但成本不高</li>
+</ul>
+<p>所以，我个人倾向于的方案是：</p>
+<ul>
+<li>命令行参数：用于维护极少量关键性的参数，如配置文件的路径</li>
+<li>配置文件：维护绝大多数的参数</li>
+</ul>
+<p>在某些极端的场景中，比如提供一个纯二进制文件作为工具，那不得不把所有配置参数都放入到命令行参数中。这并不是我们微服务框架要讨论的场景。所以，接下来我们重点讨论配置文件的加载。</p>
+<blockquote>
+<p>关于pflag相关的内容，在后续程序复杂到一定阶段后会引入。</p>
+</blockquote>
+<h2 id="2-github-com-spf13-viper的介绍"><a href="#2-github-com-spf13-viper的介绍" class="headerlink" title="2.github.com/spf13/viper的介绍"></a>2.github.com/spf13/viper的介绍</h2><p>对比上面的方案，我们来看一个业内使用最广的Go语言配置加载库<code>github.com/spf13/viper</code>的实现，对应的代码如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">viper.SetConfigName(<span class="string">&quot;config&quot;</span>)        <span class="comment">// config file name without file type</span></span><br><span class="line">viper.SetConfigType(<span class="string">&quot;yaml&quot;</span>)          <span class="comment">// config file type</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;./&quot;</span>)            <span class="comment">// config file path</span></span><br><span class="line"><span class="keyword">if</span> err := viper.ReadInConfig(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而在获取配置文件时，又采用key-value形式的语法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>详细的特性我会在<strong>Go语言技巧系列</strong>里说明，今天我们聚焦于工程侧的宏观特性，来聊聊这个库的优劣势：</p>
+<h3 id="可选的参数序列化"><a href="#可选的参数序列化" class="headerlink" title="可选的参数序列化"></a>可选的参数序列化</h3><p>从<code>viper</code>库的源码中(<a target="_blank" rel="noopener" href="https://github.com/spf13/viper/blob/v1.7.0/viper.go#L328">点击跳转</a>)，我们可以看到它支持多种<strong>本地文件类型</strong>与<strong>远程k-v数据库</strong>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SupportedExts are universally supported extensions.</span></span><br><span class="line"><span class="keyword">var</span> SupportedExts = []<span class="keyword">string</span>&#123;<span class="string">&quot;json&quot;</span>, <span class="string">&quot;toml&quot;</span>, <span class="string">&quot;yaml&quot;</span>, <span class="string">&quot;yml&quot;</span>, <span class="string">&quot;properties&quot;</span>, <span class="string">&quot;props&quot;</span>, <span class="string">&quot;prop&quot;</span>, <span class="string">&quot;hcl&quot;</span>, <span class="string">&quot;dotenv&quot;</span>, <span class="string">&quot;env&quot;</span>, <span class="string">&quot;ini&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SupportedRemoteProviders are universally supported remote providers.</span></span><br><span class="line"><span class="keyword">var</span> SupportedRemoteProviders = []<span class="keyword">string</span>&#123;<span class="string">&quot;etcd&quot;</span>, <span class="string">&quot;consul&quot;</span>, <span class="string">&quot;firestore&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们先忽略远程的存储，先看一下最常用的几个序列化的库：</p>
+<ol>
+<li>JSON: 官方自带的<code>encoding/json</code></li>
+<li>TOML: 开源的<code>github.com/pelletier/go-toml</code></li>
+<li>YAML: 官方推荐的<code>gopkg.in/yaml.v2</code></li>
+<li>INI：官方推荐的<code>gopkg.in/ini.v1</code></li>
+</ol>
+<p>在这四种技术选型时，我个人倾向于选择<code>JSON</code>和<code>YAML</code>。进一步斟酌时，虽然<code>JSON</code>的适用范围最广，但当配置文件复杂到一定程度时，<code>JSON</code>格式的配置文件很难通过换行来约束，当存在大量的嵌套时，可读性很差。所以，我个人比较推荐使用<code>YAML</code>格式的配置文件，一方面通过强制的换行约束，可读性很棒；另一方面云原生相关技术大量使用了<code>YAML</code>作为配置文件，尤其是<code>Kubernetes</code>中各种定义。</p>
+<p>例如，我们将服务的端口改造到配置文件里，就成了：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">8081</span></span><br><span class="line">  <span class="attr">grpc:</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">8082</span></span><br></pre></td></tr></table></figure>
+
+<p>对应的Go语言代码为：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">viper.GetInt(<span class="string">&quot;server.http.port&quot;</span>)</span><br><span class="line">viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="可扩展的获取参数方法"><a href="#可扩展的获取参数方法" class="headerlink" title="可扩展的获取参数方法"></a>可扩展的获取参数方法</h3><p><code>viper</code>库提供的获取参数方式为<code>viper.Get&#123;type&#125;(&quot;&#123;level1&#125;.&#123;level2&#125;.&#123;level3&#125;...&quot;)</code>的格式。随着配置文件的扩大，也只需新增Get方法即可。</p>
+<p>从获取参数的方法来看，它的设计分为3种：</p>
+<ol>
+<li>基本类型，直接提供Get{具体类型}的方法，如<code>GetInt</code>，<code>GetString</code>；</li>
+<li>任意类型，提供<code>Get(key string) interface&#123;&#125; </code>，自行转化</li>
+<li>复杂类型的反序列化，提供<code>UnmarshalKey</code>等方法，更方便地获取复杂结构</li>
+</ol>
+<p>我个人建议各位只使用第一类的方法，将配置文件这个模块做到最简化。毕竟，<strong>配置文件的复杂化很容易引入各种问题，占用大量的排查故障的时间</strong>。如果你的系统必须引入一套非常复杂的配置，那么我更建议将它独立成一个专门的服务，用来维护这套配置。</p>
+<h2 id="3-使用viper库的推荐方式"><a href="#3-使用viper库的推荐方式" class="headerlink" title="3.使用viper库的推荐方式"></a>3.使用viper库的推荐方式</h2><p>如果你仔细地阅读viper相关的代码，你会发现它有很多超酷的特性。但今天，我想告诉各位：<strong>请克制地使用进阶的特性，最棒的特性往往是简洁的</strong>。</p>
+<p>我们对照着官方的README文件中介绍的特性进行讲解。</p>
+<h3 id="尽量避免手动设置的参数值"><a href="#尽量避免手动设置的参数值" class="headerlink" title="尽量避免手动设置的参数值"></a>尽量避免手动设置的参数值</h3><p><a target="_blank" rel="noopener" href="https://github.com/spf13/viper#establishing-defaults">原文链接</a></p>
+<p>用<code>viper.SetDefault</code>函数可以给某些参数设置默认值，如果只是少数的几个参数还是很容易维护的。但如果设置的值过多了，就会给阅读代码的人带来困扰：<strong>这个参数是来自配置文件，还是在代码某处手动设置的？</strong>也就是存在<strong>二义性</strong>，增加了排查问题的复杂度。</p>
+<h3 id="明确配置文件的来源"><a href="#明确配置文件的来源" class="headerlink" title="明确配置文件的来源"></a>明确配置文件的来源</h3><p><a target="_blank" rel="noopener" href="https://github.com/spf13/viper#reading-config-files">原文链接</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">viper.AddConfigPath(<span class="string">&quot;/etc/appname/&quot;</span>)   <span class="comment">// path to look for the config file in</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;$HOME/.appname&quot;</span>)  <span class="comment">// call multiple times to add many search paths</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;.&quot;</span>)               <span class="comment">// optionally look for config in the working directory</span></span><br></pre></td></tr></table></figure>
+
+<p><code>viper</code>支持多个配置文件的路径，这虽然带来了便利性，但如果多个文件路径中都存在配置文件，那究竟以哪个为准？这也是一个<strong>二义性</strong>的问题，所以我个人更建议只设置一个，而这个路径由<code>flag</code>传入。</p>
+<h3 id="静态配置与动态配置的分离"><a href="#静态配置与动态配置的分离" class="headerlink" title="静态配置与动态配置的分离"></a>静态配置与动态配置的分离</h3><p><a target="_blank" rel="noopener" href="https://github.com/spf13/viper#watching-and-re-reading-config-files">原文链接</a></p>
+<p><code>viper</code>提供了接口<code>viper.WatchConfig()</code>，可以监听文件的变化，然后做相应的调整。这个特性很酷，我们可以用它实现<strong>热加载</strong>。但这个特性很容易让人产生混淆：例如发生了某个BUG，如何确定当时的配置文件情况？其实，这就需要引入一定的<strong>版本管理</strong>机制。</p>
+<p>我更建议采用<strong>静态配置和动态配置分离</strong>的方案，也就是配置文件负责静态的、固定的配置，一旦启动后只加载一次；而动态的配置放在带版本管理的配置中心里，具备热加载的特性。</p>
+<p>所以，我不太建议在配置文件这里引入监听文件变化的特性。</p>
+<h2 id="核心代码示例"><a href="#核心代码示例" class="headerlink" title="核心代码示例"></a>核心代码示例</h2><h3 id="main-go"><a href="#main-go" class="headerlink" title="main.go"></a>main.go</h3><p>从<code>flag</code>中解析出配置文件路径，传到<code>config</code>包中用于解析。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> configFilePath = flag.String(<span class="string">&quot;c&quot;</span>, <span class="string">&quot;./&quot;</span>, <span class="string">&quot;config file path&quot;</span>)</span><br><span class="line">flag.Parse()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err := config.Load(*configFilePath); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="internal-config-viper-go"><a href="#internal-config-viper-go" class="headerlink" title="internal/config/viper.go"></a>internal/config/viper.go</h3><p>加载的代码并不多，尽量保证配置信息的简洁易懂。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 全局Viper变量</span></span><br><span class="line"><span class="keyword">var</span> Viper = viper.New()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Load</span><span class="params">(configFilePath <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	Viper.SetConfigName(<span class="string">&quot;config&quot;</span>)       <span class="comment">// config file name without file type</span></span><br><span class="line">	Viper.SetConfigType(<span class="string">&quot;yaml&quot;</span>)         <span class="comment">// config file type</span></span><br><span class="line">	Viper.AddConfigPath(configFilePath) <span class="comment">// config file path</span></span><br><span class="line">	<span class="keyword">return</span> Viper.ReadInConfig()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置使用方"><a href="#配置使用方" class="headerlink" title="配置使用方"></a>配置使用方</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config.Viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用viper库的注意事项"><a href="#使用viper库的注意事项" class="headerlink" title="使用viper库的注意事项"></a>使用viper库的注意事项</h2><p>在使用<code>viper</code>获取配置时，我们需要手动组装<code>key</code>，也就是<code>&quot;&#123;level1&#125;.&#123;level2&#125;.&#123;level3&#125;...&quot;</code>这种形式。这时，我们只能对照着原始配置文件逐个填充字段，一不小心填错、就会发生奇怪的问题。而如果采用的是将配置文件解析到结构体的方法，就能很容易地避免这个问题。</p>
+<p>考虑到扩展性，官方库推荐的是手动组装key的方式，所以需要大家在认真查看这个<code>key</code>是否有效。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>加载静态配置文件是一个很常见的功能，<code>viper</code>提供了一套完整方案，兼具简洁和扩展性；与此同时，我们要学会<strong>克制</strong>，不要看到了<code>viper</code>中提供的各种特性、就想着应用到实际项目中，也就是常说的：<strong>手里拿了个锤子，看啥都是钉子</strong>。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Framework/" rel="tag"># Go-Framework</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/29/go-framework/go-framework-1/" rel="prev" title="Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务">
+                  <i class="fa fa-chevron-left"></i> Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/04/05/go-study/go-study-3/" rel="next" title="Go语言学习路线 - 3.准备篇:打造个人专属的学习环境">
+                  Go语言学习路线 - 3.准备篇:打造个人专属的学习环境 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
