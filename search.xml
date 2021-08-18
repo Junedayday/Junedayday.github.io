@@ -1,6 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务</title>
+    <url>/2021/03/29/go-framework/go-framework-1/</url>
+    <content><![CDATA[<p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>大家好，我是六月天天。如题所述，从今天开始，我将和大家一起逐步完成一个微服务框架。</p>
+<p>整个迭代过程会围绕着两个核心思想进行：</p>
+<ol>
+<li><strong>关注技术选型背后的思想</strong>。虽然最终某个技术选型的并不是你喜欢的方案（如RPC、日志、数据库等，你可以fork后自行调整），但我们更关注各个技术组件背后的原理与思想；</li>
+<li><strong>聚焦于简单，关注可维护性</strong>。技术框架是项目的基础设施，也是排查复杂业务问题的根本，所以框架层的功能会尽量考虑简单易用，可以让我们花更多的心思在业务开发中。许多开源库提供了大量扩展功能，但我们使用时会尽量<strong>克制</strong>，减少学习和排查问题时的成本。</li>
+</ol>
+<span id="more"></span>
+
+
+
+<h2 id="v0-1-0：搭建gRPC-HTTP的双重网关服务"><a href="#v0-1-0：搭建gRPC-HTTP的双重网关服务" class="headerlink" title="v0.1.0：搭建gRPC+HTTP的双重网关服务"></a>v0.1.0：搭建gRPC+HTTP的双重网关服务</h2><p><a href="https://github.com/Junedayday/micro_web_service/tree/v0.1.0">项目链接</a></p>
+<p><a href="https://github.com/grpc-ecosystem/grpc-gateway">gRPC-gateway官方Github</a></p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>完成RPC服务的框架的搭建</p>
+<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
+<li><code>protobuffer</code>定义IDL（Interface Define Language 接口定义语言）</li>
+<li><code>buf</code>工具生成<code>Go</code>代码（包括数据结构和RPC相关服务）</li>
+<li><code>Go</code>项目实现RPC服务（实现RPC接口）</li>
+</ol>
+<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具</span><br><span class="line">	|-- gen.sh                         buf生成的shell脚本</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-protobuffer定义IDL"><a href="#1-protobuffer定义IDL" class="headerlink" title="1. protobuffer定义IDL"></a>1. protobuffer定义IDL</h2><p>我们先看一下项目中的<code>demo.proto</code>文件，重点关注 <strong>rpc Echo(DemoRequest) returns (DemoResponse)</strong> 这个定义。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">message DemoRequest &#123;</span><br><span class="line">   string value = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message DemoResponse &#123;</span><br><span class="line">   int32 code = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 样例服务</span><br><span class="line">service DemoService &#123;</span><br><span class="line">  // Echo 样例接口</span><br><span class="line">  rpc Echo(DemoRequest) returns (DemoResponse) &#123;</span><br><span class="line">    option (google.api.http) = &#123;</span><br><span class="line">      post : &quot;/apis/demo&quot;</span><br><span class="line">      body : &quot;*&quot;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>今天我们暂时不对<code>protobuffer</code>的语法做扩展讲解，只需要简单地了解下它的请求结构体<code>DemoRequest</code>和响应结构体<code>DemoResponse</code>。</p>
+<h2 id="2-buf工具生成Go代码"><a href="#2-buf工具生成Go代码" class="headerlink" title="2. buf工具生成Go代码"></a>2. buf工具生成Go代码</h2><p>我们通过运行项目根目录中的<code>gen.sh</code>，会在<code>gen</code>目录下生成对应的Go语言代码。</p>
+<p>这部分是自动化的工作，每次修改<code>proto</code>文件后需要运行。</p>
+<blockquote>
+<p>buf工具的安装请参考README.md，它是protoc的演进版本，不再需要大量flag参数，更加简单易用。</p>
+<p>注意，如果修改了模块名，buf工具第一次初始化建议使用 buf beta mod init 指令</p>
+</blockquote>
+<h2 id="3-Go项目实现RPC服务"><a href="#3-Go项目实现RPC服务" class="headerlink" title="3.Go项目实现RPC服务"></a>3.Go项目实现RPC服务</h2><p>我们梳理一下整个逻辑，来看看这个<code>Go</code>程序是怎么提供RPC服务的。</p>
+<ol>
+<li>在<code>buf.gen.yaml</code>中定义了生成的2种服务， <code>go-grpc</code>和 <code>grpc-gateway</code>，分别表示<code>gRPC</code>和<code>HTTP</code></li>
+<li><code>demo.proto</code>通过脚本，在<code>gen/idl/demo</code>生成了2个文件，<code>*_grpc.pb.go</code>和<code>*.pb.gw.go</code>，分别表示<code>gRPC</code>和<code>HTTP</code></li>
+<li>在<code>main</code>函数中注册两个服务，分别为：<ol>
+<li>gRPC - <code>demo.RegisterDemoServiceServer(s, &amp;server.Server&#123;&#125;)</code></li>
+<li>HTTP - <code>demo.RegisterDemoServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)</code></li>
+</ol>
+</li>
+<li>在<code>internal/server/server.go</code>中，<code>server.Server</code>需要实现<code>proto</code>中定义的方法，所以我们加入接口定义<code>demo.UnsafeDemoServiceServer</code></li>
+<li>在<code>internal/server/demo.go</code>中，实现一个<code>func (s *Server) Echo(ctx context.Context, req *demo.DemoRequest) (*demo.DemoResponse, error)</code>方法</li>
+</ol>
+<h2 id="项目运行"><a href="#项目运行" class="headerlink" title="项目运行"></a>项目运行</h2><p>我们用简单的命令来运行，并用RPC访问</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 编译并运行</span></span><br><span class="line">go build &amp;&amp; ./micro_web_service </span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 模拟HTTP请求</span></span><br><span class="line">curl --location --request POST &#x27;http://127.0.0.1:8081/apis/demo&#x27;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 收到返回值 &#123;<span class="string">&quot;code&quot;</span>:0&#125;</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 而gRPC比较麻烦，是私有协议，我们查看一下对应的网络端口，发现正在监听，也就意味着正常运行</span></span><br><span class="line">netstat -an | grep 9090</span><br><span class="line">tcp4       0      0  127.0.0.1.9090         127.0.0.1.49266        ESTABLISHED</span><br><span class="line">tcp4       0      0  127.0.0.1.49266        127.0.0.1.9090         ESTABLISHED</span><br><span class="line">tcp46      0      0  *.9090                 *.*                    LISTEN </span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="项目的私有化"><a href="#项目的私有化" class="headerlink" title="项目的私有化"></a>项目的私有化</h2><p>由于本项目只是一个框架，如果你希望修改为个人的项目，主要改动点在两处：</p>
+<ol>
+<li><code>go.mod</code>里的模块名，以及<code>Go</code>代码内部的import</li>
+<li><code>proto</code>文件中定义的<code>go_package</code></li>
+</ol>
+<blockquote>
+<p>建议用编辑工具全量替换</p>
+</blockquote>
+<h2 id="新增接口示例"><a href="#新增接口示例" class="headerlink" title="新增接口示例"></a>新增接口示例</h2><h3 id="添加proto定义"><a href="#添加proto定义" class="headerlink" title="添加proto定义"></a>添加proto定义</h3><figure class="highlight protobuf"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">EmptyMessage</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Empty 空接口</span></span><br><span class="line"><span class="function"><span class="keyword">rpc</span> Empty(EmptyMessage) <span class="keyword">returns</span> (EmptyMessage) </span>&#123;</span><br><span class="line">  <span class="keyword">option</span> (google.api.http) = &#123;</span><br><span class="line">    post : <span class="string">&quot;/apis/empty&quot;</span></span><br><span class="line">    body : <span class="string">&quot;*&quot;</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成Go文件"><a href="#生成Go文件" class="headerlink" title="生成Go文件"></a>生成Go文件</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bash gen.sh</span><br></pre></td></tr></table></figure>
+
+<h3 id="添加接口定义"><a href="#添加接口定义" class="headerlink" title="添加接口定义"></a>添加接口定义</h3><p>这时候，我们会发现<code>main.go</code>中有报错，即提示<code>server.Server</code>这个对象需要实现<code>Empty</code>方法。于是，我们在<code>internal/server/demo.go</code>里添加</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">Empty</span><span class="params">(ctx context.Context, req *demo.EmptyMessage)</span> <span class="params">(*demo.EmptyMessage, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;demo.EmptyMessage&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试新接口"><a href="#测试新接口" class="headerlink" title="测试新接口"></a>测试新接口</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 编译并运行</span></span><br><span class="line">go build &amp;&amp; ./micro_web_service </span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 模拟HTTP请求</span></span><br><span class="line">curl --location --request POST &#x27;http://127.0.0.1:8081/apis/empty&#x27;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 返回 &#123;&#125;</span> </span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>v0.1.0</code>版本是一个非常简单的web框架，只有样例的RPC接口。</p>
+<p>开放<code>HTTP</code>接口是为了兼容传统方案，而<code>gRPC</code>则提供了高性能、跨语言的通信方案。从整个实现过程来看，我们只编写了一个具体的实现、也就是<code>Echo</code>这个方法，就完成了两种通信方式的兼容。</p>
+<p><code>gRPC-Gateway</code>方案还有很多很棒的特性，我会在后续逐一介绍并引入。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>技术框架</category>
+      </categories>
+      <tags>
+        <tag>Go-Framework</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Go语言微服务框架 - 2.实现加载静态配置文件</title>
+    <url>/2021/03/29/go-framework/go-framework-2/</url>
+    <content><![CDATA[<p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>我们的基础RPC服务已经正常运行，我们再来看下一个特性：配置文件的加载。</p>
+<p>首先，我们要正确地认识到配置文件的重要性：<strong>在程序交付后，变更代码的成本很大；相对而言，变更配置文件的成本就比较小</strong>。但有的同学又走了另一个极端，也就是将大量的逻辑放入到配置文件中，导致<strong>配置文件膨胀</strong>，本质上就是将部分本应在代码中维护的内容转移到了配置文件，导致配置文件也很难维护。</p>
+<p>今天，我们先将重点放到加载配置文件库的技术选型，顺便分享一些常见的问题。</p>
+<span id="more"></span>
+
+<h2 id="一个基础的加载配置文件示例"><a href="#一个基础的加载配置文件示例" class="headerlink" title="一个基础的加载配置文件示例"></a>一个基础的加载配置文件示例</h2><p>在<code>Go</code>语言中，用官方库就能快速实现配置文件的加载，下面就是一个简单的代码实现：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">b, err := ioutil.ReadFile(<span class="string">&quot;config.json&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> config MyConfig</span><br><span class="line">err = json.Unmarshal(b, &amp;config)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键的实现分为两块：</p>
+<ol>
+<li>读取文件中的数据</li>
+<li>将数据解析到Go程序的对象中，作为可识别的数据结构，这里指定了数据类型为<code>json</code></li>
+</ol>
+<h2 id="v0-2-0：实现加载静态配置文件"><a href="#v0-2-0：实现加载静态配置文件" class="headerlink" title="v0.2.0：实现加载静态配置文件"></a>v0.2.0：实现加载静态配置文件</h2><h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>从配置文件中解析数据到程序中，并具备更高的可读性和扩展性。</p>
+<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
+<li>命令行参数与配置文件的差异</li>
+<li>github.com/spf13/viper的介绍</li>
+<li>使用viper库的推荐方式</li>
+</ol>
+<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><p><code>github.com/spf13/viper</code>中存在一个全局变量<code>var v *Viper</code>（<a href="https://github.com/spf13/viper/blob/v1.7.0/viper.go#L62">点击查看</a>），如果我们调用默认的viper包，其实就是将参数解析到这个全局变量中。</p>
+<p>在具体的项目中，更推荐的方式是将这个变量保存到内部项目中，作为一个项目中的全局变量，所以我们会新建一个<code>viper.New()</code>。配置参数会被全局调用，为了保证不会发生<strong>循环依赖</strong>，我们就需要一个专门的<code>package</code>来保存这个全局变量，这里对应项目中的<code>internal/config/viper.go</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	   |-- config                          新增：配置相关的文件夹</span><br><span class="line">	      |-- viper.go                         新增：viper的相关加载逻辑</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具</span><br><span class="line">	|-- gen.sh                         buf生成的shell脚本</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
+
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="1-命令行参数与配置文件的差异"><a href="#1-命令行参数与配置文件的差异" class="headerlink" title="1.命令行参数与配置文件的差异"></a>1.命令行参数与配置文件的差异</h2><p>命令行参数类似于<code>./demo --config=a.yaml --http_port=8080 --grpc_port=8081</code>，<code>Go</code>语言中自带<code>flag</code>包可供解析，开源的有<code>pflag</code>和相关的扩展工具，如<code>cobra</code>。</p>
+<p>而配置文件则是<strong>将参数从文件解析到内存中</strong>，一般用读取文件+反序列化工具来使用。</p>
+<p>同样是解析参数到程序里，我们该选择哪种方案呢？我们从可读性和可维护性来对比下：</p>
+<ul>
+<li>可读性：命令行参数是扁平化的，可读性远不如格式化后的配置文件</li>
+<li>可维护性：配置文件增加了一个维护项，但成本不高</li>
+</ul>
+<p>所以，我个人倾向于的方案是：</p>
+<ul>
+<li>命令行参数：用于维护极少量关键性的参数，如配置文件的路径</li>
+<li>配置文件：维护绝大多数的参数</li>
+</ul>
+<p>在某些极端的场景中，比如提供一个纯二进制文件作为工具，那不得不把所有配置参数都放入到命令行参数中。这并不是我们微服务框架要讨论的场景。所以，接下来我们重点讨论配置文件的加载。</p>
+<blockquote>
+<p>关于pflag相关的内容，在后续程序复杂到一定阶段后会引入。</p>
+</blockquote>
+<h2 id="2-github-com-spf13-viper的介绍"><a href="#2-github-com-spf13-viper的介绍" class="headerlink" title="2.github.com/spf13/viper的介绍"></a>2.github.com/spf13/viper的介绍</h2><p>对比上面的方案，我们来看一个业内使用最广的Go语言配置加载库<code>github.com/spf13/viper</code>的实现，对应的代码如下：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">viper.SetConfigName(<span class="string">&quot;config&quot;</span>)        <span class="comment">// config file name without file type</span></span><br><span class="line">viper.SetConfigType(<span class="string">&quot;yaml&quot;</span>)          <span class="comment">// config file type</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;./&quot;</span>)            <span class="comment">// config file path</span></span><br><span class="line"><span class="keyword">if</span> err := viper.ReadInConfig(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而在获取配置文件时，又采用key-value形式的语法：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>详细的特性我会在<strong>Go语言技巧系列</strong>里说明，今天我们聚焦于工程侧的宏观特性，来聊聊这个库的优劣势：</p>
+<h3 id="可选的参数序列化"><a href="#可选的参数序列化" class="headerlink" title="可选的参数序列化"></a>可选的参数序列化</h3><p>从<code>viper</code>库的源码中(<a href="https://github.com/spf13/viper/blob/v1.7.0/viper.go#L328">点击跳转</a>)，我们可以看到它支持多种<strong>本地文件类型</strong>与<strong>远程k-v数据库</strong>：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// SupportedExts are universally supported extensions.</span></span><br><span class="line"><span class="keyword">var</span> SupportedExts = []<span class="keyword">string</span>&#123;<span class="string">&quot;json&quot;</span>, <span class="string">&quot;toml&quot;</span>, <span class="string">&quot;yaml&quot;</span>, <span class="string">&quot;yml&quot;</span>, <span class="string">&quot;properties&quot;</span>, <span class="string">&quot;props&quot;</span>, <span class="string">&quot;prop&quot;</span>, <span class="string">&quot;hcl&quot;</span>, <span class="string">&quot;dotenv&quot;</span>, <span class="string">&quot;env&quot;</span>, <span class="string">&quot;ini&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SupportedRemoteProviders are universally supported remote providers.</span></span><br><span class="line"><span class="keyword">var</span> SupportedRemoteProviders = []<span class="keyword">string</span>&#123;<span class="string">&quot;etcd&quot;</span>, <span class="string">&quot;consul&quot;</span>, <span class="string">&quot;firestore&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们先忽略远程的存储，先看一下最常用的几个序列化的库：</p>
+<ol>
+<li>JSON: 官方自带的<code>encoding/json</code></li>
+<li>TOML: 开源的<code>github.com/pelletier/go-toml</code></li>
+<li>YAML: 官方推荐的<code>gopkg.in/yaml.v2</code></li>
+<li>INI：官方推荐的<code>gopkg.in/ini.v1</code></li>
+</ol>
+<p>在这四种技术选型时，我个人倾向于选择<code>JSON</code>和<code>YAML</code>。进一步斟酌时，虽然<code>JSON</code>的适用范围最广，但当配置文件复杂到一定程度时，<code>JSON</code>格式的配置文件很难通过换行来约束，当存在大量的嵌套时，可读性很差。所以，我个人比较推荐使用<code>YAML</code>格式的配置文件，一方面通过强制的换行约束，可读性很棒；另一方面云原生相关技术大量使用了<code>YAML</code>作为配置文件，尤其是<code>Kubernetes</code>中各种定义。</p>
+<p>例如，我们将服务的端口改造到配置文件里，就成了：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">8081</span></span><br><span class="line">  <span class="attr">grpc:</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">8082</span></span><br></pre></td></tr></table></figure>
+
+<p>对应的Go语言代码为：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">viper.GetInt(<span class="string">&quot;server.http.port&quot;</span>)</span><br><span class="line">viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="可扩展的获取参数方法"><a href="#可扩展的获取参数方法" class="headerlink" title="可扩展的获取参数方法"></a>可扩展的获取参数方法</h3><p><code>viper</code>库提供的获取参数方式为<code>viper.Get&#123;type&#125;(&quot;&#123;level1&#125;.&#123;level2&#125;.&#123;level3&#125;...&quot;)</code>的格式。随着配置文件的扩大，也只需新增Get方法即可。</p>
+<p>从获取参数的方法来看，它的设计分为3种：</p>
+<ol>
+<li>基本类型，直接提供Get{具体类型}的方法，如<code>GetInt</code>，<code>GetString</code>；</li>
+<li>任意类型，提供<code>Get(key string) interface&#123;&#125; </code>，自行转化</li>
+<li>复杂类型的反序列化，提供<code>UnmarshalKey</code>等方法，更方便地获取复杂结构</li>
+</ol>
+<p>我个人建议各位只使用第一类的方法，将配置文件这个模块做到最简化。毕竟，<strong>配置文件的复杂化很容易引入各种问题，占用大量的排查故障的时间</strong>。如果你的系统必须引入一套非常复杂的配置，那么我更建议将它独立成一个专门的服务，用来维护这套配置。</p>
+<h2 id="3-使用viper库的推荐方式"><a href="#3-使用viper库的推荐方式" class="headerlink" title="3.使用viper库的推荐方式"></a>3.使用viper库的推荐方式</h2><p>如果你仔细地阅读viper相关的代码，你会发现它有很多超酷的特性。但今天，我想告诉各位：<strong>请克制地使用进阶的特性，最棒的特性往往是简洁的</strong>。</p>
+<p>我们对照着官方的README文件中介绍的特性进行讲解。</p>
+<h3 id="尽量避免手动设置的参数值"><a href="#尽量避免手动设置的参数值" class="headerlink" title="尽量避免手动设置的参数值"></a>尽量避免手动设置的参数值</h3><p><a href="https://github.com/spf13/viper#establishing-defaults">原文链接</a></p>
+<p>用<code>viper.SetDefault</code>函数可以给某些参数设置默认值，如果只是少数的几个参数还是很容易维护的。但如果设置的值过多了，就会给阅读代码的人带来困扰：<strong>这个参数是来自配置文件，还是在代码某处手动设置的？</strong>也就是存在<strong>二义性</strong>，增加了排查问题的复杂度。</p>
+<h3 id="明确配置文件的来源"><a href="#明确配置文件的来源" class="headerlink" title="明确配置文件的来源"></a>明确配置文件的来源</h3><p><a href="https://github.com/spf13/viper#reading-config-files">原文链接</a></p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">viper.AddConfigPath(<span class="string">&quot;/etc/appname/&quot;</span>)   <span class="comment">// path to look for the config file in</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;$HOME/.appname&quot;</span>)  <span class="comment">// call multiple times to add many search paths</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;.&quot;</span>)               <span class="comment">// optionally look for config in the working directory</span></span><br></pre></td></tr></table></figure>
+
+<p><code>viper</code>支持多个配置文件的路径，这虽然带来了便利性，但如果多个文件路径中都存在配置文件，那究竟以哪个为准？这也是一个<strong>二义性</strong>的问题，所以我个人更建议只设置一个，而这个路径由<code>flag</code>传入。</p>
+<h3 id="静态配置与动态配置的分离"><a href="#静态配置与动态配置的分离" class="headerlink" title="静态配置与动态配置的分离"></a>静态配置与动态配置的分离</h3><p><a href="https://github.com/spf13/viper#watching-and-re-reading-config-files">原文链接</a></p>
+<p><code>viper</code>提供了接口<code>viper.WatchConfig()</code>，可以监听文件的变化，然后做相应的调整。这个特性很酷，我们可以用它实现<strong>热加载</strong>。但这个特性很容易让人产生混淆：例如发生了某个BUG，如何确定当时的配置文件情况？其实，这就需要引入一定的<strong>版本管理</strong>机制。</p>
+<p>我更建议采用<strong>静态配置和动态配置分离</strong>的方案，也就是配置文件负责静态的、固定的配置，一旦启动后只加载一次；而动态的配置放在带版本管理的配置中心里，具备热加载的特性。</p>
+<p>所以，我不太建议在配置文件这里引入监听文件变化的特性。</p>
+<h2 id="核心代码示例"><a href="#核心代码示例" class="headerlink" title="核心代码示例"></a>核心代码示例</h2><h3 id="main-go"><a href="#main-go" class="headerlink" title="main.go"></a>main.go</h3><p>从<code>flag</code>中解析出配置文件路径，传到<code>config</code>包中用于解析。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> configFilePath = flag.String(<span class="string">&quot;c&quot;</span>, <span class="string">&quot;./&quot;</span>, <span class="string">&quot;config file path&quot;</span>)</span><br><span class="line">flag.Parse()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err := config.Load(*configFilePath); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="internal-config-viper-go"><a href="#internal-config-viper-go" class="headerlink" title="internal/config/viper.go"></a>internal/config/viper.go</h3><p>加载的代码并不多，尽量保证配置信息的简洁易懂。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 全局Viper变量</span></span><br><span class="line"><span class="keyword">var</span> Viper = viper.New()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Load</span><span class="params">(configFilePath <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	Viper.SetConfigName(<span class="string">&quot;config&quot;</span>)       <span class="comment">// config file name without file type</span></span><br><span class="line">	Viper.SetConfigType(<span class="string">&quot;yaml&quot;</span>)         <span class="comment">// config file type</span></span><br><span class="line">	Viper.AddConfigPath(configFilePath) <span class="comment">// config file path</span></span><br><span class="line">	<span class="keyword">return</span> Viper.ReadInConfig()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置使用方"><a href="#配置使用方" class="headerlink" title="配置使用方"></a>配置使用方</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line">config.Viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用viper库的注意事项"><a href="#使用viper库的注意事项" class="headerlink" title="使用viper库的注意事项"></a>使用viper库的注意事项</h2><p>在使用<code>viper</code>获取配置时，我们需要手动组装<code>key</code>，也就是<code>&quot;&#123;level1&#125;.&#123;level2&#125;.&#123;level3&#125;...&quot;</code>这种形式。这时，我们只能对照着原始配置文件逐个填充字段，一不小心填错、就会发生奇怪的问题。而如果采用的是将配置文件解析到结构体的方法，就能很容易地避免这个问题。</p>
+<p>考虑到扩展性，官方库推荐的是手动组装key的方式，所以需要大家在认真查看这个<code>key</code>是否有效。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>加载静态配置文件是一个很常见的功能，<code>viper</code>提供了一套完整方案，兼具简洁和扩展性；与此同时，我们要学会<strong>克制</strong>，不要看到了<code>viper</code>中提供的各种特性、就想着应用到实际项目中，也就是常说的：<strong>手里拿了个锤子，看啥都是钉子</strong>。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>技术框架</category>
+      </categories>
+      <tags>
+        <tag>Go-Framework</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Go编程模式 - 1.基础编码上</title>
     <url>/2021/02/20/go-patterns/go-patterns-1/</url>
     <content><![CDATA[<blockquote>
@@ -274,57 +473,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Go编程模式 - 6-映射、归约与过滤</title>
-    <url>/2021/02/20/go-patterns/go-patterns-6/</url>
-    <content><![CDATA[<blockquote>
-<p> 注：本文的灵感来源于GOPHER 2020年大会陈皓的分享，原PPT的<a href="https://www2.slideshare.net/haoel/go-programming-patterns?from_action=save">链接</a>可能并不方便获取，所以我下载了一份<a href="https://github.com/Junedayday/code_reading/tree/master/doc/Go_Programming_Patterns.pdf">PDF</a>到git仓，方便大家阅读。我将结合自己的实际项目经历，与大家一起细品这份文档。</p>
-</blockquote>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
-<li><a href="#Map/Reduce/Filter">映射、规约与过滤</a></li>
-<li><a href="#Scenarios">应用场景探索</a></li>
-<li><a href="#Generic">泛型</a></li>
-</ul>
-<h2 id="Map-Reduce-Filter"><a href="#Map-Reduce-Filter" class="headerlink" title="Map/Reduce/Filter"></a>Map/Reduce/Filter</h2><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MapUpCase</span><span class="params">(arr []<span class="keyword">string</span>, fn <span class="keyword">func</span>(s <span class="keyword">string</span>)</span> <span class="title">string</span>) []<span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> newArray = []<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, it := <span class="keyword">range</span> arr &#123;</span><br><span class="line">		newArray = <span class="built_in">append</span>(newArray, fn(it))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> newArray</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MapLen</span><span class="params">(arr []<span class="keyword">string</span>, fn <span class="keyword">func</span>(s <span class="keyword">string</span>)</span> <span class="title">int</span>) []<span class="title">int</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> newArray = []<span class="keyword">int</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, it := <span class="keyword">range</span> arr &#123;</span><br><span class="line">		newArray = <span class="built_in">append</span>(newArray, fn(it))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> newArray</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Reduce</span><span class="params">(arr []<span class="keyword">string</span>, fn <span class="keyword">func</span>(s <span class="keyword">string</span>)</span> <span class="title">int</span>) <span class="title">int</span></span> &#123;</span><br><span class="line">	sum := <span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> _, it := <span class="keyword">range</span> arr &#123;</span><br><span class="line">		sum += fn(it)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sum</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Filter</span><span class="params">(arr []<span class="keyword">string</span>, fn <span class="keyword">func</span>(n <span class="keyword">string</span>)</span> <span class="title">bool</span>) []<span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> newArray = []<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, it := <span class="keyword">range</span> arr &#123;</span><br><span class="line">		<span class="keyword">if</span> fn(it) &#123;</span><br><span class="line">			newArray = <span class="built_in">append</span>(newArray, it)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> newArray</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> list = []<span class="keyword">string</span>&#123;<span class="string">&quot;Hao&quot;</span>, <span class="string">&quot;Chen&quot;</span>, <span class="string">&quot;MegaEase&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 元素一对一映射 string-&gt;string</span></span><br><span class="line">	x := MapUpCase(list, <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> strings.ToUpper(s)</span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%v\n&quot;</span>, x)</span><br><span class="line">	<span class="comment">// [HAO CHEN MEGAEASE]</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 元素一对一映射 string-&gt;int</span></span><br><span class="line">	y := MapLen(list, <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">len</span>(s)</span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%v\n&quot;</span>, y)</span><br><span class="line">	<span class="comment">// [3 4 8]</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 归约：多个元素-&gt;一个元素</span></span><br><span class="line">	z := Reduce(list, <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">len</span>(s)</span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%v\n&quot;</span>, z)</span><br><span class="line">	<span class="comment">// 15</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 过滤：过滤不满足条件的元素</span></span><br><span class="line">	f := Filter(list, <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">len</span>(s) &gt; <span class="number">3</span></span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%v\n&quot;</span>, f)</span><br><span class="line">	<span class="comment">// [Chen MegaEase]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="Scenarios"><a href="#Scenarios" class="headerlink" title="Scenarios"></a>Scenarios</h2><ul>
-<li><code>Map</code> 是一对一的场景，是 <strong>循环中对数据加工处理</strong> </li>
-<li><code>Reduce</code> 是多对一，是 <strong>数据聚合处理</strong></li>
-<li><code>Filter</code>是过滤的处理，是 <strong>数据有效性</strong></li>
-</ul>
-<p>我们以常见的账单统计相关的功能，我们会遇上大量的此类情况：</p>
-<ol>
-<li>统计消费总额 - Reduce</li>
-<li>统计用户A - Filter</li>
-<li>统计本月 - Filter</li>
-<li>费用转化为美金 - Map</li>
-</ol>
-<p>在综合各个因素后，就是大量复杂的、管道式的Map/Reduce/Filter操作。</p>
-<blockquote>
-<p>延伸思考一下，这块和SQL语句非常类似</p>
-</blockquote>
-<h2 id="Generic"><a href="#Generic" class="headerlink" title="Generic"></a>Generic</h2><p>耗子叔在接下来的部分，展示了用<code>reflect</code>处理泛型情况。我这边简单地截取Map部分解析一下</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TransformInPlace</span><span class="params">(slice, function <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">interface</span></span>&#123;&#125; &#123;</span><br><span class="line">	<span class="keyword">return</span> transform(slice, function, <span class="literal">true</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// map的转换函数，slice为切片，function为对应的函数，inPlace表示是否原地处理</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">transform</span><span class="params">(slice, function <span class="keyword">interface</span>&#123;&#125;, inPlace <span class="keyword">bool</span>)</span> <span class="title">interface</span></span>&#123;&#125; &#123;</span><br><span class="line">	<span class="comment">// 类型判断，必须为切片</span></span><br><span class="line">	sliceInType := reflect.ValueOf(slice)</span><br><span class="line">	<span class="keyword">if</span> sliceInType.Kind() != reflect.Slice &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;transform: not slice&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 函数的签名判断，即函数的入参必须和slice里的元素一致</span></span><br><span class="line">	fn := reflect.ValueOf(function)</span><br><span class="line">	elemType := sliceInType.Type().Elem()</span><br><span class="line">	<span class="keyword">if</span> !verifyFuncSignature(fn, elemType, <span class="literal">nil</span>) &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;trasform: function must be of type func(&quot;</span> + sliceInType.Type().Elem().String() + <span class="string">&quot;) outputElemType&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 如果是原地，则直接处理函数，结果会保存到入参中（这时入参一般为指针）</span></span><br><span class="line">	<span class="comment">// 如果非原地，那就需要新建一个切片，用来保存结果</span></span><br><span class="line">	sliceOutType := sliceInType</span><br><span class="line">	<span class="keyword">if</span> !inPlace &#123;</span><br><span class="line">		sliceOutType = reflect.MakeSlice(reflect.SliceOf(fn.Type().Out(<span class="number">0</span>)), sliceInType.Len(), sliceInType.Len())</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; sliceInType.Len(); i++ &#123;</span><br><span class="line">		sliceOutType.Index(i).Set(fn.Call([]reflect.Value&#123;sliceInType.Index(i)&#125;)[<span class="number">0</span>])</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sliceOutType.Interface()</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">verifyFuncSignature</span><span class="params">(fn reflect.Value, types ...reflect.Type)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// 类型判断</span></span><br><span class="line">	<span class="keyword">if</span> fn.Kind() != reflect.Func &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 入参数量和函数签名一致，出参必须只有一个</span></span><br><span class="line">	<span class="keyword">if</span> (fn.Type().NumIn() != <span class="built_in">len</span>(types)<span class="number">-1</span>) || (fn.Type().NumOut() != <span class="number">1</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 每个函数入参的类型校验</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(types)<span class="number">-1</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">if</span> fn.Type().In(i) != types[i] &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 出参类型的校验</span></span><br><span class="line">	outType := types[<span class="built_in">len</span>(types)<span class="number">-1</span>]</span><br><span class="line">	<span class="keyword">if</span> outType != <span class="literal">nil</span> &amp;&amp; fn.Type().Out(<span class="number">0</span>) != outType &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>仔细阅读这一块代码，我们能学到很多反射方面的知识，尤其是并不常用的函数相关的。</p>
-<p>但是，我不建议大家在实际项目中直接使用这一块代码，毕竟其中大量的反射操作是比较耗时的，尤其是在延迟非常敏感的web服务器中。</p>
-<p>如果我们多花点时间、直接编写指定类型的代码，那么就能在编译期发现错误，运行时也可以跳过反射的耗时。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>经典品读</category>
-      </categories>
-      <tags>
-        <tag>Go-Programming-Patterns</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Go编程模式 - 5.函数式选项</title>
     <url>/2021/02/20/go-patterns/go-patterns-5/</url>
     <content><![CDATA[<blockquote>
@@ -443,6 +591,57 @@
 <p>于是，就会生成对应的方法<code>func (Pill) String() string</code>，也就是直接转化成了其命名。</p>
 <h3 id="价值"><a href="#价值" class="headerlink" title="价值"></a>价值</h3><p>Go语言在调用 <code>fmt</code> 等相关包时，如果要将某个变量转化为字符串，默认会寻找它的<code>String()</code>方法。</p>
 <p>这时，<strong>良好的命名</strong> 能体现出其价值。尤其是在错误码的处理上，无需再去查询错误码对应的错误内容，直接可以通过命名了解。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili：<a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号：golangcoding</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>经典品读</category>
+      </categories>
+      <tags>
+        <tag>Go-Programming-Patterns</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Go编程模式 - 6-映射、归约与过滤</title>
+    <url>/2021/02/20/go-patterns/go-patterns-6/</url>
+    <content><![CDATA[<blockquote>
+<p> 注：本文的灵感来源于GOPHER 2020年大会陈皓的分享，原PPT的<a href="https://www2.slideshare.net/haoel/go-programming-patterns?from_action=save">链接</a>可能并不方便获取，所以我下载了一份<a href="https://github.com/Junedayday/code_reading/tree/master/doc/Go_Programming_Patterns.pdf">PDF</a>到git仓，方便大家阅读。我将结合自己的实际项目经历，与大家一起细品这份文档。</p>
+</blockquote>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#Map/Reduce/Filter">映射、规约与过滤</a></li>
+<li><a href="#Scenarios">应用场景探索</a></li>
+<li><a href="#Generic">泛型</a></li>
+</ul>
+<h2 id="Map-Reduce-Filter"><a href="#Map-Reduce-Filter" class="headerlink" title="Map/Reduce/Filter"></a>Map/Reduce/Filter</h2><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MapUpCase</span><span class="params">(arr []<span class="keyword">string</span>, fn <span class="keyword">func</span>(s <span class="keyword">string</span>)</span> <span class="title">string</span>) []<span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> newArray = []<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, it := <span class="keyword">range</span> arr &#123;</span><br><span class="line">		newArray = <span class="built_in">append</span>(newArray, fn(it))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> newArray</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MapLen</span><span class="params">(arr []<span class="keyword">string</span>, fn <span class="keyword">func</span>(s <span class="keyword">string</span>)</span> <span class="title">int</span>) []<span class="title">int</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> newArray = []<span class="keyword">int</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, it := <span class="keyword">range</span> arr &#123;</span><br><span class="line">		newArray = <span class="built_in">append</span>(newArray, fn(it))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> newArray</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Reduce</span><span class="params">(arr []<span class="keyword">string</span>, fn <span class="keyword">func</span>(s <span class="keyword">string</span>)</span> <span class="title">int</span>) <span class="title">int</span></span> &#123;</span><br><span class="line">	sum := <span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> _, it := <span class="keyword">range</span> arr &#123;</span><br><span class="line">		sum += fn(it)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sum</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Filter</span><span class="params">(arr []<span class="keyword">string</span>, fn <span class="keyword">func</span>(n <span class="keyword">string</span>)</span> <span class="title">bool</span>) []<span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> newArray = []<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, it := <span class="keyword">range</span> arr &#123;</span><br><span class="line">		<span class="keyword">if</span> fn(it) &#123;</span><br><span class="line">			newArray = <span class="built_in">append</span>(newArray, it)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> newArray</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> list = []<span class="keyword">string</span>&#123;<span class="string">&quot;Hao&quot;</span>, <span class="string">&quot;Chen&quot;</span>, <span class="string">&quot;MegaEase&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 元素一对一映射 string-&gt;string</span></span><br><span class="line">	x := MapUpCase(list, <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> strings.ToUpper(s)</span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%v\n&quot;</span>, x)</span><br><span class="line">	<span class="comment">// [HAO CHEN MEGAEASE]</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 元素一对一映射 string-&gt;int</span></span><br><span class="line">	y := MapLen(list, <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">len</span>(s)</span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%v\n&quot;</span>, y)</span><br><span class="line">	<span class="comment">// [3 4 8]</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 归约：多个元素-&gt;一个元素</span></span><br><span class="line">	z := Reduce(list, <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">len</span>(s)</span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%v\n&quot;</span>, z)</span><br><span class="line">	<span class="comment">// 15</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 过滤：过滤不满足条件的元素</span></span><br><span class="line">	f := Filter(list, <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">len</span>(s) &gt; <span class="number">3</span></span><br><span class="line">	&#125;)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%v\n&quot;</span>, f)</span><br><span class="line">	<span class="comment">// [Chen MegaEase]</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Scenarios"><a href="#Scenarios" class="headerlink" title="Scenarios"></a>Scenarios</h2><ul>
+<li><code>Map</code> 是一对一的场景，是 <strong>循环中对数据加工处理</strong> </li>
+<li><code>Reduce</code> 是多对一，是 <strong>数据聚合处理</strong></li>
+<li><code>Filter</code>是过滤的处理，是 <strong>数据有效性</strong></li>
+</ul>
+<p>我们以常见的账单统计相关的功能，我们会遇上大量的此类情况：</p>
+<ol>
+<li>统计消费总额 - Reduce</li>
+<li>统计用户A - Filter</li>
+<li>统计本月 - Filter</li>
+<li>费用转化为美金 - Map</li>
+</ol>
+<p>在综合各个因素后，就是大量复杂的、管道式的Map/Reduce/Filter操作。</p>
+<blockquote>
+<p>延伸思考一下，这块和SQL语句非常类似</p>
+</blockquote>
+<h2 id="Generic"><a href="#Generic" class="headerlink" title="Generic"></a>Generic</h2><p>耗子叔在接下来的部分，展示了用<code>reflect</code>处理泛型情况。我这边简单地截取Map部分解析一下</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TransformInPlace</span><span class="params">(slice, function <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">interface</span></span>&#123;&#125; &#123;</span><br><span class="line">	<span class="keyword">return</span> transform(slice, function, <span class="literal">true</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// map的转换函数，slice为切片，function为对应的函数，inPlace表示是否原地处理</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">transform</span><span class="params">(slice, function <span class="keyword">interface</span>&#123;&#125;, inPlace <span class="keyword">bool</span>)</span> <span class="title">interface</span></span>&#123;&#125; &#123;</span><br><span class="line">	<span class="comment">// 类型判断，必须为切片</span></span><br><span class="line">	sliceInType := reflect.ValueOf(slice)</span><br><span class="line">	<span class="keyword">if</span> sliceInType.Kind() != reflect.Slice &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;transform: not slice&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 函数的签名判断，即函数的入参必须和slice里的元素一致</span></span><br><span class="line">	fn := reflect.ValueOf(function)</span><br><span class="line">	elemType := sliceInType.Type().Elem()</span><br><span class="line">	<span class="keyword">if</span> !verifyFuncSignature(fn, elemType, <span class="literal">nil</span>) &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;trasform: function must be of type func(&quot;</span> + sliceInType.Type().Elem().String() + <span class="string">&quot;) outputElemType&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 如果是原地，则直接处理函数，结果会保存到入参中（这时入参一般为指针）</span></span><br><span class="line">	<span class="comment">// 如果非原地，那就需要新建一个切片，用来保存结果</span></span><br><span class="line">	sliceOutType := sliceInType</span><br><span class="line">	<span class="keyword">if</span> !inPlace &#123;</span><br><span class="line">		sliceOutType = reflect.MakeSlice(reflect.SliceOf(fn.Type().Out(<span class="number">0</span>)), sliceInType.Len(), sliceInType.Len())</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; sliceInType.Len(); i++ &#123;</span><br><span class="line">		sliceOutType.Index(i).Set(fn.Call([]reflect.Value&#123;sliceInType.Index(i)&#125;)[<span class="number">0</span>])</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sliceOutType.Interface()</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">verifyFuncSignature</span><span class="params">(fn reflect.Value, types ...reflect.Type)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="comment">// 类型判断</span></span><br><span class="line">	<span class="keyword">if</span> fn.Kind() != reflect.Func &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 入参数量和函数签名一致，出参必须只有一个</span></span><br><span class="line">	<span class="keyword">if</span> (fn.Type().NumIn() != <span class="built_in">len</span>(types)<span class="number">-1</span>) || (fn.Type().NumOut() != <span class="number">1</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 每个函数入参的类型校验</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(types)<span class="number">-1</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">if</span> fn.Type().In(i) != types[i] &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 出参类型的校验</span></span><br><span class="line">	outType := types[<span class="built_in">len</span>(types)<span class="number">-1</span>]</span><br><span class="line">	<span class="keyword">if</span> outType != <span class="literal">nil</span> &amp;&amp; fn.Type().Out(<span class="number">0</span>) != outType &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>仔细阅读这一块代码，我们能学到很多反射方面的知识，尤其是并不常用的函数相关的。</p>
+<p>但是，我不建议大家在实际项目中直接使用这一块代码，毕竟其中大量的反射操作是比较耗时的，尤其是在延迟非常敏感的web服务器中。</p>
+<p>如果我们多花点时间、直接编写指定类型的代码，那么就能在编译期发现错误，运行时也可以跳过反射的耗时。</p>
 <blockquote>
 <p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
@@ -1329,101 +1528,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Go语言技巧 - 2.【错误处理】谈谈Go Error的前世今生</title>
-    <url>/2021/05/05/go-tip/go-tip-2/</url>
-    <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
-<h2 id="从Go-2-Error-Proposal谈起"><a href="#从Go-2-Error-Proposal谈起" class="headerlink" title="从Go 2 Error Proposal谈起"></a>从Go 2 Error Proposal谈起</h2><p><code>Go</code>对<code>error</code>的处理一直都是很大的争议点，这点官方也已多次发文，并在2019年1月推出了一篇Proposal，有兴趣的可以点击链接细细品读。</p>
-<p><a href="https://go.googlesource.com/proposal/+/master/design/29934-error-values.md">官方原文链接</a></p>
-<p>下面，我会结合Proposal原文，发表一些自己的看法（会带上主观意见），欢迎讨论。</p>
-<span id="more"></span>
-
-<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>这篇Proposal有一句话很好地解释了对<code>error</code>的期许：</p>
-<p><strong>making errors more informative for both programs and people</strong></p>
-<p>错误不仅是告诉机器怎么做的，也是告诉人发生了什么问题。</p>
-<h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><p>先让我们一起简单地回顾一下<code>error</code>的现状，来更好地理解这个 <strong>more informative</strong> 指的是什么。</p>
-<p>原始的error定义为：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> error <span class="keyword">interface</span> &#123;</span><br><span class="line">  Error() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里面的包含信息很少：一个Error() 的方法，即用字符串返回对应的错误信息。</p>
-<p>最常用的<code>error</code>相关方法是2种：</p>
-<ol>
-<li>创建<code>error</code> - <code>fmt.Errorf</code>，它是针对<code>Error() </code>方法返回的字符串进行加工，如附带一些参数信息（暂不讨论%w这个wrap错误的实现）</li>
-<li>使用<code>error</code> - 由于我们将<code>error</code>的输出结果定义为字符串，所以使用<code>error</code>时，一旦涉及到细节，就只能使用一些<code>string</code>的方法了</li>
-</ol>
-<p>举个具体的例子：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 假设 readFile 存在于第三方或公用的库，我们没有权限修改、或者修改它的影响面很大</span></span><br><span class="line">	_, err := readFile(<span class="string">&quot;test&quot;</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 错误中包含业务逻辑:</span></span><br><span class="line">	<span class="comment">// 1. 文件不存在时，认为是 正常</span></span><br><span class="line">	<span class="comment">// 2. 其余报错时，认为是 异常</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> strings.Index(err.Error(), <span class="string">&quot;no such file or directory&quot;</span>) &gt;= <span class="number">0</span> &#123;</span><br><span class="line">			log.Println(<span class="string">&quot;file not exist&quot;</span>)</span><br><span class="line">			os.Exit(<span class="number">0</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		log.Println(<span class="string">&quot;open file error&quot;</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">readFile</span><span class="params">(fileName <span class="keyword">string</span>)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	b, err := ioutil.ReadFile(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里存在3个明显的问题：</p>
-<ol>
-<li><strong>破坏性</strong> - <code>fmt.Errorf</code> 破坏了原有的error，将它从一个 <strong>具体对象</strong> 转化为 <strong>扁平的</strong> <code>string</code>，再填充到了新的<code>error</code>中。所以，通过<code>fmt.Errorf</code>处理后的error，都只传递了一个<code>string</code>的信息</li>
-<li><strong>实现僵化</strong> - <strong>“no such file or directory”</strong> 这个错误信息用的是<strong>硬编码</strong>，对第三方<code>readFile</code>的内容有强依赖，不灵活</li>
-<li><strong>排查问题效率低</strong> - 可以通过日志组件了解到error在<code>main</code>函数哪行发生，但无法知道错误从<code>readFile</code>中的哪行返回过来的</li>
-</ol>
-<blockquote>
-<p>其中第一个破坏性的问题，其实就是破坏了error这个interface背后的具体实现，违背了面向对象的继承原则。</p>
-</blockquote>
-<h2 id="Handle-Errors-Only-Once"><a href="#Handle-Errors-Only-Once" class="headerlink" title="Handle Errors Only Once"></a>Handle Errors Only Once</h2><p>在工程中，为了解决 <strong>排查问题效率低</strong> 这个问题，有一个很常见的做法（以上面的readFile为例）:</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">readFile</span><span class="params">(fileName <span class="keyword">string</span>)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	b, err := ioutil.ReadFile(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Printf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>没错，就是 <strong>打印错误并返回</strong>。有大量排查问题经验的同学，对此肯定是深恶痛绝： <strong>一个错误能找到N处打印，看得人眼花缭乱</strong>。</p>
-<p>这里违背了一个关键性的原则：<strong>对错误只进行一次处理，处理完之后就不要再往上抛了，而打印错误也是一种处理。</strong></p>
-<p>结合三种具体的场景，我们分析一下：</p>
-<ol>
-<li>一个程序模块内，<code>error</code>不断往上抛，最上层处理；</li>
-<li>一个公共的工具包中，<code>error</code>不记录，传给调用方处理；</li>
-<li>一个RPC模块的调用中，<code>error</code>可以记录，作为<code>debug</code>信息，而具体的处理仍应交给调用方。</li>
-</ol>
-<p>示例参考文章</p>
-<ul>
-<li><a href="https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully">https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully</a></li>
-<li><a href="https://www.orsolabs.com/post/go-errors-and-logs/">https://www.orsolabs.com/post/go-errors-and-logs/</a></li>
-</ul>
-<h2 id="理论实现"><a href="#理论实现" class="headerlink" title="理论实现"></a>理论实现</h2><p>那么，怎么样的<code>error</code>才是合适的呢？我们分两个角度来看这个<code>error</code>：</p>
-<ol>
-<li>对程序来说，<code>error</code>要包含<strong>错误细节</strong>：如错误类型、错误码等，方便在模块间传递；</li>
-<li>对人来说，<code>error</code>要包含<strong>代码信息</strong>：如相关的调用参数、运行信息，方便查问题；</li>
-</ol>
-<p>用原文一句话来归纳：<strong>hide implementation details from programs while displaying them for diagnosis</strong></p>
-<ul>
-<li>Wrap - 隐藏实现，针对代码调用时的堆栈信息</li>
-<li>Is/As - 展示细节，针对底层真正实现的数据结构</li>
-</ul>
-<h2 id="当前实现"><a href="#当前实现" class="headerlink" title="当前实现"></a>当前实现</h2><p><code>Go</code>语言发展多年，已经有了很多关于<code>error</code>的处理方法，但大多为过渡方案，我就不一一分析了。</p>
-<p>这里我以 github.com/pkg/errors 为例，也是这个<strong>官方Proposal</strong>的重点参考对象，简单地分享一下大致实现思路。</p>
-<p>代码量并不多，大家可以自行阅读源码：</p>
-<h3 id="New-产生错误的堆栈信息"><a href="#New-产生错误的堆栈信息" class="headerlink" title="New 产生错误的堆栈信息"></a>New 产生错误的堆栈信息</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;fundamental&#123;</span><br><span class="line">		msg:   message,</span><br><span class="line">		stack: callers(),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> fundamental <span class="keyword">struct</span> &#123;</span><br><span class="line">	msg <span class="keyword">string</span></span><br><span class="line">	*stack</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> stack保存了错误产生的堆栈信息，如函数名、代码行</p>
-<h3 id="Wrap-包装错误"><a href="#Wrap-包装错误" class="headerlink" title="Wrap 包装错误"></a>Wrap 包装错误</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Wrap</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	err = &amp;withMessage&#123;</span><br><span class="line">		cause: err,</span><br><span class="line">		msg:   message,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;withStack&#123;</span><br><span class="line">		err,</span><br><span class="line">		callers(),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> 将错误包装出一个全新的堆栈。一般只用于对外接口产生错误时，包括标准库、RPC。</p>
-<h3 id="WithMessage-添加普通信息"><a href="#WithMessage-添加普通信息" class="headerlink" title="WithMessage 添加普通信息"></a>WithMessage 添加普通信息</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithMessage</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;withMessage&#123;</span><br><span class="line">		cause: err,</span><br><span class="line">		msg:   message,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> 添加错误信息，增加一个普通的堆栈打印</p>
-<h3 id="Is-解析Sentinel错误、即全局错误变量"><a href="#Is-解析Sentinel错误、即全局错误变量" class="headerlink" title="Is 解析Sentinel错误、即全局错误变量"></a>Is 解析Sentinel错误、即全局错误变量</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Is</span><span class="params">(err, target error)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> stderrors.Is(err, target) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Is</span><span class="params">(err, target error)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> target == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err == target</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	isComparable := reflectlite.TypeOf(target).Comparable()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> isComparable &amp;&amp; err == target &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> x, ok := err.(<span class="keyword">interface</span>&#123; Is(error) <span class="keyword">bool</span> &#125;); ok &amp;&amp; x.Is(target) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// <span class="doctag">TODO:</span> consider supporing target.Is(err). This would allow</span></span><br><span class="line">		<span class="comment">// user-definable predicates, but also may allow for coping with sloppy</span></span><br><span class="line">		<span class="comment">// APIs, thereby making it easier to get away with them.</span></span><br><span class="line">		<span class="keyword">if</span> err = Unwrap(err); err == <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> 反复Unwrap、提取错误，解析并对比错误类型</p>
-<h2 id="As-提取出具体的错误数据结构"><a href="#As-提取出具体的错误数据结构" class="headerlink" title="As - 提取出具体的错误数据结构"></a>As - 提取出具体的错误数据结构</h2><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">As</span><span class="params">(err error, target <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> stderrors.As(err, target) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">As</span><span class="params">(err error, target <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> target == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: target cannot be nil&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	val := reflectlite.ValueOf(target)</span><br><span class="line">	typ := val.Type()</span><br><span class="line">	<span class="keyword">if</span> typ.Kind() != reflectlite.Ptr || val.IsNil() &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: target must be a non-nil pointer&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> e := typ.Elem(); e.Kind() != reflectlite.Interface &amp;&amp; !e.Implements(errorType) &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: *target must be interface or implement error&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	targetType := typ.Elem()</span><br><span class="line">	<span class="keyword">for</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> reflectlite.TypeOf(err).AssignableTo(targetType) &#123;</span><br><span class="line">			val.Elem().Set(reflectlite.ValueOf(err))</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> x, ok := err.(<span class="keyword">interface</span>&#123; As(<span class="keyword">interface</span>&#123;&#125;) <span class="keyword">bool</span> &#125;); ok &amp;&amp; x.As(target) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		err = Unwrap(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>关键点</strong> 反复Unwrap、提取错误，提取底层的实现类型</p>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><code>Go</code>语言对<code>error</code>的定义很简单，虽然带来了灵活性，但也导致处理方式泛滥，一如当年的<strong>Go语言的版本管理</strong>。如今的<strong>go mod</strong>版本管理机制已经”一统江湖“，随着大家对<code>error</code>这块的不断深入，<code>Error Handling</code>也总会达成共识。</p>
-<p>接下来，我会结合实际代码样例，写一个具体工程中 <strong>Error Handling</strong> 的操作方法，提供一定的参考。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>成长分享</category>
-      </categories>
-      <tags>
-        <tag>Go-Tip</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Go语言技巧 - 1.【惊艳亮相】如何写出一个优雅的main函数</title>
     <url>/2021/03/07/go-tip/go-tip-1/</url>
     <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
@@ -1513,6 +1617,101 @@
 <li><strong>面向错误编程</strong> - 关键业务的<code>Goroutine</code> 里代码要考虑所有可能发生错误的点，保证程序退出或<code>panic/recover</code>也不要出现 <strong>脏数据</strong>。</li>
 </ol>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>main</code>函数是<code>go</code>程序的入口，如果在这里写出一段优雅的代码，很容易给阅读自己源码的朋友留下良好的印象。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>成长分享</category>
+      </categories>
+      <tags>
+        <tag>Go-Tip</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Go语言技巧 - 2.【错误处理】谈谈Go Error的前世今生</title>
+    <url>/2021/05/05/go-tip/go-tip-2/</url>
+    <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="从Go-2-Error-Proposal谈起"><a href="#从Go-2-Error-Proposal谈起" class="headerlink" title="从Go 2 Error Proposal谈起"></a>从Go 2 Error Proposal谈起</h2><p><code>Go</code>对<code>error</code>的处理一直都是很大的争议点，这点官方也已多次发文，并在2019年1月推出了一篇Proposal，有兴趣的可以点击链接细细品读。</p>
+<p><a href="https://go.googlesource.com/proposal/+/master/design/29934-error-values.md">官方原文链接</a></p>
+<p>下面，我会结合Proposal原文，发表一些自己的看法（会带上主观意见），欢迎讨论。</p>
+<span id="more"></span>
+
+<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>这篇Proposal有一句话很好地解释了对<code>error</code>的期许：</p>
+<p><strong>making errors more informative for both programs and people</strong></p>
+<p>错误不仅是告诉机器怎么做的，也是告诉人发生了什么问题。</p>
+<h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><p>先让我们一起简单地回顾一下<code>error</code>的现状，来更好地理解这个 <strong>more informative</strong> 指的是什么。</p>
+<p>原始的error定义为：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> error <span class="keyword">interface</span> &#123;</span><br><span class="line">  Error() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里面的包含信息很少：一个Error() 的方法，即用字符串返回对应的错误信息。</p>
+<p>最常用的<code>error</code>相关方法是2种：</p>
+<ol>
+<li>创建<code>error</code> - <code>fmt.Errorf</code>，它是针对<code>Error() </code>方法返回的字符串进行加工，如附带一些参数信息（暂不讨论%w这个wrap错误的实现）</li>
+<li>使用<code>error</code> - 由于我们将<code>error</code>的输出结果定义为字符串，所以使用<code>error</code>时，一旦涉及到细节，就只能使用一些<code>string</code>的方法了</li>
+</ol>
+<p>举个具体的例子：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 假设 readFile 存在于第三方或公用的库，我们没有权限修改、或者修改它的影响面很大</span></span><br><span class="line">	_, err := readFile(<span class="string">&quot;test&quot;</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 错误中包含业务逻辑:</span></span><br><span class="line">	<span class="comment">// 1. 文件不存在时，认为是 正常</span></span><br><span class="line">	<span class="comment">// 2. 其余报错时，认为是 异常</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> strings.Index(err.Error(), <span class="string">&quot;no such file or directory&quot;</span>) &gt;= <span class="number">0</span> &#123;</span><br><span class="line">			log.Println(<span class="string">&quot;file not exist&quot;</span>)</span><br><span class="line">			os.Exit(<span class="number">0</span>)</span><br><span class="line">		&#125;</span><br><span class="line">		log.Println(<span class="string">&quot;open file error&quot;</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">readFile</span><span class="params">(fileName <span class="keyword">string</span>)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	b, err := ioutil.ReadFile(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里存在3个明显的问题：</p>
+<ol>
+<li><strong>破坏性</strong> - <code>fmt.Errorf</code> 破坏了原有的error，将它从一个 <strong>具体对象</strong> 转化为 <strong>扁平的</strong> <code>string</code>，再填充到了新的<code>error</code>中。所以，通过<code>fmt.Errorf</code>处理后的error，都只传递了一个<code>string</code>的信息</li>
+<li><strong>实现僵化</strong> - <strong>“no such file or directory”</strong> 这个错误信息用的是<strong>硬编码</strong>，对第三方<code>readFile</code>的内容有强依赖，不灵活</li>
+<li><strong>排查问题效率低</strong> - 可以通过日志组件了解到error在<code>main</code>函数哪行发生，但无法知道错误从<code>readFile</code>中的哪行返回过来的</li>
+</ol>
+<blockquote>
+<p>其中第一个破坏性的问题，其实就是破坏了error这个interface背后的具体实现，违背了面向对象的继承原则。</p>
+</blockquote>
+<h2 id="Handle-Errors-Only-Once"><a href="#Handle-Errors-Only-Once" class="headerlink" title="Handle Errors Only Once"></a>Handle Errors Only Once</h2><p>在工程中，为了解决 <strong>排查问题效率低</strong> 这个问题，有一个很常见的做法（以上面的readFile为例）:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">readFile</span><span class="params">(fileName <span class="keyword">string</span>)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">	b, err := ioutil.ReadFile(fileName)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Printf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;read file %s error %v&quot;</span>, fileName, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>没错，就是 <strong>打印错误并返回</strong>。有大量排查问题经验的同学，对此肯定是深恶痛绝： <strong>一个错误能找到N处打印，看得人眼花缭乱</strong>。</p>
+<p>这里违背了一个关键性的原则：<strong>对错误只进行一次处理，处理完之后就不要再往上抛了，而打印错误也是一种处理。</strong></p>
+<p>结合三种具体的场景，我们分析一下：</p>
+<ol>
+<li>一个程序模块内，<code>error</code>不断往上抛，最上层处理；</li>
+<li>一个公共的工具包中，<code>error</code>不记录，传给调用方处理；</li>
+<li>一个RPC模块的调用中，<code>error</code>可以记录，作为<code>debug</code>信息，而具体的处理仍应交给调用方。</li>
+</ol>
+<p>示例参考文章</p>
+<ul>
+<li><a href="https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully">https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully</a></li>
+<li><a href="https://www.orsolabs.com/post/go-errors-and-logs/">https://www.orsolabs.com/post/go-errors-and-logs/</a></li>
+</ul>
+<h2 id="理论实现"><a href="#理论实现" class="headerlink" title="理论实现"></a>理论实现</h2><p>那么，怎么样的<code>error</code>才是合适的呢？我们分两个角度来看这个<code>error</code>：</p>
+<ol>
+<li>对程序来说，<code>error</code>要包含<strong>错误细节</strong>：如错误类型、错误码等，方便在模块间传递；</li>
+<li>对人来说，<code>error</code>要包含<strong>代码信息</strong>：如相关的调用参数、运行信息，方便查问题；</li>
+</ol>
+<p>用原文一句话来归纳：<strong>hide implementation details from programs while displaying them for diagnosis</strong></p>
+<ul>
+<li>Wrap - 隐藏实现，针对代码调用时的堆栈信息</li>
+<li>Is/As - 展示细节，针对底层真正实现的数据结构</li>
+</ul>
+<h2 id="当前实现"><a href="#当前实现" class="headerlink" title="当前实现"></a>当前实现</h2><p><code>Go</code>语言发展多年，已经有了很多关于<code>error</code>的处理方法，但大多为过渡方案，我就不一一分析了。</p>
+<p>这里我以 github.com/pkg/errors 为例，也是这个<strong>官方Proposal</strong>的重点参考对象，简单地分享一下大致实现思路。</p>
+<p>代码量并不多，大家可以自行阅读源码：</p>
+<h3 id="New-产生错误的堆栈信息"><a href="#New-产生错误的堆栈信息" class="headerlink" title="New 产生错误的堆栈信息"></a>New 产生错误的堆栈信息</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;fundamental&#123;</span><br><span class="line">		msg:   message,</span><br><span class="line">		stack: callers(),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> fundamental <span class="keyword">struct</span> &#123;</span><br><span class="line">	msg <span class="keyword">string</span></span><br><span class="line">	*stack</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> stack保存了错误产生的堆栈信息，如函数名、代码行</p>
+<h3 id="Wrap-包装错误"><a href="#Wrap-包装错误" class="headerlink" title="Wrap 包装错误"></a>Wrap 包装错误</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Wrap</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	err = &amp;withMessage&#123;</span><br><span class="line">		cause: err,</span><br><span class="line">		msg:   message,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;withStack&#123;</span><br><span class="line">		err,</span><br><span class="line">		callers(),</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> 将错误包装出一个全新的堆栈。一般只用于对外接口产生错误时，包括标准库、RPC。</p>
+<h3 id="WithMessage-添加普通信息"><a href="#WithMessage-添加普通信息" class="headerlink" title="WithMessage 添加普通信息"></a>WithMessage 添加普通信息</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithMessage</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;withMessage&#123;</span><br><span class="line">		cause: err,</span><br><span class="line">		msg:   message,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> 添加错误信息，增加一个普通的堆栈打印</p>
+<h3 id="Is-解析Sentinel错误、即全局错误变量"><a href="#Is-解析Sentinel错误、即全局错误变量" class="headerlink" title="Is 解析Sentinel错误、即全局错误变量"></a>Is 解析Sentinel错误、即全局错误变量</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Is</span><span class="params">(err, target error)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> stderrors.Is(err, target) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Is</span><span class="params">(err, target error)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> target == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err == target</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	isComparable := reflectlite.TypeOf(target).Comparable()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> isComparable &amp;&amp; err == target &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> x, ok := err.(<span class="keyword">interface</span>&#123; Is(error) <span class="keyword">bool</span> &#125;); ok &amp;&amp; x.Is(target) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// <span class="doctag">TODO:</span> consider supporing target.Is(err). This would allow</span></span><br><span class="line">		<span class="comment">// user-definable predicates, but also may allow for coping with sloppy</span></span><br><span class="line">		<span class="comment">// APIs, thereby making it easier to get away with them.</span></span><br><span class="line">		<span class="keyword">if</span> err = Unwrap(err); err == <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> 反复Unwrap、提取错误，解析并对比错误类型</p>
+<h2 id="As-提取出具体的错误数据结构"><a href="#As-提取出具体的错误数据结构" class="headerlink" title="As - 提取出具体的错误数据结构"></a>As - 提取出具体的错误数据结构</h2><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">As</span><span class="params">(err error, target <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123; <span class="keyword">return</span> stderrors.As(err, target) &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">As</span><span class="params">(err error, target <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> target == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: target cannot be nil&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	val := reflectlite.ValueOf(target)</span><br><span class="line">	typ := val.Type()</span><br><span class="line">	<span class="keyword">if</span> typ.Kind() != reflectlite.Ptr || val.IsNil() &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: target must be a non-nil pointer&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> e := typ.Elem(); e.Kind() != reflectlite.Interface &amp;&amp; !e.Implements(errorType) &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;errors: *target must be interface or implement error&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	targetType := typ.Elem()</span><br><span class="line">	<span class="keyword">for</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> reflectlite.TypeOf(err).AssignableTo(targetType) &#123;</span><br><span class="line">			val.Elem().Set(reflectlite.ValueOf(err))</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> x, ok := err.(<span class="keyword">interface</span>&#123; As(<span class="keyword">interface</span>&#123;&#125;) <span class="keyword">bool</span> &#125;); ok &amp;&amp; x.As(target) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">		&#125;</span><br><span class="line">		err = Unwrap(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong> 反复Unwrap、提取错误，提取底层的实现类型</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><code>Go</code>语言对<code>error</code>的定义很简单，虽然带来了灵活性，但也导致处理方式泛滥，一如当年的<strong>Go语言的版本管理</strong>。如今的<strong>go mod</strong>版本管理机制已经”一统江湖“，随着大家对<code>error</code>这块的不断深入，<code>Error Handling</code>也总会达成共识。</p>
+<p>接下来，我会结合实际代码样例，写一个具体工程中 <strong>Error Handling</strong> 的操作方法，提供一定的参考。</p>
 <blockquote>
 <p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
@@ -1716,91 +1915,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Go语言技巧 - 6.【深入Go Module】探索最小版本选择的机制</title>
-    <url>/2021/07/09/go-tip/go-tip-6/</url>
-    <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
-<h2 id="从一个示例讲起"><a href="#从一个示例讲起" class="headerlink" title="从一个示例讲起"></a>从一个示例讲起</h2><p>用一个简单列表来表示我们的模块A依赖：</p>
-<ul>
-<li>B1<code>v1.0.0</code><ul>
-<li>C1<code>v1.1.0</code></li>
-<li>C2 <code>v1.2.0</code></li>
-</ul>
-</li>
-<li>B2 <code>v1.2.0</code><ul>
-<li>C1<code>v1.1.2</code></li>
-<li>C3 <code>v1.2.0</code></li>
-</ul>
-</li>
-</ul>
-<p>表示 <em>A依赖B1与B2，而B1又依赖C1、C2，B2依赖C1、C3</em>。</p>
-<p>这里，我们把关注点放到有争议的C1，它存在两个版本<code>v1.1.0</code>与<code>v1.1.2</code>。而最终A选择的是<code>v1.1.2</code>版本的C1。</p>
-<ul>
-<li>B1<code>v1.0.0</code><ul>
-<li><del>C1<code>v1.1.0</code></del></li>
-<li>C2 <code>v1.2.0</code></li>
-</ul>
-</li>
-<li>B2 <code>v1.2.0</code><ul>
-<li>C1<code>v1.1.2</code></li>
-<li>C3 <code>v1.2.0</code></li>
-</ul>
-</li>
-</ul>
-<span id="more"></span>
-
-<h3 id="问题1：为什么要选择较高版本的C1？"><a href="#问题1：为什么要选择较高版本的C1？" class="headerlink" title="问题1：为什么要选择较高版本的C1？"></a>问题1：为什么要选择较高版本的C1？</h3><p>也许你会疑惑，为什么原则名字叫<strong>最小版本选择</strong>，但反而选择了较高那个版本呢？</p>
-<p>我们要明确一点，<strong>最小版本选择</strong>这个概念不是应用在这个场景的！</p>
-<p>从两个版本号的语义来看，<code>v1.1.2</code>和<code>v1.1.0</code>的主版本号都是<code>v1</code>，说明是向下兼容的。所以我们自然会选择较高的<code>v1.1.2</code>，毕竟如果用了<code>v1.1.0</code>，可能导致B2具体的代码不可用。</p>
-<h3 id="问题2：如果同时出现了v1和v2怎么办？"><a href="#问题2：如果同时出现了v1和v2怎么办？" class="headerlink" title="问题2：如果同时出现了v1和v2怎么办？"></a>问题2：如果同时出现了v1和v2怎么办？</h3><p>如果场景变化，C1的依赖版本为<code>v1.1.0</code>和<code>v2.0.0</code>，也就是大版本发生了变化。</p>
-<p>从版本号的语义来看，两者是<strong>不兼容</strong>的！所以，这时不会出现<strong>高版本覆盖低版本</strong>的情况。</p>
-<p>这时，就会出现依赖2个版本的C1。</p>
-<h3 id="问题3：那什么是最小版本选择中的“最小”呢？"><a href="#问题3：那什么是最小版本选择中的“最小”呢？" class="headerlink" title="问题3：那什么是最小版本选择中的“最小”呢？"></a>问题3：那什么是最小版本选择中的“最小”呢？</h3><p>在C1这个库中，我们能看到很多tag，例如<code>v1.1.0</code>，<code>v1.1.1</code>，<code>v1.1.2</code>，<code>v1.1.3</code>。而我们用到的是<code>v1.1.2</code>和<code>v1.1.0</code>。</p>
-<p>从兼容性来看，<code>v1.1.3</code>肯定能兼容前面的版本。但这时，根据<strong>最小版本选择</strong>，我们引用到<code>v1.1.2</code>。</p>
-<p>为什么要用这个最小版本原则，而不是每次都去拉取最新的tag？大家不妨思考思考，我这里列两个我能想到的点：</p>
-<ol>
-<li>保证项目依赖的稳定性：如果存在某个依赖库高频更新，会导致整个项目也频繁升级，造成风险；</li>
-<li>完全向下兼容并不可靠：毕竟软件存在不稳定性，最新的tag很有可能会导致代码变更；</li>
-</ol>
-<h2 id="结合源码巩固知识点"><a href="#结合源码巩固知识点" class="headerlink" title="结合源码巩固知识点"></a>结合源码巩固知识点</h2><p>在阅读源码之前，我们先明确本次阅读源码的预期：<strong>不要为了掌握所有代码细节而读代码，而是希望能通过了解这部分功能的一个大致实现，巩固理论知识</strong>。</p>
-<p>这里，我以<code>go语言1.15.11</code>版本为例，具体的代码路径在<code>src/cmd/go/internal/modcmd</code>下。</p>
-<p><code>go mod tidy</code>是整理Go Module最常用的指令之一，这里我们就来看看<code>tidy.go</code>文件。</p>
-<h3 id="tidy的简介"><a href="#tidy的简介" class="headerlink" title="tidy的简介"></a>tidy的简介</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> cmdTidy = &amp;base.Command&#123;</span><br><span class="line">	UsageLine: <span class="string">&quot;go mod tidy [-v]&quot;</span>,</span><br><span class="line">	Short:     <span class="string">&quot;add missing and remove unused modules&quot;</span>,</span><br><span class="line">	Long: <span class="string">`</span></span><br><span class="line"><span class="string">Tidy makes sure go.mod matches the source code in the module.</span></span><br><span class="line"><span class="string">It adds any missing modules necessary to build the current module&#x27;s</span></span><br><span class="line"><span class="string">packages and dependencies, and it removes unused modules that</span></span><br><span class="line"><span class="string">don&#x27;t provide any relevant packages. It also adds any missing entries</span></span><br><span class="line"><span class="string">to go.sum and removes any unnecessary ones.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">The -v flag causes tidy to print information about removed modules</span></span><br><span class="line"><span class="string">to standard error.</span></span><br><span class="line"><span class="string">	`</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>tidy</code>主要是把缺失的module加入到模块中，并删除弃用的modules。加上<code>-v</code>的标记位，就能把信息打印到标注错误。</p>
-<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><p>核心的数据结构为，储存Go Module的路径Path和版本Version:</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> Version <span class="keyword">struct</span> &#123;</span><br><span class="line">	Path <span class="keyword">string</span></span><br><span class="line">	Version <span class="keyword">string</span> <span class="string">`json:&quot;,omitempty&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而加载模块的代码，则是下面的<code>mvs.Req</code>函数：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// cmd/go/internal/mvs</span></span><br><span class="line">mvs.Req(Target, direct, &amp;mvsReqs&#123;buildList: keep&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>这个函数的功能，我进行了一定的简化，大家关注重点标注出来的几行。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Req</span><span class="params">(target module.Version, base []<span class="keyword">string</span>, reqs Reqs)</span> <span class="params">([]module.Version, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 保存模块与其依赖module的map，用map是为了防止依赖库重复</span></span><br><span class="line">	reqCache := <span class="keyword">map</span>[module.Version][]module.Version&#123;&#125;</span><br><span class="line">	reqCache[target] = <span class="literal">nil</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 第一次遍历：walk函数，用于遍历整个依赖</span></span><br><span class="line">	<span class="keyword">var</span> walk <span class="function"><span class="keyword">func</span><span class="params">(module.Version)</span> <span class="title">error</span></span></span><br><span class="line">	walk = <span class="function"><span class="keyword">func</span><span class="params">(m module.Version)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="comment">// 获取m的依赖库required，保存到map中</span></span><br><span class="line">		required, err := reqs.Required(m)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		reqCache[m] = required</span><br><span class="line">    <span class="comment">// 继续遍历依赖的依赖，保证不缺失</span></span><br><span class="line">		<span class="keyword">for</span> _, m1 := <span class="keyword">range</span> required &#123;</span><br><span class="line">			<span class="keyword">if</span> err := walk(m1); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		postorder = <span class="built_in">append</span>(postorder, m)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 真正运行第一次walk的地方</span></span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> list &#123;</span><br><span class="line">		<span class="keyword">if</span> err := walk(m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 第二次遍历：再次定义一个walk函数，取最大的版本号</span></span><br><span class="line">	have := <span class="keyword">map</span>[module.Version]<span class="keyword">bool</span>&#123;&#125;</span><br><span class="line">	walk = <span class="function"><span class="keyword">func</span><span class="params">(m module.Version)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> have[m] &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		have[m] = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">for</span> _, m1 := <span class="keyword">range</span> reqCache[m] &#123;</span><br><span class="line">			walk(m1)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	max := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> list &#123;</span><br><span class="line">		<span class="keyword">if</span> v, ok := max[m.Path]; ok &#123;</span><br><span class="line">      <span class="comment">// 只保存较大的版本号</span></span><br><span class="line">      <span class="comment">// 而v1与v2的问题也是在这里解决的：两者的Path路径不同</span></span><br><span class="line">			max[m.Path] = reqs.Max(m.Version, v)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			max[m.Path] = m.Version</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 真正运行第二次walk的地方</span></span><br><span class="line">	<span class="keyword">var</span> min []module.Version</span><br><span class="line">	<span class="keyword">for</span> _, path := <span class="keyword">range</span> base &#123;</span><br><span class="line">		m := module.Version&#123;Path: path, Version: max[path]&#125;</span><br><span class="line">		min = <span class="built_in">append</span>(min, m)</span><br><span class="line">		walk(m)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 根据名称排序</span></span><br><span class="line">	sort.Slice(min, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> min[i].Path &lt; min[j].Path</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">return</span> min, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><strong>Minimal version selection (MVS)</strong> 的整体实现看起来不复杂，但其实里面做了很多兼容性的工作，尤其是<code>indirect</code>和<code>incompatible</code>等特性。这其实在另一层面提醒了我们：<strong>一项功能尽可能在前期做好设计，靠后期补救往往会增加大量兼容性的工作</strong>。</p>
-<p>整个Go Module的核心实现在于2点：</p>
-<ol>
-<li>2个<code>walk</code>函数，一个用于查找所有依赖，另一个选择最大依赖版本；</li>
-<li>选择最大依赖版本的核心依赖一个map，<code>max[m.Path] = reqs.Max(m.Version, v)</code></li>
-</ol>
-<p>至此，对Go Module的讲解告一段落了。而更多的细节问题，需要大家结合上一篇提到的排查问题工具，边实践、边加深理解。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>成长分享</category>
-      </categories>
-      <tags>
-        <tag>Go-Tip</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Go语言技巧 - 5.【初探Go Module】Go语言的版本管理</title>
     <url>/2021/07/03/go-tip/go-tip-5/</url>
     <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
@@ -1914,6 +2028,91 @@
 </blockquote>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本讲的内容到这里就告一段落了，相信通过这篇文章，大家已经能应对绝大部分Go Module的场景。</p>
 <p>下一讲，我会重点讲Go Module最核心的 <strong>Minimal version selection (MVS)</strong> 机制。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>成长分享</category>
+      </categories>
+      <tags>
+        <tag>Go-Tip</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Go语言技巧 - 6.【深入Go Module】探索最小版本选择的机制</title>
+    <url>/2021/07/09/go-tip/go-tip-6/</url>
+    <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="从一个示例讲起"><a href="#从一个示例讲起" class="headerlink" title="从一个示例讲起"></a>从一个示例讲起</h2><p>用一个简单列表来表示我们的模块A依赖：</p>
+<ul>
+<li>B1<code>v1.0.0</code><ul>
+<li>C1<code>v1.1.0</code></li>
+<li>C2 <code>v1.2.0</code></li>
+</ul>
+</li>
+<li>B2 <code>v1.2.0</code><ul>
+<li>C1<code>v1.1.2</code></li>
+<li>C3 <code>v1.2.0</code></li>
+</ul>
+</li>
+</ul>
+<p>表示 <em>A依赖B1与B2，而B1又依赖C1、C2，B2依赖C1、C3</em>。</p>
+<p>这里，我们把关注点放到有争议的C1，它存在两个版本<code>v1.1.0</code>与<code>v1.1.2</code>。而最终A选择的是<code>v1.1.2</code>版本的C1。</p>
+<ul>
+<li>B1<code>v1.0.0</code><ul>
+<li><del>C1<code>v1.1.0</code></del></li>
+<li>C2 <code>v1.2.0</code></li>
+</ul>
+</li>
+<li>B2 <code>v1.2.0</code><ul>
+<li>C1<code>v1.1.2</code></li>
+<li>C3 <code>v1.2.0</code></li>
+</ul>
+</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="问题1：为什么要选择较高版本的C1？"><a href="#问题1：为什么要选择较高版本的C1？" class="headerlink" title="问题1：为什么要选择较高版本的C1？"></a>问题1：为什么要选择较高版本的C1？</h3><p>也许你会疑惑，为什么原则名字叫<strong>最小版本选择</strong>，但反而选择了较高那个版本呢？</p>
+<p>我们要明确一点，<strong>最小版本选择</strong>这个概念不是应用在这个场景的！</p>
+<p>从两个版本号的语义来看，<code>v1.1.2</code>和<code>v1.1.0</code>的主版本号都是<code>v1</code>，说明是向下兼容的。所以我们自然会选择较高的<code>v1.1.2</code>，毕竟如果用了<code>v1.1.0</code>，可能导致B2具体的代码不可用。</p>
+<h3 id="问题2：如果同时出现了v1和v2怎么办？"><a href="#问题2：如果同时出现了v1和v2怎么办？" class="headerlink" title="问题2：如果同时出现了v1和v2怎么办？"></a>问题2：如果同时出现了v1和v2怎么办？</h3><p>如果场景变化，C1的依赖版本为<code>v1.1.0</code>和<code>v2.0.0</code>，也就是大版本发生了变化。</p>
+<p>从版本号的语义来看，两者是<strong>不兼容</strong>的！所以，这时不会出现<strong>高版本覆盖低版本</strong>的情况。</p>
+<p>这时，就会出现依赖2个版本的C1。</p>
+<h3 id="问题3：那什么是最小版本选择中的“最小”呢？"><a href="#问题3：那什么是最小版本选择中的“最小”呢？" class="headerlink" title="问题3：那什么是最小版本选择中的“最小”呢？"></a>问题3：那什么是最小版本选择中的“最小”呢？</h3><p>在C1这个库中，我们能看到很多tag，例如<code>v1.1.0</code>，<code>v1.1.1</code>，<code>v1.1.2</code>，<code>v1.1.3</code>。而我们用到的是<code>v1.1.2</code>和<code>v1.1.0</code>。</p>
+<p>从兼容性来看，<code>v1.1.3</code>肯定能兼容前面的版本。但这时，根据<strong>最小版本选择</strong>，我们引用到<code>v1.1.2</code>。</p>
+<p>为什么要用这个最小版本原则，而不是每次都去拉取最新的tag？大家不妨思考思考，我这里列两个我能想到的点：</p>
+<ol>
+<li>保证项目依赖的稳定性：如果存在某个依赖库高频更新，会导致整个项目也频繁升级，造成风险；</li>
+<li>完全向下兼容并不可靠：毕竟软件存在不稳定性，最新的tag很有可能会导致代码变更；</li>
+</ol>
+<h2 id="结合源码巩固知识点"><a href="#结合源码巩固知识点" class="headerlink" title="结合源码巩固知识点"></a>结合源码巩固知识点</h2><p>在阅读源码之前，我们先明确本次阅读源码的预期：<strong>不要为了掌握所有代码细节而读代码，而是希望能通过了解这部分功能的一个大致实现，巩固理论知识</strong>。</p>
+<p>这里，我以<code>go语言1.15.11</code>版本为例，具体的代码路径在<code>src/cmd/go/internal/modcmd</code>下。</p>
+<p><code>go mod tidy</code>是整理Go Module最常用的指令之一，这里我们就来看看<code>tidy.go</code>文件。</p>
+<h3 id="tidy的简介"><a href="#tidy的简介" class="headerlink" title="tidy的简介"></a>tidy的简介</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> cmdTidy = &amp;base.Command&#123;</span><br><span class="line">	UsageLine: <span class="string">&quot;go mod tidy [-v]&quot;</span>,</span><br><span class="line">	Short:     <span class="string">&quot;add missing and remove unused modules&quot;</span>,</span><br><span class="line">	Long: <span class="string">`</span></span><br><span class="line"><span class="string">Tidy makes sure go.mod matches the source code in the module.</span></span><br><span class="line"><span class="string">It adds any missing modules necessary to build the current module&#x27;s</span></span><br><span class="line"><span class="string">packages and dependencies, and it removes unused modules that</span></span><br><span class="line"><span class="string">don&#x27;t provide any relevant packages. It also adds any missing entries</span></span><br><span class="line"><span class="string">to go.sum and removes any unnecessary ones.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">The -v flag causes tidy to print information about removed modules</span></span><br><span class="line"><span class="string">to standard error.</span></span><br><span class="line"><span class="string">	`</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>tidy</code>主要是把缺失的module加入到模块中，并删除弃用的modules。加上<code>-v</code>的标记位，就能把信息打印到标注错误。</p>
+<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><p>核心的数据结构为，储存Go Module的路径Path和版本Version:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> Version <span class="keyword">struct</span> &#123;</span><br><span class="line">	Path <span class="keyword">string</span></span><br><span class="line">	Version <span class="keyword">string</span> <span class="string">`json:&quot;,omitempty&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而加载模块的代码，则是下面的<code>mvs.Req</code>函数：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// cmd/go/internal/mvs</span></span><br><span class="line">mvs.Req(Target, direct, &amp;mvsReqs&#123;buildList: keep&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>这个函数的功能，我进行了一定的简化，大家关注重点标注出来的几行。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Req</span><span class="params">(target module.Version, base []<span class="keyword">string</span>, reqs Reqs)</span> <span class="params">([]module.Version, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 保存模块与其依赖module的map，用map是为了防止依赖库重复</span></span><br><span class="line">	reqCache := <span class="keyword">map</span>[module.Version][]module.Version&#123;&#125;</span><br><span class="line">	reqCache[target] = <span class="literal">nil</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 第一次遍历：walk函数，用于遍历整个依赖</span></span><br><span class="line">	<span class="keyword">var</span> walk <span class="function"><span class="keyword">func</span><span class="params">(module.Version)</span> <span class="title">error</span></span></span><br><span class="line">	walk = <span class="function"><span class="keyword">func</span><span class="params">(m module.Version)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="comment">// 获取m的依赖库required，保存到map中</span></span><br><span class="line">		required, err := reqs.Required(m)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		reqCache[m] = required</span><br><span class="line">    <span class="comment">// 继续遍历依赖的依赖，保证不缺失</span></span><br><span class="line">		<span class="keyword">for</span> _, m1 := <span class="keyword">range</span> required &#123;</span><br><span class="line">			<span class="keyword">if</span> err := walk(m1); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		postorder = <span class="built_in">append</span>(postorder, m)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 真正运行第一次walk的地方</span></span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> list &#123;</span><br><span class="line">		<span class="keyword">if</span> err := walk(m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 第二次遍历：再次定义一个walk函数，取最大的版本号</span></span><br><span class="line">	have := <span class="keyword">map</span>[module.Version]<span class="keyword">bool</span>&#123;&#125;</span><br><span class="line">	walk = <span class="function"><span class="keyword">func</span><span class="params">(m module.Version)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> have[m] &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		have[m] = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">for</span> _, m1 := <span class="keyword">range</span> reqCache[m] &#123;</span><br><span class="line">			walk(m1)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	max := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> list &#123;</span><br><span class="line">		<span class="keyword">if</span> v, ok := max[m.Path]; ok &#123;</span><br><span class="line">      <span class="comment">// 只保存较大的版本号</span></span><br><span class="line">      <span class="comment">// 而v1与v2的问题也是在这里解决的：两者的Path路径不同</span></span><br><span class="line">			max[m.Path] = reqs.Max(m.Version, v)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			max[m.Path] = m.Version</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 真正运行第二次walk的地方</span></span><br><span class="line">	<span class="keyword">var</span> min []module.Version</span><br><span class="line">	<span class="keyword">for</span> _, path := <span class="keyword">range</span> base &#123;</span><br><span class="line">		m := module.Version&#123;Path: path, Version: max[path]&#125;</span><br><span class="line">		min = <span class="built_in">append</span>(min, m)</span><br><span class="line">		walk(m)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 根据名称排序</span></span><br><span class="line">	sort.Slice(min, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> min[i].Path &lt; min[j].Path</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">return</span> min, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><strong>Minimal version selection (MVS)</strong> 的整体实现看起来不复杂，但其实里面做了很多兼容性的工作，尤其是<code>indirect</code>和<code>incompatible</code>等特性。这其实在另一层面提醒了我们：<strong>一项功能尽可能在前期做好设计，靠后期补救往往会增加大量兼容性的工作</strong>。</p>
+<p>整个Go Module的核心实现在于2点：</p>
+<ol>
+<li>2个<code>walk</code>函数，一个用于查找所有依赖，另一个选择最大依赖版本；</li>
+<li>选择最大依赖版本的核心依赖一个map，<code>max[m.Path] = reqs.Max(m.Version, v)</code></li>
+</ol>
+<p>至此，对Go Module的讲解告一段落了。而更多的细节问题，需要大家结合上一篇提到的排查问题工具，边实践、边加深理解。</p>
 <blockquote>
 <p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
@@ -2059,65 +2258,6 @@
       </tags>
   </entry>
   <entry>
-    <title>gRPC源码分析(四)：剖析Proto序列化</title>
-    <url>/2021/02/20/grpc/grpc-4/</url>
-    <content><![CDATA[<p>在前面的分析中，我们已经知道了使用proto序列化的代码在<a href="https://github.com/grpc/grpc-go/tree/v1.29.x/encoding/proto">encoding目录</a>中，路径中只有三个文件，其中2个还是测试文件，看起来这次的工作量并不大。</p>
-<p>首先，针对读源码是先看源代码还是测试代码，因人而异。个人建议在对源码毫无头绪时，先从测试入手，了解大致功能；如果有一定基础，那么也可以直接入手源代码。我认为优秀的Go源码可读性是非常高的，所以一般情况下，我都直接从源文件入手，遇到问题才会去对应的测试里阅读。</p>
-<h2 id="Marshal"><a href="#Marshal" class="headerlink" title="Marshal"></a>Marshal</h2><p>Marshal的代码不多，关键在于传入参数的类型，有2个分支路线：</p>
-<ol>
-<li><a href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L68">proto.Marshaler类型</a>，实现了<code>Marshal() ([]byte, error)</code>方法</li>
-<li><a href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L54">proto.Message类型</a>，实现了<code>Reset()</code>、<code>String() string</code> 和<code>ProtoMessage()</code>三个方法</li>
-</ol>
-<p>我们回头看看proto生成的<a href="https://github.com/grpc/grpc-go/blob/v1.29.x/examples/helloworld/helloworld/helloworld.pb.go#L35">go文件</a>，发现对应的是第二个接口。那我们接着看：</p>
-<ol>
-<li>调用了protoBufferPool，是一个sync.Pool，是为了加速proto对象的分配</li>
-<li>内部采用的是 <code>marshalAppend</code>，字面来看就是 序列化并追加，对应了 <code> wire-format</code>这个概念，并不需要将整个结构加载完毕、再进行序列化</li>
-<li>接下来调用的是<code>protoV2.MarshalOptions</code>，需要关注的是protoV2是另一个package，<code>protoV2 &quot;google.golang.org/protobuf/proto&quot;</code></li>
-<li>在正式marshal前，调用<code>m.ProtoReflect()</code>方法，根据名字可以猜测是对Message做反射，详细内容不妨后面再看</li>
-<li>最后就是正式的marshal了，分两个分支：<code>out, err = methods.Marshal(in)</code>和<code>out.Buf, err = o.marshalMessageSlow(b, m)</code>。后者是慢速的，一般情况下是不会用到，我们重点关注前者，这时就需要回头看4中的实现了</li>
-<li>逐个往前搜索，<code>接口protoreflect.Message =&gt; </code> <code>接口Message</code> =&gt;<code>函数MessageV2</code>  =&gt; <code>函数ProtoMessageV2Of</code>  =&gt; <code>函数legacyWrapMessage</code> =&gt; <code>函数MessageOf</code> =&gt; <code>类型messageReflectWrapper</code>，终于，在这里找到了目标函数 <code>ProtoMethods</code></li>
-<li>因为我们取的是<code>methods</code>，所以很快将代码定位到 <code>makeCoderMethods</code> =&gt; <code>marshal</code> =&gt; <code>marshalAppendPointer</code> ，最后找到一行核心代码 <code>b, err = f.funcs.marshal(b, fptr, f, opts)</code></li>
-<li>那这个marshal什么时候被赋值的呢？在步骤7中，我们查看了methods被赋值的地方，其实旁边就有一个函数 <code>makeReflectFuncs</code> ，最后定位到了 <code>/google.golang.org/protobuf/internal/impl/codec_gen.go</code> 文件中。每种变量的序列化，都是按照特定规则来执行的。</li>
-</ol>
-<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>那么 protobuf 实际是如何对每种类型进行Encoding的呢？有兴趣的朋友可以点击<a href="https://developers.google.com/protocol-buffers/docs/encoding">这个链接</a>，阅读原文。这里，我直接拿出一个实例进行讲解。</p>
-<h4 id="定义proto"><a href="#定义proto" class="headerlink" title="定义proto"></a>定义proto</h4><figure class="highlight protobuf"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">People</span> </span>&#123;</span><br><span class="line">	<span class="built_in">bool</span> male = <span class="number">1</span>;</span><br><span class="line">	<span class="built_in">int32</span> age = <span class="number">2</span>;</span><br><span class="line">	<span class="built_in">string</span> address = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="生成对应文件后，编写测试用例"><a href="#生成对应文件后，编写测试用例" class="headerlink" title="生成对应文件后，编写测试用例"></a>生成对应文件后，编写测试用例</h4><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	people := &amp;pbmsg.People&#123;</span><br><span class="line">		Male:    <span class="literal">true</span>,</span><br><span class="line">		Age:     <span class="number">80</span>,</span><br><span class="line">		Address: <span class="string">&quot;China Town&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	b, _ := proto.Marshal(people)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%b\n&quot;</span>, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="运行生成结果"><a href="#运行生成结果" class="headerlink" title="运行生成结果"></a>运行生成结果</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[1000 1 10000 1010000 11010 1010 1000011 1101000 1101001 1101110 1100001 100000 1010100 1101111 1110111 1101110]</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="分析第一个字段Bool"><a href="#分析第一个字段Bool" class="headerlink" title="分析第一个字段Bool"></a>分析第一个字段Bool</h4><p>首先，Male是一个bool字段，序号为1。</p>
-<p>根据Google上的文档，bool是Varint，所以计算</p>
-<p>(field_number &lt;&lt; 3) | wire_type = (1&lt;&lt;3)|0 = 8，对应第一个字节： <code>1000</code></p>
-<p>然后，它的值true对应第二个字节<code>1</code></p>
-<h4 id="分析第二个字段Int"><a href="#分析第二个字段Int" class="headerlink" title="分析第二个字段Int"></a>分析第二个字段Int</h4><p>同样的，(field_number &lt;&lt; 3) | wire_type = (2&lt;&lt;3)|0 = 16，对应第三个字节<code>10000</code></p>
-<p>值80对应<code>1010000</code></p>
-<h4 id="分析第三个字段String"><a href="#分析第三个字段String" class="headerlink" title="分析第三个字段String"></a>分析第三个字段String</h4><p>因为string是不定长的，所以需要一个额外的长度字段</p>
-<p>(field_number &lt;&lt; 3) | wire_type = (3&lt;&lt;3)|2=26，对应<code>11010</code></p>
-<p>接下来是长度字段，我们有10个英文单词，所以长度为10，对应 <code>1010</code></p>
-<p>然后就是10个Byte表示”China Town”了</p>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>本次的分析到这里就暂时告一段落了，阅读protobuf的相关代码还是非常耗时耗力的。其实这块最主要的复杂度在于为了兼容新老版本，采用了大量的Interface实现。Interface带有面向对象特色，在重构代码时很有意义，不过也给阅读代码时，查找方法对应实现时带来了复杂度。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>源码阅读</category>
-      </categories>
-      <tags>
-        <tag>gRPC</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>gRPC源码分析(三)：从Github文档了解gRPC的项目细节</title>
     <url>/2021/02/20/grpc/grpc-3/</url>
     <content><![CDATA[<h2 id="官方Git总览"><a href="#官方Git总览" class="headerlink" title="官方Git总览"></a><a href="https://github.com/grpc">官方Git总览</a></h2><p>我们先看看GRPC这个项目的总览，主要分三种：</p>
@@ -2205,6 +2345,65 @@
 <h4 id="server-reflection"><a href="#server-reflection" class="headerlink" title="server reflection"></a><a href="https://github.com/grpc/grpc-go/blob/master/Documentation/server-reflection-tutorial.md">server reflection</a></h4><p>服务端方法映射，跟着教程走即可。</p>
 <p>值得一提的是，采用c++中的grpc_cli模块，可以查看指定端口暴露出来的服务详情。</p>
 <h4 id="versioning"><a href="#versioning" class="headerlink" title="versioning"></a><a href="https://github.com/grpc/grpc-go/blob/master/Documentation/versioning.md">versioning</a></h4><p>版本演进，一般情况下每6周一个小版本，紧急修复会打补丁号。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili：<a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号：golangcoding</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>源码阅读</category>
+      </categories>
+      <tags>
+        <tag>gRPC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>gRPC源码分析(四)：剖析Proto序列化</title>
+    <url>/2021/02/20/grpc/grpc-4/</url>
+    <content><![CDATA[<p>在前面的分析中，我们已经知道了使用proto序列化的代码在<a href="https://github.com/grpc/grpc-go/tree/v1.29.x/encoding/proto">encoding目录</a>中，路径中只有三个文件，其中2个还是测试文件，看起来这次的工作量并不大。</p>
+<p>首先，针对读源码是先看源代码还是测试代码，因人而异。个人建议在对源码毫无头绪时，先从测试入手，了解大致功能；如果有一定基础，那么也可以直接入手源代码。我认为优秀的Go源码可读性是非常高的，所以一般情况下，我都直接从源文件入手，遇到问题才会去对应的测试里阅读。</p>
+<h2 id="Marshal"><a href="#Marshal" class="headerlink" title="Marshal"></a>Marshal</h2><p>Marshal的代码不多，关键在于传入参数的类型，有2个分支路线：</p>
+<ol>
+<li><a href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L68">proto.Marshaler类型</a>，实现了<code>Marshal() ([]byte, error)</code>方法</li>
+<li><a href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L54">proto.Message类型</a>，实现了<code>Reset()</code>、<code>String() string</code> 和<code>ProtoMessage()</code>三个方法</li>
+</ol>
+<p>我们回头看看proto生成的<a href="https://github.com/grpc/grpc-go/blob/v1.29.x/examples/helloworld/helloworld/helloworld.pb.go#L35">go文件</a>，发现对应的是第二个接口。那我们接着看：</p>
+<ol>
+<li>调用了protoBufferPool，是一个sync.Pool，是为了加速proto对象的分配</li>
+<li>内部采用的是 <code>marshalAppend</code>，字面来看就是 序列化并追加，对应了 <code> wire-format</code>这个概念，并不需要将整个结构加载完毕、再进行序列化</li>
+<li>接下来调用的是<code>protoV2.MarshalOptions</code>，需要关注的是protoV2是另一个package，<code>protoV2 &quot;google.golang.org/protobuf/proto&quot;</code></li>
+<li>在正式marshal前，调用<code>m.ProtoReflect()</code>方法，根据名字可以猜测是对Message做反射，详细内容不妨后面再看</li>
+<li>最后就是正式的marshal了，分两个分支：<code>out, err = methods.Marshal(in)</code>和<code>out.Buf, err = o.marshalMessageSlow(b, m)</code>。后者是慢速的，一般情况下是不会用到，我们重点关注前者，这时就需要回头看4中的实现了</li>
+<li>逐个往前搜索，<code>接口protoreflect.Message =&gt; </code> <code>接口Message</code> =&gt;<code>函数MessageV2</code>  =&gt; <code>函数ProtoMessageV2Of</code>  =&gt; <code>函数legacyWrapMessage</code> =&gt; <code>函数MessageOf</code> =&gt; <code>类型messageReflectWrapper</code>，终于，在这里找到了目标函数 <code>ProtoMethods</code></li>
+<li>因为我们取的是<code>methods</code>，所以很快将代码定位到 <code>makeCoderMethods</code> =&gt; <code>marshal</code> =&gt; <code>marshalAppendPointer</code> ，最后找到一行核心代码 <code>b, err = f.funcs.marshal(b, fptr, f, opts)</code></li>
+<li>那这个marshal什么时候被赋值的呢？在步骤7中，我们查看了methods被赋值的地方，其实旁边就有一个函数 <code>makeReflectFuncs</code> ，最后定位到了 <code>/google.golang.org/protobuf/internal/impl/codec_gen.go</code> 文件中。每种变量的序列化，都是按照特定规则来执行的。</li>
+</ol>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>那么 protobuf 实际是如何对每种类型进行Encoding的呢？有兴趣的朋友可以点击<a href="https://developers.google.com/protocol-buffers/docs/encoding">这个链接</a>，阅读原文。这里，我直接拿出一个实例进行讲解。</p>
+<h4 id="定义proto"><a href="#定义proto" class="headerlink" title="定义proto"></a>定义proto</h4><figure class="highlight protobuf"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">People</span> </span>&#123;</span><br><span class="line">	<span class="built_in">bool</span> male = <span class="number">1</span>;</span><br><span class="line">	<span class="built_in">int32</span> age = <span class="number">2</span>;</span><br><span class="line">	<span class="built_in">string</span> address = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="生成对应文件后，编写测试用例"><a href="#生成对应文件后，编写测试用例" class="headerlink" title="生成对应文件后，编写测试用例"></a>生成对应文件后，编写测试用例</h4><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	people := &amp;pbmsg.People&#123;</span><br><span class="line">		Male:    <span class="literal">true</span>,</span><br><span class="line">		Age:     <span class="number">80</span>,</span><br><span class="line">		Address: <span class="string">&quot;China Town&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	b, _ := proto.Marshal(people)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%b\n&quot;</span>, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="运行生成结果"><a href="#运行生成结果" class="headerlink" title="运行生成结果"></a>运行生成结果</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[1000 1 10000 1010000 11010 1010 1000011 1101000 1101001 1101110 1100001 100000 1010100 1101111 1110111 1101110]</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="分析第一个字段Bool"><a href="#分析第一个字段Bool" class="headerlink" title="分析第一个字段Bool"></a>分析第一个字段Bool</h4><p>首先，Male是一个bool字段，序号为1。</p>
+<p>根据Google上的文档，bool是Varint，所以计算</p>
+<p>(field_number &lt;&lt; 3) | wire_type = (1&lt;&lt;3)|0 = 8，对应第一个字节： <code>1000</code></p>
+<p>然后，它的值true对应第二个字节<code>1</code></p>
+<h4 id="分析第二个字段Int"><a href="#分析第二个字段Int" class="headerlink" title="分析第二个字段Int"></a>分析第二个字段Int</h4><p>同样的，(field_number &lt;&lt; 3) | wire_type = (2&lt;&lt;3)|0 = 16，对应第三个字节<code>10000</code></p>
+<p>值80对应<code>1010000</code></p>
+<h4 id="分析第三个字段String"><a href="#分析第三个字段String" class="headerlink" title="分析第三个字段String"></a>分析第三个字段String</h4><p>因为string是不定长的，所以需要一个额外的长度字段</p>
+<p>(field_number &lt;&lt; 3) | wire_type = (3&lt;&lt;3)|2=26，对应<code>11010</code></p>
+<p>接下来是长度字段，我们有10个英文单词，所以长度为10，对应 <code>1010</code></p>
+<p>然后就是10个Byte表示”China Town”了</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>本次的分析到这里就暂时告一段落了，阅读protobuf的相关代码还是非常耗时耗力的。其实这块最主要的复杂度在于为了兼容新老版本，采用了大量的Interface实现。Interface带有面向对象特色，在重构代码时很有意义，不过也给阅读代码时，查找方法对应实现时带来了复杂度。</p>
 <blockquote>
 <p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
@@ -2970,6 +3169,53 @@
       </tags>
   </entry>
   <entry>
+    <title>阅读摘要1 - 业务建模</title>
+    <url>/2021/06/19/readings/1-business_modeling/</url>
+    <content><![CDATA[<p><img src=""></p>
+<h2 id="资料推荐"><a href="#资料推荐" class="headerlink" title="资料推荐"></a>资料推荐</h2><p>今天推荐的是一个极客时间的专栏：<a href="https://time.geekbang.org/column/article/386594">如何落地业务建模</a>。</p>
+<p>由于示例中的代码和思路都是基于<code>JAVA</code>编程语言的，而为了方便<code>Go</code>语言的同学理解，我作一下转述，谈谈个人的心得。</p>
+<h2 id="业务建模的两个关键步骤"><a href="#业务建模的两个关键步骤" class="headerlink" title="业务建模的两个关键步骤"></a>业务建模的两个关键步骤</h2><ol>
+<li>定义业务问题<ol>
+<li>清晰定义业务问题</li>
+<li>同步给周围人并都接受</li>
+</ol>
+</li>
+<li>解决问题<ol>
+<li>结合实际架构实现模型</li>
+<li>建立沟通与反馈渠道</li>
+</ol>
+</li>
+</ol>
+<p>业务问题（业务人员） -&gt; 数据结构（开发人员）</p>
+<p>业务问题（业务人员） &lt;-&gt; 领域模型（统一语言） &lt;-&gt; 数据结构（开发人员）</p>
+<h2 id="示例1：用户User订阅专栏Subscription"><a href="#示例1：用户User订阅专栏Subscription" class="headerlink" title="示例1：用户User订阅专栏Subscription"></a>示例1：用户User订阅专栏Subscription</h2><h3 id="常规做法"><a href="#常规做法" class="headerlink" title="常规做法"></a>常规做法</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// User 用户相关信息</span></span><br><span class="line"><span class="keyword">type</span> User <span class="keyword">interface</span> &#123;</span><br><span class="line">	<span class="comment">// 查询用户订阅的专栏</span></span><br><span class="line">	<span class="comment">// pn:page number 页码</span></span><br><span class="line">	<span class="comment">// ps:page size 每页大小</span></span><br><span class="line">	QuerySubscription(pn, ps <span class="keyword">int</span>) ([]Subscription, error)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Subscription 订阅的专栏信息</span></span><br><span class="line"><span class="keyword">type</span> Subscription <span class="keyword">interface</span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个做法的实现很容易猜到</p>
+<ul>
+<li><code>User</code> 和 <code>Subscription</code> 都对应一张表</li>
+<li> <code>Subscription</code>  中有个 <code>User</code>  的信息，用于查询用户的订阅</li>
+</ul>
+<h2 id="问题1：不能体现Subscription与User的关系"><a href="#问题1：不能体现Subscription与User的关系" class="headerlink" title="问题1：不能体现Subscription与User的关系"></a>问题1：不能体现Subscription与User的关系</h2><p>从上面可以看到，<code>SubScription</code>中有<code>User</code>的信息。从业务特点上来分析，只有用户订阅了专栏，才成立一个具体的<code>Subscription</code>对象。</p>
+<blockquote>
+<p>注意，这里我们讨论的Subscription不是指具体的一门专栏，那它确实不具备用户属性。</p>
+<p>我们讨论的是订阅场景下的专栏，那么这个专栏肯定是有被订阅的对象的，如果有n个对象订阅了这个专栏，就有n条数据。</p>
+</blockquote>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>成长分享</category>
+      </categories>
+      <tags>
+        <tag>Digest</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Go算法实战 - 1.【两数相加LeetCode-2】递归解法</title>
     <url>/2021/07/10/go-leetcode/go-leetcode-1/</url>
     <content><![CDATA[<p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
@@ -3317,47 +3563,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Go算法实战 - 6.【正则表达式匹配LeetCode-10】</title>
-    <url>/2021/07/28/go-leetcode/go-leetcode-6/</url>
-    <content><![CDATA[<p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-10-正则表达式匹配"><a href="#Leetcode-10-正则表达式匹配" class="headerlink" title="Leetcode-10 正则表达式匹配"></a>Leetcode-10 正则表达式匹配</h2><p>原题链接 <a href="https://leetcode-cn.com/problems/regular-expression-matching/">https://leetcode-cn.com/problems/regular-expression-matching/</a></p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h2 id="基础解法"><a href="#基础解法" class="headerlink" title="基础解法"></a>基础解法</h2><p>我们先理一下正则匹配的大致思路：<strong>逐个对比s和p两个字符串，匹配则继续往后，发现不匹配直接退出</strong>。</p>
-<p>那么，我们先简化一下问题，看看代码的大致结构：</p>
-<h3 id="普通字符串匹配"><a href="#普通字符串匹配" class="headerlink" title="普通字符串匹配"></a>普通字符串匹配</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> || <span class="built_in">len</span>(p) == <span class="number">0</span> || s[<span class="number">0</span>] != p[<span class="number">0</span>] &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里的代码思路很清晰，我们重点要解决的是两个通配符<code>.</code>和<code>*</code>：</p>
-<h3 id="单个字符匹配"><a href="#单个字符匹配" class="headerlink" title="单个字符匹配"></a>单个字符匹配</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> || <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果p[0]为. ，则必定匹配</span></span><br><span class="line">    <span class="keyword">if</span> s[<span class="number">0</span>] != p[<span class="number">0</span>] &amp;&amp; p[<span class="number">0</span>] != <span class="string">&#x27;.&#x27;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="匹配"><a href="#匹配" class="headerlink" title="*匹配"></a>*匹配</h2><p>接下来，我们就要解决最复杂的*匹配，也就是star符号。具体的解法我在下面给出，大家可以参考注释阅读：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="comment">// 边界情况，即s为空，p前两个为 x*</span></span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(p) &gt;= <span class="number">2</span> &amp;&amp; p[<span class="number">1</span>] == <span class="string">&#x27;*&#x27;</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> isMatch(s, p[<span class="number">2</span>:])</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// p是否为 x* 形式</span></span><br><span class="line">	<span class="keyword">var</span> hasStar <span class="keyword">bool</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p) &gt;= <span class="number">2</span> &amp;&amp; p[<span class="number">1</span>] == <span class="string">&#x27;*&#x27;</span> &#123;</span><br><span class="line">		hasStar = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// isMatch表示s与p的第一个字符是否匹配</span></span><br><span class="line">	<span class="keyword">var</span> isMatched = <span class="literal">true</span></span><br><span class="line">	<span class="keyword">if</span> s[<span class="number">0</span>] != p[<span class="number">0</span>] &amp;&amp; p[<span class="number">0</span>] != <span class="string">&#x27;.&#x27;</span> &#123;</span><br><span class="line">		isMatched = <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> hasStar &#123;</span><br><span class="line">		<span class="keyword">if</span> isMatched &#123;</span><br><span class="line">			<span class="comment">// 情况1： 有星且第一个字符匹配，则递归包括2个情况：s去掉第一个字符，p去掉star这两个字符</span></span><br><span class="line">			<span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p) || isMatch(s, p[<span class="number">2</span>:])</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 情况2：有星且不匹配，则去掉p的前两个字符继续匹配</span></span><br><span class="line">		<span class="keyword">return</span> isMatch(s, p[<span class="number">2</span>:])</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> !isMatched &#123;</span><br><span class="line">		<span class="comment">// 情况3：没星且不匹配，则直接返回不匹配</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 情况4：没有星但是匹配，s和p删掉匹配的第一个字符，继续匹配</span></span><br><span class="line">	<span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个解法虽然看过去复杂，但是比较直观，核心在于两个变量<code>hasStar</code>和<code>isMatch</code>，以及它们组合起来的四个情况。</p>
-<h2 id="动态规划解"><a href="#动态规划解" class="headerlink" title="动态规划解"></a>动态规划解</h2><p>动态规划是一个面试高频的题，其核心是<strong>状态转移方程</strong>。这道题很符合动态规划的特征，我们通过了上面的递归解法，其实已经有了基本的思路：<strong>递归中的四种情况，其实就是状态转移方程的大致思路</strong>。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	row, col := <span class="built_in">len</span>(s), <span class="built_in">len</span>(p)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// dp 就是核心的状态转移方程，这里注意要+1，是为了空字符串这个边界条件</span></span><br><span class="line">	<span class="comment">// 所以后面的i/j默认都要-1</span></span><br><span class="line">	dp := <span class="built_in">make</span>([][]<span class="keyword">bool</span>, row+<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(dp); i++ &#123;</span><br><span class="line">		dp[i] = <span class="built_in">make</span>([]<span class="keyword">bool</span>, col+<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充dp[0]数组，也就是s为空字符串</span></span><br><span class="line">	<span class="keyword">for</span> j := <span class="number">0</span>; j &lt; col+<span class="number">1</span>; j++ &#123;</span><br><span class="line">		<span class="keyword">if</span> j == <span class="number">0</span> &#123;</span><br><span class="line">			<span class="comment">// p为空字符串的情况</span></span><br><span class="line">			dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="literal">true</span></span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> p[j<span class="number">-1</span>] == <span class="string">&#x27;*&#x27;</span> &#123;</span><br><span class="line">			<span class="comment">// 如果p[j-1]为*，则可以认为匹配p和p[0:j-2]一样，类似于情况2</span></span><br><span class="line">			dp[<span class="number">0</span>][j] = dp[<span class="number">0</span>][j<span class="number">-2</span>]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充整个dp数组，注意i和j在dp中不变，但对应到字符串s/p中都要-1</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">1</span>; i &lt; row+<span class="number">1</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">for</span> j := <span class="number">1</span>; j &lt; col+<span class="number">1</span>; j++ &#123;</span><br><span class="line">			<span class="keyword">if</span> p[j<span class="number">-1</span>] == <span class="string">&#x27;*&#x27;</span> &#123;</span><br><span class="line">				<span class="keyword">if</span> i != <span class="number">0</span> &amp;&amp; (s[i<span class="number">-1</span>] == p[j<span class="number">-2</span>] || p[j<span class="number">-2</span>] == <span class="string">&#x27;.&#x27;</span>) &#123;</span><br><span class="line">					<span class="comment">// 对应情况1，有星且第一个字符匹配</span></span><br><span class="line">					dp[i][j] = dp[i][j<span class="number">-2</span>] || dp[i<span class="number">-1</span>][j]</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					<span class="comment">// 对应情况2，有星且不匹配</span></span><br><span class="line">					dp[i][j] = dp[i][j<span class="number">-2</span>]</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">else</span> <span class="keyword">if</span> i != <span class="number">0</span> &amp;&amp; (s[i<span class="number">-1</span>] == p[j<span class="number">-1</span>] || p[j<span class="number">-1</span>] == <span class="string">&#x27;.&#x27;</span>) &#123;</span><br><span class="line">				<span class="comment">// 对应情况4，没有星但是匹配</span></span><br><span class="line">				dp[i][j] = dp[i<span class="number">-1</span>][j<span class="number">-1</span>]</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 其余的对应情况3，没星且不匹配，即默认false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> dp[row][col]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>只要有了递归解法的思路，动态规划的难度并不高。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我们又完成了一道hard级别的题目！</p>
-<p>这道题，让我们看到了递归与动态规划存在共性。其中，递归解法的核心思路是<strong>将问题拆解为复杂度更低的子问题，直到边界情况</strong>，而动态规划解法的核心思路是<strong>从边界情况开始推导，从复杂度低的问题推导出复杂度更高的问题</strong>。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>成长分享</category>
-      </categories>
-      <tags>
-        <tag>Go-Leetcode</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Go算法实战 - 7.【盛最多水的容器LeetCode-11】</title>
     <url>/2021/08/02/go-leetcode/go-leetcode-7/</url>
     <content><![CDATA[<p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
@@ -3408,6 +3613,47 @@
 <p><strong>双指针解法很简洁</strong>，但最重要的是推导过程。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在编写代码的过程中，我们很难一步到位就写出最佳实现的解法，而前面的<strong>递归+减枝</strong>方法，虽然代码比较复杂，但是更符合我们直观逻辑的。<strong>双指针解法</strong>并不直观，这也就是体现出了刷题的价值。</p>
 <p>值得一提的是，如果你上手就写出双指针解法，面试官会认为你是靠刷题记忆的，所以在面试算法的过程中，我们更应该关注<strong>解决问题的递进式思路</strong>，答案只是评价算法能力的其中一个重要项。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>成长分享</category>
+      </categories>
+      <tags>
+        <tag>Go-Leetcode</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Go算法实战 - 6.【正则表达式匹配LeetCode-10】</title>
+    <url>/2021/07/28/go-leetcode/go-leetcode-6/</url>
+    <content><![CDATA[<p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-10-正则表达式匹配"><a href="#Leetcode-10-正则表达式匹配" class="headerlink" title="Leetcode-10 正则表达式匹配"></a>Leetcode-10 正则表达式匹配</h2><p>原题链接 <a href="https://leetcode-cn.com/problems/regular-expression-matching/">https://leetcode-cn.com/problems/regular-expression-matching/</a></p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="基础解法"><a href="#基础解法" class="headerlink" title="基础解法"></a>基础解法</h2><p>我们先理一下正则匹配的大致思路：<strong>逐个对比s和p两个字符串，匹配则继续往后，发现不匹配直接退出</strong>。</p>
+<p>那么，我们先简化一下问题，看看代码的大致结构：</p>
+<h3 id="普通字符串匹配"><a href="#普通字符串匹配" class="headerlink" title="普通字符串匹配"></a>普通字符串匹配</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> || <span class="built_in">len</span>(p) == <span class="number">0</span> || s[<span class="number">0</span>] != p[<span class="number">0</span>] &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的代码思路很清晰，我们重点要解决的是两个通配符<code>.</code>和<code>*</code>：</p>
+<h3 id="单个字符匹配"><a href="#单个字符匹配" class="headerlink" title="单个字符匹配"></a>单个字符匹配</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> || <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果p[0]为. ，则必定匹配</span></span><br><span class="line">    <span class="keyword">if</span> s[<span class="number">0</span>] != p[<span class="number">0</span>] &amp;&amp; p[<span class="number">0</span>] != <span class="string">&#x27;.&#x27;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="匹配"><a href="#匹配" class="headerlink" title="*匹配"></a>*匹配</h2><p>接下来，我们就要解决最复杂的*匹配，也就是star符号。具体的解法我在下面给出，大家可以参考注释阅读：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &amp;&amp; <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(s) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="comment">// 边界情况，即s为空，p前两个为 x*</span></span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(p) &gt;= <span class="number">2</span> &amp;&amp; p[<span class="number">1</span>] == <span class="string">&#x27;*&#x27;</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> isMatch(s, p[<span class="number">2</span>:])</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">len</span>(p) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// p是否为 x* 形式</span></span><br><span class="line">	<span class="keyword">var</span> hasStar <span class="keyword">bool</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(p) &gt;= <span class="number">2</span> &amp;&amp; p[<span class="number">1</span>] == <span class="string">&#x27;*&#x27;</span> &#123;</span><br><span class="line">		hasStar = <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// isMatch表示s与p的第一个字符是否匹配</span></span><br><span class="line">	<span class="keyword">var</span> isMatched = <span class="literal">true</span></span><br><span class="line">	<span class="keyword">if</span> s[<span class="number">0</span>] != p[<span class="number">0</span>] &amp;&amp; p[<span class="number">0</span>] != <span class="string">&#x27;.&#x27;</span> &#123;</span><br><span class="line">		isMatched = <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> hasStar &#123;</span><br><span class="line">		<span class="keyword">if</span> isMatched &#123;</span><br><span class="line">			<span class="comment">// 情况1： 有星且第一个字符匹配，则递归包括2个情况：s去掉第一个字符，p去掉star这两个字符</span></span><br><span class="line">			<span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p) || isMatch(s, p[<span class="number">2</span>:])</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 情况2：有星且不匹配，则去掉p的前两个字符继续匹配</span></span><br><span class="line">		<span class="keyword">return</span> isMatch(s, p[<span class="number">2</span>:])</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> !isMatched &#123;</span><br><span class="line">		<span class="comment">// 情况3：没星且不匹配，则直接返回不匹配</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 情况4：没有星但是匹配，s和p删掉匹配的第一个字符，继续匹配</span></span><br><span class="line">	<span class="keyword">return</span> isMatch(s[<span class="number">1</span>:], p[<span class="number">1</span>:])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个解法虽然看过去复杂，但是比较直观，核心在于两个变量<code>hasStar</code>和<code>isMatch</code>，以及它们组合起来的四个情况。</p>
+<h2 id="动态规划解"><a href="#动态规划解" class="headerlink" title="动态规划解"></a>动态规划解</h2><p>动态规划是一个面试高频的题，其核心是<strong>状态转移方程</strong>。这道题很符合动态规划的特征，我们通过了上面的递归解法，其实已经有了基本的思路：<strong>递归中的四种情况，其实就是状态转移方程的大致思路</strong>。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	row, col := <span class="built_in">len</span>(s), <span class="built_in">len</span>(p)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// dp 就是核心的状态转移方程，这里注意要+1，是为了空字符串这个边界条件</span></span><br><span class="line">	<span class="comment">// 所以后面的i/j默认都要-1</span></span><br><span class="line">	dp := <span class="built_in">make</span>([][]<span class="keyword">bool</span>, row+<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(dp); i++ &#123;</span><br><span class="line">		dp[i] = <span class="built_in">make</span>([]<span class="keyword">bool</span>, col+<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充dp[0]数组，也就是s为空字符串</span></span><br><span class="line">	<span class="keyword">for</span> j := <span class="number">0</span>; j &lt; col+<span class="number">1</span>; j++ &#123;</span><br><span class="line">		<span class="keyword">if</span> j == <span class="number">0</span> &#123;</span><br><span class="line">			<span class="comment">// p为空字符串的情况</span></span><br><span class="line">			dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="literal">true</span></span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> p[j<span class="number">-1</span>] == <span class="string">&#x27;*&#x27;</span> &#123;</span><br><span class="line">			<span class="comment">// 如果p[j-1]为*，则可以认为匹配p和p[0:j-2]一样，类似于情况2</span></span><br><span class="line">			dp[<span class="number">0</span>][j] = dp[<span class="number">0</span>][j<span class="number">-2</span>]</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 填充整个dp数组，注意i和j在dp中不变，但对应到字符串s/p中都要-1</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">1</span>; i &lt; row+<span class="number">1</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">for</span> j := <span class="number">1</span>; j &lt; col+<span class="number">1</span>; j++ &#123;</span><br><span class="line">			<span class="keyword">if</span> p[j<span class="number">-1</span>] == <span class="string">&#x27;*&#x27;</span> &#123;</span><br><span class="line">				<span class="keyword">if</span> i != <span class="number">0</span> &amp;&amp; (s[i<span class="number">-1</span>] == p[j<span class="number">-2</span>] || p[j<span class="number">-2</span>] == <span class="string">&#x27;.&#x27;</span>) &#123;</span><br><span class="line">					<span class="comment">// 对应情况1，有星且第一个字符匹配</span></span><br><span class="line">					dp[i][j] = dp[i][j<span class="number">-2</span>] || dp[i<span class="number">-1</span>][j]</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					<span class="comment">// 对应情况2，有星且不匹配</span></span><br><span class="line">					dp[i][j] = dp[i][j<span class="number">-2</span>]</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">else</span> <span class="keyword">if</span> i != <span class="number">0</span> &amp;&amp; (s[i<span class="number">-1</span>] == p[j<span class="number">-1</span>] || p[j<span class="number">-1</span>] == <span class="string">&#x27;.&#x27;</span>) &#123;</span><br><span class="line">				<span class="comment">// 对应情况4，没有星但是匹配</span></span><br><span class="line">				dp[i][j] = dp[i<span class="number">-1</span>][j<span class="number">-1</span>]</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 其余的对应情况3，没星且不匹配，即默认false</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> dp[row][col]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>只要有了递归解法的思路，动态规划的难度并不高。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我们又完成了一道hard级别的题目！</p>
+<p>这道题，让我们看到了递归与动态规划存在共性。其中，递归解法的核心思路是<strong>将问题拆解为复杂度更低的子问题，直到边界情况</strong>，而动态规划解法的核心思路是<strong>从边界情况开始推导，从复杂度低的问题推导出复杂度更高的问题</strong>。</p>
 <blockquote>
 <p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
@@ -3513,252 +3759,6 @@
       </categories>
       <tags>
         <tag>Go-Leetcode</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务</title>
-    <url>/2021/03/29/go-framework/go-framework-1/</url>
-    <content><![CDATA[<p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>大家好，我是六月天天。如题所述，从今天开始，我将和大家一起逐步完成一个微服务框架。</p>
-<p>整个迭代过程会围绕着两个核心思想进行：</p>
-<ol>
-<li><strong>关注技术选型背后的思想</strong>。虽然最终某个技术选型的并不是你喜欢的方案（如RPC、日志、数据库等，你可以fork后自行调整），但我们更关注各个技术组件背后的原理与思想；</li>
-<li><strong>聚焦于简单，关注可维护性</strong>。技术框架是项目的基础设施，也是排查复杂业务问题的根本，所以框架层的功能会尽量考虑简单易用，可以让我们花更多的心思在业务开发中。许多开源库提供了大量扩展功能，但我们使用时会尽量<strong>克制</strong>，减少学习和排查问题时的成本。</li>
-</ol>
-<span id="more"></span>
-
-
-
-<h2 id="v0-1-0：搭建gRPC-HTTP的双重网关服务"><a href="#v0-1-0：搭建gRPC-HTTP的双重网关服务" class="headerlink" title="v0.1.0：搭建gRPC+HTTP的双重网关服务"></a>v0.1.0：搭建gRPC+HTTP的双重网关服务</h2><p><a href="https://github.com/Junedayday/micro_web_service/tree/v0.1.0">项目链接</a></p>
-<p><a href="https://github.com/grpc-ecosystem/grpc-gateway">gRPC-gateway官方Github</a></p>
-<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>完成RPC服务的框架的搭建</p>
-<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
-<li><code>protobuffer</code>定义IDL（Interface Define Language 接口定义语言）</li>
-<li><code>buf</code>工具生成<code>Go</code>代码（包括数据结构和RPC相关服务）</li>
-<li><code>Go</code>项目实现RPC服务（实现RPC接口）</li>
-</ol>
-<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具</span><br><span class="line">	|-- gen.sh                         buf生成的shell脚本</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
-
-<h2 id="1-protobuffer定义IDL"><a href="#1-protobuffer定义IDL" class="headerlink" title="1. protobuffer定义IDL"></a>1. protobuffer定义IDL</h2><p>我们先看一下项目中的<code>demo.proto</code>文件，重点关注 <strong>rpc Echo(DemoRequest) returns (DemoResponse)</strong> 这个定义。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">message DemoRequest &#123;</span><br><span class="line">   string value = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">message DemoResponse &#123;</span><br><span class="line">   int32 code = 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 样例服务</span><br><span class="line">service DemoService &#123;</span><br><span class="line">  // Echo 样例接口</span><br><span class="line">  rpc Echo(DemoRequest) returns (DemoResponse) &#123;</span><br><span class="line">    option (google.api.http) = &#123;</span><br><span class="line">      post : &quot;/apis/demo&quot;</span><br><span class="line">      body : &quot;*&quot;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>今天我们暂时不对<code>protobuffer</code>的语法做扩展讲解，只需要简单地了解下它的请求结构体<code>DemoRequest</code>和响应结构体<code>DemoResponse</code>。</p>
-<h2 id="2-buf工具生成Go代码"><a href="#2-buf工具生成Go代码" class="headerlink" title="2. buf工具生成Go代码"></a>2. buf工具生成Go代码</h2><p>我们通过运行项目根目录中的<code>gen.sh</code>，会在<code>gen</code>目录下生成对应的Go语言代码。</p>
-<p>这部分是自动化的工作，每次修改<code>proto</code>文件后需要运行。</p>
-<blockquote>
-<p>buf工具的安装请参考README.md，它是protoc的演进版本，不再需要大量flag参数，更加简单易用。</p>
-<p>注意，如果修改了模块名，buf工具第一次初始化建议使用 buf beta mod init 指令</p>
-</blockquote>
-<h2 id="3-Go项目实现RPC服务"><a href="#3-Go项目实现RPC服务" class="headerlink" title="3.Go项目实现RPC服务"></a>3.Go项目实现RPC服务</h2><p>我们梳理一下整个逻辑，来看看这个<code>Go</code>程序是怎么提供RPC服务的。</p>
-<ol>
-<li>在<code>buf.gen.yaml</code>中定义了生成的2种服务， <code>go-grpc</code>和 <code>grpc-gateway</code>，分别表示<code>gRPC</code>和<code>HTTP</code></li>
-<li><code>demo.proto</code>通过脚本，在<code>gen/idl/demo</code>生成了2个文件，<code>*_grpc.pb.go</code>和<code>*.pb.gw.go</code>，分别表示<code>gRPC</code>和<code>HTTP</code></li>
-<li>在<code>main</code>函数中注册两个服务，分别为：<ol>
-<li>gRPC - <code>demo.RegisterDemoServiceServer(s, &amp;server.Server&#123;&#125;)</code></li>
-<li>HTTP - <code>demo.RegisterDemoServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)</code></li>
-</ol>
-</li>
-<li>在<code>internal/server/server.go</code>中，<code>server.Server</code>需要实现<code>proto</code>中定义的方法，所以我们加入接口定义<code>demo.UnsafeDemoServiceServer</code></li>
-<li>在<code>internal/server/demo.go</code>中，实现一个<code>func (s *Server) Echo(ctx context.Context, req *demo.DemoRequest) (*demo.DemoResponse, error)</code>方法</li>
-</ol>
-<h2 id="项目运行"><a href="#项目运行" class="headerlink" title="项目运行"></a>项目运行</h2><p>我们用简单的命令来运行，并用RPC访问</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 编译并运行</span></span><br><span class="line">go build &amp;&amp; ./micro_web_service </span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 模拟HTTP请求</span></span><br><span class="line">curl --location --request POST &#x27;http://127.0.0.1:8081/apis/demo&#x27;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 收到返回值 &#123;<span class="string">&quot;code&quot;</span>:0&#125;</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 而gRPC比较麻烦，是私有协议，我们查看一下对应的网络端口，发现正在监听，也就意味着正常运行</span></span><br><span class="line">netstat -an | grep 9090</span><br><span class="line">tcp4       0      0  127.0.0.1.9090         127.0.0.1.49266        ESTABLISHED</span><br><span class="line">tcp4       0      0  127.0.0.1.49266        127.0.0.1.9090         ESTABLISHED</span><br><span class="line">tcp46      0      0  *.9090                 *.*                    LISTEN </span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="项目的私有化"><a href="#项目的私有化" class="headerlink" title="项目的私有化"></a>项目的私有化</h2><p>由于本项目只是一个框架，如果你希望修改为个人的项目，主要改动点在两处：</p>
-<ol>
-<li><code>go.mod</code>里的模块名，以及<code>Go</code>代码内部的import</li>
-<li><code>proto</code>文件中定义的<code>go_package</code></li>
-</ol>
-<blockquote>
-<p>建议用编辑工具全量替换</p>
-</blockquote>
-<h2 id="新增接口示例"><a href="#新增接口示例" class="headerlink" title="新增接口示例"></a>新增接口示例</h2><h3 id="添加proto定义"><a href="#添加proto定义" class="headerlink" title="添加proto定义"></a>添加proto定义</h3><figure class="highlight protobuf"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">EmptyMessage</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Empty 空接口</span></span><br><span class="line"><span class="function"><span class="keyword">rpc</span> Empty(EmptyMessage) <span class="keyword">returns</span> (EmptyMessage) </span>&#123;</span><br><span class="line">  <span class="keyword">option</span> (google.api.http) = &#123;</span><br><span class="line">    post : <span class="string">&quot;/apis/empty&quot;</span></span><br><span class="line">    body : <span class="string">&quot;*&quot;</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="生成Go文件"><a href="#生成Go文件" class="headerlink" title="生成Go文件"></a>生成Go文件</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bash gen.sh</span><br></pre></td></tr></table></figure>
-
-<h3 id="添加接口定义"><a href="#添加接口定义" class="headerlink" title="添加接口定义"></a>添加接口定义</h3><p>这时候，我们会发现<code>main.go</code>中有报错，即提示<code>server.Server</code>这个对象需要实现<code>Empty</code>方法。于是，我们在<code>internal/server/demo.go</code>里添加</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *Server)</span> <span class="title">Empty</span><span class="params">(ctx context.Context, req *demo.EmptyMessage)</span> <span class="params">(*demo.EmptyMessage, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;demo.EmptyMessage&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="测试新接口"><a href="#测试新接口" class="headerlink" title="测试新接口"></a>测试新接口</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 编译并运行</span></span><br><span class="line">go build &amp;&amp; ./micro_web_service </span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 模拟HTTP请求</span></span><br><span class="line">curl --location --request POST &#x27;http://127.0.0.1:8081/apis/empty&#x27;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 返回 &#123;&#125;</span> </span><br></pre></td></tr></table></figure>
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>v0.1.0</code>版本是一个非常简单的web框架，只有样例的RPC接口。</p>
-<p>开放<code>HTTP</code>接口是为了兼容传统方案，而<code>gRPC</code>则提供了高性能、跨语言的通信方案。从整个实现过程来看，我们只编写了一个具体的实现、也就是<code>Echo</code>这个方法，就完成了两种通信方式的兼容。</p>
-<p><code>gRPC-Gateway</code>方案还有很多很棒的特性，我会在后续逐一介绍并引入。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>技术框架</category>
-      </categories>
-      <tags>
-        <tag>Go-Framework</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Go语言微服务框架 - 2.实现加载静态配置文件</title>
-    <url>/2021/03/29/go-framework/go-framework-2/</url>
-    <content><![CDATA[<p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>我们的基础RPC服务已经正常运行，我们再来看下一个特性：配置文件的加载。</p>
-<p>首先，我们要正确地认识到配置文件的重要性：<strong>在程序交付后，变更代码的成本很大；相对而言，变更配置文件的成本就比较小</strong>。但有的同学又走了另一个极端，也就是将大量的逻辑放入到配置文件中，导致<strong>配置文件膨胀</strong>，本质上就是将部分本应在代码中维护的内容转移到了配置文件，导致配置文件也很难维护。</p>
-<p>今天，我们先将重点放到加载配置文件库的技术选型，顺便分享一些常见的问题。</p>
-<span id="more"></span>
-
-<h2 id="一个基础的加载配置文件示例"><a href="#一个基础的加载配置文件示例" class="headerlink" title="一个基础的加载配置文件示例"></a>一个基础的加载配置文件示例</h2><p>在<code>Go</code>语言中，用官方库就能快速实现配置文件的加载，下面就是一个简单的代码实现：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">b, err := ioutil.ReadFile(<span class="string">&quot;config.json&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> config MyConfig</span><br><span class="line">err = json.Unmarshal(b, &amp;config)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>关键的实现分为两块：</p>
-<ol>
-<li>读取文件中的数据</li>
-<li>将数据解析到Go程序的对象中，作为可识别的数据结构，这里指定了数据类型为<code>json</code></li>
-</ol>
-<h2 id="v0-2-0：实现加载静态配置文件"><a href="#v0-2-0：实现加载静态配置文件" class="headerlink" title="v0.2.0：实现加载静态配置文件"></a>v0.2.0：实现加载静态配置文件</h2><h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>从配置文件中解析数据到程序中，并具备更高的可读性和扩展性。</p>
-<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
-<li>命令行参数与配置文件的差异</li>
-<li>github.com/spf13/viper的介绍</li>
-<li>使用viper库的推荐方式</li>
-</ol>
-<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><p><code>github.com/spf13/viper</code>中存在一个全局变量<code>var v *Viper</code>（<a href="https://github.com/spf13/viper/blob/v1.7.0/viper.go#L62">点击查看</a>），如果我们调用默认的viper包，其实就是将参数解析到这个全局变量中。</p>
-<p>在具体的项目中，更推荐的方式是将这个变量保存到内部项目中，作为一个项目中的全局变量，所以我们会新建一个<code>viper.New()</code>。配置参数会被全局调用，为了保证不会发生<strong>循环依赖</strong>，我们就需要一个专门的<code>package</code>来保存这个全局变量，这里对应项目中的<code>internal/config/viper.go</code>。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	   |-- config                          新增：配置相关的文件夹</span><br><span class="line">	      |-- viper.go                         新增：viper的相关加载逻辑</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具</span><br><span class="line">	|-- gen.sh                         buf生成的shell脚本</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
-
-<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="1-命令行参数与配置文件的差异"><a href="#1-命令行参数与配置文件的差异" class="headerlink" title="1.命令行参数与配置文件的差异"></a>1.命令行参数与配置文件的差异</h2><p>命令行参数类似于<code>./demo --config=a.yaml --http_port=8080 --grpc_port=8081</code>，<code>Go</code>语言中自带<code>flag</code>包可供解析，开源的有<code>pflag</code>和相关的扩展工具，如<code>cobra</code>。</p>
-<p>而配置文件则是<strong>将参数从文件解析到内存中</strong>，一般用读取文件+反序列化工具来使用。</p>
-<p>同样是解析参数到程序里，我们该选择哪种方案呢？我们从可读性和可维护性来对比下：</p>
-<ul>
-<li>可读性：命令行参数是扁平化的，可读性远不如格式化后的配置文件</li>
-<li>可维护性：配置文件增加了一个维护项，但成本不高</li>
-</ul>
-<p>所以，我个人倾向于的方案是：</p>
-<ul>
-<li>命令行参数：用于维护极少量关键性的参数，如配置文件的路径</li>
-<li>配置文件：维护绝大多数的参数</li>
-</ul>
-<p>在某些极端的场景中，比如提供一个纯二进制文件作为工具，那不得不把所有配置参数都放入到命令行参数中。这并不是我们微服务框架要讨论的场景。所以，接下来我们重点讨论配置文件的加载。</p>
-<blockquote>
-<p>关于pflag相关的内容，在后续程序复杂到一定阶段后会引入。</p>
-</blockquote>
-<h2 id="2-github-com-spf13-viper的介绍"><a href="#2-github-com-spf13-viper的介绍" class="headerlink" title="2.github.com/spf13/viper的介绍"></a>2.github.com/spf13/viper的介绍</h2><p>对比上面的方案，我们来看一个业内使用最广的Go语言配置加载库<code>github.com/spf13/viper</code>的实现，对应的代码如下：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">viper.SetConfigName(<span class="string">&quot;config&quot;</span>)        <span class="comment">// config file name without file type</span></span><br><span class="line">viper.SetConfigType(<span class="string">&quot;yaml&quot;</span>)          <span class="comment">// config file type</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;./&quot;</span>)            <span class="comment">// config file path</span></span><br><span class="line"><span class="keyword">if</span> err := viper.ReadInConfig(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而在获取配置文件时，又采用key-value形式的语法：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>详细的特性我会在<strong>Go语言技巧系列</strong>里说明，今天我们聚焦于工程侧的宏观特性，来聊聊这个库的优劣势：</p>
-<h3 id="可选的参数序列化"><a href="#可选的参数序列化" class="headerlink" title="可选的参数序列化"></a>可选的参数序列化</h3><p>从<code>viper</code>库的源码中(<a href="https://github.com/spf13/viper/blob/v1.7.0/viper.go#L328">点击跳转</a>)，我们可以看到它支持多种<strong>本地文件类型</strong>与<strong>远程k-v数据库</strong>：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// SupportedExts are universally supported extensions.</span></span><br><span class="line"><span class="keyword">var</span> SupportedExts = []<span class="keyword">string</span>&#123;<span class="string">&quot;json&quot;</span>, <span class="string">&quot;toml&quot;</span>, <span class="string">&quot;yaml&quot;</span>, <span class="string">&quot;yml&quot;</span>, <span class="string">&quot;properties&quot;</span>, <span class="string">&quot;props&quot;</span>, <span class="string">&quot;prop&quot;</span>, <span class="string">&quot;hcl&quot;</span>, <span class="string">&quot;dotenv&quot;</span>, <span class="string">&quot;env&quot;</span>, <span class="string">&quot;ini&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SupportedRemoteProviders are universally supported remote providers.</span></span><br><span class="line"><span class="keyword">var</span> SupportedRemoteProviders = []<span class="keyword">string</span>&#123;<span class="string">&quot;etcd&quot;</span>, <span class="string">&quot;consul&quot;</span>, <span class="string">&quot;firestore&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们先忽略远程的存储，先看一下最常用的几个序列化的库：</p>
-<ol>
-<li>JSON: 官方自带的<code>encoding/json</code></li>
-<li>TOML: 开源的<code>github.com/pelletier/go-toml</code></li>
-<li>YAML: 官方推荐的<code>gopkg.in/yaml.v2</code></li>
-<li>INI：官方推荐的<code>gopkg.in/ini.v1</code></li>
-</ol>
-<p>在这四种技术选型时，我个人倾向于选择<code>JSON</code>和<code>YAML</code>。进一步斟酌时，虽然<code>JSON</code>的适用范围最广，但当配置文件复杂到一定程度时，<code>JSON</code>格式的配置文件很难通过换行来约束，当存在大量的嵌套时，可读性很差。所以，我个人比较推荐使用<code>YAML</code>格式的配置文件，一方面通过强制的换行约束，可读性很棒；另一方面云原生相关技术大量使用了<code>YAML</code>作为配置文件，尤其是<code>Kubernetes</code>中各种定义。</p>
-<p>例如，我们将服务的端口改造到配置文件里，就成了：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">http:</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">8081</span></span><br><span class="line">  <span class="attr">grpc:</span></span><br><span class="line">    <span class="attr">port:</span> <span class="number">8082</span></span><br></pre></td></tr></table></figure>
-
-<p>对应的Go语言代码为：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">viper.GetInt(<span class="string">&quot;server.http.port&quot;</span>)</span><br><span class="line">viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h3 id="可扩展的获取参数方法"><a href="#可扩展的获取参数方法" class="headerlink" title="可扩展的获取参数方法"></a>可扩展的获取参数方法</h3><p><code>viper</code>库提供的获取参数方式为<code>viper.Get&#123;type&#125;(&quot;&#123;level1&#125;.&#123;level2&#125;.&#123;level3&#125;...&quot;)</code>的格式。随着配置文件的扩大，也只需新增Get方法即可。</p>
-<p>从获取参数的方法来看，它的设计分为3种：</p>
-<ol>
-<li>基本类型，直接提供Get{具体类型}的方法，如<code>GetInt</code>，<code>GetString</code>；</li>
-<li>任意类型，提供<code>Get(key string) interface&#123;&#125; </code>，自行转化</li>
-<li>复杂类型的反序列化，提供<code>UnmarshalKey</code>等方法，更方便地获取复杂结构</li>
-</ol>
-<p>我个人建议各位只使用第一类的方法，将配置文件这个模块做到最简化。毕竟，<strong>配置文件的复杂化很容易引入各种问题，占用大量的排查故障的时间</strong>。如果你的系统必须引入一套非常复杂的配置，那么我更建议将它独立成一个专门的服务，用来维护这套配置。</p>
-<h2 id="3-使用viper库的推荐方式"><a href="#3-使用viper库的推荐方式" class="headerlink" title="3.使用viper库的推荐方式"></a>3.使用viper库的推荐方式</h2><p>如果你仔细地阅读viper相关的代码，你会发现它有很多超酷的特性。但今天，我想告诉各位：<strong>请克制地使用进阶的特性，最棒的特性往往是简洁的</strong>。</p>
-<p>我们对照着官方的README文件中介绍的特性进行讲解。</p>
-<h3 id="尽量避免手动设置的参数值"><a href="#尽量避免手动设置的参数值" class="headerlink" title="尽量避免手动设置的参数值"></a>尽量避免手动设置的参数值</h3><p><a href="https://github.com/spf13/viper#establishing-defaults">原文链接</a></p>
-<p>用<code>viper.SetDefault</code>函数可以给某些参数设置默认值，如果只是少数的几个参数还是很容易维护的。但如果设置的值过多了，就会给阅读代码的人带来困扰：<strong>这个参数是来自配置文件，还是在代码某处手动设置的？</strong>也就是存在<strong>二义性</strong>，增加了排查问题的复杂度。</p>
-<h3 id="明确配置文件的来源"><a href="#明确配置文件的来源" class="headerlink" title="明确配置文件的来源"></a>明确配置文件的来源</h3><p><a href="https://github.com/spf13/viper#reading-config-files">原文链接</a></p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">viper.AddConfigPath(<span class="string">&quot;/etc/appname/&quot;</span>)   <span class="comment">// path to look for the config file in</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;$HOME/.appname&quot;</span>)  <span class="comment">// call multiple times to add many search paths</span></span><br><span class="line">viper.AddConfigPath(<span class="string">&quot;.&quot;</span>)               <span class="comment">// optionally look for config in the working directory</span></span><br></pre></td></tr></table></figure>
-
-<p><code>viper</code>支持多个配置文件的路径，这虽然带来了便利性，但如果多个文件路径中都存在配置文件，那究竟以哪个为准？这也是一个<strong>二义性</strong>的问题，所以我个人更建议只设置一个，而这个路径由<code>flag</code>传入。</p>
-<h3 id="静态配置与动态配置的分离"><a href="#静态配置与动态配置的分离" class="headerlink" title="静态配置与动态配置的分离"></a>静态配置与动态配置的分离</h3><p><a href="https://github.com/spf13/viper#watching-and-re-reading-config-files">原文链接</a></p>
-<p><code>viper</code>提供了接口<code>viper.WatchConfig()</code>，可以监听文件的变化，然后做相应的调整。这个特性很酷，我们可以用它实现<strong>热加载</strong>。但这个特性很容易让人产生混淆：例如发生了某个BUG，如何确定当时的配置文件情况？其实，这就需要引入一定的<strong>版本管理</strong>机制。</p>
-<p>我更建议采用<strong>静态配置和动态配置分离</strong>的方案，也就是配置文件负责静态的、固定的配置，一旦启动后只加载一次；而动态的配置放在带版本管理的配置中心里，具备热加载的特性。</p>
-<p>所以，我不太建议在配置文件这里引入监听文件变化的特性。</p>
-<h2 id="核心代码示例"><a href="#核心代码示例" class="headerlink" title="核心代码示例"></a>核心代码示例</h2><h3 id="main-go"><a href="#main-go" class="headerlink" title="main.go"></a>main.go</h3><p>从<code>flag</code>中解析出配置文件路径，传到<code>config</code>包中用于解析。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> configFilePath = flag.String(<span class="string">&quot;c&quot;</span>, <span class="string">&quot;./&quot;</span>, <span class="string">&quot;config file path&quot;</span>)</span><br><span class="line">flag.Parse()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err := config.Load(*configFilePath); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="internal-config-viper-go"><a href="#internal-config-viper-go" class="headerlink" title="internal/config/viper.go"></a>internal/config/viper.go</h3><p>加载的代码并不多，尽量保证配置信息的简洁易懂。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 全局Viper变量</span></span><br><span class="line"><span class="keyword">var</span> Viper = viper.New()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Load</span><span class="params">(configFilePath <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	Viper.SetConfigName(<span class="string">&quot;config&quot;</span>)       <span class="comment">// config file name without file type</span></span><br><span class="line">	Viper.SetConfigType(<span class="string">&quot;yaml&quot;</span>)         <span class="comment">// config file type</span></span><br><span class="line">	Viper.AddConfigPath(configFilePath) <span class="comment">// config file path</span></span><br><span class="line">	<span class="keyword">return</span> Viper.ReadInConfig()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="配置使用方"><a href="#配置使用方" class="headerlink" title="配置使用方"></a>配置使用方</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line">config.Viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="使用viper库的注意事项"><a href="#使用viper库的注意事项" class="headerlink" title="使用viper库的注意事项"></a>使用viper库的注意事项</h2><p>在使用<code>viper</code>获取配置时，我们需要手动组装<code>key</code>，也就是<code>&quot;&#123;level1&#125;.&#123;level2&#125;.&#123;level3&#125;...&quot;</code>这种形式。这时，我们只能对照着原始配置文件逐个填充字段，一不小心填错、就会发生奇怪的问题。而如果采用的是将配置文件解析到结构体的方法，就能很容易地避免这个问题。</p>
-<p>考虑到扩展性，官方库推荐的是手动组装key的方式，所以需要大家在认真查看这个<code>key</code>是否有效。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>加载静态配置文件是一个很常见的功能，<code>viper</code>提供了一套完整方案，兼具简洁和扩展性；与此同时，我们要学会<strong>克制</strong>，不要看到了<code>viper</code>中提供的各种特性、就想着应用到实际项目中，也就是常说的：<strong>手里拿了个锤子，看啥都是钉子</strong>。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>技术框架</category>
-      </categories>
-      <tags>
-        <tag>Go-Framework</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>阅读摘要1 - 业务建模</title>
-    <url>/2021/06/19/readings/1-business_modeling/</url>
-    <content><![CDATA[<p><img src=""></p>
-<h2 id="资料推荐"><a href="#资料推荐" class="headerlink" title="资料推荐"></a>资料推荐</h2><p>今天推荐的是一个极客时间的专栏：<a href="https://time.geekbang.org/column/article/386594">如何落地业务建模</a>。</p>
-<p>由于示例中的代码和思路都是基于<code>JAVA</code>编程语言的，而为了方便<code>Go</code>语言的同学理解，我作一下转述，谈谈个人的心得。</p>
-<h2 id="业务建模的两个关键步骤"><a href="#业务建模的两个关键步骤" class="headerlink" title="业务建模的两个关键步骤"></a>业务建模的两个关键步骤</h2><ol>
-<li>定义业务问题<ol>
-<li>清晰定义业务问题</li>
-<li>同步给周围人并都接受</li>
-</ol>
-</li>
-<li>解决问题<ol>
-<li>结合实际架构实现模型</li>
-<li>建立沟通与反馈渠道</li>
-</ol>
-</li>
-</ol>
-<p>业务问题（业务人员） -&gt; 数据结构（开发人员）</p>
-<p>业务问题（业务人员） &lt;-&gt; 领域模型（统一语言） &lt;-&gt; 数据结构（开发人员）</p>
-<h2 id="示例1：用户User订阅专栏Subscription"><a href="#示例1：用户User订阅专栏Subscription" class="headerlink" title="示例1：用户User订阅专栏Subscription"></a>示例1：用户User订阅专栏Subscription</h2><h3 id="常规做法"><a href="#常规做法" class="headerlink" title="常规做法"></a>常规做法</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// User 用户相关信息</span></span><br><span class="line"><span class="keyword">type</span> User <span class="keyword">interface</span> &#123;</span><br><span class="line">	<span class="comment">// 查询用户订阅的专栏</span></span><br><span class="line">	<span class="comment">// pn:page number 页码</span></span><br><span class="line">	<span class="comment">// ps:page size 每页大小</span></span><br><span class="line">	QuerySubscription(pn, ps <span class="keyword">int</span>) ([]Subscription, error)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Subscription 订阅的专栏信息</span></span><br><span class="line"><span class="keyword">type</span> Subscription <span class="keyword">interface</span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个做法的实现很容易猜到</p>
-<ul>
-<li><code>User</code> 和 <code>Subscription</code> 都对应一张表</li>
-<li> <code>Subscription</code>  中有个 <code>User</code>  的信息，用于查询用户的订阅</li>
-</ul>
-<h2 id="问题1：不能体现Subscription与User的关系"><a href="#问题1：不能体现Subscription与User的关系" class="headerlink" title="问题1：不能体现Subscription与User的关系"></a>问题1：不能体现Subscription与User的关系</h2><p>从上面可以看到，<code>SubScription</code>中有<code>User</code>的信息。从业务特点上来分析，只有用户订阅了专栏，才成立一个具体的<code>Subscription</code>对象。</p>
-<blockquote>
-<p>注意，这里我们讨论的Subscription不是指具体的一门专栏，那它确实不具备用户属性。</p>
-<p>我们讨论的是订阅场景下的专栏，那么这个专栏肯定是有被订阅的对象的，如果有n个对象订阅了这个专栏，就有n条数据。</p>
-</blockquote>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>成长分享</category>
-      </categories>
-      <tags>
-        <tag>Digest</tag>
       </tags>
   </entry>
 </search>
