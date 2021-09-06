@@ -207,6 +207,81 @@
       </tags>
   </entry>
   <entry>
+    <title>Go语言微服务框架 - 3.日志库的选型与引入</title>
+    <url>/2021/03/29/go-framework/go-framework-3/</url>
+    <content><![CDATA[<p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>日志是一个框架的重要组成部分，那今天我们一起来看看这部分。</p>
+<p>衡量日志库有多个指标，我们今天重点关注两点：<strong>简单易用</strong> 与 <strong>高性能</strong>。简单易用是一个日志库能被广泛使用的必要条件，而<strong>高性能</strong>则是企业级的日志库非常重要的衡量点，也能在源码层面对我们有一定的启发。</p>
+<span id="more"></span>
+
+<h2 id="v0-3-0：日志库的选型与引入"><a href="#v0-3-0：日志库的选型与引入" class="headerlink" title="v0.3.0：日志库的选型与引入"></a>v0.3.0：日志库的选型与引入</h2><p>项目链接 <a href="https://github.com/Junedayday/micro_web_service/tree/v0.3.0">https://github.com/Junedayday/micro_web_service/tree/v0.3.0</a></p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>选择一个开源的日志组件引入，支持常规的日志打印。</p>
+<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol start="3">
+<li>三款开源日志库的横向对比</li>
+<li>zap日志库的关键实现</li>
+<li>关于日志参数的解析</li>
+</ol>
+<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	   |-- config                          配置相关的文件夹</span><br><span class="line">	      |-- viper.go                         viper的相关加载逻辑</span><br><span class="line">     |-- zlog                            新增：封装日志的文件夹</span><br><span class="line">        |-- zap.go                           新增：zap封装的代码实现</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具</span><br><span class="line">	|-- gen.sh                         buf生成的shell脚本</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-三款开源日志库的横向对比"><a href="#1-三款开源日志库的横向对比" class="headerlink" title="1.三款开源日志库的横向对比"></a>1.三款开源日志库的横向对比</h2><ul>
+<li>glog: <a href="https://github.com/golang/glog">https://github.com/golang/glog</a></li>
+<li>logrus: <a href="https://github.com/sirupsen/logrus">https://github.com/sirupsen/logrus</a></li>
+<li>zap: <a href="https://github.com/uber-go/zap">https://github.com/uber-go/zap</a></li>
+</ul>
+<p>如果用一次词语分别进行概括三者的特性，我分别会用：<strong>glog - 代码极简，logrus - 功能全面， zap - 高性能</strong>。经过反复思考，这个框架会选择zap库作为日志引擎的基本组件，主要考量如下：</p>
+<ol>
+<li><strong>高性能</strong> - 性能是一个日志库很重要的属性，它往往由前期的设计决定，很难通过后面的优化大幅度提高，所以zap的高性能很难被替代；</li>
+<li><strong>方便封装</strong> - zap设计简单，容易进行二次封装（glog更简洁，相应地就需要更多的封装代码）</li>
+<li><strong>大厂背书</strong> - zap库被很多大公司引用，作为内部的日志库的底层，再二次开发</li>
+<li><strong>源码学习</strong> - zap库对性能追求极高，可以作为高性能Go语言代码的分析样例</li>
+</ol>
+<h2 id="2-zap日志库的关键实现"><a href="#2-zap日志库的关键实现" class="headerlink" title="2.zap日志库的关键实现"></a>2.zap日志库的关键实现</h2><h3 id="最简化的调用"><a href="#最简化的调用" class="headerlink" title="最简化的调用"></a>最简化的调用</h3><p>zap日志库的调用很简单，只需要两行代码就能实现初始化：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">logger, _ := zap.NewProduction()</span><br><span class="line"><span class="keyword">defer</span> logger.Sync()</span><br></pre></td></tr></table></figure>
+
+<p>但这样的zap代码存在两个明显弊端：</p>
+<ul>
+<li>默认输出到控制台上</li>
+<li>无法保存到指定目录的文件</li>
+</ul>
+<h3 id="核心的日志文件实现"><a href="#核心的日志文件实现" class="headerlink" title="核心的日志文件实现"></a>核心的日志文件实现</h3><p>我们增加了一定的特性，代码如下：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	<span class="comment">// Logger为zap提供的原始日志，但使用起来比较烦，有强类型约束</span></span><br><span class="line">	logger *zap.Logger</span><br><span class="line">	<span class="comment">// SugaredLogger为zap提供的一个通用性更好的日志组件，作为本项目的核心日志组件</span></span><br><span class="line">	Sugar *zap.SugaredLogger</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Init</span><span class="params">(logPath <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 日志暂时只开放一个配置 - 配置文件路径，有需要可以后续开放</span></span><br><span class="line">	hook := lumberjack.Logger&#123;</span><br><span class="line">		Filename: logPath,</span><br><span class="line">	&#125;</span><br><span class="line">	w := zapcore.AddSync(&amp;hook)</span><br><span class="line"></span><br><span class="line">	encoderConfig := zap.NewProductionEncoderConfig()</span><br><span class="line">	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder</span><br><span class="line"></span><br><span class="line">	core := zapcore.NewCore(</span><br><span class="line">		zapcore.NewConsoleEncoder(encoderConfig),</span><br><span class="line">		w,</span><br><span class="line">		zap.InfoLevel,</span><br><span class="line">	)</span><br><span class="line"></span><br><span class="line">	logger = zap.New(core, zap.AddCaller())</span><br><span class="line">	Sugar = logger.Sugar()</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 命名和原生的Zap Log尽量一致，方便理解</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sync</span><span class="params">()</span></span> &#123;</span><br><span class="line">	logger.Sync()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>那我们是如何解决上面两个问题的呢？</p>
+<ol>
+<li>利用<code>go.uber.org/zap/zapcore</code>中的开放配置</li>
+<li>借用了<code>github.com/natefinch/lumberjack</code>这个常用的日志切分库，也顺带实现了日志路径的支持</li>
+</ol>
+<h3 id="main函数的调用"><a href="#main函数的调用" class="headerlink" title="main函数的调用"></a>main函数的调用</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> logFilePath = flag.String(<span class="string">&quot;l&quot;</span>, <span class="string">&quot;log/service.log&quot;</span>, <span class="string">&quot;log file path&quot;</span>)</span><br><span class="line">flag.Parse()</span><br><span class="line"></span><br><span class="line">zlog.Init(*logFilePath)</span><br><span class="line"><span class="keyword">defer</span> zlog.Sync()</span><br></pre></td></tr></table></figure>
+
+<p>至此，我们的日志功能已经基本打通。</p>
+<h2 id="3-关于日志参数的解析"><a href="#3-关于日志参数的解析" class="headerlink" title="3.关于日志参数的解析"></a>3.关于日志参数的解析</h2><p>日志参数常见的方式分2种，一个是来自<code>flag</code>的解析，另一个是来自配置文件。</p>
+<p>随着我们功能的拓展，日志库肯定会支持越来越复杂的场景。那这个时候用<code>flag</code>解析的扩展性就会很差，所以，我更推荐在微服务的框架中，<strong>用配置文件的方式去加载日志的相关配置</strong>。但这种方式会带来一个常见的现象：</p>
+<p>程序代码的实现为：先加载配置文件，后加载日志，导致配置文件出错时，无法通过日志来排查，需要用控制台或者进程管理工具协助定位问题。</p>
+<p>后续，随着框架的迭代，我会开放出更多的日志参数，目前只放出了一个日志路径的参数作为示例。</p>
+<h2 id="后续的两点核心需求"><a href="#后续的两点核心需求" class="headerlink" title="后续的两点核心需求"></a>后续的两点核心需求</h2><p>至此，我们添加的代码量并不多，也算成功地实现了一个日志打印的功能。但在实际的工程中，日志模块还需要实现两个比较大的功能：</p>
+<ol>
+<li>支持Go程序Panic/Error Wrapping风格的<strong>多行打印与采集</strong></li>
+<li>支持分布式TraceId的打印，用来排查<strong>微服务调用链路</strong></li>
+</ol>
+<p>这两块的内容会结合具体的相关相关技术，会在后续专题中专门分享，请大家重点关注。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>zap</code>库的代码是一个很棒的实现，我会在接下来的<strong>Go语言技巧系列</strong>中详细分析，欢迎大家进行关注。</p>
+<p>至此，我们的框架逐渐成型，接下来我将对<code>GORM</code>做一个简单的讲解，引入到框架中。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>技术框架</category>
+      </categories>
+      <tags>
+        <tag>Go-Framework</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Go语言微服务框架 - 4.初识GORM库</title>
     <url>/2021/03/29/go-framework/go-framework-4/</url>
     <content><![CDATA[<p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
@@ -340,6 +415,73 @@
       </tags>
   </entry>
   <entry>
+    <title>Go算法实战 - 1.【两数相加LeetCode-2】递归解法</title>
+    <url>/2021/07/10/go-leetcode/go-leetcode-1/</url>
+    <content><![CDATA[<p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 <a href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为了能保证代码都能执行，我会贴出所有代码，<strong>重点会用注释着重说明</strong>。</p>
+<span id="more"></span>
+
+<h2 id="递归实现的思路"><a href="#递归实现的思路" class="headerlink" title="递归实现的思路"></a>递归实现的思路</h2><h3 id="简化问题"><a href="#简化问题" class="headerlink" title="简化问题"></a>简化问题</h3><p>这道题的难点在于处理<strong>进位</strong>。那我们就先<strong>简化问题、把框架搭起来</strong>，看看先不考虑进位的大致代码怎么写的：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="comment">// 先判断边界情况</span></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val</span><br><span class="line">        node.Next = addTwoNumbers(l1.Next, l2.Next)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val </span><br><span class="line">        node.Next = addTwoNumbers(l1.Next, l2)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val </span><br><span class="line">        node.Next = addTwoNumbers(l1, l2.Next)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但这块代码有个问题- 当<code>l1</code>和<code>l2</code>都为空时，还会进入一次<code>addTwoNumbers</code>，导致最高位必定是0。</p>
+<p>所以，我们需要保证<strong>最高位不要产生一个冗余，也就是l1和l2都为nil时，不要再进入addTwoNumbers函数</strong>。</p>
+<h3 id="修复最高位的问题"><a href="#修复最高位的问题" class="headerlink" title="修复最高位的问题"></a>修复最高位的问题</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="comment">// 这里l1和l2作为指针传递下去</span></span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val </span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果都为空，无需继续处理</span></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 继续处理下一个节点</span></span><br><span class="line">    node.Next = addTwoNumbers(l1, l2)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="递归函数增加进位参数carry"><a href="#递归函数增加进位参数carry" class="headerlink" title="递归函数增加进位参数carry"></a>递归函数增加进位参数carry</h3><p>进位carry是一个在不同位中传递的参数，所以必须要加到函数签名中，所以我们得对递归函数进行改造。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 新的函数参数 carry</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> newCarry <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        newCarry = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; newCarry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, newCarry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="边界条件修复"><a href="#边界条件修复" class="headerlink" title="边界条件修复"></a>边界条件修复</h3><p>到了这里，我们看似完成了功能，但还有个边界条件没有修复：引入进位后，当<code>l1/l2</code>为nil，carry为1时，我们很容易就修复了</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; </span><br><span class="line">        node.Val = carry <span class="comment">// 修复进位的边界问题</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> newCarry <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        newCarry = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; newCarry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, newCarry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="持续优化"><a href="#持续优化" class="headerlink" title="持续优化"></a>持续优化</h2><p>首先，先明确一下优化的原则：</p>
+<p><strong>我并不是单纯地为了提升性能而去优化，而是更应该从全局入手，考虑代码的可读性和扩展性！</strong></p>
+<p>所以，下面的优化并不一定是性能最优的，但或多或少可能让你感受到代码的迭代升级。</p>
+<h3 id="A-复用变量"><a href="#A-复用变量" class="headerlink" title="A - 复用变量"></a>A - 复用变量</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.Val = carry</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        carry = <span class="number">1</span> <span class="comment">// 复用carry变量</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        carry = <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>删除<code>newCarry</code>变量，节省了内存。</p>
+<p>虽然这点改进很小，但我想表达的重点是：<strong>大家不要小看变量的复用，尤其是在一些递归调用的场景下，能节省大量的空间。</strong>上面的<code>l1</code>与<code>l2</code>这两个指针也进行了变量的复用。</p>
+<h3 id="B-增加位操作，去除if-else分支"><a href="#B-增加位操作，去除if-else分支" class="headerlink" title="B - 增加位操作，去除if-else分支"></a>B - 增加位操作，去除if-else分支</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.Val = carry</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="C-增加代码的扩展性（推荐）"><a href="#C-增加代码的扩展性（推荐）" class="headerlink" title="C - 增加代码的扩展性（推荐）"></a>C - 增加代码的扩展性（推荐）</h3><p>在这个代码里，我们只支持2个<code>ListNode</code>的相加，就引入了4个<code>if-else</code>的分支，这就很难支持大量<code>ListNode</code>的扩展。</p>
+<p><strong>总体来说，我个人推荐这个解法，它的思路很清晰，也不会出现边界问题。</strong></p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val += l1.Val</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val += l2.Val</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Val += carry</span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="实战化特性"><a href="#实战化特性" class="headerlink" title="实战化特性"></a>实战化特性</h2><p>在实际的项目中，我们会希望这个函数的扩展性能更好，例如支持多个输入参数。</p>
+<h3 id="引入不定参数的特性"><a href="#引入不定参数的特性" class="headerlink" title="引入不定参数的特性"></a>引入不定参数的特性</h3><p>我们进一步改造成<strong>不定参数</strong>形式的函数签名：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(<span class="number">0</span>, l1, l2)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不定参数必须是最后一个函数签名</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(carry <span class="keyword">int</span>, nodes ...*ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">        <span class="keyword">if</span> nodes[k] != <span class="literal">nil</span> &#123;</span><br><span class="line">            node.Val += nodes[k].Val</span><br><span class="line">            nodes[k] = nodes[k].Next</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Val += carry</span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断所有node是否为空</span></span><br><span class="line">    <span class="keyword">var</span> isEnd = <span class="literal">true</span></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">        <span class="keyword">if</span> nodes[k] != <span class="literal">nil</span> &#123;</span><br><span class="line">            isEnd = <span class="literal">false</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> isEnd &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(carry, nodes...)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>成长分享</category>
+      </categories>
+      <tags>
+        <tag>Go-Leetcode</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Go算法实战 - 2.【两数相加LeetCode-2】非递归解法</title>
     <url>/2021/07/10/go-leetcode/go-leetcode-2/</url>
     <content><![CDATA[<p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
@@ -395,73 +537,6 @@
 <li><code>Walker</code>是一个遍历指针，聚焦于<code>walker = walker.Next</code>这个关键的移动操作</li>
 </ul>
 <p>总体来说，非递归的代码可读性会比递归的差一点，比较考验程序员的解题思路。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>成长分享</category>
-      </categories>
-      <tags>
-        <tag>Go-Leetcode</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Go算法实战 - 1.【两数相加LeetCode-2】递归解法</title>
-    <url>/2021/07/10/go-leetcode/go-leetcode-1/</url>
-    <content><![CDATA[<p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 <a href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>为了能保证代码都能执行，我会贴出所有代码，<strong>重点会用注释着重说明</strong>。</p>
-<span id="more"></span>
-
-<h2 id="递归实现的思路"><a href="#递归实现的思路" class="headerlink" title="递归实现的思路"></a>递归实现的思路</h2><h3 id="简化问题"><a href="#简化问题" class="headerlink" title="简化问题"></a>简化问题</h3><p>这道题的难点在于处理<strong>进位</strong>。那我们就先<strong>简化问题、把框架搭起来</strong>，看看先不考虑进位的大致代码怎么写的：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="comment">// 先判断边界情况</span></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val</span><br><span class="line">        node.Next = addTwoNumbers(l1.Next, l2.Next)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val </span><br><span class="line">        node.Next = addTwoNumbers(l1.Next, l2)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val </span><br><span class="line">        node.Next = addTwoNumbers(l1, l2.Next)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但这块代码有个问题- 当<code>l1</code>和<code>l2</code>都为空时，还会进入一次<code>addTwoNumbers</code>，导致最高位必定是0。</p>
-<p>所以，我们需要保证<strong>最高位不要产生一个冗余，也就是l1和l2都为nil时，不要再进入addTwoNumbers函数</strong>。</p>
-<h3 id="修复最高位的问题"><a href="#修复最高位的问题" class="headerlink" title="修复最高位的问题"></a>修复最高位的问题</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="comment">// 这里l1和l2作为指针传递下去</span></span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val </span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果都为空，无需继续处理</span></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 继续处理下一个节点</span></span><br><span class="line">    node.Next = addTwoNumbers(l1, l2)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="递归函数增加进位参数carry"><a href="#递归函数增加进位参数carry" class="headerlink" title="递归函数增加进位参数carry"></a>递归函数增加进位参数carry</h3><p>进位carry是一个在不同位中传递的参数，所以必须要加到函数签名中，所以我们得对递归函数进行改造。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 新的函数参数 carry</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> newCarry <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        newCarry = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; newCarry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, newCarry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="边界条件修复"><a href="#边界条件修复" class="headerlink" title="边界条件修复"></a>边界条件修复</h3><p>到了这里，我们看似完成了功能，但还有个边界条件没有修复：引入进位后，当<code>l1/l2</code>为nil，carry为1时，我们很容易就修复了</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; </span><br><span class="line">        node.Val = carry <span class="comment">// 修复进位的边界问题</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> newCarry <span class="keyword">int</span></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        newCarry = <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; newCarry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, newCarry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="持续优化"><a href="#持续优化" class="headerlink" title="持续优化"></a>持续优化</h2><p>首先，先明确一下优化的原则：</p>
-<p><strong>我并不是单纯地为了提升性能而去优化，而是更应该从全局入手，考虑代码的可读性和扩展性！</strong></p>
-<p>所以，下面的优化并不一定是性能最优的，但或多或少可能让你感受到代码的迭代升级。</p>
-<h3 id="A-复用变量"><a href="#A-复用变量" class="headerlink" title="A - 复用变量"></a>A - 复用变量</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.Val = carry</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> node.Val &gt; <span class="number">9</span> &#123;</span><br><span class="line">        node.Val = node.Val - <span class="number">10</span></span><br><span class="line">        carry = <span class="number">1</span> <span class="comment">// 复用carry变量</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        carry = <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>删除<code>newCarry</code>变量，节省了内存。</p>
-<p>虽然这点改进很小，但我想表达的重点是：<strong>大家不要小看变量的复用，尤其是在一些递归调用的场景下，能节省大量的空间。</strong>上面的<code>l1</code>与<code>l2</code>这两个指针也进行了变量的复用。</p>
-<h3 id="B-增加位操作，去除if-else分支"><a href="#B-增加位操作，去除if-else分支" class="headerlink" title="B - 增加位操作，去除if-else分支"></a>B - 增加位操作，去除if-else分支</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &amp;&amp; l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + l2.Val + carry</span><br><span class="line">        l1, l2 = l1.Next, l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l1.Val + carry</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val = l2.Val + carry</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        node.Val = carry</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="C-增加代码的扩展性（推荐）"><a href="#C-增加代码的扩展性（推荐）" class="headerlink" title="C - 增加代码的扩展性（推荐）"></a>C - 增加代码的扩展性（推荐）</h3><p>在这个代码里，我们只支持2个<code>ListNode</code>的相加，就引入了4个<code>if-else</code>的分支，这就很难支持大量<code>ListNode</code>的扩展。</p>
-<p><strong>总体来说，我个人推荐这个解法，它的思路很清晰，也不会出现边界问题。</strong></p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(l1, l2, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(l1 *ListNode, l2 *ListNode, carry <span class="keyword">int</span>)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">if</span> l1 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val += l1.Val</span><br><span class="line">        l1 = l1.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l2 != <span class="literal">nil</span> &#123;</span><br><span class="line">        node.Val += l2.Val</span><br><span class="line">        l2 = l2.Next</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Val += carry</span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> l1 == <span class="literal">nil</span> &amp;&amp; l2 == <span class="literal">nil</span> &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(l1, l2, carry)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="实战化特性"><a href="#实战化特性" class="headerlink" title="实战化特性"></a>实战化特性</h2><p>在实际的项目中，我们会希望这个函数的扩展性能更好，例如支持多个输入参数。</p>
-<h3 id="引入不定参数的特性"><a href="#引入不定参数的特性" class="headerlink" title="引入不定参数的特性"></a>引入不定参数的特性</h3><p>我们进一步改造成<strong>不定参数</strong>形式的函数签名：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> addTwoNumbersWithCarry(<span class="number">0</span>, l1, l2)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不定参数必须是最后一个函数签名</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbersWithCarry</span><span class="params">(carry <span class="keyword">int</span>, nodes ...*ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> node = <span class="built_in">new</span>(ListNode)</span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">        <span class="keyword">if</span> nodes[k] != <span class="literal">nil</span> &#123;</span><br><span class="line">            node.Val += nodes[k].Val</span><br><span class="line">            nodes[k] = nodes[k].Next</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Val += carry</span><br><span class="line">    carry, node.Val = node.Val/<span class="number">10</span>, node.Val%<span class="number">10</span> <span class="comment">// 引入位操作</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断所有node是否为空</span></span><br><span class="line">    <span class="keyword">var</span> isEnd = <span class="literal">true</span></span><br><span class="line">    <span class="keyword">for</span> k := <span class="keyword">range</span> nodes &#123;</span><br><span class="line">        <span class="keyword">if</span> nodes[k] != <span class="literal">nil</span> &#123;</span><br><span class="line">            isEnd = <span class="literal">false</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> isEnd &amp;&amp; carry == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    node.Next = addTwoNumbersWithCarry(carry, nodes...)</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
 <blockquote>
 <p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
@@ -2483,81 +2558,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Go语言微服务框架 - 3.日志库的选型与引入</title>
-    <url>/2021/03/29/go-framework/go-framework-3/</url>
-    <content><![CDATA[<p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>日志是一个框架的重要组成部分，那今天我们一起来看看这部分。</p>
-<p>衡量日志库有多个指标，我们今天重点关注两点：<strong>简单易用</strong> 与 <strong>高性能</strong>。简单易用是一个日志库能被广泛使用的必要条件，而<strong>高性能</strong>则是企业级的日志库非常重要的衡量点，也能在源码层面对我们有一定的启发。</p>
-<span id="more"></span>
-
-<h2 id="v0-3-0：日志库的选型与引入"><a href="#v0-3-0：日志库的选型与引入" class="headerlink" title="v0.3.0：日志库的选型与引入"></a>v0.3.0：日志库的选型与引入</h2><p>项目链接 <a href="https://github.com/Junedayday/micro_web_service/tree/v0.3.0">https://github.com/Junedayday/micro_web_service/tree/v0.3.0</a></p>
-<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>选择一个开源的日志组件引入，支持常规的日志打印。</p>
-<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol start="3">
-<li>三款开源日志库的横向对比</li>
-<li>zap日志库的关键实现</li>
-<li>关于日志参数的解析</li>
-</ol>
-<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	   |-- config                          配置相关的文件夹</span><br><span class="line">	      |-- viper.go                         viper的相关加载逻辑</span><br><span class="line">     |-- zlog                            新增：封装日志的文件夹</span><br><span class="line">        |-- zap.go                           新增：zap封装的代码实现</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具</span><br><span class="line">	|-- gen.sh                         buf生成的shell脚本</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
-
-<h2 id="1-三款开源日志库的横向对比"><a href="#1-三款开源日志库的横向对比" class="headerlink" title="1.三款开源日志库的横向对比"></a>1.三款开源日志库的横向对比</h2><ul>
-<li>glog: <a href="https://github.com/golang/glog">https://github.com/golang/glog</a></li>
-<li>logrus: <a href="https://github.com/sirupsen/logrus">https://github.com/sirupsen/logrus</a></li>
-<li>zap: <a href="https://github.com/uber-go/zap">https://github.com/uber-go/zap</a></li>
-</ul>
-<p>如果用一次词语分别进行概括三者的特性，我分别会用：<strong>glog - 代码极简，logrus - 功能全面， zap - 高性能</strong>。经过反复思考，这个框架会选择zap库作为日志引擎的基本组件，主要考量如下：</p>
-<ol>
-<li><strong>高性能</strong> - 性能是一个日志库很重要的属性，它往往由前期的设计决定，很难通过后面的优化大幅度提高，所以zap的高性能很难被替代；</li>
-<li><strong>方便封装</strong> - zap设计简单，容易进行二次封装（glog更简洁，相应地就需要更多的封装代码）</li>
-<li><strong>大厂背书</strong> - zap库被很多大公司引用，作为内部的日志库的底层，再二次开发</li>
-<li><strong>源码学习</strong> - zap库对性能追求极高，可以作为高性能Go语言代码的分析样例</li>
-</ol>
-<h2 id="2-zap日志库的关键实现"><a href="#2-zap日志库的关键实现" class="headerlink" title="2.zap日志库的关键实现"></a>2.zap日志库的关键实现</h2><h3 id="最简化的调用"><a href="#最简化的调用" class="headerlink" title="最简化的调用"></a>最简化的调用</h3><p>zap日志库的调用很简单，只需要两行代码就能实现初始化：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">logger, _ := zap.NewProduction()</span><br><span class="line"><span class="keyword">defer</span> logger.Sync()</span><br></pre></td></tr></table></figure>
-
-<p>但这样的zap代码存在两个明显弊端：</p>
-<ul>
-<li>默认输出到控制台上</li>
-<li>无法保存到指定目录的文件</li>
-</ul>
-<h3 id="核心的日志文件实现"><a href="#核心的日志文件实现" class="headerlink" title="核心的日志文件实现"></a>核心的日志文件实现</h3><p>我们增加了一定的特性，代码如下：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	<span class="comment">// Logger为zap提供的原始日志，但使用起来比较烦，有强类型约束</span></span><br><span class="line">	logger *zap.Logger</span><br><span class="line">	<span class="comment">// SugaredLogger为zap提供的一个通用性更好的日志组件，作为本项目的核心日志组件</span></span><br><span class="line">	Sugar *zap.SugaredLogger</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Init</span><span class="params">(logPath <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 日志暂时只开放一个配置 - 配置文件路径，有需要可以后续开放</span></span><br><span class="line">	hook := lumberjack.Logger&#123;</span><br><span class="line">		Filename: logPath,</span><br><span class="line">	&#125;</span><br><span class="line">	w := zapcore.AddSync(&amp;hook)</span><br><span class="line"></span><br><span class="line">	encoderConfig := zap.NewProductionEncoderConfig()</span><br><span class="line">	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder</span><br><span class="line"></span><br><span class="line">	core := zapcore.NewCore(</span><br><span class="line">		zapcore.NewConsoleEncoder(encoderConfig),</span><br><span class="line">		w,</span><br><span class="line">		zap.InfoLevel,</span><br><span class="line">	)</span><br><span class="line"></span><br><span class="line">	logger = zap.New(core, zap.AddCaller())</span><br><span class="line">	Sugar = logger.Sugar()</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 命名和原生的Zap Log尽量一致，方便理解</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sync</span><span class="params">()</span></span> &#123;</span><br><span class="line">	logger.Sync()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>那我们是如何解决上面两个问题的呢？</p>
-<ol>
-<li>利用<code>go.uber.org/zap/zapcore</code>中的开放配置</li>
-<li>借用了<code>github.com/natefinch/lumberjack</code>这个常用的日志切分库，也顺带实现了日志路径的支持</li>
-</ol>
-<h3 id="main函数的调用"><a href="#main函数的调用" class="headerlink" title="main函数的调用"></a>main函数的调用</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> logFilePath = flag.String(<span class="string">&quot;l&quot;</span>, <span class="string">&quot;log/service.log&quot;</span>, <span class="string">&quot;log file path&quot;</span>)</span><br><span class="line">flag.Parse()</span><br><span class="line"></span><br><span class="line">zlog.Init(*logFilePath)</span><br><span class="line"><span class="keyword">defer</span> zlog.Sync()</span><br></pre></td></tr></table></figure>
-
-<p>至此，我们的日志功能已经基本打通。</p>
-<h2 id="3-关于日志参数的解析"><a href="#3-关于日志参数的解析" class="headerlink" title="3.关于日志参数的解析"></a>3.关于日志参数的解析</h2><p>日志参数常见的方式分2种，一个是来自<code>flag</code>的解析，另一个是来自配置文件。</p>
-<p>随着我们功能的拓展，日志库肯定会支持越来越复杂的场景。那这个时候用<code>flag</code>解析的扩展性就会很差，所以，我更推荐在微服务的框架中，<strong>用配置文件的方式去加载日志的相关配置</strong>。但这种方式会带来一个常见的现象：</p>
-<p>程序代码的实现为：先加载配置文件，后加载日志，导致配置文件出错时，无法通过日志来排查，需要用控制台或者进程管理工具协助定位问题。</p>
-<p>后续，随着框架的迭代，我会开放出更多的日志参数，目前只放出了一个日志路径的参数作为示例。</p>
-<h2 id="后续的两点核心需求"><a href="#后续的两点核心需求" class="headerlink" title="后续的两点核心需求"></a>后续的两点核心需求</h2><p>至此，我们添加的代码量并不多，也算成功地实现了一个日志打印的功能。但在实际的工程中，日志模块还需要实现两个比较大的功能：</p>
-<ol>
-<li>支持Go程序Panic/Error Wrapping风格的<strong>多行打印与采集</strong></li>
-<li>支持分布式TraceId的打印，用来排查<strong>微服务调用链路</strong></li>
-</ol>
-<p>这两块的内容会结合具体的相关相关技术，会在后续专题中专门分享，请大家重点关注。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>zap</code>库的代码是一个很棒的实现，我会在接下来的<strong>Go语言技巧系列</strong>中详细分析，欢迎大家进行关注。</p>
-<p>至此，我们的框架逐渐成型，接下来我将对<code>GORM</code>做一个简单的讲解，引入到框架中。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>技术框架</category>
-      </categories>
-      <tags>
-        <tag>Go-Framework</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学</title>
     <url>/2021/06/27/go-tip/go-tip-4/</url>
     <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
@@ -2660,91 +2660,6 @@
 </ol>
 <h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>本文介绍了三种对error的处理方式，代码实现相对简单，大家更需要关注背后的适用场景。</p>
 <p>其中，第三种方式是一个很有意思的设计模式，可以帮助大家理解函数式编程的价值。</p>
-<blockquote>
-<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>成长分享</category>
-      </categories>
-      <tags>
-        <tag>Go-Tip</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Go语言技巧 - 6.【深入Go Module】探索最小版本选择的机制</title>
-    <url>/2021/07/09/go-tip/go-tip-6/</url>
-    <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
-<h2 id="从一个示例讲起"><a href="#从一个示例讲起" class="headerlink" title="从一个示例讲起"></a>从一个示例讲起</h2><p>用一个简单列表来表示我们的模块A依赖：</p>
-<ul>
-<li>B1<code>v1.0.0</code><ul>
-<li>C1<code>v1.1.0</code></li>
-<li>C2 <code>v1.2.0</code></li>
-</ul>
-</li>
-<li>B2 <code>v1.2.0</code><ul>
-<li>C1<code>v1.1.2</code></li>
-<li>C3 <code>v1.2.0</code></li>
-</ul>
-</li>
-</ul>
-<p>表示 <em>A依赖B1与B2，而B1又依赖C1、C2，B2依赖C1、C3</em>。</p>
-<p>这里，我们把关注点放到有争议的C1，它存在两个版本<code>v1.1.0</code>与<code>v1.1.2</code>。而最终A选择的是<code>v1.1.2</code>版本的C1。</p>
-<ul>
-<li>B1<code>v1.0.0</code><ul>
-<li><del>C1<code>v1.1.0</code></del></li>
-<li>C2 <code>v1.2.0</code></li>
-</ul>
-</li>
-<li>B2 <code>v1.2.0</code><ul>
-<li>C1<code>v1.1.2</code></li>
-<li>C3 <code>v1.2.0</code></li>
-</ul>
-</li>
-</ul>
-<span id="more"></span>
-
-<h3 id="问题1：为什么要选择较高版本的C1？"><a href="#问题1：为什么要选择较高版本的C1？" class="headerlink" title="问题1：为什么要选择较高版本的C1？"></a>问题1：为什么要选择较高版本的C1？</h3><p>也许你会疑惑，为什么原则名字叫<strong>最小版本选择</strong>，但反而选择了较高那个版本呢？</p>
-<p>我们要明确一点，<strong>最小版本选择</strong>这个概念不是应用在这个场景的！</p>
-<p>从两个版本号的语义来看，<code>v1.1.2</code>和<code>v1.1.0</code>的主版本号都是<code>v1</code>，说明是向下兼容的。所以我们自然会选择较高的<code>v1.1.2</code>，毕竟如果用了<code>v1.1.0</code>，可能导致B2具体的代码不可用。</p>
-<h3 id="问题2：如果同时出现了v1和v2怎么办？"><a href="#问题2：如果同时出现了v1和v2怎么办？" class="headerlink" title="问题2：如果同时出现了v1和v2怎么办？"></a>问题2：如果同时出现了v1和v2怎么办？</h3><p>如果场景变化，C1的依赖版本为<code>v1.1.0</code>和<code>v2.0.0</code>，也就是大版本发生了变化。</p>
-<p>从版本号的语义来看，两者是<strong>不兼容</strong>的！所以，这时不会出现<strong>高版本覆盖低版本</strong>的情况。</p>
-<p>这时，就会出现依赖2个版本的C1。</p>
-<h3 id="问题3：那什么是最小版本选择中的“最小”呢？"><a href="#问题3：那什么是最小版本选择中的“最小”呢？" class="headerlink" title="问题3：那什么是最小版本选择中的“最小”呢？"></a>问题3：那什么是最小版本选择中的“最小”呢？</h3><p>在C1这个库中，我们能看到很多tag，例如<code>v1.1.0</code>，<code>v1.1.1</code>，<code>v1.1.2</code>，<code>v1.1.3</code>。而我们用到的是<code>v1.1.2</code>和<code>v1.1.0</code>。</p>
-<p>从兼容性来看，<code>v1.1.3</code>肯定能兼容前面的版本。但这时，根据<strong>最小版本选择</strong>，我们引用到<code>v1.1.2</code>。</p>
-<p>为什么要用这个最小版本原则，而不是每次都去拉取最新的tag？大家不妨思考思考，我这里列两个我能想到的点：</p>
-<ol>
-<li>保证项目依赖的稳定性：如果存在某个依赖库高频更新，会导致整个项目也频繁升级，造成风险；</li>
-<li>完全向下兼容并不可靠：毕竟软件存在不稳定性，最新的tag很有可能会导致代码变更；</li>
-</ol>
-<h2 id="结合源码巩固知识点"><a href="#结合源码巩固知识点" class="headerlink" title="结合源码巩固知识点"></a>结合源码巩固知识点</h2><p>在阅读源码之前，我们先明确本次阅读源码的预期：<strong>不要为了掌握所有代码细节而读代码，而是希望能通过了解这部分功能的一个大致实现，巩固理论知识</strong>。</p>
-<p>这里，我以<code>go语言1.15.11</code>版本为例，具体的代码路径在<code>src/cmd/go/internal/modcmd</code>下。</p>
-<p><code>go mod tidy</code>是整理Go Module最常用的指令之一，这里我们就来看看<code>tidy.go</code>文件。</p>
-<h3 id="tidy的简介"><a href="#tidy的简介" class="headerlink" title="tidy的简介"></a>tidy的简介</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> cmdTidy = &amp;base.Command&#123;</span><br><span class="line">	UsageLine: <span class="string">&quot;go mod tidy [-v]&quot;</span>,</span><br><span class="line">	Short:     <span class="string">&quot;add missing and remove unused modules&quot;</span>,</span><br><span class="line">	Long: <span class="string">`</span></span><br><span class="line"><span class="string">Tidy makes sure go.mod matches the source code in the module.</span></span><br><span class="line"><span class="string">It adds any missing modules necessary to build the current module&#x27;s</span></span><br><span class="line"><span class="string">packages and dependencies, and it removes unused modules that</span></span><br><span class="line"><span class="string">don&#x27;t provide any relevant packages. It also adds any missing entries</span></span><br><span class="line"><span class="string">to go.sum and removes any unnecessary ones.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">The -v flag causes tidy to print information about removed modules</span></span><br><span class="line"><span class="string">to standard error.</span></span><br><span class="line"><span class="string">	`</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>tidy</code>主要是把缺失的module加入到模块中，并删除弃用的modules。加上<code>-v</code>的标记位，就能把信息打印到标注错误。</p>
-<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><p>核心的数据结构为，储存Go Module的路径Path和版本Version:</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> Version <span class="keyword">struct</span> &#123;</span><br><span class="line">	Path <span class="keyword">string</span></span><br><span class="line">	Version <span class="keyword">string</span> <span class="string">`json:&quot;,omitempty&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而加载模块的代码，则是下面的<code>mvs.Req</code>函数：</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// cmd/go/internal/mvs</span></span><br><span class="line">mvs.Req(Target, direct, &amp;mvsReqs&#123;buildList: keep&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>这个函数的功能，我进行了一定的简化，大家关注重点标注出来的几行。</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Req</span><span class="params">(target module.Version, base []<span class="keyword">string</span>, reqs Reqs)</span> <span class="params">([]module.Version, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 保存模块与其依赖module的map，用map是为了防止依赖库重复</span></span><br><span class="line">	reqCache := <span class="keyword">map</span>[module.Version][]module.Version&#123;&#125;</span><br><span class="line">	reqCache[target] = <span class="literal">nil</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 第一次遍历：walk函数，用于遍历整个依赖</span></span><br><span class="line">	<span class="keyword">var</span> walk <span class="function"><span class="keyword">func</span><span class="params">(module.Version)</span> <span class="title">error</span></span></span><br><span class="line">	walk = <span class="function"><span class="keyword">func</span><span class="params">(m module.Version)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="comment">// 获取m的依赖库required，保存到map中</span></span><br><span class="line">		required, err := reqs.Required(m)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		reqCache[m] = required</span><br><span class="line">    <span class="comment">// 继续遍历依赖的依赖，保证不缺失</span></span><br><span class="line">		<span class="keyword">for</span> _, m1 := <span class="keyword">range</span> required &#123;</span><br><span class="line">			<span class="keyword">if</span> err := walk(m1); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		postorder = <span class="built_in">append</span>(postorder, m)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 真正运行第一次walk的地方</span></span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> list &#123;</span><br><span class="line">		<span class="keyword">if</span> err := walk(m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 第二次遍历：再次定义一个walk函数，取最大的版本号</span></span><br><span class="line">	have := <span class="keyword">map</span>[module.Version]<span class="keyword">bool</span>&#123;&#125;</span><br><span class="line">	walk = <span class="function"><span class="keyword">func</span><span class="params">(m module.Version)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> have[m] &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		have[m] = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">for</span> _, m1 := <span class="keyword">range</span> reqCache[m] &#123;</span><br><span class="line">			walk(m1)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	max := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> list &#123;</span><br><span class="line">		<span class="keyword">if</span> v, ok := max[m.Path]; ok &#123;</span><br><span class="line">      <span class="comment">// 只保存较大的版本号</span></span><br><span class="line">      <span class="comment">// 而v1与v2的问题也是在这里解决的：两者的Path路径不同</span></span><br><span class="line">			max[m.Path] = reqs.Max(m.Version, v)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			max[m.Path] = m.Version</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 真正运行第二次walk的地方</span></span><br><span class="line">	<span class="keyword">var</span> min []module.Version</span><br><span class="line">	<span class="keyword">for</span> _, path := <span class="keyword">range</span> base &#123;</span><br><span class="line">		m := module.Version&#123;Path: path, Version: max[path]&#125;</span><br><span class="line">		min = <span class="built_in">append</span>(min, m)</span><br><span class="line">		walk(m)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 根据名称排序</span></span><br><span class="line">	sort.Slice(min, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> min[i].Path &lt; min[j].Path</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">return</span> min, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><strong>Minimal version selection (MVS)</strong> 的整体实现看起来不复杂，但其实里面做了很多兼容性的工作，尤其是<code>indirect</code>和<code>incompatible</code>等特性。这其实在另一层面提醒了我们：<strong>一项功能尽可能在前期做好设计，靠后期补救往往会增加大量兼容性的工作</strong>。</p>
-<p>整个Go Module的核心实现在于2点：</p>
-<ol>
-<li>2个<code>walk</code>函数，一个用于查找所有依赖，另一个选择最大依赖版本；</li>
-<li>选择最大依赖版本的核心依赖一个map，<code>max[m.Path] = reqs.Max(m.Version, v)</code></li>
-</ol>
-<p>至此，对Go Module的讲解告一段落了。而更多的细节问题，需要大家结合上一篇提到的排查问题工具，边实践、边加深理解。</p>
 <blockquote>
 <p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
@@ -2874,6 +2789,91 @@
 </blockquote>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本讲的内容到这里就告一段落了，相信通过这篇文章，大家已经能应对绝大部分Go Module的场景。</p>
 <p>下一讲，我会重点讲Go Module最核心的 <strong>Minimal version selection (MVS)</strong> 机制。</p>
+<blockquote>
+<p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>成长分享</category>
+      </categories>
+      <tags>
+        <tag>Go-Tip</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Go语言技巧 - 6.【深入Go Module】探索最小版本选择的机制</title>
+    <url>/2021/07/09/go-tip/go-tip-6/</url>
+    <content><![CDATA[<p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="从一个示例讲起"><a href="#从一个示例讲起" class="headerlink" title="从一个示例讲起"></a>从一个示例讲起</h2><p>用一个简单列表来表示我们的模块A依赖：</p>
+<ul>
+<li>B1<code>v1.0.0</code><ul>
+<li>C1<code>v1.1.0</code></li>
+<li>C2 <code>v1.2.0</code></li>
+</ul>
+</li>
+<li>B2 <code>v1.2.0</code><ul>
+<li>C1<code>v1.1.2</code></li>
+<li>C3 <code>v1.2.0</code></li>
+</ul>
+</li>
+</ul>
+<p>表示 <em>A依赖B1与B2，而B1又依赖C1、C2，B2依赖C1、C3</em>。</p>
+<p>这里，我们把关注点放到有争议的C1，它存在两个版本<code>v1.1.0</code>与<code>v1.1.2</code>。而最终A选择的是<code>v1.1.2</code>版本的C1。</p>
+<ul>
+<li>B1<code>v1.0.0</code><ul>
+<li><del>C1<code>v1.1.0</code></del></li>
+<li>C2 <code>v1.2.0</code></li>
+</ul>
+</li>
+<li>B2 <code>v1.2.0</code><ul>
+<li>C1<code>v1.1.2</code></li>
+<li>C3 <code>v1.2.0</code></li>
+</ul>
+</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="问题1：为什么要选择较高版本的C1？"><a href="#问题1：为什么要选择较高版本的C1？" class="headerlink" title="问题1：为什么要选择较高版本的C1？"></a>问题1：为什么要选择较高版本的C1？</h3><p>也许你会疑惑，为什么原则名字叫<strong>最小版本选择</strong>，但反而选择了较高那个版本呢？</p>
+<p>我们要明确一点，<strong>最小版本选择</strong>这个概念不是应用在这个场景的！</p>
+<p>从两个版本号的语义来看，<code>v1.1.2</code>和<code>v1.1.0</code>的主版本号都是<code>v1</code>，说明是向下兼容的。所以我们自然会选择较高的<code>v1.1.2</code>，毕竟如果用了<code>v1.1.0</code>，可能导致B2具体的代码不可用。</p>
+<h3 id="问题2：如果同时出现了v1和v2怎么办？"><a href="#问题2：如果同时出现了v1和v2怎么办？" class="headerlink" title="问题2：如果同时出现了v1和v2怎么办？"></a>问题2：如果同时出现了v1和v2怎么办？</h3><p>如果场景变化，C1的依赖版本为<code>v1.1.0</code>和<code>v2.0.0</code>，也就是大版本发生了变化。</p>
+<p>从版本号的语义来看，两者是<strong>不兼容</strong>的！所以，这时不会出现<strong>高版本覆盖低版本</strong>的情况。</p>
+<p>这时，就会出现依赖2个版本的C1。</p>
+<h3 id="问题3：那什么是最小版本选择中的“最小”呢？"><a href="#问题3：那什么是最小版本选择中的“最小”呢？" class="headerlink" title="问题3：那什么是最小版本选择中的“最小”呢？"></a>问题3：那什么是最小版本选择中的“最小”呢？</h3><p>在C1这个库中，我们能看到很多tag，例如<code>v1.1.0</code>，<code>v1.1.1</code>，<code>v1.1.2</code>，<code>v1.1.3</code>。而我们用到的是<code>v1.1.2</code>和<code>v1.1.0</code>。</p>
+<p>从兼容性来看，<code>v1.1.3</code>肯定能兼容前面的版本。但这时，根据<strong>最小版本选择</strong>，我们引用到<code>v1.1.2</code>。</p>
+<p>为什么要用这个最小版本原则，而不是每次都去拉取最新的tag？大家不妨思考思考，我这里列两个我能想到的点：</p>
+<ol>
+<li>保证项目依赖的稳定性：如果存在某个依赖库高频更新，会导致整个项目也频繁升级，造成风险；</li>
+<li>完全向下兼容并不可靠：毕竟软件存在不稳定性，最新的tag很有可能会导致代码变更；</li>
+</ol>
+<h2 id="结合源码巩固知识点"><a href="#结合源码巩固知识点" class="headerlink" title="结合源码巩固知识点"></a>结合源码巩固知识点</h2><p>在阅读源码之前，我们先明确本次阅读源码的预期：<strong>不要为了掌握所有代码细节而读代码，而是希望能通过了解这部分功能的一个大致实现，巩固理论知识</strong>。</p>
+<p>这里，我以<code>go语言1.15.11</code>版本为例，具体的代码路径在<code>src/cmd/go/internal/modcmd</code>下。</p>
+<p><code>go mod tidy</code>是整理Go Module最常用的指令之一，这里我们就来看看<code>tidy.go</code>文件。</p>
+<h3 id="tidy的简介"><a href="#tidy的简介" class="headerlink" title="tidy的简介"></a>tidy的简介</h3><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> cmdTidy = &amp;base.Command&#123;</span><br><span class="line">	UsageLine: <span class="string">&quot;go mod tidy [-v]&quot;</span>,</span><br><span class="line">	Short:     <span class="string">&quot;add missing and remove unused modules&quot;</span>,</span><br><span class="line">	Long: <span class="string">`</span></span><br><span class="line"><span class="string">Tidy makes sure go.mod matches the source code in the module.</span></span><br><span class="line"><span class="string">It adds any missing modules necessary to build the current module&#x27;s</span></span><br><span class="line"><span class="string">packages and dependencies, and it removes unused modules that</span></span><br><span class="line"><span class="string">don&#x27;t provide any relevant packages. It also adds any missing entries</span></span><br><span class="line"><span class="string">to go.sum and removes any unnecessary ones.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">The -v flag causes tidy to print information about removed modules</span></span><br><span class="line"><span class="string">to standard error.</span></span><br><span class="line"><span class="string">	`</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>tidy</code>主要是把缺失的module加入到模块中，并删除弃用的modules。加上<code>-v</code>的标记位，就能把信息打印到标注错误。</p>
+<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><p>核心的数据结构为，储存Go Module的路径Path和版本Version:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> Version <span class="keyword">struct</span> &#123;</span><br><span class="line">	Path <span class="keyword">string</span></span><br><span class="line">	Version <span class="keyword">string</span> <span class="string">`json:&quot;,omitempty&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而加载模块的代码，则是下面的<code>mvs.Req</code>函数：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// cmd/go/internal/mvs</span></span><br><span class="line">mvs.Req(Target, direct, &amp;mvsReqs&#123;buildList: keep&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>这个函数的功能，我进行了一定的简化，大家关注重点标注出来的几行。</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Req</span><span class="params">(target module.Version, base []<span class="keyword">string</span>, reqs Reqs)</span> <span class="params">([]module.Version, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 保存模块与其依赖module的map，用map是为了防止依赖库重复</span></span><br><span class="line">	reqCache := <span class="keyword">map</span>[module.Version][]module.Version&#123;&#125;</span><br><span class="line">	reqCache[target] = <span class="literal">nil</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 第一次遍历：walk函数，用于遍历整个依赖</span></span><br><span class="line">	<span class="keyword">var</span> walk <span class="function"><span class="keyword">func</span><span class="params">(module.Version)</span> <span class="title">error</span></span></span><br><span class="line">	walk = <span class="function"><span class="keyword">func</span><span class="params">(m module.Version)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="comment">// 获取m的依赖库required，保存到map中</span></span><br><span class="line">		required, err := reqs.Required(m)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		reqCache[m] = required</span><br><span class="line">    <span class="comment">// 继续遍历依赖的依赖，保证不缺失</span></span><br><span class="line">		<span class="keyword">for</span> _, m1 := <span class="keyword">range</span> required &#123;</span><br><span class="line">			<span class="keyword">if</span> err := walk(m1); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		postorder = <span class="built_in">append</span>(postorder, m)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 真正运行第一次walk的地方</span></span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> list &#123;</span><br><span class="line">		<span class="keyword">if</span> err := walk(m); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 第二次遍历：再次定义一个walk函数，取最大的版本号</span></span><br><span class="line">	have := <span class="keyword">map</span>[module.Version]<span class="keyword">bool</span>&#123;&#125;</span><br><span class="line">	walk = <span class="function"><span class="keyword">func</span><span class="params">(m module.Version)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="keyword">if</span> have[m] &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		have[m] = <span class="literal">true</span></span><br><span class="line">		<span class="keyword">for</span> _, m1 := <span class="keyword">range</span> reqCache[m] &#123;</span><br><span class="line">			walk(m1)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	max := <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, m := <span class="keyword">range</span> list &#123;</span><br><span class="line">		<span class="keyword">if</span> v, ok := max[m.Path]; ok &#123;</span><br><span class="line">      <span class="comment">// 只保存较大的版本号</span></span><br><span class="line">      <span class="comment">// 而v1与v2的问题也是在这里解决的：两者的Path路径不同</span></span><br><span class="line">			max[m.Path] = reqs.Max(m.Version, v)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			max[m.Path] = m.Version</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 真正运行第二次walk的地方</span></span><br><span class="line">	<span class="keyword">var</span> min []module.Version</span><br><span class="line">	<span class="keyword">for</span> _, path := <span class="keyword">range</span> base &#123;</span><br><span class="line">		m := module.Version&#123;Path: path, Version: max[path]&#125;</span><br><span class="line">		min = <span class="built_in">append</span>(min, m)</span><br><span class="line">		walk(m)</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 根据名称排序</span></span><br><span class="line">	sort.Slice(min, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">		<span class="keyword">return</span> min[i].Path &lt; min[j].Path</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">return</span> min, <span class="literal">nil</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p><strong>Minimal version selection (MVS)</strong> 的整体实现看起来不复杂，但其实里面做了很多兼容性的工作，尤其是<code>indirect</code>和<code>incompatible</code>等特性。这其实在另一层面提醒了我们：<strong>一项功能尽可能在前期做好设计，靠后期补救往往会增加大量兼容性的工作</strong>。</p>
+<p>整个Go Module的核心实现在于2点：</p>
+<ol>
+<li>2个<code>walk</code>函数，一个用于查找所有依赖，另一个选择最大依赖版本；</li>
+<li>选择最大依赖版本的核心依赖一个map，<code>max[m.Path] = reqs.Max(m.Version, v)</code></li>
+</ol>
+<p>至此，对Go Module的讲解告一段落了。而更多的细节问题，需要大家结合上一篇提到的排查问题工具，边实践、边加深理解。</p>
 <blockquote>
 <p>Github: <a href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a href="http://junes.tech/">http://junes.tech/</a></p>
