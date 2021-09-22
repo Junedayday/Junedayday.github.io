@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="GORM库的官方文档GORM库作为Go语言最受欢迎的ORM框架，提供了非常丰富的功能，大家可以通过阅读中文官网了解详情。 这里，先着重介绍一个背景：GORM内部会区分v1与v2两个版本，其中  v1的包导入路径为 github.com&#x2F;jinzhu&#x2F;gorm v2的包导入路径为 gorm.io&#x2F;gorm  v1与v2对使用者来说体验相差不大，今天就主要针对v2版本进行讲解。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言技巧 - 7.【GORM实战剖析】基本用法和原理解析">
+<meta property="og:url" content="http://example.com/2021/09/15/go-tip/go-tip-7/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="GORM库的官方文档GORM库作为Go语言最受欢迎的ORM框架，提供了非常丰富的功能，大家可以通过阅读中文官网了解详情。 这里，先着重介绍一个背景：GORM内部会区分v1与v2两个版本，其中  v1的包导入路径为 github.com&#x2F;jinzhu&#x2F;gorm v2的包导入路径为 gorm.io&#x2F;gorm  v1与v2对使用者来说体验相差不大，今天就主要针对v2版本进行讲解。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-09-15T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-16T03:02:44.448Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Tip">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/09/15/go-tip/go-tip-7/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言技巧 - 7.【GORM实战剖析】基本用法和原理解析 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#GORM%E5%BA%93%E7%9A%84%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-number">1.</span> <span class="nav-text">GORM库的官方文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Talk-is-Cheap-Show-me-the-code"><span class="nav-number">2.</span> <span class="nav-text">Talk is Cheap. Show me the code.</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA"><span class="nav-number">2.1.</span> <span class="nav-text">创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2"><span class="nav-number">2.2.</span> <span class="nav-text">查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0"><span class="nav-number">2.3.</span> <span class="nav-text">更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4"><span class="nav-number">2.4.</span> <span class="nav-text">删除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%94%9FSQL"><span class="nav-number">2.5.</span> <span class="nav-text">原生SQL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8GORM%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E8%B7%AF%E6%A2%B3%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">使用GORM的核心思路梳理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E5%AF%B9%E8%B1%A1-%E4%B8%80%E8%A1%8C%E6%95%B0%E6%8D%AE"><span class="nav-number">3.1.</span> <span class="nav-text">一个对象 &#x3D; 一行数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E7%94%9F%E6%95%88%E5%AD%97%E6%AE%B5-%E6%A0%B8%E5%BF%83%E7%BB%93%E6%9E%84%E4%BD%93-%E5%AD%97%E6%AE%B5%E6%95%B0%E7%BB%84"><span class="nav-number">3.2.</span> <span class="nav-text">选择生效字段 &#x3D; 核心结构体 + 字段数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%A9%E7%9F%AD%E9%93%BE%E5%BC%8F%E8%B0%83%E7%94%A8"><span class="nav-number">3.3.</span> <span class="nav-text">缩短链式调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%9A%E7%84%A6%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="nav-number">3.4.</span> <span class="nav-text">聚焦微服务的场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E5%BC%95%E5%85%A5%E9%9D%9E%E5%8E%9F%E7%94%9FMySQL%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">3.5.</span> <span class="nav-text">避免引入非原生MySQL的特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E6%9F%A5%E8%AF%A2%E6%8E%A5%E5%8F%A3%E4%BA%86%E8%A7%A3GORM%E7%9A%84%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">从查询接口了解GORM的核心实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E4%B8%AA%E6%A0%B8%E5%BF%83%E6%96%87%E4%BB%B6"><span class="nav-number">4.1.</span> <span class="nav-text">两个核心文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Find%E7%9A%84%E8%B0%83%E7%94%A8%E9%93%BE%E8%B7%AF"><span class="nav-number">4.2.</span> <span class="nav-text">Find的调用链路</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Find%E7%9A%84%E4%B8%BB%E8%A6%81%E4%BB%A3%E7%A0%81"><span class="nav-number">4.2.1.</span> <span class="nav-text">1. Find的主要代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-tx-callbacks-Query-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.2.2.</span> <span class="nav-text">2. tx.callbacks.Query()的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Execute%E7%9A%84%E6%89%A7%E8%A1%8C%E9%80%BB%E8%BE%91"><span class="nav-number">4.2.3.</span> <span class="nav-text">3. Execute的执行逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-Callback%E7%9A%84%E6%B3%A8%E5%86%8C"><span class="nav-number">4.2.4.</span> <span class="nav-text">4. Callback的注册</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-Query%E5%87%BD%E6%95%B0%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.2.5.</span> <span class="nav-text">5. Query函数的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E6%A0%B8%E5%BF%83-%E6%9E%84%E5%BB%BASQL%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.2.6.</span> <span class="nav-text">6.核心-构建SQL的实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">57</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/15/go-tip/go-tip-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言技巧 - 7.【GORM实战剖析】基本用法和原理解析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-15 12:00:00" itemprop="dateCreated datePublished" datetime="2021-09-15T12:00:00+08:00">2021-09-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-16 11:02:44" itemprop="dateModified" datetime="2021-09-16T11:02:44+08:00">2021-09-16</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="GORM库的官方文档"><a href="#GORM库的官方文档" class="headerlink" title="GORM库的官方文档"></a>GORM库的官方文档</h2><p>GORM库作为Go语言最受欢迎的ORM框架，提供了非常丰富的功能，大家可以通过阅读<a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/index.html">中文官网</a>了解详情。</p>
+<p>这里，先着重介绍一个背景：<strong>GORM内部会区分v1与v2两个版本</strong>，其中</p>
+<ul>
+<li>v1的包导入路径为 <code>github.com/jinzhu/gorm</code></li>
+<li>v2的包导入路径为 <code>gorm.io/gorm</code></li>
+</ul>
+<p>v1与v2对使用者来说体验相差不大，今天就主要针对v2版本进行讲解。</p>
+<span id="more"></span>
+
+<h2 id="Talk-is-Cheap-Show-me-the-code"><a href="#Talk-is-Cheap-Show-me-the-code" class="headerlink" title="Talk is Cheap. Show me the code."></a>Talk is Cheap. Show me the code.</h2><p>接下来，我先给出一套个人比较推荐的CRUD代码。</p>
+<h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p><a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/create.html">官方链接 - 创建</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">user := User&#123;Name: <span class="string">&quot;Jinzhu&quot;</span>, Age: <span class="number">18</span>, Birthday: time.Now()&#125;</span><br><span class="line"><span class="comment">// 直接创建</span></span><br><span class="line">result := db.Create(&amp;user)</span><br><span class="line"><span class="comment">// 指定字段创建</span></span><br><span class="line">db.Select(<span class="string">&quot;Name&quot;</span>, <span class="string">&quot;Age&quot;</span>, <span class="string">&quot;CreatedAt&quot;</span>).Create(&amp;user)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 批量创建</span></span><br><span class="line"><span class="keyword">var</span> users = []User&#123;&#123;Name: <span class="string">&quot;jinzhu1&quot;</span>&#125;, &#123;Name: <span class="string">&quot;jinzhu2&quot;</span>&#125;, &#123;Name: <span class="string">&quot;jinzhu3&quot;</span>&#125;&#125;</span><br><span class="line">db.Create(&amp;users)</span><br></pre></td></tr></table></figure>
+
+<p>推荐：</p>
+<ol>
+<li>通常：直接用<strong>结构体</strong>或<strong>结构体的切片</strong>进行创建；</li>
+<li>特殊：加上指定的字段，也就是其余字段不生效，如上面的<code>Birthday</code>。</li>
+</ol>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><p><a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/query.html">官方链接 - 查询</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 查询所有对象</span></span><br><span class="line"><span class="keyword">var</span> users []User  </span><br><span class="line">result := db.Find(&amp;users)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指定查询条件（where）</span></span><br><span class="line">db.Where(&amp;User&#123;Name: <span class="string">&quot;jinzhu&quot;</span>&#125;, <span class="string">&quot;name&quot;</span>, <span class="string">&quot;Age&quot;</span>).Find(&amp;users)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 限制返回数量</span></span><br><span class="line">db.Limit(<span class="number">10</span>).Offset(<span class="number">5</span>).Find(&amp;users)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查询部分字段（即从select * 改造为 select name, age）</span></span><br><span class="line">db.Select(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;age&quot;</span>).Find(&amp;users)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 其余扩展</span></span><br><span class="line">db.Order(<span class="string">&quot;age desc, name&quot;</span>).Find(&amp;users)</span><br></pre></td></tr></table></figure>
+
+<p>推荐：</p>
+<ol>
+<li>普通场景：简单查询用<code>Find+Where</code>的函数结合实现，结合<code>Limit+Offset+Order</code>实现分页等高频功能；</li>
+<li>追求性能：可以引入<code>Select</code>避免查询所有字段，但会导致返回结果部分字段不存在的奇怪现象，需要权衡；</li>
+<li>复杂查询：例如<code>Join+子查询</code>等，推荐使用下面的原生SQL，用GORM拼接的体验并不好。</li>
+</ol>
+<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p><a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/update.html">官方链接 - 更新</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 更新通常包含两块，一个是要更新的字段Select+Updates，另一个是被更新数据的条件Where</span></span><br><span class="line">db.Model(&amp;user).Where(&amp;User&#123;Name: <span class="string">&quot;jinzhu&quot;</span>&#125;, <span class="string">&quot;name&quot;</span>, <span class="string">&quot;Age&quot;</span>).Select(<span class="string">&quot;Name&quot;</span>, <span class="string">&quot;Age&quot;</span>).Updates(User&#123;Name: <span class="string">&quot;new_name&quot;</span>, Age: <span class="number">0</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>零值问题：参考<a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/update.html#%E6%9B%B4%E6%96%B0%E5%A4%9A%E5%88%97">https://gorm.io/zh_CN/docs/update.html#%E6%9B%B4%E6%96%B0%E5%A4%9A%E5%88%97</a> 下的注释</p>
+</blockquote>
+<p>推荐：</p>
+<ol>
+<li>普通场景：利用<code>Select+Updates</code>指定更新字段，利用<code>Where</code>指定更新条件；</li>
+<li>特殊场景：复杂SQL用原生SQL。</li>
+</ol>
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><p><a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/delete.html">官方链接 - 删除</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 删除条件不建议太复杂，所以可以用简单的Where条件来拼接</span></span><br><span class="line">db.Where(<span class="string">&quot;email LIKE ?&quot;</span>, <span class="string">&quot;%jinzhu%&quot;</span>).Delete(Email&#123;&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>推荐：</p>
+<ol>
+<li>普通场景：利用<code>Where</code>限定删除条件，不建议太复杂；</li>
+<li>软删除：在实际项目中，不太建议用<code>硬删除</code>的方式，而是用<code>软删除</code>，即更新一个标记字段。</li>
+</ol>
+<h3 id="原生SQL"><a href="#原生SQL" class="headerlink" title="原生SQL"></a>原生SQL</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原生SQL，推荐在复杂sql场景下使用</span></span><br><span class="line">db.Raw(<span class="string">&quot;SELECT id, name, age FROM users WHERE name = ?&quot;</span>, <span class="number">3</span>).Scan(&amp;result)</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用GORM的核心思路梳理"><a href="#使用GORM的核心思路梳理" class="headerlink" title="使用GORM的核心思路梳理"></a>使用GORM的核心思路梳理</h2><h3 id="一个对象-一行数据"><a href="#一个对象-一行数据" class="headerlink" title="一个对象 = 一行数据"></a>一个对象 = 一行数据</h3><p>示例中的一个<code>User</code>对象，完整地对应到具体<code>users</code>表中的一行数据，让整个框架更加清晰明了。每当数据库增加了一列，就对应地在结构体中加一个字段。这里有两个注意点：</p>
+<ol>
+<li>不要在核心结构体<code>User</code>中加入非表中的数据，如一些计算的中间值，引起二义性；</li>
+<li><a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/models.html#gorm-Model">gorm.Model</a>可以提升编码效率（会减少重复编码），但会限制数据库表中字段的定义，慎用（个人更希望它能开放成一个接口）；</li>
+</ol>
+<h3 id="选择生效字段-核心结构体-字段数组"><a href="#选择生效字段-核心结构体-字段数组" class="headerlink" title="选择生效字段 = 核心结构体 + 字段数组"></a>选择生效字段 = 核心结构体 + 字段数组</h3><p>在 <strong>查询</strong> 和 <strong>更新</strong> 接口里，我推荐的使用方法是采用核心结构体<code>User</code>+一个fields的数组，前者保存具体的数据、也实现了结构体复用，后者则选择生效的字段。</p>
+<p>这种风格代码和Google推荐的<a target="_blank" rel="noopener" href="https://cloud.google.com/apis/design/standard_methods#update">API风格</a>非常像，可读性很棒。</p>
+<blockquote>
+<p>这里还遗留了一个问题，就是fields数组里的字符串必须手输，可以考虑结合go generate自动生成这些fields的字符串常量，减少出错的概率。</p>
+</blockquote>
+<h3 id="缩短链式调用"><a href="#缩短链式调用" class="headerlink" title="缩短链式调用"></a>缩短链式调用</h3><p>GORM的主要风格是<a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/method_chaining.html">链式调用</a>，类似于Builder设计模式、串联堆起一个SQL语句。这种调用方式扩展性很强，但会带来了一个很严重的问题：容易写出一个超长的链式调用，可维护成本大幅度提高。</p>
+<p>所以，在我的推荐使用方式里，区分了两种场景：</p>
+<ol>
+<li>简单场景 - <strong>核心结构体 + 字段数组</strong></li>
+<li>复杂场景 - <strong>原生SQL</strong></li>
+</ol>
+<h3 id="聚焦微服务的场景"><a href="#聚焦微服务的场景" class="headerlink" title="聚焦微服务的场景"></a>聚焦微服务的场景</h3><p>作为一个<code>ORM</code>工具，GORM要考虑兼容各种SQL语句，内部非常庞大的。但如今更多地是考虑微服务的场景，这就能抛开大量的历史包袱，实现得更加简洁。这里我简单列举三个不太推荐使用的SQL特性：</p>
+<ol>
+<li>减少group by - 考虑将聚合字段再单独放在一个表中</li>
+<li>抛弃join - 多表关联采用多次查询（先查A表，然后用In语句去B表查）、或做一定的字段冗余（即同时放在A、B两个表里）</li>
+<li>抛弃子查询，将相关逻辑放在代码里</li>
+</ol>
+<p>当然，真实业务研发过程中无法完全避免复杂SQL，我们只能有意识地减少引入复杂度。</p>
+<h3 id="避免引入非原生MySQL的特性"><a href="#避免引入非原生MySQL的特性" class="headerlink" title="避免引入非原生MySQL的特性"></a>避免引入非原生MySQL的特性</h3><p>GORM除了常规的SQL功能，还提供了一些<a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/models.html#%E9%AB%98%E7%BA%A7%E9%80%89%E9%A1%B9">高级特性</a>、<a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/belongs_to.html">模型关联</a>、<a target="_blank" rel="noopener" href="https://gorm.io/zh_CN/docs/hooks.html">钩子</a>等，非常炫酷。</p>
+<p>但我不推荐大家在实际项目中使用这些特性。只有尽可能地保证这个框架简洁，才能保证代码后续的可维护性。</p>
+<p>熟悉MySQL历史的朋友都知道，<strong>存储过程</strong>在以前相当一段时间都是很好的工具，但如今都倡导<strong>去存储过程</strong>。GORM的这些特性和存储过程有异曲同工之处：一个将业务逻辑放在了数据库，另一个则放到了ORM框架里，会导致后续的迁移成本变高。</p>
+<blockquote>
+<p>这也是我不推荐使用 gorm.Model的重要原因。</p>
+</blockquote>
+<h2 id="从查询接口了解GORM的核心实现"><a href="#从查询接口了解GORM的核心实现" class="headerlink" title="从查询接口了解GORM的核心实现"></a>从查询接口了解GORM的核心实现</h2><h3 id="两个核心文件"><a href="#两个核心文件" class="headerlink" title="两个核心文件"></a>两个核心文件</h3><p>在GORM库中，有两个核心的文件，也是我们调用频率最高的函数所在：<strong>chainable_api.go</strong>和 <strong>finisher_api.go</strong>。顾名思义，前者是整个链式调用的中间部分，后者则是最终获取结果的函数。以查询为例：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.Where(&amp;User&#123;Name: <span class="string">&quot;jinzhu&quot;</span>&#125;, <span class="string">&quot;name&quot;</span>, <span class="string">&quot;Age&quot;</span>).Find(&amp;users)</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>Where</code>是chainable，也就是还在拼接SQL条件，<code>Find</code>则是触发真正查询的finisher。</p>
+<p>如果一开始过于关注chainable调用，很容易陷入构造SQL的细节，所以这块代码建议从finisher入手，深入看看一个SQL的到底是怎么在GORM中拼接并执行的。</p>
+<h3 id="Find的调用链路"><a href="#Find的调用链路" class="headerlink" title="Find的调用链路"></a>Find的调用链路</h3><h4 id="1-Find的主要代码"><a href="#1-Find的主要代码" class="headerlink" title="1. Find的主要代码"></a>1. Find的主要代码</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(db *DB)</span> <span class="title">Find</span><span class="params">(dest <span class="keyword">interface</span>&#123;&#125;, conds ...<span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(tx *DB)</span></span> &#123;</span><br><span class="line">	tx = db.getInstance()</span><br><span class="line">  <span class="comment">// conds是查询的条件，这里忽略，我们默认已经在前面的Chainable中完成了所有参数的拼接</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(conds) &gt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> exprs := tx.Statement.BuildCondition(conds[<span class="number">0</span>], conds[<span class="number">1</span>:]...); <span class="built_in">len</span>(exprs) &gt; <span class="number">0</span> &#123;</span><br><span class="line">			tx.Statement.AddClause(clause.Where&#123;Exprs: exprs&#125;)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	tx.Statement.Dest = dest</span><br><span class="line">  <span class="comment">// 关键的执行逻辑</span></span><br><span class="line">	<span class="keyword">return</span> tx.callbacks.Query().Execute(tx)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-tx-callbacks-Query-的实现"><a href="#2-tx-callbacks-Query-的实现" class="headerlink" title="2. tx.callbacks.Query()的实现"></a>2. tx.callbacks.Query()的实现</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cs *callbacks)</span> <span class="title">Query</span><span class="params">()</span> *<span class="title">processor</span></span> &#123;</span><br><span class="line">  <span class="comment">// Query 是从processors的 map 中取出 query</span></span><br><span class="line">	<span class="keyword">return</span> cs.processors[<span class="string">&quot;query&quot;</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这个对应的processor是 gorm.DB，也就是执行DB的Execute</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">initializeCallbacks</span><span class="params">(db *DB)</span> *<span class="title">callbacks</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;callbacks&#123;</span><br><span class="line">		processors: <span class="keyword">map</span>[<span class="keyword">string</span>]*processor&#123;</span><br><span class="line">			<span class="string">&quot;create&quot;</span>: &#123;db: db&#125;,</span><br><span class="line">			<span class="string">&quot;query&quot;</span>:  &#123;db: db&#125;,</span><br><span class="line">			<span class="string">&quot;update&quot;</span>: &#123;db: db&#125;,</span><br><span class="line">			<span class="string">&quot;delete&quot;</span>: &#123;db: db&#125;,</span><br><span class="line">			<span class="string">&quot;row&quot;</span>:    &#123;db: db&#125;,</span><br><span class="line">			<span class="string">&quot;raw&quot;</span>:    &#123;db: db&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-Execute的执行逻辑"><a href="#3-Execute的执行逻辑" class="headerlink" title="3. Execute的执行逻辑"></a>3. Execute的执行逻辑</h4><p>抛开一些周边逻辑，我们聚焦于下面的核心逻辑：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *processor)</span> <span class="title">Execute</span><span class="params">(db *DB)</span> *<span class="title">DB</span></span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// processor中注册了多个函数，按顺序执行。</span></span><br><span class="line">  <span class="comment">// 核心的查询逻辑也在这里面</span></span><br><span class="line">	<span class="keyword">for</span> _, f := <span class="keyword">range</span> p.fns &#123;</span><br><span class="line">		f(db)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> db</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而fns又是来自callbacks</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *processor)</span> <span class="title">compile</span><span class="params">()</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 对 callbacks 会做排序</span></span><br><span class="line">	<span class="keyword">if</span> p.fns, err = sortCallbacks(p.callbacks); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		p.db.Logger.Error(context.Background(), <span class="string">&quot;Got error when compile callbacks, got %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-Callback的注册"><a href="#4-Callback的注册" class="headerlink" title="4. Callback的注册"></a>4. Callback的注册</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RegisterDefaultCallbacks</span><span class="params">(db *gorm.DB, config *Config)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 默认注册了create/query/delete/update/raw 五种 callback 大类，这里以query为例</span></span><br><span class="line">	queryCallback := db.Callback().Query()</span><br><span class="line">	queryCallback.Register(<span class="string">&quot;gorm:query&quot;</span>, Query)</span><br><span class="line">	queryCallback.Register(<span class="string">&quot;gorm:preload&quot;</span>, Preload)</span><br><span class="line">	queryCallback.Register(<span class="string">&quot;gorm:after_query&quot;</span>, AfterQuery)</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(config.QueryClauses) == <span class="number">0</span> &#123;</span><br><span class="line">		config.QueryClauses = queryClauses</span><br><span class="line">	&#125;</span><br><span class="line">	queryCallback.Clauses = config.QueryClauses</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-Query函数的实现"><a href="#5-Query函数的实现" class="headerlink" title="5. Query函数的实现"></a>5. Query函数的实现</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Query</span><span class="params">(db *gorm.DB)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> db.Error == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="comment">// 构建查询的 SQL 语句</span></span><br><span class="line">		BuildQuerySQL(db)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 查询数据</span></span><br><span class="line">		<span class="keyword">if</span> !db.DryRun &amp;&amp; db.Error == <span class="literal">nil</span> &#123;</span><br><span class="line">			rows, err := db.Statement.ConnPool.QueryContext(db.Statement.Context, db.Statement.SQL.String(), db.Statement.Vars...)</span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				db.AddError(err)</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">defer</span> rows.Close()</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 将结果输出到目标结构体中</span></span><br><span class="line">			gorm.Scan(rows, db, <span class="literal">false</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-核心-构建SQL的实现"><a href="#6-核心-构建SQL的实现" class="headerlink" title="6.核心-构建SQL的实现"></a>6.核心-构建SQL的实现</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BuildQuerySQL</span><span class="params">(db *gorm.DB)</span></span> &#123;</span><br><span class="line">  <span class="comment">// SQL为空，表示需要自己构建</span></span><br><span class="line">	<span class="keyword">if</span> db.Statement.SQL.String() == <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">		db.Statement.SQL.Grow(<span class="number">100</span>) <span class="comment">// 分配初始空间</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(db.Statement.Selects) &gt; <span class="number">0</span> &#123; </span><br><span class="line">      <span class="comment">// 表示只select某几个字段，而不是select *</span></span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> db.Statement.Schema != <span class="literal">nil</span> &amp;&amp; <span class="built_in">len</span>(db.Statement.Omits) &gt; <span class="number">0</span> &#123;</span><br><span class="line">      <span class="comment">// Omit表示忽略特定字段</span></span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> db.Statement.Schema != <span class="literal">nil</span> &amp;&amp; db.Statement.ReflectValue.IsValid() &#123;</span><br><span class="line">      <span class="comment">// 查询到指定结构体</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 对join的处理，涉及到多表关联，暂时忽略</span></span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(db.Statement.Joins) != <span class="number">0</span> &#123;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			db.Statement.AddClauseIfNotExists(clause.From&#123;&#125;)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 用一个map去重，符合名字中的 IfNotExists 含义</span></span><br><span class="line">		db.Statement.AddClauseIfNotExists(clauseSelect)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最后拼接出完整 SQL 的地方</span></span><br><span class="line">		db.Statement.Build(db.Statement.BuildClauses...)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文旨在介绍GORM的推荐使用方式，并简单阅读对接数据库的相关代码。这里分享我的四个观点：</p>
+<ol>
+<li><strong>Builder设计模式</strong> - 在面对复杂场景中，Builder设计模式扩展性很好，可分为两个阶段：存储数据+处理数据；GORM的调用就是采用了chainable+finisher的两段实现，前者保存SQL相关元数据，后者拼接SQL并执行；</li>
+<li><strong>负重前行</strong> - GORM是一个负重前行的框架：它不仅支持了所有原生SQL的特性，也增加了很多类似Hook的高级特性，导致这个框架非常庞大。如果团队没有历史包袱，更推荐<strong>节制</strong>地使用GORM特性，适当封装一层；</li>
+<li><strong>interface{}问题</strong> - GORM中许多函数入参的数据类型都是<code>interface&#123;&#125;</code>，底层又用reflect支持了多种类型，这种实现会导致两个问题：<ol>
+<li>reflect导致的底层的性能不高（这点还能接受）</li>
+<li>interface{}如果传入了不支持的复杂数据类型时，排查问题麻烦，往往要运行程序时才会报错</li>
+</ol>
+</li>
+<li><strong>高频拼接重复SQL</strong> - 在一个程序运行过程中，执行的SQL语句都比较固定，而变化的往往是参数；从GORM的实现来看，每次执行都需要重新拼接一次SQL语句，是有不小的优化空间的，比如引入一定的cache。</li>
+</ol>
+<p>希望这四点能对大家的日常工作有所启发~</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Tip/" rel="tag"># Go-Tip</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/19/go-framework/go-framework-1/" rel="prev" title="Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务">
+                  <i class="fa fa-chevron-left"></i> Go语言微服务框架 - 1.搭建gRPC+HTTP的双重网关服务
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
