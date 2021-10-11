@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="CRUD是贯穿整个程序员日常开发的基本工作，占据了我们绝大多数的coding时间。 作为一名程序员，我们总是希望能有更简单的开发方式来解决重复性的工作问题。在这个小版本中，我将结合自己的工作，来给出一套自动生成代码的完整方案，供大家借鉴。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言微服务框架 - 7.Gormer-自动生成代码的初体验">
+<meta property="og:url" content="http://example.com/2021/09/27/go-framework/go-framework-7/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="CRUD是贯穿整个程序员日常开发的基本工作，占据了我们绝大多数的coding时间。 作为一名程序员，我们总是希望能有更简单的开发方式来解决重复性的工作问题。在这个小版本中，我将结合自己的工作，来给出一套自动生成代码的完整方案，供大家借鉴。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-09-27T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-10-11T09:33:37.212Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Framework">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/09/27/go-framework/go-framework-7/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言微服务框架 - 7.Gormer-自动生成代码的初体验 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#v0-5-1%EF%BC%9AGormer-%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E4%BB%A3%E7%A0%81%E7%9A%84%E5%88%9D%E4%BD%93%E9%AA%8C"><span class="nav-number">1.</span> <span class="nav-text">v0.5.1：Gormer-自动生成代码的初体验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">1.1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9"><span class="nav-number">1.2.</span> <span class="nav-text">关键技术点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95%E6%9E%84%E9%80%A0"><span class="nav-number">1.3.</span> <span class="nav-text">目录构造</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Go-Template%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text">1.Go Template技术概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-gormer%E5%B7%A5%E5%85%B7%E6%A0%B8%E5%BF%83%E6%80%9D%E8%B7%AF"><span class="nav-number">3.</span> <span class="nav-text">2.gormer工具核心思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-gormer%E7%9A%84%E6%A8%A1%E6%9D%BF%E5%A1%AB%E5%85%85"><span class="nav-number">4.</span> <span class="nav-text">3.gormer的模板填充</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/27/go-framework/go-framework-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言微服务框架 - 7.Gormer-自动生成代码的初体验
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-27 12:00:00" itemprop="dateCreated datePublished" datetime="2021-09-27T12:00:00+08:00">2021-09-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-10-11 17:33:37" itemprop="dateModified" datetime="2021-10-11T17:33:37+08:00">2021-10-11</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>CRUD是贯穿整个程序员日常开发的基本工作，占据了我们绝大多数的coding时间。</p>
+<p>作为一名程序员，我们总是希望能有更简单的开发方式来解决重复性的工作问题。在这个小版本中，我将结合自己的工作，来给出一套自动生成代码的完整方案，供大家借鉴。</p>
+<span id="more"></span>
+
+<h2 id="v0-5-1：Gormer-自动生成代码的初体验"><a href="#v0-5-1：Gormer-自动生成代码的初体验" class="headerlink" title="v0.5.1：Gormer-自动生成代码的初体验"></a>v0.5.1：Gormer-自动生成代码的初体验</h2><p>项目链接 <a target="_blank" rel="noopener" href="https://github.com/Junedayday/micro_web_service/tree/v0.5.1">https://github.com/Junedayday/micro_web_service/tree/v0.5.1</a></p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>自动生成一套可用的Dao层代码，兼容原始版本。</p>
+<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
+<li>Go Template技术概览</li>
+<li>gormer工具核心思路</li>
+<li>gormer的模板填充</li>
+</ol>
+<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务</span><br><span class="line">	         |-- demo.pb.go                        demo.proto的基础结构</span><br><span class="line">	         |-- demo.pb.gw.go                     demo.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- demo_grpc.pb.go                   demo.proto的gRPC接口代码</span><br><span class="line">	    	|-- order                            对应idl/order服务</span><br><span class="line">	         |-- order.pb.go                       order.proto的基础结构</span><br><span class="line">	         |-- order.pb.gw.go                    order.proto的HTTP接口，对应gRPC-Gateway</span><br><span class="line">	         |-- order_grpc.pb.go                  order.proto的gRPC接口代码</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义</span><br><span class="line">	      |-- demo.proto                       protobuffer的原始定义</span><br><span class="line">	   |-- order                           业务order定义</span><br><span class="line">	      |-- order.proto                      protobuffer的原始定义</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- config                          配置相关的文件夹</span><br><span class="line">	      |-- viper.go                         viper的相关加载逻辑</span><br><span class="line">	   |-- dao                             Data Access Object层</span><br><span class="line">	      |-- order.go                         Order对象，订单表，实现model层的OrderRepository</span><br><span class="line">	      |-- order_test.go                    Order的单元测试</span><br><span class="line">	   |-- gormer                          新增：从pkg/gormer中生成的相关代码，不允许更改</span><br><span class="line">	      |-- order.go                         新增：gormer从orders表中获取的真实Gorm结构体</span><br><span class="line">	   |-- model                           model层，定义对象的接口方法</span><br><span class="line">	      |-- order.go                         OrderRepository接口，具体实现在dao层</span><br><span class="line">	   |-- mysql                           MySQL连接</span><br><span class="line">	      |-- init.go                          初始化连接到MySQL的工作</span><br><span class="line">	   |-- server                          服务器的实现</span><br><span class="line">	      |-- demo.go                          server中对demo这个服务的接口实现</span><br><span class="line">	      |-- server.go                        server的定义，须实现对应服务的方法</span><br><span class="line">	   |-- service                         service层，作为领域实现的核心部分</span><br><span class="line">	      |-- order.go                         Order相关的服务，目前仅简单的CRUD</span><br><span class="line">     |-- zlog                            封装日志的文件夹</span><br><span class="line">        |-- zap.go                           zap封装的代码实现</span><br><span class="line">  |-- pkg                            新增：开放给第三方的工具库</span><br><span class="line">     |-- gormer                          新增：gormer工具，用于生成Gorm相关Dao层代码</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义，从v1beta升到v1</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具，从v1beta升到v1</span><br><span class="line">	|-- gen.sh                         更新：生成代码的脚本：buf+gormer</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-Go-Template技术概览"><a href="#1-Go-Template技术概览" class="headerlink" title="1.Go Template技术概览"></a>1.Go Template技术概览</h2><p>Go的标准库提供了Template功能，但网上的介绍很零散，我建议大家可以阅读以下两篇资料：</p>
+<ul>
+<li>原理性：官方文档 - <a target="_blank" rel="noopener" href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a> </li>
+<li>实践性：Blog - <a target="_blank" rel="noopener" href="https://blog.gopheracademy.com/advent-2017/using-go-templates/">https://blog.gopheracademy.com/advent-2017/using-go-templates/</a> </li>
+</ul>
+<p>这里，为了方便大家阅读下面的内容，我简要概括下：</p>
+<ol>
+<li>结构体中字段填充 <code>&#123;&#123; .FieldName &#125;&#125;</code></li>
+<li>条件语句 <code>&#123;&#123;if .FieldName&#125;&#125; // action &#123;&#123; else &#125;&#125; // action 2 &#123;&#123; end &#125;&#125;</code></li>
+<li>循环 <code>&#123;&#123;range .Member&#125;&#125; ... &#123;&#123;end&#125;&#125;</code></li>
+<li>流水线 <code>&#123;&#123; with $x := <^>result-of-some-action<^> &#125;&#125; &#123;&#123; $x &#125;&#125; &#123;&#123; end &#125;&#125;</code></li>
+</ol>
+<blockquote>
+<p>很多资料会很自然地将Go Template和HTML结合起来，但这只是模板的其中一个用法。</p>
+<p>HTML的结构用模板化的方式可以减少大量重复性的代码，但这种思路是前后单不分离的，个人不太推荐。</p>
+</blockquote>
+<h2 id="2-gormer工具核心思路"><a href="#2-gormer工具核心思路" class="headerlink" title="2.gormer工具核心思路"></a>2.gormer工具核心思路</h2><p>在pkg/gormer目录下提供了一个gormer工具，用于自动生成代码，我对主流程进行简单地讲解：</p>
+<ol>
+<li>解析各种关键性的参数</li>
+<li>连接测试数据库，获取表信息</li>
+<li>逐个处理每个表<ol>
+<li>读取数据库中的表结构</li>
+<li>根据表结构生成对应的Go语言结构体，放在internal/gormer下</li>
+<li>生成相关的Dao层代码，放在internal/dao下</li>
+</ol>
+</li>
+<li>执行go fmt格式化代码</li>
+</ol>
+<p>其中最关键的是3-b与3-c，它们是生成代码的最关键步骤。我们来看一个关键性的结构体：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 结构体名称，对应MySQL表级别的信息</span></span><br><span class="line"><span class="keyword">type</span> StructLevel <span class="keyword">struct</span> &#123;</span><br><span class="line">	TableName      <span class="keyword">string</span></span><br><span class="line">	Name           <span class="keyword">string</span></span><br><span class="line">	SmallCamelName <span class="keyword">string</span></span><br><span class="line">	Columns        []FieldLevel</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Field字段名称，对应MySQL表里Column</span></span><br><span class="line"><span class="keyword">type</span> FieldLevel <span class="keyword">struct</span> &#123;</span><br><span class="line">	FieldName <span class="keyword">string</span></span><br><span class="line">	FieldType <span class="keyword">string</span></span><br><span class="line">	GormName  <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-gormer的模板填充"><a href="#3-gormer的模板填充" class="headerlink" title="3.gormer的模板填充"></a>3.gormer的模板填充</h2><p>结合1、2，我们可以开始生成模板的部分，具体的Template代码如下，它会将StructLevel这个结构体中的字段填充到下面内容中，生成go文件。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> gormerTmpl = <span class="string">`</span></span><br><span class="line"><span class="string">// Table Level Info</span></span><br><span class="line"><span class="string">const &#123;&#123;.Name&#125;&#125;TableName = &quot;&#123;&#123;.TableName&#125;&#125;&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">// Field Level Info</span></span><br><span class="line"><span class="string">type &#123;&#123;.Name&#125;&#125;Field string</span></span><br><span class="line"><span class="string">const (</span></span><br><span class="line"><span class="string">&#123;&#123;range $item := .Columns&#125;&#125;</span></span><br><span class="line"><span class="string">    &#123;&#123;$.Name&#125;&#125;Field&#123;&#123;$item.FieldName&#125;&#125; &#123;&#123;$.Name&#125;&#125;Field = &quot;&#123;&#123;$item.GormName&#125;&#125;&quot; &#123;&#123;end&#125;&#125;</span></span><br><span class="line"><span class="string">)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">var &#123;&#123;$.Name&#125;&#125;FieldAll = []&#123;&#123;$.Name&#125;&#125;Field&#123; &#123;&#123;range $k,$item := .Columns&#125;&#125;&quot;&#123;&#123;$item.GormName&#125;&#125;&quot;, &#123;&#123;end&#125;&#125;&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">// Kernel struct for table for one row</span></span><br><span class="line"><span class="string">type &#123;&#123;.Name&#125;&#125; struct &#123; &#123;&#123;range $item := .Columns&#125;&#125;</span></span><br><span class="line"><span class="string">	&#123;&#123;$item.FieldName&#125;&#125;	&#123;&#123;$item.FieldType&#125;&#125;	`</span> + <span class="string">&quot;`&quot;</span> + <span class="string">`gorm:&quot;column:&#123;&#123;$item.GormName&#125;&#125;&quot;`</span> + <span class="string">&quot;`&quot;</span> + <span class="string">` &#123;&#123;end&#125;&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">// Kernel struct for table operation</span></span><br><span class="line"><span class="string">type &#123;&#123;.Name&#125;&#125;Options struct &#123;</span></span><br><span class="line"><span class="string">    &#123;&#123;.Name&#125;&#125; *&#123;&#123;.Name&#125;&#125;</span></span><br><span class="line"><span class="string">    Fields []string</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">// Match: case insensitive</span></span><br><span class="line"><span class="string">var &#123;&#123;$.Name&#125;&#125;FieldMap = map[string]string&#123;</span></span><br><span class="line"><span class="string">&#123;&#123;range $item := .Columns&#125;&#125;&quot;&#123;&#123;$item.FieldName&#125;&#125;&quot;:&quot;&#123;&#123;$item.GormName&#125;&#125;&quot;,&quot;&#123;&#123;$item.GormName&#125;&#125;&quot;:&quot;&#123;&#123;$item.GormName&#125;&#125;&quot;,</span></span><br><span class="line"><span class="string">&#123;&#123;end&#125;&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">func New&#123;&#123;.Name&#125;&#125;Options(target *&#123;&#123;.Name&#125;&#125;, fields ...&#123;&#123;$.Name&#125;&#125;Field) *&#123;&#123;.Name&#125;&#125;Options&#123;</span></span><br><span class="line"><span class="string">    options := &amp;&#123;&#123;.Name&#125;&#125;Options&#123;</span></span><br><span class="line"><span class="string">        &#123;&#123;.Name&#125;&#125;: target,</span></span><br><span class="line"><span class="string">        Fields: make([]string, len(fields)),</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    for index, field := range fields &#123;</span></span><br><span class="line"><span class="string">        options.Fields[index] = string(field)</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    return options</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">func New&#123;&#123;.Name&#125;&#125;OptionsAll(target *&#123;&#123;.Name&#125;&#125;) *&#123;&#123;.Name&#125;&#125;Options&#123;</span></span><br><span class="line"><span class="string">    return New&#123;&#123;.Name&#125;&#125;Options(target, &#123;&#123;$.Name&#125;&#125;FieldAll...)</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">func New&#123;&#123;.Name&#125;&#125;OptionsRawString(target *&#123;&#123;.Name&#125;&#125;, fields ...string) *&#123;&#123;.Name&#125;&#125;Options&#123;</span></span><br><span class="line"><span class="string">    options := &amp;&#123;&#123;.Name&#125;&#125;Options&#123;</span></span><br><span class="line"><span class="string">        &#123;&#123;.Name&#125;&#125;: target,</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    for _, field := range fields &#123;</span></span><br><span class="line"><span class="string">        if f,ok := &#123;&#123;$.Name&#125;&#125;FieldMap[field];ok &#123;</span></span><br><span class="line"><span class="string">             options.Fields = append(options.Fields, f)</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    return options</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">`</span></span><br></pre></td></tr></table></figure>
+
+<p>生成的代码如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Code generated by gormer. DO NOT EDIT.</span></span><br><span class="line"><span class="keyword">package</span> gormer</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;time&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Table Level Info</span></span><br><span class="line"><span class="keyword">const</span> OrderTableName = <span class="string">&quot;orders&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Field Level Info</span></span><br><span class="line"><span class="keyword">type</span> OrderField <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	OrderFieldId         OrderField = <span class="string">&quot;id&quot;</span></span><br><span class="line">	OrderFieldName       OrderField = <span class="string">&quot;name&quot;</span></span><br><span class="line">	OrderFieldPrice      OrderField = <span class="string">&quot;price&quot;</span></span><br><span class="line">	OrderFieldCreateTime OrderField = <span class="string">&quot;create_time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> OrderFieldAll = []OrderField&#123;<span class="string">&quot;id&quot;</span>, <span class="string">&quot;name&quot;</span>, <span class="string">&quot;price&quot;</span>, <span class="string">&quot;create_time&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Kernel struct for table for one row</span></span><br><span class="line"><span class="keyword">type</span> Order <span class="keyword">struct</span> &#123;</span><br><span class="line">	Id         <span class="keyword">int64</span>     <span class="string">`gorm:&quot;column:id&quot;`</span></span><br><span class="line">	Name       <span class="keyword">string</span>    <span class="string">`gorm:&quot;column:name&quot;`</span></span><br><span class="line">	Price      <span class="keyword">float64</span>   <span class="string">`gorm:&quot;column:price&quot;`</span></span><br><span class="line">	CreateTime time.Time <span class="string">`gorm:&quot;column:create_time&quot;`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Kernel struct for table operation</span></span><br><span class="line"><span class="keyword">type</span> OrderOptions <span class="keyword">struct</span> &#123;</span><br><span class="line">	Order  *Order</span><br><span class="line">	Fields []<span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Match: case insensitive</span></span><br><span class="line"><span class="keyword">var</span> OrderFieldMap = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;</span><br><span class="line">	<span class="string">&quot;Id&quot;</span>: <span class="string">&quot;id&quot;</span>, <span class="string">&quot;id&quot;</span>: <span class="string">&quot;id&quot;</span>,</span><br><span class="line">	<span class="string">&quot;Name&quot;</span>: <span class="string">&quot;name&quot;</span>, <span class="string">&quot;name&quot;</span>: <span class="string">&quot;name&quot;</span>,</span><br><span class="line">	<span class="string">&quot;Price&quot;</span>: <span class="string">&quot;price&quot;</span>, <span class="string">&quot;price&quot;</span>: <span class="string">&quot;price&quot;</span>,</span><br><span class="line">	<span class="string">&quot;CreateTime&quot;</span>: <span class="string">&quot;create_time&quot;</span>, <span class="string">&quot;create_time&quot;</span>: <span class="string">&quot;create_time&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewOrderOptions</span><span class="params">(target *Order, fields ...OrderField)</span> *<span class="title">OrderOptions</span></span> &#123;</span><br><span class="line">	options := &amp;OrderOptions&#123;</span><br><span class="line">		Order:  target,</span><br><span class="line">		Fields: <span class="built_in">make</span>([]<span class="keyword">string</span>, <span class="built_in">len</span>(fields)),</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> index, field := <span class="keyword">range</span> fields &#123;</span><br><span class="line">		options.Fields[index] = <span class="keyword">string</span>(field)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> options</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewOrderOptionsAll</span><span class="params">(target *Order)</span> *<span class="title">OrderOptions</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> NewOrderOptions(target, OrderFieldAll...)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewOrderOptionsRawString</span><span class="params">(target *Order, fields ...<span class="keyword">string</span>)</span> *<span class="title">OrderOptions</span></span> &#123;</span><br><span class="line">	options := &amp;OrderOptions&#123;</span><br><span class="line">		Order: target,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, field := <span class="keyword">range</span> fields &#123;</span><br><span class="line">		<span class="keyword">if</span> f, ok := OrderFieldMap[field]; ok &#123;</span><br><span class="line">			options.Fields = <span class="built_in">append</span>(options.Fields, f)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> options</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>dao层的代码逻辑类似，我就不重复填写了。</p>
+<p>这里，我将代码拆分成了gormer与dao两层，主要是：</p>
+<ul>
+<li>internal/gormer整个目录是不可变的、只能自动生成，对应基础的数据库表结构</li>
+<li>internal/dao层会添加其余的文件，如定制化的sql。</li>
+</ul>
+<p>至此，再将引用的相关代码简单修改，就实现了这一整块功能.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本章重点介绍了Go Template在高度重复的代码模块中的应用，结合数据库实现了一个高度自动化的工具gormer。</p>
+<p>gormer目前实现的功能比较单一，但只要有了初步自动化的思路，我们可以在后续迭代中慢慢优化，让它适应更多的场景。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Framework/" rel="tag"># Go-Framework</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/19/go-framework/go-framework-6/" rel="prev" title="Go语言微服务框架 - 6.用Google风格的API接口打通MySQL操作">
+                  <i class="fa fa-chevron-left"></i> Go语言微服务框架 - 6.用Google风格的API接口打通MySQL操作
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/10/10/go-framework/go-framework-8/" rel="next" title="Go语言微服务框架 - 8.Gormer迭代-定制专属的ORM代码生成工具">
+                  Go语言微服务框架 - 8.Gormer迭代-定制专属的ORM代码生成工具 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

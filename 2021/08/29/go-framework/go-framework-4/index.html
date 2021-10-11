@@ -25,21 +25,21 @@
   <meta name="description" content="数据持久化是服务的必要特性，最常见的组件就是关系型数据库MySQL。而在Go语言里，GORM已经成了对接MySQL事实上的标准，那么也就不去横向对比其它库了。 GORM库是一个很强大、但同时也是一个非常复杂的工具。为了支持复杂的SQL语言，它比之前的配置文件加载工具github.com&#x2F;spf13&#x2F;viper要复杂不少。今天，我们不会全量地引入GORM里的所有特性，而是从一个最简单的场景入手，对">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go语言微服务框架 - 4.初识GORM库">
-<meta property="og:url" content="http://example.com/2021/03/29/go-framework/go-framework-4/index.html">
+<meta property="og:url" content="http://example.com/2021/08/29/go-framework/go-framework-4/index.html">
 <meta property="og:site_name" content="Junedayday Blog">
 <meta property="og:description" content="数据持久化是服务的必要特性，最常见的组件就是关系型数据库MySQL。而在Go语言里，GORM已经成了对接MySQL事实上的标准，那么也就不去横向对比其它库了。 GORM库是一个很强大、但同时也是一个非常复杂的工具。为了支持复杂的SQL语言，它比之前的配置文件加载工具github.com&#x2F;spf13&#x2F;viper要复杂不少。今天，我们不会全量地引入GORM里的所有特性，而是从一个最简单的场景入手，对">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
-<meta property="article:published_time" content="2021-03-29T12:51:46.961Z">
-<meta property="article:modified_time" content="2021-08-26T10:38:56.000Z">
+<meta property="article:published_time" content="2021-08-29T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-26T02:52:13.703Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Go-Framework">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
 
 
-<link rel="canonical" href="http://example.com/2021/03/29/go-framework/go-framework-4/">
+<link rel="canonical" href="http://example.com/2021/08/29/go-framework/go-framework-4/">
 
 
 <script class="page-configurations">
@@ -166,7 +166,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">57</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -213,7 +213,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/29/go-framework/go-framework-4/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/29/go-framework/go-framework-4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -240,14 +240,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2021-03-29 20:51:46" itemprop="dateCreated datePublished" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+      <time title="创建时间：2021-08-29 12:00:00" itemprop="dateCreated datePublished" datetime="2021-08-29T12:00:00+08:00">2021-08-29</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-26 18:38:56" itemprop="dateModified" datetime="2021-08-26T18:38:56+08:00">2021-08-26</time>
+        <time title="修改时间：2021-09-26 10:52:13" itemprop="dateModified" datetime="2021-09-26T10:52:13+08:00">2021-09-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -349,13 +349,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/03/29/go-framework/go-framework-5/" rel="prev" title="Go语言微服务框架 - 5.GORM库的适配sqlmock的单元测试">
-                  <i class="fa fa-chevron-left"></i> Go语言微服务框架 - 5.GORM库的适配sqlmock的单元测试
+                <a href="/2021/08/25/go-framework/go-framework-3/" rel="prev" title="Go语言微服务框架 - 3.日志库的选型与引入">
+                  <i class="fa fa-chevron-left"></i> Go语言微服务框架 - 3.日志库的选型与引入
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/03/29/go-framework/go-framework-3/" rel="next" title="Go语言微服务框架 - 3.日志库的选型与引入">
-                  Go语言微服务框架 - 3.日志库的选型与引入 <i class="fa fa-chevron-right"></i>
+                <a href="/2021/09/05/go-framework/go-framework-5/" rel="next" title="Go语言微服务框架 - 5.GORM库的适配sqlmock的单元测试">
+                  Go语言微服务框架 - 5.GORM库的适配sqlmock的单元测试 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
