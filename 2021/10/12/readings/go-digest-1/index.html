@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="概览十二要素应用原则（The Twelve-Factor App） 在如今的微服务领域非常流行，相信大家或多或少有所耳闻，但了解其中细节的并不多。 今天，我将对这12个原则做一个概要分析，结合Go语言中的相关例子，根据开源与大厂的具体实践，和大家一起看看个中究竟。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="技术阅读摘要 - 1.十二要素应用原则">
+<meta property="og:url" content="http://example.com/2021/10/12/readings/go-digest-1/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="概览十二要素应用原则（The Twelve-Factor App） 在如今的微服务领域非常流行，相信大家或多或少有所耳闻，但了解其中细节的并不多。 今天，我将对这12个原则做一个概要分析，结合Go语言中的相关例子，根据开源与大厂的具体实践，和大家一起看看个中究竟。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/15/QZ3lGpkvgdfXW7R.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-10-12T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-10-22T06:37:50.496Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Digest">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/15/QZ3lGpkvgdfXW7R.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/10/12/readings/go-digest-1/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>技术阅读摘要 - 1.十二要素应用原则 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E8%B5%84%E6%96%99"><span class="nav-number">2.</span> <span class="nav-text">官方资料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">核心概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Codebase-%E5%9F%BA%E5%87%86%E4%BB%A3%E7%A0%81-%E4%B8%80%E4%BB%BD%E5%9F%BA%E5%87%86%E4%BB%A3%E7%A0%81%EF%BC%8C%E5%A4%9A%E4%BB%BD%E9%83%A8%E7%BD%B2"><span class="nav-number">3.1.</span> <span class="nav-text">1. Codebase 基准代码 - 一份基准代码，多份部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Dependencies-%E4%BE%9D%E8%B5%96-%E6%98%BE%E5%BC%8F%E5%A3%B0%E6%98%8E%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB"><span class="nav-number">3.2.</span> <span class="nav-text">2. Dependencies 依赖 - 显式声明依赖关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Config-%E9%85%8D%E7%BD%AE-%E5%9C%A8%E7%8E%AF%E5%A2%83%E4%B8%AD%E5%AD%98%E5%82%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.</span> <span class="nav-text">3. Config 配置 - 在环境中存储配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Backing-Services-%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1-%E6%8A%8A%E5%90%8E%E7%AB%AF%E6%9C%8D%E5%8A%A1%E5%BD%93%E4%BD%9C%E9%99%84%E5%8A%A0%E8%B5%84%E6%BA%90"><span class="nav-number">3.4.</span> <span class="nav-text">4. Backing Services 后端服务 - 把后端服务当作附加资源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Build-release-run-%E6%9E%84%E5%BB%BA%EF%BC%8C%E5%8F%91%E5%B8%83%EF%BC%8C%E8%BF%90%E8%A1%8C-%E4%B8%A5%E6%A0%BC%E5%88%86%E7%A6%BB%E6%9E%84%E5%BB%BA%E5%92%8C%E8%BF%90%E8%A1%8C"><span class="nav-number">3.5.</span> <span class="nav-text">5. Build, release, run 构建，发布，运行 - 严格分离构建和运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Processes-%E8%BF%9B%E7%A8%8B-%E4%BB%A5%E4%B8%80%E4%B8%AA%E6%88%96%E5%A4%9A%E4%B8%AA%E6%97%A0%E7%8A%B6%E6%80%81%E8%BF%9B%E7%A8%8B%E8%BF%90%E8%A1%8C%E5%BA%94%E7%94%A8"><span class="nav-number">3.6.</span> <span class="nav-text">6. Processes 进程 - 以一个或多个无状态进程运行应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Port-Binding-%E7%AB%AF%E5%8F%A3%E7%BB%91%E5%AE%9A-%E9%80%9A%E8%BF%87%E7%AB%AF%E5%8F%A3%E7%BB%91%E5%AE%9A%E6%8F%90%E4%BE%9B%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.7.</span> <span class="nav-text">7. Port Binding 端口绑定 - 通过端口绑定提供服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Concurrency-%E5%B9%B6%E5%8F%91-%E9%80%9A%E8%BF%87%E8%BF%9B%E7%A8%8B%E6%A8%A1%E5%9E%8B%E8%BF%9B%E8%A1%8C%E6%89%A9%E5%B1%95"><span class="nav-number">3.8.</span> <span class="nav-text">8. Concurrency 并发 - 通过进程模型进行扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Disposability-%E6%98%93%E5%A4%84%E7%90%86-%E5%BF%AB%E9%80%9F%E5%90%AF%E5%8A%A8%E5%92%8C%E4%BC%98%E9%9B%85%E7%BB%88%E6%AD%A2%E5%8F%AF%E6%9C%80%E5%A4%A7%E5%8C%96%E5%81%A5%E5%A3%AE%E6%80%A7"><span class="nav-number">3.9.</span> <span class="nav-text">9. Disposability 易处理 - 快速启动和优雅终止可最大化健壮性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-Dev-prod-parity-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83%E4%B8%8E%E7%BA%BF%E4%B8%8A%E7%8E%AF%E5%A2%83%E7%AD%89%E4%BB%B7-%E5%B0%BD%E5%8F%AF%E8%83%BD%E7%9A%84%E4%BF%9D%E6%8C%81%E5%BC%80%E5%8F%91%EF%BC%8C%E9%A2%84%E5%8F%91%E5%B8%83%EF%BC%8C%E7%BA%BF%E4%B8%8A%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%90%8C"><span class="nav-number">3.10.</span> <span class="nav-text">10. Dev&#x2F;prod parity 开发环境与线上环境等价 - 尽可能的保持开发，预发布，线上环境相同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-Logs-%E6%97%A5%E5%BF%97-%E6%8A%8A%E6%97%A5%E5%BF%97%E5%BD%93%E4%BD%9C%E4%BA%8B%E4%BB%B6%E6%B5%81"><span class="nav-number">3.11.</span> <span class="nav-text">11. Logs 日志 - 把日志当作事件流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-Admin-processes-%E7%AE%A1%E7%90%86%E8%BF%9B%E7%A8%8B-%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86%E4%BB%BB%E5%8A%A1%E5%BD%93%E4%BD%9C%E4%B8%80%E6%AC%A1%E6%80%A7%E8%BF%9B%E7%A8%8B%E8%BF%90%E8%A1%8C"><span class="nav-number">3.12.</span> <span class="nav-text">12. Admin processes 管理进程 - 后台管理任务当作一次性进程运行</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E4%B8%B2%E8%AE%B2"><span class="nav-number">4.</span> <span class="nav-text">案例串讲</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E9%98%B6%E6%AE%B5"><span class="nav-number">4.1.</span> <span class="nav-text">开发阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8A%E7%BA%BF%E9%98%B6%E6%AE%B5"><span class="nav-number">4.2.</span> <span class="nav-text">上线阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%B4%E6%8A%A4%E9%98%B6%E6%AE%B5"><span class="nav-number">4.3.</span> <span class="nav-text">维护阶段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/12/readings/go-digest-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          技术阅读摘要 - 1.十二要素应用原则
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-10-12 12:00:00" itemprop="dateCreated datePublished" datetime="2021-10-12T12:00:00+08:00">2021-10-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-10-22 14:37:50" itemprop="dateModified" datetime="2021-10-22T14:37:50+08:00">2021-10-22</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/08/15/QZ3lGpkvgdfXW7R.jpg" alt="Go-Framework"></p>
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p><strong>十二要素应用原则（The Twelve-Factor App）</strong> 在如今的微服务领域非常流行，相信大家或多或少有所耳闻，但了解其中细节的并不多。</p>
+<p>今天，我将对这12个原则做一个概要分析，结合Go语言中的相关例子，根据开源与大厂的具体实践，和大家一起看看个中究竟。</p>
+<span id="more"></span>
+
+<h2 id="官方资料"><a href="#官方资料" class="headerlink" title="官方资料"></a>官方资料</h2><ul>
+<li>英文链接 <a target="_blank" rel="noopener" href="https://12factor.net/">https://12factor.net/</a></li>
+<li>中文链接 <a target="_blank" rel="noopener" href="https://12factor.net/zh_cn/">https://12factor.net/zh_cn/</a></li>
+</ul>
+<h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><p>先对12个概念做一个简单的讲解，让不熟悉的朋友心中有个初步概念。</p>
+<h3 id="1-Codebase-基准代码-一份基准代码，多份部署"><a href="#1-Codebase-基准代码-一份基准代码，多份部署" class="headerlink" title="1. Codebase 基准代码 - 一份基准代码，多份部署"></a>1. Codebase 基准代码 - 一份基准代码，多份部署</h3><p>示例：一个应用程序的代码，放在一个Git仓库里。</p>
+<blockquote>
+<p>分支算不算一个仓库呢？</p>
+<p>这点常有不同的理解。我个人会把一个分支认为是一个轻量级的仓库，每个分支对应一个具体的业务场景。</p>
+</blockquote>
+<p>痛点：在分布式的环境下，保证多个机器上运行的应用程序源代码一致，提升排查问题的效率。</p>
+<h3 id="2-Dependencies-依赖-显式声明依赖关系"><a href="#2-Dependencies-依赖-显式声明依赖关系" class="headerlink" title="2. Dependencies 依赖 - 显式声明依赖关系"></a>2. Dependencies 依赖 - 显式声明依赖关系</h3><p>示例：Go语言的go module就显式地声明了项目依赖库与版本，方便维护。</p>
+<p>痛点：以前Go vendor模式，将依赖代码都放在本地，没有一个文件集中说明项目的依赖，这就导致想找依赖关系必须去看代码细节。如果某个库的v1.0版本有bug，需要升级到1.1，go module只需查看一个文件，而vendor模式得遍历具体的项目，甚至多次递归。</p>
+<h3 id="3-Config-配置-在环境中存储配置"><a href="#3-Config-配置-在环境中存储配置" class="headerlink" title="3. Config 配置 - 在环境中存储配置"></a>3. Config 配置 - 在环境中存储配置</h3><p>示例：将配置信息（端口、数据库、外部服务等）放在环境中，而不要硬编码。</p>
+<blockquote>
+<p>环境定义的扩展：在微服务中，这个环境指的是代码具体的运行环境，包括配置文件、环境变量、配置中心的数据。</p>
+<p>值得一提的是，按照这种实践，配置文件不应该和应用程序代码放在一个代码仓库中，而是单独管理。</p>
+</blockquote>
+<p>痛点：保证多机器上运行的代码一致后，把变化点转移到配置中，避免硬编码到代码仓库中、导致更新需要整体升级。</p>
+<h3 id="4-Backing-Services-后端服务-把后端服务当作附加资源"><a href="#4-Backing-Services-后端服务-把后端服务当作附加资源" class="headerlink" title="4. Backing Services 后端服务 - 把后端服务当作附加资源"></a>4. Backing Services 后端服务 - 把后端服务当作附加资源</h3><p>示例：当前的数据库选型为MySQL，有一天突然转变成了阿里云的RDS，只需要修改一个配置。</p>
+<p>痛点：这是一种面向标准接口编程的模式，重点是让非业务相关的代码变得灵活可替代，如数据库、缓存、第三方服务。从被调用方的角度来看，过于理想化，很多重量级的组件很难被替代；而从调用方来看，这一切又显得理所当然，谁都希望外部系统的变化是无感知的。</p>
+<blockquote>
+<p>这一点，非常考验每个服务的设计者的能力，尤其是API接口。</p>
+</blockquote>
+<h3 id="5-Build-release-run-构建，发布，运行-严格分离构建和运行"><a href="#5-Build-release-run-构建，发布，运行-严格分离构建和运行" class="headerlink" title="5. Build, release, run 构建，发布，运行 - 严格分离构建和运行"></a>5. Build, release, run 构建，发布，运行 - 严格分离构建和运行</h3><p>示例：Go程序在一个构建机器上用 go build命令生成二进制文件，在发布阶段将这个二进制文件分发到各个待运行的机器上，最后在各个机器上运行这个二进制文件。</p>
+<p>痛点：强调了CICD一整套流水线，不要让构建和运行强绑定。举个极端的例子，如果有一台centos和一台ubuntu的机器，我们去两个机器上各自编译+运行，可能因为内核不同而发生奇怪的现象；而如果采用在一台专用的centos机器上编译成统一的可执行文件，再分发到这两台机器上，更加合理。</p>
+<blockquote>
+<p> 如果centos上可执行文件无法在ubuntu机器上运行，就在部署阶段报错，提醒我们去修复。我们更应该去把部署的机器改成centos统一管理，而不是去花大量精力兼容ubuntu。</p>
+<p>随着Docker技术的推广，大量简化了这一步骤。</p>
+</blockquote>
+<h3 id="6-Processes-进程-以一个或多个无状态进程运行应用"><a href="#6-Processes-进程-以一个或多个无状态进程运行应用" class="headerlink" title="6. Processes 进程 - 以一个或多个无状态进程运行应用"></a>6. Processes 进程 - 以一个或多个无状态进程运行应用</h3><p>示例：程序的内存中不保存具体业务相关的数据，而应该保存在共享存储上。</p>
+<p>痛点：程序有状态是横向扩容的一大阻碍。想要完全去掉有状态的数据过于理想化，毕竟放在共享存储上肯定不如本地内存访问快，这对一些性能敏感的应用来说影响很大；但微服务架构强调要面向失败编程，这些有状态的数据在程序崩溃时无法恢复，可能导致级联雪崩的等更可怕情况。这一点，需要服务的负责人仔细权衡。</p>
+<h3 id="7-Port-Binding-端口绑定-通过端口绑定提供服务"><a href="#7-Port-Binding-端口绑定-通过端口绑定提供服务" class="headerlink" title="7. Port Binding 端口绑定 - 通过端口绑定提供服务"></a>7. Port Binding 端口绑定 - 通过端口绑定提供服务</h3><p>示例：通过开放端口、以RPC形式提供服务</p>
+<p>痛点：历史上有些程序以unix socket的本地形式提供服务，维护成本比较高。目前微服务以HTTP为代表的RPC方式提供服务，适合横向扩展。</p>
+<h3 id="8-Concurrency-并发-通过进程模型进行扩展"><a href="#8-Concurrency-并发-通过进程模型进行扩展" class="headerlink" title="8. Concurrency 并发 - 通过进程模型进行扩展"></a>8. Concurrency 并发 - 通过进程模型进行扩展</h3><p>示例：当并发量达到一定程度，通过横向扩容进程（Docker实例）来满足需求</p>
+<p>痛点：在并发度比较小时，最简单的提升方式是纵向扩容 - 即提高机器的配置。但当并发程度达到一定级别后，无法再通过提升硬件配置来解决。如果进程做到了无状态，利用外部的调度平台（如k8s）进行扩缩容，更适合长期发展。</p>
+<h3 id="9-Disposability-易处理-快速启动和优雅终止可最大化健壮性"><a href="#9-Disposability-易处理-快速启动和优雅终止可最大化健壮性" class="headerlink" title="9. Disposability 易处理 - 快速启动和优雅终止可最大化健壮性"></a>9. Disposability 易处理 - 快速启动和优雅终止可最大化健壮性</h3><p>示例：程序能够快速启动，遇到严重异常时也能尽可能地完成现有的任务，优雅终止。</p>
+<p>痛点：启动时间少能让程序遇到问题后快速恢复，也可以更快速地横向扩容；而优雅终止更多地是为了保障数据的一致性。</p>
+<h3 id="10-Dev-prod-parity-开发环境与线上环境等价-尽可能的保持开发，预发布，线上环境相同"><a href="#10-Dev-prod-parity-开发环境与线上环境等价-尽可能的保持开发，预发布，线上环境相同" class="headerlink" title="10. Dev/prod parity 开发环境与线上环境等价 - 尽可能的保持开发，预发布，线上环境相同"></a>10. Dev/prod parity 开发环境与线上环境等价 - 尽可能的保持开发，预发布，线上环境相同</h3><p>示例：开发、预发布、线上等环境上部署的代码、配置、第三方服务等，尽可能地保证一致，让故障提前在测试环境发生。</p>
+<p>痛点：尽可能地保证线上环境的稳定性，让问题尽可能地在开发环境中暴露出来，结合CICD工作保障环境的一致性。</p>
+<h3 id="11-Logs-日志-把日志当作事件流"><a href="#11-Logs-日志-把日志当作事件流" class="headerlink" title="11. Logs 日志 - 把日志当作事件流"></a>11. Logs 日志 - 把日志当作事件流</h3><p>示例：在微服务架构中，通过日志将一个事件（如一个RPC请求）串联起来。</p>
+<p>痛点：利用格式化的日志+ELK，将日志收集到统一的管理平台，用于分析数据。</p>
+<h3 id="12-Admin-processes-管理进程-后台管理任务当作一次性进程运行"><a href="#12-Admin-processes-管理进程-后台管理任务当作一次性进程运行" class="headerlink" title="12. Admin processes 管理进程 - 后台管理任务当作一次性进程运行"></a>12. Admin processes 管理进程 - 后台管理任务当作一次性进程运行</h3><p>示例：将脚本、定时任务等，也作为一个应用程序提交，由k8s等调度平台执行</p>
+<p>痛点：手动执行脚本或任务往往会有两个严重问题：误操作与可追溯性差。更合理的方式是走一个正式的发布流程，方便管理。</p>
+<h2 id="案例串讲"><a href="#案例串讲" class="headerlink" title="案例串讲"></a>案例串讲</h2><h3 id="开发阶段"><a href="#开发阶段" class="headerlink" title="开发阶段"></a>开发阶段</h3><p>你（研发人员）收到了一个需求，要实现一个分布式的订单服务。于是，你新建了一个git仓库（<strong>1.基准代码</strong>），准备用go语言编写，部署在多个机器上（<strong>8.并发</strong>）。开发期间引用了大量的开源库，用Go Module将这些依赖都管理了起来（<strong>2.依赖</strong>）。</p>
+<p>开发过程中，由于测试和线上的数据库地址不同，所以你把这些信息放在了配置中心（<strong>3.配置</strong>），如Etcd、k8s的ConfigMap中。</p>
+<p>由于外部服务会依赖这个订单服务，所以要求研发提供的API接口必须向前兼容，所以选用了经典的RESTful风格的HTTP接口作为对外的协议（<strong>7.端口绑定</strong>）。这样，即便订单服务后续不断迭代，对外部来说也只是修改一个调用地址即可（<strong>4.后端服务</strong>）。</p>
+<h3 id="上线阶段"><a href="#上线阶段" class="headerlink" title="上线阶段"></a>上线阶段</h3><p>在测试、预发布环境，为了开发与测试人员更好地验证功能，绝大部分的配置参数都保证与线上一致（<strong>10.开发环境与线上环境等价</strong>）。</p>
+<p>整个上线流程包括了测试、预发布、线上三个环境的部署和验证，统一采用CICD的技术自动化执行（<strong>5.构建，发布，运行</strong>）。</p>
+<h3 id="维护阶段"><a href="#维护阶段" class="headerlink" title="维护阶段"></a>维护阶段</h3><p>订单服务很复杂，经常会发生崩溃，导致很多数据恢复不了。于是，研发组长决定把关键的数据都放在Redis集群中（<strong>6.进程</strong>），保证应用的无状态化。</p>
+<p>数据不丢了，但程序崩溃后恢复很慢，发现花大量的时间在加载初始数据上。于是又做了一次优化，利用Lazy Load的思路，按需加载（<strong>9.易处理</strong>）。</p>
+<p>程序正常运行了，但用户反馈有个请求经常失败。这时，你利用ELK收集上的日志，排查了整个链路中的信息（<strong>11.日志</strong>），发现某处代码逻辑搞混了。当前的问题修复了，你还需要去数据库修复历史数据，就又写了个sql脚本提交到专门用来维护修改数据的代码仓库，提交给平台自动运行（<strong>12.管理进程</strong>）。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>业界对这12个原则的理解并不完全一致，这也是因为<strong>不同角色处于不同的阶段所导致的视野差异性</strong>。</p>
+<p>总体来说，这12个原则强调了简单性、可维护性，我们可以把它们作为微服务架构设计的指导性原则。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Digest/" rel="tag"># Digest</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/10/10/go-framework/go-framework-8/" rel="prev" title="Go语言微服务框架 - 8.Gormer迭代-定制专属的ORM代码生成工具">
+                  <i class="fa fa-chevron-left"></i> Go语言微服务框架 - 8.Gormer迭代-定制专属的ORM代码生成工具
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/10/14/readings/go-digest-2/" rel="next" title="技术阅读摘要 - 2.OpenTelemetry技术概览">
+                  技术阅读摘要 - 2.OpenTelemetry技术概览 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
