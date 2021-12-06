@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-count">65</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,6 +201,277 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/06/27/go-tip/go-tip-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/27/go-tip/go-tip-4/" class="post-title-link" itemprop="url">Go语言技巧 - 4.【错误的三种处理】探索不同代码风格背后的哲学</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-06-27 12:00:00" itemprop="dateCreated datePublished" datetime="2021-06-27T12:00:00+08:00">2021-06-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-26 13:11:44" itemprop="dateModified" datetime="2021-07-26T13:11:44+08:00">2021-07-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>通过前面两讲，我们对错误的认知已经超过很多人了。让我们继续去看看常见项目中对错误的处理方式，探索背后的深意。</p>
+<p>在介绍具体的处理方式前，我们先来模拟一个场景：我们要去动物园进行一次游玩，主要行为有</p>
+<ul>
+<li>进入动物园</li>
+<li>参观熊猫</li>
+<li>参观老虎</li>
+<li>离开动物园</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/27/go-tip/go-tip-4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/13/go-study/go-study-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/13/go-study/go-study-5/" class="post-title-link" itemprop="url">Go语言学习路线 - 5.基础篇:从一个web项目来谈Go语言的技能点</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-13 12:00:00" itemprop="dateCreated datePublished" datetime="2021-05-13T12:00:00+08:00">2021-05-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-26 13:10:54" itemprop="dateModified" datetime="2021-07-26T13:10:54+08:00">2021-07-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="从一个Web项目开始"><a href="#从一个Web项目开始" class="headerlink" title="从一个Web项目开始"></a>从一个Web项目开始</h2><p>经过了 <strong>入门篇</strong> 的学习，大家已经初步了解Go语言的语法，也能写常见的代码了。接下来，我们就从一个Web项目入手，看看一些常见的技能与知识吧。</p>
+<p>我们先简单地聊一下这个Web项目的背景：我们要做的是一个简单的web系统 ，有前端同学负责界面的开发，后端不会考虑高并发等复杂情况。</p>
+<p>我们先从一个Web请求出发，看看会涉及到哪些模块。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/05/13/go-study/go-study-5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/07/go-tip/go-tip-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/07/go-tip/go-tip-3/" class="post-title-link" itemprop="url">Go语言技巧 - 3.【Error工程化】Go Error的工程化探索</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-05-07 12:00:00" itemprop="dateCreated datePublished" datetime="2021-05-07T12:00:00+08:00">2021-05-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-26 13:11:41" itemprop="dateModified" datetime="2021-07-26T13:11:41+08:00">2021-07-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/05/05/2bmr98tG3xDneL5.jpg" alt="Go-Study"></p>
+<h2 id="Go-Error的工程化探索"><a href="#Go-Error的工程化探索" class="headerlink" title="Go Error的工程化探索"></a>Go Error的工程化探索</h2><p>在上一篇，我分享了对 <a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/master/design/29934-error-values.md">官方Proposal</a> 的一些见解，偏向于理论层面。</p>
+<p>本篇里，我会具体到代码层面，谈谈如何在一个工程化的项目中利用<code>github.com/pkg/errors</code>包，完整实现一套的错误处理机制。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/05/07/go-tip/go-tip-3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -839,431 +1110,6 @@
             </div>
           <!--/noindex-->
         
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/grpc/grpc-4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/20/grpc/grpc-4/" class="post-title-link" itemprop="url">gRPC源码分析(四)：剖析Proto序列化</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-20 19:34:49" itemprop="dateCreated datePublished" datetime="2021-02-20T19:34:49+08:00">2021-02-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>在前面的分析中，我们已经知道了使用proto序列化的代码在<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/tree/v1.29.x/encoding/proto">encoding目录</a>中，路径中只有三个文件，其中2个还是测试文件，看起来这次的工作量并不大。</p>
-<p>首先，针对读源码是先看源代码还是测试代码，因人而异。个人建议在对源码毫无头绪时，先从测试入手，了解大致功能；如果有一定基础，那么也可以直接入手源代码。我认为优秀的Go源码可读性是非常高的，所以一般情况下，我都直接从源文件入手，遇到问题才会去对应的测试里阅读。</p>
-<h2 id="Marshal"><a href="#Marshal" class="headerlink" title="Marshal"></a>Marshal</h2><p>Marshal的代码不多，关键在于传入参数的类型，有2个分支路线：</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L68">proto.Marshaler类型</a>，实现了<code>Marshal() ([]byte, error)</code>方法</li>
-<li><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L54">proto.Message类型</a>，实现了<code>Reset()</code>、<code>String() string</code> 和<code>ProtoMessage()</code>三个方法</li>
-</ol>
-<p>我们回头看看proto生成的<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/examples/helloworld/helloworld/helloworld.pb.go#L35">go文件</a>，发现对应的是第二个接口。那我们接着看：</p>
-<ol>
-<li>调用了protoBufferPool，是一个sync.Pool，是为了加速proto对象的分配</li>
-<li>内部采用的是 <code>marshalAppend</code>，字面来看就是 序列化并追加，对应了 <code> wire-format</code>这个概念，并不需要将整个结构加载完毕、再进行序列化</li>
-<li>接下来调用的是<code>protoV2.MarshalOptions</code>，需要关注的是protoV2是另一个package，<code>protoV2 &quot;google.golang.org/protobuf/proto&quot;</code></li>
-<li>在正式marshal前，调用<code>m.ProtoReflect()</code>方法，根据名字可以猜测是对Message做反射，详细内容不妨后面再看</li>
-<li>最后就是正式的marshal了，分两个分支：<code>out, err = methods.Marshal(in)</code>和<code>out.Buf, err = o.marshalMessageSlow(b, m)</code>。后者是慢速的，一般情况下是不会用到，我们重点关注前者，这时就需要回头看4中的实现了</li>
-<li>逐个往前搜索，<code>接口protoreflect.Message =&gt; </code> <code>接口Message</code> =&gt;<code>函数MessageV2</code>  =&gt; <code>函数ProtoMessageV2Of</code>  =&gt; <code>函数legacyWrapMessage</code> =&gt; <code>函数MessageOf</code> =&gt; <code>类型messageReflectWrapper</code>，终于，在这里找到了目标函数 <code>ProtoMethods</code></li>
-<li>因为我们取的是<code>methods</code>，所以很快将代码定位到 <code>makeCoderMethods</code> =&gt; <code>marshal</code> =&gt; <code>marshalAppendPointer</code> ，最后找到一行核心代码 <code>b, err = f.funcs.marshal(b, fptr, f, opts)</code></li>
-<li>那这个marshal什么时候被赋值的呢？在步骤7中，我们查看了methods被赋值的地方，其实旁边就有一个函数 <code>makeReflectFuncs</code> ，最后定位到了 <code>/google.golang.org/protobuf/internal/impl/codec_gen.go</code> 文件中。每种变量的序列化，都是按照特定规则来执行的。</li>
-</ol>
-<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>那么 protobuf 实际是如何对每种类型进行Encoding的呢？有兴趣的朋友可以点击<a target="_blank" rel="noopener" href="https://developers.google.com/protocol-buffers/docs/encoding">这个链接</a>，阅读原文。这里，我直接拿出一个实例进行讲解。</p>
-<h4 id="定义proto"><a href="#定义proto" class="headerlink" title="定义proto"></a>定义proto</h4><figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">People</span> </span>&#123;</span><br><span class="line">	<span class="built_in">bool</span> male = <span class="number">1</span>;</span><br><span class="line">	<span class="built_in">int32</span> age = <span class="number">2</span>;</span><br><span class="line">	<span class="built_in">string</span> address = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="生成对应文件后，编写测试用例"><a href="#生成对应文件后，编写测试用例" class="headerlink" title="生成对应文件后，编写测试用例"></a>生成对应文件后，编写测试用例</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	people := &amp;pbmsg.People&#123;</span><br><span class="line">		Male:    <span class="literal">true</span>,</span><br><span class="line">		Age:     <span class="number">80</span>,</span><br><span class="line">		Address: <span class="string">&quot;China Town&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	b, _ := proto.Marshal(people)</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%b\n&quot;</span>, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="运行生成结果"><a href="#运行生成结果" class="headerlink" title="运行生成结果"></a>运行生成结果</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[1000 1 10000 1010000 11010 1010 1000011 1101000 1101001 1101110 1100001 100000 1010100 1101111 1110111 1101110]</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="分析第一个字段Bool"><a href="#分析第一个字段Bool" class="headerlink" title="分析第一个字段Bool"></a>分析第一个字段Bool</h4><p>首先，Male是一个bool字段，序号为1。</p>
-<p>根据Google上的文档，bool是Varint，所以计算</p>
-<p>(field_number &lt;&lt; 3) | wire_type = (1&lt;&lt;3)|0 = 8，对应第一个字节： <code>1000</code></p>
-<p>然后，它的值true对应第二个字节<code>1</code></p>
-<h4 id="分析第二个字段Int"><a href="#分析第二个字段Int" class="headerlink" title="分析第二个字段Int"></a>分析第二个字段Int</h4><p>同样的，(field_number &lt;&lt; 3) | wire_type = (2&lt;&lt;3)|0 = 16，对应第三个字节<code>10000</code></p>
-<p>值80对应<code>1010000</code></p>
-<h4 id="分析第三个字段String"><a href="#分析第三个字段String" class="headerlink" title="分析第三个字段String"></a>分析第三个字段String</h4><p>因为string是不定长的，所以需要一个额外的长度字段</p>
-<p>(field_number &lt;&lt; 3) | wire_type = (3&lt;&lt;3)|2=26，对应<code>11010</code></p>
-<p>接下来是长度字段，我们有10个英文单词，所以长度为10，对应 <code>1010</code></p>
-<p>然后就是10个Byte表示”China Town”了</p>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>本次的分析到这里就暂时告一段落了，阅读protobuf的相关代码还是非常耗时耗力的。其实这块最主要的复杂度在于为了兼容新老版本，采用了大量的Interface实现。Interface带有面向对象特色，在重构代码时很有意义，不过也给阅读代码时，查找方法对应实现时带来了复杂度。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/grpc/grpc-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/20/grpc/grpc-3/" class="post-title-link" itemprop="url">gRPC源码分析(三)：从Github文档了解gRPC的项目细节</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-20 19:34:47" itemprop="dateCreated datePublished" datetime="2021-02-20T19:34:47+08:00">2021-02-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="官方Git总览"><a href="#官方Git总览" class="headerlink" title="官方Git总览"></a><a target="_blank" rel="noopener" href="https://github.com/grpc">官方Git总览</a></h2><p>我们先看看GRPC这个项目的总览，主要分三种：</p>
-<ul>
-<li>基于C实现，包括了 C++, Python, Ruby, Objective-C, PHP, C#</li>
-<li>其余语言实现的，最主要是go，java，node</li>
-<li>proposal，即grpc的RFC，关于实现、讨论的文档汇总</li>
-</ul>
-<p>从这里可以看出，gRPC虽然是支持多语言，但原生的实现并不多。如果想在一些小众语言里引入gRPC，还是有很大风险的，有兴趣的可以搜索下TiDB在探索rust的gRPC的经验分享。</p>
-<h2 id="gRPC-Go"><a href="#gRPC-Go" class="headerlink" title="gRPC-Go"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go">gRPC-Go</a></h2><p>作为一名Go语言开发者，我自然选择从最熟悉的语言入手。同时，值得注意的是，grpc-go是除了<code>C家族系列</code>以外使用量最大的repo，加上Go语言优秀的可读性，是一个很好的入门gRPC的阅读材料。</p>
-<p>进入项目，整个README.md文档也不长。通常情况下，如果你能啃完这个文档及相关链接，你对这个开源项目就已经超过99%的人了。</p>
-<p>对Repo的相关注意事项，大家逐行阅读即可，整体比较简单，我简单列举下关键点：</p>
-<ol>
-<li>建议阅读官网文档（恭喜你，上次我们已经读完了官方文档）</li>
-<li>在项目中的引入，建议用go mod</li>
-<li>优先支持3个Go语言最新发布的版本</li>
-<li>FAQ中的常见问题，主要关注<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go#io-timeout-errors">package下载问题</a>和<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go#how-to-turn-on-logging">如何开启追踪日志</a></li>
-</ol>
-<p>通读完成，我们再深入看看<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go#documentation">文档细节</a>，Example这块我们在官网的测试中已经看过，我们的接下来重点是godoc和具体细节的文档。</p>
-<h2 id="go-doc"><a href="#go-doc" class="headerlink" title="go doc"></a><a target="_blank" rel="noopener" href="https://godoc.org/google.golang.org/grpc">go doc</a></h2><h4 id="DefaultBackoffConfig"><a href="#DefaultBackoffConfig" class="headerlink" title="DefaultBackoffConfig"></a>DefaultBackoffConfig</h4><p>注意，这个变量被弃用，被挪到 <code>ConnectParams</code>里了(<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc/blob/master/doc/connection-backoff.md">详情链接</a>)。那这个所谓的连接参数是什么用呢？代码不长，我们选择几个比较重要的内容来阅读下，原链接可以<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/internal/backoff/backoff.go#L54">点击这里</a>。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Backoff returns the amount of time to wait before the next retry given the</span></span><br><span class="line"><span class="comment">// number of retries.</span></span><br><span class="line"><span class="comment">// 根据retries返回等待时间，可以认为是一种退避策略</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(bc Exponential)</span> <span class="title">Backoff</span><span class="params">(retries <span class="keyword">int</span>)</span> <span class="title">time</span>.<span class="title">Duration</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> retries == <span class="number">0</span> &#123;</span><br><span class="line">    <span class="comment">// 之前没有retries过，就返回BaseDelay</span></span><br><span class="line">		<span class="keyword">return</span> bc.Config.BaseDelay</span><br><span class="line">	&#125;</span><br><span class="line">	backoff, max := <span class="keyword">float64</span>(bc.Config.BaseDelay), <span class="keyword">float64</span>(bc.Config.MaxDelay)</span><br><span class="line">  <span class="comment">// 等待时间不能超过max，等待时间 = BaseDelay * Multiplier的retries次方</span></span><br><span class="line">  <span class="comment">// Multiplier默认1.6，并不是官方http包中的2</span></span><br><span class="line">	<span class="keyword">for</span> backoff &lt; max &amp;&amp; retries &gt; <span class="number">0</span> &#123;</span><br><span class="line">		backoff *= bc.Config.Multiplier</span><br><span class="line">		retries--</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> backoff &gt; max &#123;</span><br><span class="line">		backoff = max</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Randomize backoff delays so that if a cluster of requests start at</span></span><br><span class="line">	<span class="comment">// the same time, they won&#x27;t operate in lockstep.</span></span><br><span class="line">  <span class="comment">// 乘以一个随机因子，数值为(1-Jitter,1+Jitter)，默认为(0.8,1.2)，防止同一时刻有大量请求发出，引起锁的问题</span></span><br><span class="line">	backoff *= <span class="number">1</span> + bc.Config.Jitter*(grpcrand.Float64()*<span class="number">2</span><span class="number">-1</span>)</span><br><span class="line">	<span class="keyword">if</span> backoff &lt; <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> time.Duration(backoff)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="EnableTracing"><a href="#EnableTracing" class="headerlink" title="EnableTracing"></a>EnableTracing</h4><p>用来设置是否开启 trace，追踪日志</p>
-<h4 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h4><p>gRPC的错误码，原代码见<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/codes/codes.go#L29">链接</a>，我们大概了解其原因即可：</p>
-<ul>
-<li><strong>OK</strong> 正常</li>
-<li><strong>Canceled</strong> 客户端取消</li>
-<li><strong>Unknown</strong> 未知</li>
-<li><strong>InvalidArgument</strong> 未知参数</li>
-<li><strong>DeadlineExceeded</strong> 超时</li>
-<li><strong>NotFound</strong> 未找到资源</li>
-<li><strong>AlreadyExists</strong> 资源已经创建</li>
-<li><strong>PermissionDenied</strong> 权限不足</li>
-<li><strong>ResourceExhausted</strong> 资源耗尽</li>
-<li><strong>FailedPrecondition</strong> 前置条件不满足</li>
-<li><strong>Aborted</strong> 异常退出</li>
-<li><strong>OutOfRange</strong> 超出范围</li>
-<li><strong>Unimplemented</strong> 未实现方法</li>
-<li><strong>Internal</strong> 内部问题</li>
-<li><strong>Unavailable</strong> 不可用状态</li>
-<li><strong>DataLoss</strong> 数据丢失</li>
-<li><strong>Unauthenticated</strong> 未认证</li>
-</ul>
-<p>读完上面的内容，发现跟HTTP/1.1的Status Code非常相似。</p>
-<h4 id="CallOption"><a href="#CallOption" class="headerlink" title="CallOption"></a>CallOption</h4><p>调用在客户端 <code>Invoke</code> 方法中，包括before发送前，after为接收后。</p>
-<p>官方提供了几个常用的CallOption，按场景调用。</p>
-<h4 id="ClientConn"><a href="#ClientConn" class="headerlink" title="ClientConn"></a>ClientConn</h4><p>抽象的客户端连接。</p>
-<p>值得注意的是，conns是一个map，所以实际可能有多个tcp连接。</p>
-<h4 id="CodeC"><a href="#CodeC" class="headerlink" title="CodeC"></a>CodeC</h4><p>定义了Marshal和Unmarshal的接口，在grpc底层实现是proto，详细可见 <a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/proto/proto.go#L39">codec</a></p>
-<h4 id="Compressor"><a href="#Compressor" class="headerlink" title="Compressor"></a>Compressor</h4><p>压缩相关的定义</p>
-<h4 id="MetaData"><a href="#MetaData" class="headerlink" title="MetaData"></a>MetaData</h4><p>元数据，也就是key-value，可以类比到http的header</p>
-<h4 id="DialOption"><a href="#DialOption" class="headerlink" title="DialOption"></a>DialOption</h4><p>客户端新建连接时的选项，按场景调用。</p>
-<h4 id="ServerOption"><a href="#ServerOption" class="headerlink" title="ServerOption"></a>ServerOption</h4><p>服务端监听时的选项，按场景调用。</p>
-<h2 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h2><p><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/tree/master/Documentation">文档链接</a></p>
-<h4 id="benchmark"><a href="#benchmark" class="headerlink" title="benchmark"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/benchmark.md">benchmark</a></h4><p>性能测试，有兴趣的可以细看gRPC是从哪几个维度做RPC性能测试的。</p>
-<h4 id="Compression"><a href="#Compression" class="headerlink" title="Compression"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/compression.md">Compression</a></h4><p>可用<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/encoding.go#L66">encoding.RegisterCompressor</a>实现自定义的压缩方法。</p>
-<p>注意，压缩算法应用于客户端和服务端两侧。</p>
-<h4 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/concurrency.md">Concurrency</a></h4><p>支持并发，从三个角度分析：</p>
-<ul>
-<li><code>ClientConn</code>支持多个Goroutine</li>
-<li><code>Steams</code>中，<code>SendMsg</code>/<code>RecvMsg</code>可分别在两个Goroutine中运行，但任何一个方法运行在多个Goroutine上是不安全的</li>
-<li><code>Server</code>每个客户端的invoke会对应一个Server端的Goroutine</li>
-</ul>
-<h4 id="Encoding"><a href="#Encoding" class="headerlink" title="Encoding"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/encoding.md">Encoding</a></h4><p>类似Compression，可用<a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/v1.29.x/encoding/encoding.go#L105">encoding.RegisterCodec</a>实现自定义的序列化方法。</p>
-<h4 id="go-mock"><a href="#go-mock" class="headerlink" title="go mock"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/gomock-example.md">go mock</a></h4><p>用mock生成测试代码，详细可细看。</p>
-<h4 id="Authentication"><a href="#Authentication" class="headerlink" title="Authentication"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-auth-support.md">Authentication</a></h4><p>认证的相关选项，包括 TLS/OAuth2/GCE/JWT ，一般用前两者即可。</p>
-<h4 id="Metadata"><a href="#Metadata" class="headerlink" title="Metadata"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md">Metadata</a></h4><p>介绍了Metadata的使用，类比于HTTP/1.1的Header。</p>
-<h4 id="Keepalive"><a href="#Keepalive" class="headerlink" title="Keepalive"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/keepalive.md">Keepalive</a></h4><p>长连接的参数分为3类：</p>
-<ul>
-<li>ClientParameters 客户端侧参数，主要用来探活</li>
-<li>SeverParameters 服务端参数，控制连接时间</li>
-<li>EnforcementPolicy 服务端加强型参数</li>
-</ul>
-<h4 id="log-level"><a href="#log-level" class="headerlink" title="log level"></a><a href="zhttps://github.com/grpc/grpc-go/blob/master/Documentation/log_levels.md">log level</a></h4><p>四个级别的log level，针对不同场景：</p>
-<ul>
-<li><code>Info</code> 用于debug问题</li>
-<li><code>Warning</code> 排查非关键性的问题</li>
-<li><code>Error</code> gRPC调用出现无法返回到客户端的问题</li>
-<li><code>Fatal</code>  导致程序无法恢复的致命问题</li>
-</ul>
-<h4 id="proxy"><a href="#proxy" class="headerlink" title="proxy"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/proxy.md">proxy</a></h4><p>使用默认的HTTP或HTTPS代理。</p>
-<h4 id="rpc-error"><a href="#rpc-error" class="headerlink" title="rpc error"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/rpc-errors.md">rpc error</a></h4><p>结合官方提供的错误码，用 <code>status.New</code> 或者 <code>status.Error</code> 创建错误。</p>
-<h4 id="server-reflection"><a href="#server-reflection" class="headerlink" title="server reflection"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/server-reflection-tutorial.md">server reflection</a></h4><p>服务端方法映射，跟着教程走即可。</p>
-<p>值得一提的是，采用c++中的grpc_cli模块，可以查看指定端口暴露出来的服务详情。</p>
-<h4 id="versioning"><a href="#versioning" class="headerlink" title="versioning"></a><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-go/blob/master/Documentation/versioning.md">versioning</a></h4><p>版本演进，一般情况下每6周一个小版本，紧急修复会打补丁号。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/grpc/grpc-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/20/grpc/grpc-2/" class="post-title-link" itemprop="url">gRPC源码分析(二)：从官网文档看gRPC的特性</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-20 19:34:45" itemprop="dateCreated datePublished" datetime="2021-02-20T19:34:45+08:00">2021-02-20</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>在第一部分，我们学习了gRPC的基本调用过程，这样我们对全局层面有了一定了解。接下来，我们将结合官方文档，继续深入学习、探索下去。</p>
-<h2 id="1-Authentication-认证的实现"><a href="#1-Authentication-认证的实现" class="headerlink" title="1. Authentication 认证的实现"></a>1. Authentication 认证的实现</h2><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/guides/auth/#with-server-authentication-ssltls">官方示例</a></p>
-<p>示例很简单，客户端和服务端都大致分为两步：</p>
-<ol>
-<li>生成对应的认证信息 <code>creds</code></li>
-<li>将认证信息作为 <code>DialOption</code> 传入信息</li>
-</ol>
-<p>认证方法的底层实现并不在我们今天的讨论范围内。这里值得一提的是，由于请求会存在大量的输入参数，这里提供的方法是 <code>opts ...DialOption</code>，也就是可变长度的参数，这一点很值得我们思考和学习。</p>
-<h4 id="客户端的认证实现"><a href="#客户端的认证实现" class="headerlink" title="客户端的认证实现"></a>客户端的认证实现</h4><p>第一步：将认证信息放入连接中</p>
-<ul>
-<li><code>grpc.WithTransportCredentials</code> 中，将<code>creds</code> 保存到<code>copts.TransportCredentials</code></li>
-<li>调用<code>Dial</code>，在内部用 <code>opt.apply(&amp;cc.dopts)</code>将认证信息传递到结构中</li>
-<li><code>credsClone = creds.Clone()</code> 使用了一份复制，放到了Balancer中，估计是用于负载均衡的，暂时不用考虑</li>
-</ul>
-<p>第二步：将认证信息请求中发出</p>
-<ul>
-<li>首先我们先找到 <code>Invoke</code>函数，这里是发送请求的入口（对这一块有疑问的，查看上一篇）</li>
-<li>分析一下函数 <code>invoke</code> ，调用了<code>newClientStream</code>，一大段代码都没有用到<code>copts.TransportCredentials</code>中的参数，大致猜测是在<code>clientStream</code>中</li>
-<li>接下来这块，只通过阅读代码，要找到对应使用到<code>copts.TransportCredentials</code>很麻烦，建议第一次可以先通过反向查找，调用到这个参数的地方</li>
-<li><code>newHTTP2Client</code> =&gt; <code>NewClientTransport</code> =&gt; <code>createTransport</code> =&gt; <code>tryAllAddrs</code> =&gt; <code>resetTransport</code> =&gt; <code>connect</code> =&gt; <code>getReadyTransport</code> =&gt;<code>pick</code> =&gt; <code>getTransport</code> =&gt;<code>newAttemptLocked</code> =&gt; <code>newAttemptLocked</code> =&gt; <code>newClientStream</code></li>
-<li>这时，我们再正向梳理一下其调用逻辑，大致是查找连接情况，对传输层进行初始化。如果你了解认证是基于传输层<code>Transport</code>的，那下次正向查找时，会有一条比较明确的方向了</li>
-</ul>
-<h4 id="服务端的认证实现"><a href="#服务端的认证实现" class="headerlink" title="服务端的认证实现"></a>服务端的认证实现</h4><p>第一步：将认证信息放入Server结构中</p>
-<ul>
-<li>将<code>creds</code>包装成<code>ServerOption</code>，传入<code>NewServer</code>中</li>
-<li>类似Client中的操作，被存至 <code>opts.creds</code> 里</li>
-</ul>
-<p>第二步：在连接中进行认证</p>
-<ul>
-<li>参考之前一讲的分析，我们进入函数 <code>handleRawConn</code></li>
-<li>这次，我们的进展很顺利，一下子就看到了关键函数名<code>useTransportAuthenticator</code></li>
-<li>在这里，调用了<code>creds</code>实现的<code>ServerHandshake</code>实现了认证。到这里，认证已经完成，不过我们可以再看看，认证信息是怎么传递的</li>
-<li>接着，认证信息传入了 <code>newHTTP2Transport</code>，保存到结构体<code>http2Server</code>中的<code>authInfo</code>，最后返回了一个Interface <code>ServerTransport</code></li>
-<li>在进行连接时，调用了<code>serveStreams</code>，然后调用了 <code>http2Server</code>的<code>HandleStreams</code>方法，这时，我们大致可以猜测，auth在这里被用到了</li>
-<li>往下看，发现有个对header帧的处理<code>operateHeaders</code>，在这里被赋值到 <code>pr.AuthInfo</code>里，并被保存到s的Context中</li>
-<li>一般情况下，Context的调用是十分隐蔽的，我们可以通过反向查找，哪里调用了<code>peer.FromContext</code>，然而并没有地方应用，那认证的分析，就告一段落了</li>
-</ul>
-<h2 id="2-四类gRPC调用的实现"><a href="#2-四类gRPC调用的实现" class="headerlink" title="2. 四类gRPC调用的实现"></a>2. 四类gRPC调用的实现</h2><p>这一块我们暂不深入源码，先了解使用时的特性</p>
-<h4 id="2-1-简单RPC"><a href="#2-1-简单RPC" class="headerlink" title="2.1 简单RPC"></a>2.1 简单RPC</h4><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/tutorials/basic/go/#simple-rpc">代码链接</a></p>
-<p>代码逻辑很直观，即处理后返回</p>
-<h4 id="2-2-服务端流式RPC"><a href="#2-2-服务端流式RPC" class="headerlink" title="2.2 服务端流式RPC"></a>2.2 服务端流式RPC</h4><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/tutorials/basic/go/#server-side-streaming-rpc">代码链接</a></p>
-<p>代码的关键在于两个函数<code>inRange</code>和 <code>stream.Send</code></p>
-<h4 id="2-3-客户端流式RPC"><a href="#2-3-客户端流式RPC" class="headerlink" title="2.3 客户端流式RPC"></a>2.3 客户端流式RPC</h4><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/tutorials/basic/go/#client-side-streaming-rpc">代码链接</a></p>
-<p>用一个for循环进行多次发送，<code>stream.Recv()</code>实现了从服务端获取数据，当EOF时，才调用<code>stream.SendAndClose</code>结束发送</p>
-<h4 id="2-4-双向流式RPC"><a href="#2-4-双向流式RPC" class="headerlink" title="2.4 双向流式RPC"></a>2.4 双向流式RPC</h4><p><a target="_blank" rel="noopener" href="https://grpc.io/docs/tutorials/basic/go/#bidirectional-streaming-rpc">代码链接</a></p>
-<p>将 <code>SendAndClose</code> 变为 <code>Send</code>，其余基本不变。从这里可以看到，正常的关闭都是由服务端发起的。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
       
     </div>
 

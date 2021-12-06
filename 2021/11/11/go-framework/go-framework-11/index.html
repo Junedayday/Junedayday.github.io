@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="随着API在线文档的发布，服务的接口将会被开放给各种各样的调用方。 大量开发接口的朋友会经常遇到接口参数校验的问题。举个例子，我们希望将某个字段是必填的，如name，我们经常会需要做两步：  在程序中加一个判断逻辑，当这个字段为空时返回错误给调用方 在接口文档中加上注释，告诉调用方这个参数必填  一旦某项工作被拆分为两步，就很容易出现不一致性：对应到参数检查，我们会经常遇到文档和具体实现不一致，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言微服务框架 - 11.接口的参数校验功能-buf中引入PGV">
+<meta property="og:url" content="http://example.com/2021/11/11/go-framework/go-framework-11/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="随着API在线文档的发布，服务的接口将会被开放给各种各样的调用方。 大量开发接口的朋友会经常遇到接口参数校验的问题。举个例子，我们希望将某个字段是必填的，如name，我们经常会需要做两步：  在程序中加一个判断逻辑，当这个字段为空时返回错误给调用方 在接口文档中加上注释，告诉调用方这个参数必填  一旦某项工作被拆分为两步，就很容易出现不一致性：对应到参数检查，我们会经常遇到文档和具体实现不一致，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-11-11T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-15T11:45:20.470Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Framework">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/11/11/go-framework/go-framework-11/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言微服务框架 - 11.接口的参数校验功能-buf中引入PGV | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#v0-7-1%EF%BC%9A%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E5%8A%9F%E8%83%BD"><span class="nav-number">1.</span> <span class="nav-text">v0.7.1：接口的参数校验功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">1.1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9"><span class="nav-number">1.2.</span> <span class="nav-text">关键技术点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95%E6%9E%84%E9%80%A0"><span class="nav-number">1.3.</span> <span class="nav-text">目录构造</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E7%9A%84%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">1.参数校验的技术选型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%9C%A8buf%E4%B8%AD%E5%BC%95%E5%85%A5PGV"><span class="nav-number">3.</span> <span class="nav-text">2.在buf中引入PGV</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%A0%B8%E5%BF%83%E6%96%87%E4%BB%B6-buf-yaml"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 核心文件 - buf.yaml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E7%94%9F%E6%88%90%E7%9A%84%E5%AE%9A%E4%B9%89%E6%96%87%E4%BB%B6-buf-gen-yaml"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 生成的定义文件 - buf.gen.yaml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-proto%E5%AE%9A%E4%B9%89%E6%96%87%E4%BB%B6"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 proto定义文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-%E7%94%9F%E6%88%90%E7%9B%B8%E5%85%B3%E4%BB%A3%E7%A0%81"><span class="nav-number">3.4.</span> <span class="nav-text">2.4 生成相关代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-number">3.5.</span> <span class="nav-text">2.5 参数校验的代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%9C%A8%E6%A1%86%E6%9E%B6%E4%B8%AD%E5%BC%95%E5%85%A5%E5%8F%82%E6%95%B0%E6%A3%80%E6%9F%A5"><span class="nav-number">4.</span> <span class="nav-text">3.在框架中引入参数检查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-grpc%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 grpc拦截器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E5%AE%9E%E7%8E%B0%E5%8F%82%E6%95%B0%E6%A0%A1%E9%AA%8C%E7%9A%84%E6%8B%A6%E6%88%AA"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 实现参数校验的拦截</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E5%85%B7%E4%BD%93%E8%B0%83%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 具体调用示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-buf%E6%A0%BC%E5%BC%8F%E6%A3%80%E6%9F%A5"><span class="nav-number">5.</span> <span class="nav-text">4.buf格式检查</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">65</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/11/go-framework/go-framework-11/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言微服务框架 - 11.接口的参数校验功能-buf中引入PGV
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-11-11 12:00:00" itemprop="dateCreated datePublished" datetime="2021-11-11T12:00:00+08:00">2021-11-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-11-15 19:45:20" itemprop="dateModified" datetime="2021-11-15T19:45:20+08:00">2021-11-15</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>随着API在线文档的发布，服务的接口将会被开放给各种各样的调用方。</p>
+<p>大量开发接口的朋友会经常遇到<strong>接口参数校验</strong>的问题。举个例子，我们希望将某个字段是必填的，如<code>name</code>，我们经常会需要做两步：</p>
+<ol>
+<li>在程序中加一个<strong>判断逻辑</strong>，当这个字段为空时返回错误给调用方</li>
+<li>在接口文档中加上<strong>注释</strong>，告诉调用方这个参数必填</li>
+</ol>
+<p>一旦某项工作被拆分为两步，就很容易出现<strong>不一致性</strong>：对应到参数检查，我们会经常遇到文档和具体实现不一致，从而导致双方研发的沟通成本增加。那么，今天我将引入一个方案，实现两者的一致性。</p>
+<blockquote>
+<p>为了缩小讨论范围，我们将 <strong>参数校验</strong> 限定为简单规则。</p>
+<p>而复合条件的检查（逻辑组合等），不在本次的讨论范围内，主要考虑到2点：</p>
+<ol>
+<li>要生成跨语言的方案，技术上比较难实现</li>
+<li>复合条件往往是一种业务逻辑的检查，放在接口层面不合适</li>
+</ol>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="v0-7-1：接口的参数校验功能"><a href="#v0-7-1：接口的参数校验功能" class="headerlink" title="v0.7.1：接口的参数校验功能"></a>v0.7.1：接口的参数校验功能</h2><p>项目链接 <a target="_blank" rel="noopener" href="https://github.com/Junedayday/micro_web_service/tree/v0.7.1">https://github.com/Junedayday/micro_web_service/tree/v0.7.1</a></p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>在线接口文档提供参数校验的逻辑，并自动生成相关代码。</p>
+<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
+<li>参数校验的技术选型</li>
+<li>在buf中引入PGV</li>
+<li>在框架中引入参数检查</li>
+<li>buf格式检查</li>
+</ol>
+<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务，包括基础结构、HTTP接口、gRPC接口</span><br><span class="line">	    	|-- order                            对应idl/order服务，同上</span><br><span class="line">     |-- swagger.json                    openapiv2的接口文档</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义，protobuffer的原始定义</span><br><span class="line">	   |-- order                           业务order定义，同时干</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- config                          配置相关的文件夹，viper的相关加载逻辑</span><br><span class="line">	   |-- dao                             Data Access Object层，是model层的实现</span><br><span class="line">	   |-- gormer                          从pkg/gormer中生成的相关代码，不允许更改</span><br><span class="line">	   |-- model                           model层，定义对象的接口方法，具体实现在dao层</span><br><span class="line">	   |-- mysql                           MySQL连接</span><br><span class="line">	   |-- server                          服务器的实现，对idl中定义服务的具体实现</span><br><span class="line">	   |-- service                         service层，作为领域实现的核心部分</span><br><span class="line">     |-- zlog                            封装zap日志的代码实现</span><br><span class="line">  |-- pkg                            开放给第三方的工具库</span><br><span class="line">     |-- gormer                          gormer二进制工具，用于生成Gorm相关Dao层代码</span><br><span class="line">	|-- buf.gen.yaml                   修改：buf生成代码的定义，新增参数校验逻辑</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具，从v1beta升到v1</span><br><span class="line">	|-- gen.sh                         生成代码的脚本：buf+gormer</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- gormer.yaml                    将gormer中的参数移动到这里</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br><span class="line">	|-- swagger.sh                     生成openapiv2的相关脚本</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-参数校验的技术选型"><a href="#1-参数校验的技术选型" class="headerlink" title="1.参数校验的技术选型"></a>1.参数校验的技术选型</h2><p>从搜索引擎可知，protobuf的主流参数校验采用两者：</p>
+<ol>
+<li>go-proto-validators <a target="_blank" rel="noopener" href="https://github.com/mwitkow/go-proto-validators">https://github.com/mwitkow/go-proto-validators</a></li>
+<li>protoc-gen-validate <a target="_blank" rel="noopener" href="https://github.com/envoyproxy/protoc-gen-validate">https://github.com/envoyproxy/protoc-gen-validate</a></li>
+</ol>
+<p>这里，我们最终选用的是protoc-gen-validate（PGV），决定性的理由有两个：</p>
+<ol>
+<li>buf的官方文档更倾向于PGV - <a target="_blank" rel="noopener" href="https://docs.buf.build/lint/rules/#custom-options">https://docs.buf.build/lint/rules/#custom-options</a></li>
+<li>PGV由envoy背书，长期来看更具维护性</li>
+</ol>
+<h2 id="2-在buf中引入PGV"><a href="#2-在buf中引入PGV" class="headerlink" title="2.在buf中引入PGV"></a>2.在buf中引入PGV</h2><p>protoc-gen-validate（PGV）作为一款插件，它已经被集成在了buf工具中。这次，我们就从其调用的顺序，来理解一下buf里的重要文件：</p>
+<h3 id="2-1-核心文件-buf-yaml"><a href="#2-1-核心文件-buf-yaml" class="headerlink" title="2.1 核心文件 - buf.yaml"></a>2.1 核心文件 - buf.yaml</h3><p>具体引用路径可以在buf库 - <a target="_blank" rel="noopener" href="https://buf.build/">https://buf.build/</a> 搜索找到，然后在文件中里添加一个依赖项：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deps:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">buf.build/envoyproxy/protoc-gen-validate</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-生成的定义文件-buf-gen-yaml"><a href="#2-2-生成的定义文件-buf-gen-yaml" class="headerlink" title="2.2 生成的定义文件 - buf.gen.yaml"></a>2.2 生成的定义文件 - buf.gen.yaml</h3><p>这个文件定义了我们要生成什么样的代码，具体增加如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">plugins:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">validate</span></span><br><span class="line">    <span class="attr">out:</span> <span class="string">gen</span></span><br><span class="line">    <span class="attr">opt:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">paths=source_relative</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">lang=go</span></span><br></pre></td></tr></table></figure>
+
+<p>其中，要注意opt选项要增加一个参数<code>lang=go</code>，类似的，我们也可以生成其余语言的代码。</p>
+<h3 id="2-3-proto定义文件"><a href="#2-3-proto定义文件" class="headerlink" title="2.3 proto定义文件"></a>2.3 proto定义文件</h3><p>我们以分页参数为例，添加2条规则，即要求页码、每页数量均大于0。</p>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;validate/validate.proto&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">ListOrdersRequest</span> </span>&#123;</span><br><span class="line">  <span class="built_in">int32</span> page_number = <span class="number">1</span> [(validate.rules).<span class="built_in">int32</span> = &#123;gt: <span class="number">0</span>&#125;];</span><br><span class="line">  <span class="built_in">int32</span> page_size = <span class="number">2</span>   [(validate.rules).<span class="built_in">int32</span> = &#123;gt: <span class="number">0</span>&#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-生成相关代码"><a href="#2-4-生成相关代码" class="headerlink" title="2.4 生成相关代码"></a>2.4 生成相关代码</h3><p>因为我们引入了一个新的模块，所以先需要更新依赖，用来下载新模块：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">buf mod update</span><br><span class="line">buf generate</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-5-参数校验的代码"><a href="#2-5-参数校验的代码" class="headerlink" title="2.5 参数校验的代码"></a>2.5 参数校验的代码</h3><p>在2.3引入validate的数据结构定义，会生成一个<code>*.pb.validate.go</code>文件，我们截取两个关键函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ListOrdersRequest)</span> <span class="title">Validate</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> m.validate(<span class="literal">false</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *ListOrdersRequest)</span> <span class="title">ValidateAll</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> m.validate(<span class="literal">true</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从命名不难看出，<code>Validate</code>是检查到有一个不符合规则就立刻返回，<code>ValidateAll</code>是校验完所有的参数后、将不符合的规则一起返回。这两种处理方式的差异主要在于：</p>
+<ol>
+<li>耗时：全量检查相对会花费更多的时间</li>
+<li>返回的信息量：全量检查的error会包含更多信息</li>
+</ol>
+<p>从服务端的视角，更推荐全量检查，将所有字段的检查结果返回给调用方，方便对方一次性修正。</p>
+<h2 id="3-在框架中引入参数检查"><a href="#3-在框架中引入参数检查" class="headerlink" title="3.在框架中引入参数检查"></a>3.在框架中引入参数检查</h2><h3 id="3-1-grpc拦截器"><a href="#3-1-grpc拦截器" class="headerlink" title="3.1 grpc拦截器"></a>3.1 grpc拦截器</h3><p>grpc提供了一套拦截器Interceptor的机制，类似于http router中的middleware。之前，我们已经引入了一个拦截器，用于打印trace相关的日志。那么这次又新增了一个拦截器，该如何处理呢？</p>
+<p>参考grpc的代码，我们可以看到下面两个函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">UnaryInterceptor</span><span class="params">(i UnaryServerInterceptor)</span> <span class="title">ServerOption</span></span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ChainUnaryInterceptor</span><span class="params">(interceptors ...UnaryServerInterceptor)</span> <span class="title">ServerOption</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中前者是单个拦截器，而后者是一种链式拦截器的概念。毫无疑问，我们需要扩充成多个拦截器。</p>
+<h3 id="3-2-实现参数校验的拦截"><a href="#3-2-实现参数校验的拦截" class="headerlink" title="3.2 实现参数校验的拦截"></a>3.2 实现参数校验的拦截</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ValidateAll 对应 protoc-gen-validate 生成的 *.pb.validate.go 中的代码</span></span><br><span class="line"><span class="keyword">type</span> Validator <span class="keyword">interface</span> &#123;</span><br><span class="line">	ValidateAll() error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ServerValidationUnaryInterceptor</span><span class="params">(ctx context.Context, req <span class="keyword">interface</span>&#123;&#125;, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler)</span> <span class="params">(resp <span class="keyword">interface</span>&#123;&#125;, err error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> r, ok := req.(Validator); ok &#123;</span><br><span class="line">		<span class="keyword">if</span> err := r.ValidateAll(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, status.Error(codes.InvalidArgument, err.Error())</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> handler(ctx, req)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后在拦截器中引入我们定义的插件：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">s := grpc.NewServer(</span><br><span class="line">  grpc.ChainUnaryInterceptor(</span><br><span class="line">    grpc_opentracing.UnaryServerInterceptor(</span><br><span class="line">      grpc_opentracing.WithTracer(opentracing.GlobalTracer()),</span><br><span class="line">    ),</span><br><span class="line">    ServerValidationUnaryInterceptor,</span><br><span class="line">  ),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-具体调用示例"><a href="#3-3-具体调用示例" class="headerlink" title="3.3 具体调用示例"></a>3.3 具体调用示例</h3><p>我们尝试着传一个错误的接口参数，看看返回结果：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;code&quot;</span>: <span class="number">3</span>,</span><br><span class="line">    <span class="attr">&quot;message&quot;</span>: <span class="string">&quot;invalid ListOrdersRequest.PageNumber: value must be greater than 0; invalid ListOrdersRequest.PageSize: value must be greater than 0&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;details&quot;</span>: []</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，结果中清晰地说明了不合规的两个参数，以及具体的规则，对调用方来说非常直观。</p>
+<h2 id="4-buf格式检查"><a href="#4-buf格式检查" class="headerlink" title="4.buf格式检查"></a>4.buf格式检查</h2><p>随着buf工具的推进，我们引入了越来越多的内容，protobuf文件也新增了很多东西。这时，我们会希望能将protobuf的格式也能有一定的规范化。在buf之前，已经有prototool等工具，buf对此做了集成。</p>
+<p>由于buf的lint检查有很多细节，建议酌情选用。以项目中我选择的为例：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">lint:</span></span><br><span class="line">  <span class="attr">use:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">DEFAULT</span></span><br><span class="line">  <span class="attr">except:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">PACKAGE_VERSION_SUFFIX</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">PACKAGE_DIRECTORY_MATCH</span></span><br><span class="line">  <span class="attr">rpc_allow_google_protobuf_empty_requests:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">rpc_allow_google_protobuf_empty_responses:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>包括两块：</p>
+<ul>
+<li>except排除了两个检查项，即要求protobuf的package带上版本后缀、与代码路径匹配</li>
+<li>允许request和response设置为empty格式</li>
+</ul>
+<p>接下来，运行<code>buf lint</code>，会提示你需要修正的地方，逐一修改即可（很多是命名上的规范，增加可读性，推荐按插件的建议进行修改）。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本次框架的小迭代高度依赖了buf的生态体系，建议有时间的朋友可以再看看buf的文档链接 - <a target="_blank" rel="noopener" href="https://docs.buf.build/introduction%E3%80%82buf%E5%B7%A5%E5%85%B7%E7%9A%84%E8%BF%AD%E4%BB%A3%E9%A2%91%E7%8E%87%E6%AF%94%E8%BE%83%E9%AB%98%EF%BC%8C%E5%AF%B9%E5%85%B6%E6%96%B0%E7%89%B9%E6%80%A7%E4%BB%8D%E5%A4%84%E4%BA%8E%E8%A7%82%E6%9C%9B%E7%8A%B6%E6%80%81%EF%BC%8C%E7%9B%AE%E5%89%8D%E6%B2%A1%E6%9C%89%E5%AE%8C%E5%85%A8%E6%8C%89%E7%85%A7%E5%85%B6Best">https://docs.buf.build/introduction。buf工具的迭代频率比较高，对其新特性仍处于观望状态，目前没有完全按照其Best</a> Practice推进。</p>
+<p>回过头来，我们的参数检查方案依然存在一个明显问题：生成的swagger文档中没有对应的参数要求（Issue - <a target="_blank" rel="noopener" href="https://github.com/grpc-ecosystem/grpc-gateway/issues/1093%EF%BC%89%E3%80%82%E5%A6%82%E6%9E%9C%E8%BF%99%E4%B8%AA%E9%97%AE%E9%A2%98%E9%95%BF%E6%9C%9F%E6%97%A0%E6%B3%95%E8%A7%A3%E5%86%B3%EF%BC%8C%E6%88%91%E4%B9%9F%E4%BC%9A%E7%BB%99%E5%87%BA%E4%B8%80%E5%A5%97%E8%87%AA%E5%B7%B1%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E3%80%82">https://github.com/grpc-ecosystem/grpc-gateway/issues/1093）。如果这个问题长期无法解决，我也会给出一套自己的解决方案。</a></p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Framework/" rel="tag"># Go-Framework</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/11/01/go-framework/go-framework-10/" rel="prev" title="Go语言微服务框架 - 10.接口文档-openapiv2的在线文档方案">
+                  <i class="fa fa-chevron-left"></i> Go语言微服务框架 - 10.接口文档-openapiv2的在线文档方案
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/12/02/go-framework/go-framework-12/" rel="next" title="Go语言微服务框架 - 12.ORM层的自动抽象与自定义方法的扩展">
+                  Go语言微服务框架 - 12.ORM层的自动抽象与自定义方法的扩展 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

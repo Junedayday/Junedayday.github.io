@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="我们从API层到数据库层的链路已经打通，简单的CRUD功能已经可以快速实现。 随着模块的增加，我们会越发感受到系统的复杂性，开始关注系统的可维护性。这时，有个名词会进入我们的视野：分布式链路追踪。相关的内容可以参考这我的两篇文章：  OpenTelemetry https:&#x2F;&#x2F;junedayday.github.io&#x2F;2021&#x2F;10&#x2F;14&#x2F;readings&#x2F;go-digest-2&#x2F; Jaeger">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言微服务框架 - 9.分布式链路追踪-OpenTracing的初步引入">
+<meta property="og:url" content="http://example.com/2021/10/26/go-framework/go-framework-9/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="我们从API层到数据库层的链路已经打通，简单的CRUD功能已经可以快速实现。 随着模块的增加，我们会越发感受到系统的复杂性，开始关注系统的可维护性。这时，有个名词会进入我们的视野：分布式链路追踪。相关的内容可以参考这我的两篇文章：  OpenTelemetry https:&#x2F;&#x2F;junedayday.github.io&#x2F;2021&#x2F;10&#x2F;14&#x2F;readings&#x2F;go-digest-2&#x2F; Jaeger">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2021-10-26T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-01T08:11:18.225Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Framework">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg">
+
+
+<link rel="canonical" href="http://example.com/2021/10/26/go-framework/go-framework-9/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言微服务框架 - 9.分布式链路追踪-OpenTracing的初步引入 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#v0-6-0%EF%BC%9A%E5%88%86%E5%B8%83%E5%BC%8F%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA-OpenTracing%E7%9A%84%E5%88%9D%E6%AD%A5%E5%BC%95%E5%85%A5"><span class="nav-number">1.</span> <span class="nav-text">v0.6.0：分布式链路追踪-OpenTracing的初步引入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">1.1.</span> <span class="nav-text">目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E7%82%B9"><span class="nav-number">1.2.</span> <span class="nav-text">关键技术点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95%E6%9E%84%E9%80%A0"><span class="nav-number">1.3.</span> <span class="nav-text">目录构造</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-trace%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">1.trace的初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%B0%86opentracing%E7%9A%84%E8%AE%BE%E7%BD%AE%E5%88%B0grpc%E5%92%8Cgrpc-gateway%E4%B8%AD"><span class="nav-number">3.</span> <span class="nav-text">2.将opentracing的设置到grpc和grpc-gateway中</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%B0%86traceid%E5%BC%95%E5%85%A5%E5%88%B0log%E7%BB%84%E4%BB%B6%E4%B8%AD"><span class="nav-number">4.</span> <span class="nav-text">3.将traceid引入到log组件中</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-HTTP%E8%AF%B7%E6%B1%82%E8%BF%94%E5%9B%9Etraceid"><span class="nav-number">5.</span> <span class="nav-text">4.HTTP请求返回traceid</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">6.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">65</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/26/go-framework/go-framework-9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言微服务框架 - 9.分布式链路追踪-OpenTracing的初步引入
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-10-26 12:00:00" itemprop="dateCreated datePublished" datetime="2021-10-26T12:00:00+08:00">2021-10-26</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-11-01 16:11:18" itemprop="dateModified" datetime="2021-11-01T16:11:18+08:00">2021-11-01</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>我们从API层到数据库层的链路已经打通，简单的CRUD功能已经可以快速实现。</p>
+<p>随着模块的增加，我们会越发感受到系统的复杂性，开始关注系统的可维护性。这时，有个名词会进入我们的视野：<strong>分布式链路追踪</strong>。相关的内容可以参考这我的两篇文章：</p>
+<ul>
+<li>OpenTelemetry <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/10/14/readings/go-digest-2/">https://junedayday.github.io/2021/10/14/readings/go-digest-2/</a></li>
+<li>Jaeger <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/10/20/readings/go-digest-3/">https://junedayday.github.io/2021/10/20/readings/go-digest-3/</a></li>
+</ul>
+<p>我们接下来直接进入实战。</p>
+<span id="more"></span>
+
+<h2 id="v0-6-0：分布式链路追踪-OpenTracing的初步引入"><a href="#v0-6-0：分布式链路追踪-OpenTracing的初步引入" class="headerlink" title="v0.6.0：分布式链路追踪-OpenTracing的初步引入"></a>v0.6.0：分布式链路追踪-OpenTracing的初步引入</h2><p>项目链接 <a target="_blank" rel="noopener" href="https://github.com/Junedayday/micro_web_service/tree/v0.6.0">https://github.com/Junedayday/micro_web_service/tree/v0.6.0</a></p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>在项目中引入Jaeger为代表的OpenTracing，用一个traceid串联整个请求的链路。</p>
+<h3 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h3><ol>
+<li>trace的初始化</li>
+<li>将opentracing的设置到grpc和grpc-gateway中</li>
+<li>将traceid引入到log组件中</li>
+<li>HTTP请求返回traceid</li>
+</ol>
+<blockquote>
+<p>前两点我将一笔带过，在 <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/10/20/readings/go-digest-3/">https://junedayday.github.io/2021/10/20/readings/go-digest-3/</a> 这篇中已有详细的讲解</p>
+</blockquote>
+<h3 id="目录构造"><a href="#目录构造" class="headerlink" title="目录构造"></a>目录构造</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">--- micro_web_service            项目目录</span><br><span class="line">	|-- gen                            从idl文件夹中生成的文件，不可手动修改</span><br><span class="line">	   |-- idl                             对应idl文件夹</span><br><span class="line">	      |-- demo                             对应idl/demo服务，包括基础结构、HTTP接口、gRPC接口</span><br><span class="line">	    	|-- order                            对应idl/order服务，同上</span><br><span class="line">	|-- idl                            原始的idl定义</span><br><span class="line">	   |-- demo                            业务package定义，protobuffer的原始定义</span><br><span class="line">	   |-- order                           业务order定义，同时干</span><br><span class="line">	|-- internal                       项目的内部代码，不对外暴露</span><br><span class="line">	   |-- config                          配置相关的文件夹，viper的相关加载逻辑</span><br><span class="line">	   |-- dao                             Data Access Object层，是model层的实现</span><br><span class="line">	   |-- gormer                          从pkg/gormer中生成的相关代码，不允许更改</span><br><span class="line">	   |-- model                           model层，定义对象的接口方法，具体实现在dao层</span><br><span class="line">	   |-- mysql                           MySQL连接</span><br><span class="line">	   |-- server                          服务器的实现，对idl中定义服务的具体实现</span><br><span class="line">	   |-- service                         service层，作为领域实现的核心部分</span><br><span class="line">     |-- zlog                            封装zap日志的代码实现</span><br><span class="line">  |-- pkg                            开放给第三方的工具库</span><br><span class="line">     |-- gormer                          gormer二进制工具，用于生成Gorm相关Dao层代码</span><br><span class="line">	|-- buf.gen.yaml                   buf生成代码的定义，从v1beta升到v1</span><br><span class="line">	|-- buf.yaml                       buf工具安装所需的工具，从v1beta升到v1</span><br><span class="line">	|-- gen.sh                         生成代码的脚本：buf+gormer</span><br><span class="line">	|-- go.mod                         Go Module文件</span><br><span class="line">	|-- gormer.yaml                    将gormer中的参数移动到这里</span><br><span class="line">	|-- main.go                        项目启动的main函数</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-trace的初始化"><a href="#1-trace的初始化" class="headerlink" title="1.trace的初始化"></a>1.trace的初始化</h2><p>创建了一个jaeger的trace并设置到opentracing包里的全局变量中。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">traceCfg := &amp;jaegerconfig.Configuration&#123;</span><br><span class="line">  ServiceName: <span class="string">&quot;MyService&quot;</span>,</span><br><span class="line">  Sampler: &amp;jaegerconfig.SamplerConfig&#123;</span><br><span class="line">    Type:  jaeger.SamplerTypeConst,</span><br><span class="line">    Param: <span class="number">1</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  Reporter: &amp;jaegerconfig.ReporterConfig&#123;</span><br><span class="line">    LocalAgentHostPort: <span class="string">&quot;127.0.0.1:6831&quot;</span>,</span><br><span class="line">    LogSpans:           <span class="literal">true</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line">tracer, closer, err := traceCfg.NewTracer(jaegerconfig.Logger(jaeger.StdLogger))</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">defer</span> closer.Close()</span><br><span class="line">opentracing.SetGlobalTracer(tracer)</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-将opentracing的设置到grpc和grpc-gateway中"><a href="#2-将opentracing的设置到grpc和grpc-gateway中" class="headerlink" title="2.将opentracing的设置到grpc和grpc-gateway中"></a>2.将opentracing的设置到grpc和grpc-gateway中</h2><p>利用了拦截器的特性，类似于middleware。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// grpc-gateway</span></span><br><span class="line">opts := []grpc.DialOption&#123;</span><br><span class="line">  grpc.WithInsecure(),</span><br><span class="line">  grpc.WithUnaryInterceptor(</span><br><span class="line">    grpc_opentracing.UnaryClientInterceptor(</span><br><span class="line">      grpc_opentracing.WithTracer(opentracing.GlobalTracer()),</span><br><span class="line">    ),</span><br><span class="line">  ),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err := demo.RegisterDemoServiceHandlerFromEndpoint(ctx, mux, fmt.Sprintf(<span class="string">&quot;:%d&quot;</span>, config.Viper.GetInt(<span class="string">&quot;server.grpc.port&quot;</span>)), opts); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> errors.Wrap(err, <span class="string">&quot;RegisterDemoServiceHandlerFromEndpoint error&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// grpc</span></span><br><span class="line">s := grpc.NewServer(grpc.UnaryInterceptor(grpc_opentracing.UnaryServerInterceptor(grpc_opentracing.WithTracer(opentracing.GlobalTracer()))))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-将traceid引入到log组件中"><a href="#3-将traceid引入到log组件中" class="headerlink" title="3.将traceid引入到log组件中"></a>3.将traceid引入到log组件中</h2><p>从Opentracing对Go语言的相关介绍可以得知，trace信息被放在go语言的context里。于是，就有了下面这一段提取traceid的代码。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 为了使用方便，不修改zap源码，这里利用With函数返回一个SugaredLogger</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithTrace</span><span class="params">(ctx context.Context)</span> *<span class="title">zap</span>.<span class="title">SugaredLogger</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> jTraceId jaeger.TraceID</span><br><span class="line">	<span class="keyword">if</span> parent := opentracing.SpanFromContext(ctx); parent != <span class="literal">nil</span> &#123;</span><br><span class="line">		parentCtx := parent.Context()</span><br><span class="line">		<span class="keyword">if</span> tracer := opentracing.GlobalTracer(); tracer != <span class="literal">nil</span> &#123;</span><br><span class="line">			mySpan := tracer.StartSpan(<span class="string">&quot;my info&quot;</span>, opentracing.ChildOf(parentCtx))</span><br><span class="line">      <span class="comment">// 提取出一个jaeger的traceid</span></span><br><span class="line">			<span class="keyword">if</span> sc, ok := mySpan.Context().(jaeger.SpanContext); ok &#123;</span><br><span class="line">				jTraceId = sc.TraceID()</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">defer</span> mySpan.Finish()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> Sugar.With(zap.String(jaeger.TraceContextHeaderName, fmt.Sprint(jTraceId)))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-HTTP请求返回traceid"><a href="#4-HTTP请求返回traceid" class="headerlink" title="4.HTTP请求返回traceid"></a>4.HTTP请求返回traceid</h2><p>在拦截器里，解析出trace信息，设置到http的头里。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">trace, ok := serverSpan.Context().(jaeger.SpanContext)</span><br><span class="line"><span class="keyword">if</span> ok &#123;</span><br><span class="line">  w.Header().Set(jaeger.TraceContextHeaderName, fmt.Sprint(trace.TraceID()))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>我们模拟一个简单的请求</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --request GET &#x27;http://127.0.0.1:8081/v1/orders&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>从返回的结果来看，可以看到<code>Uber-Trace-Id</code>头里有个具体的trace-id，例如5fd1fc3ba1715909。</p>
+<p>而在应用代码中，我们添加了一行日志：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(orderSvc *OrderService)</span> <span class="title">List</span><span class="params">(ctx context.Context, pageNumber, pageSize <span class="keyword">int</span>, condition *gormer.OrderOptions)</span> <span class="params">([]gormer.Order, <span class="keyword">int64</span>, error)</span></span> &#123;</span><br><span class="line">	zlog.WithTrace(ctx).Infof(<span class="string">&quot;page number is %d&quot;</span>, pageNumber)</span><br><span class="line">	<span class="comment">// zlog信息</span></span><br><span class="line">	<span class="keyword">return</span> orders, count, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体的打印如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2021-10-22T17:25:05.591+0800	info	service/order.go:26	page number is 0	&#123;&quot;uber-trace-id&quot;: &quot;5fd1fc3ba1715909&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>虽然格式还不是那么优美，但traceid信息已经填入到了日志中。</p>
+<p>至此，调用方只要提供返回的trace-id，我们就可以在程序日志中查找到相应的日志信息，方便针对性地排查问题。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>OpenTracing是服务治理非常关键的一环。利用traceid串联一个请求的整个生命周期，能帮助我们快速地排查问题，在实际生产环境上能更快地定位问题。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Framework/" rel="tag"># Go-Framework</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/10/20/readings/go-digest-3/" rel="prev" title="技术阅读摘要 - 3.Jaeger技术分析">
+                  <i class="fa fa-chevron-left"></i> 技术阅读摘要 - 3.Jaeger技术分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/11/01/go-framework/go-framework-10/" rel="next" title="Go语言微服务框架 - 10.接口文档-openapiv2的在线文档方案">
+                  Go语言微服务框架 - 10.接口文档-openapiv2的在线文档方案 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
