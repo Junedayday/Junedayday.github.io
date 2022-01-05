@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="Go Micro框架概况截止到本文发布时，Go-Micro在github上的star数达到了10.8k，也已经累计发布了v1、v2、v3这三个大版本，目前前两个已经停止维护。 本文主要以最新的技术视角去看待这个框架，所以会集中目光在v3版本。本文包含大量个人的主观观点，请大家选择性听取，更欢迎与我讨论。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言技巧 - 8.【浅析微服务框架】Go-Micro概览">
+<meta property="og:url" content="http://example.com/2021/12/20/go-tip/go-tip-8/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="Go Micro框架概况截止到本文发布时，Go-Micro在github上的star数达到了10.8k，也已经累计发布了v1、v2、v3这三个大版本，目前前两个已经停止维护。 本文主要以最新的技术视角去看待这个框架，所以会集中目光在v3版本。本文包含大量个人的主观观点，请大家选择性听取，更欢迎与我讨论。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/micro-3.0.png">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/my_wechat.jpeg">
+<meta property="article:published_time" content="2021-12-20T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-20T11:27:55.226Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Tip">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg">
+
+
+<link rel="canonical" href="http://example.com/2021/12/20/go-tip/go-tip-8/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言技巧 - 8.【浅析微服务框架】Go-Micro概览 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-Micro%E6%A1%86%E6%9E%B6%E6%A6%82%E5%86%B5"><span class="nav-number">1.</span> <span class="nav-text">Go Micro框架概况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Micro%E7%9A%84%E5%8D%81%E5%A4%A7%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97"><span class="nav-number">3.</span> <span class="nav-text">Micro的十大核心模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Auth-%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83"><span class="nav-number">3.1.</span> <span class="nav-text">1. Auth 认证授权</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Build%E7%BC%96%E8%AF%91%E6%A8%A1%E5%9D%97"><span class="nav-number">3.2.</span> <span class="nav-text">2.Build编译模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Broker%E6%B6%88%E6%81%AF%E7%AE%A1%E9%81%93"><span class="nav-number">3.3.</span> <span class="nav-text">3.Broker消息管道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Config%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AE"><span class="nav-number">3.4.</span> <span class="nav-text">4.Config动态配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Events%E4%BA%8B%E4%BB%B6%E6%B5%81"><span class="nav-number">3.5.</span> <span class="nav-text">5.Events事件流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Network%E7%BD%91%E7%BB%9C"><span class="nav-number">3.6.</span> <span class="nav-text">6.Network网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Registry%E6%B3%A8%E5%86%8C"><span class="nav-number">3.7.</span> <span class="nav-text">7.Registry注册</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Runtime%E8%BF%90%E8%A1%8C%E6%97%B6"><span class="nav-number">3.8.</span> <span class="nav-text">8.Runtime运行时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Store%E5%AD%98%E5%82%A8"><span class="nav-number">3.9.</span> <span class="nav-text">9.Store存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-Plugins%E6%8F%92%E4%BB%B6%E5%8C%96"><span class="nav-number">3.10.</span> <span class="nav-text">10.Plugins插件化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E6%80%BB%E8%A7%88"><span class="nav-number">4.</span> <span class="nav-text">模块总览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E6%8F%90"><span class="nav-number">4.1.</span> <span class="nav-text">前提</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E5%A4%A7%E5%88%86%E7%B1%BB"><span class="nav-number">4.2.</span> <span class="nav-text">三大分类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">72</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/12/20/go-tip/go-tip-8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言技巧 - 8.【浅析微服务框架】Go-Micro概览
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-12-20 12:00:00 / 修改时间：19:27:55" itemprop="dateCreated datePublished" datetime="2021-12-20T12:00:00+08:00">2021-12-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
+<h2 id="Go-Micro框架概况"><a href="#Go-Micro框架概况" class="headerlink" title="Go Micro框架概况"></a>Go Micro框架概况</h2><p>截止到本文发布时，Go-Micro在github上的star数达到了10.8k，也已经累计发布了v1、v2、v3这三个大版本，目前前两个已经停止维护。</p>
+<p>本文主要以最新的技术视角去看待这个框架，所以会集中目光在v3版本。本文包含大量个人的主观观点，请大家选择性听取，更欢迎与我讨论。</p>
+<span id="more"></span>
+
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p><strong>Micro is a distributed cloud operating system built for real world programming.</strong></p>
+<p>Micro框架的定义里有个关键词：distributed cloud operating system - 分布式云操作系统。这是一个很<strong>重量级</strong>的定义，我们根据它的官方介绍了解，从这10个核心模块入手，理解这个框架的功能。</p>
+<blockquote>
+<p>本人对这个框架研究不深，主要参考官方提供的资料，如果有认知偏差，欢迎大家多多指正~</p>
+</blockquote>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/micro-3.0.png" alt="micro"></p>
+<h2 id="Micro的十大核心模块"><a href="#Micro的十大核心模块" class="headerlink" title="Micro的十大核心模块"></a>Micro的十大核心模块</h2><h3 id="1-Auth-认证授权"><a href="#1-Auth-认证授权" class="headerlink" title="1. Auth 认证授权"></a>1. Auth 认证授权</h3><p>认证授权是一个很基础的模块，但放在一个微服务的框架里，我个人认为不太合适。为什么呢？</p>
+<ol>
+<li><strong>大部分的微服务的Auth模块，往往是网关层的一种能力</strong>。也就是说，一般我们在请求入口处做一次Auth即可，接下来我们就认为消息可靠、无需检查；</li>
+<li><strong>如果Auth模块必须嵌入到每个服务，更应该采用Service Mesh的side-car模式</strong>。借用Istio的能力，尽可能不要侵入应用的代码；</li>
+<li><strong>Auth</strong>会有很多方式，ACL/RBAC/ABAC，往往会和公司内部的系统强结合（如人员管理），抽象为一个组件很难满足通用性和扩展性；</li>
+</ol>
+<p>所以，常规的微服务框架中，会有个专门的Auth服务，管理权限、认证等功能。</p>
+<h3 id="2-Build编译模块"><a href="#2-Build编译模块" class="headerlink" title="2.Build编译模块"></a>2.Build编译模块</h3><p>编译功能放在微服务框架不合适，它更应该与CICD结合起来，交由专门的编译部署平台，实现快速交付。</p>
+<h3 id="3-Broker消息管道"><a href="#3-Broker消息管道" class="headerlink" title="3.Broker消息管道"></a>3.Broker消息管道</h3><p>从官方的介绍来看，Broker基本与MQ的功能一致，即发布和订阅消息。</p>
+<p>作为跨服务异步通信的主流方式，MQ在中大型工程中被广泛使用，Broker概念的抽象可以让使用者不用过于关心底层具体采用的技术。</p>
+<h3 id="4-Config动态配置"><a href="#4-Config动态配置" class="headerlink" title="4.Config动态配置"></a>4.Config动态配置</h3><p>Config定义为动态配置和密码，可类比为配置中心，或者K8s中的ConfigMap与Secret。这个模块的功能更多的是对配置能力的抽象。</p>
+<h3 id="5-Events事件流"><a href="#5-Events事件流" class="headerlink" title="5.Events事件流"></a>5.Events事件流</h3><p>事件流中有三个关键词：<strong>顺序、重放和持久化</strong>。这三个特性与MQ的特性基本一致，可以认为是Broker一个具体的实践。</p>
+<p>这里抽象出一个事件流的概念，主要强调的是 <strong>可靠性</strong>。</p>
+<h3 id="6-Network网络"><a href="#6-Network网络" class="headerlink" title="6.Network网络"></a>6.Network网络</h3><p>网络是计算机中很大的一块，这里特指服务内的网络隔离与路由。我个人认为个定义过于宽泛，很容易引起误解。</p>
+<p>从云原生的划分来看，这块更应该放在Service Mesh部分。</p>
+<h3 id="7-Registry注册"><a href="#7-Registry注册" class="headerlink" title="7.Registry注册"></a>7.Registry注册</h3><p>服务注册这部分包括两块：</p>
+<ol>
+<li>服务提供方把服务信息注册到中心节点</li>
+<li>服务调用方从中心节点获取服务提供方的信息进行调用</li>
+</ol>
+<p>这服务注册与发现的工作，K8s等这类Paas平台已经封装得很完善了；而如果公司没有提供Paas平台，也可以通过etcd等注册中心快速实现。这部分也不建议重复建设。</p>
+<h3 id="8-Runtime运行时"><a href="#8-Runtime运行时" class="headerlink" title="8.Runtime运行时"></a>8.Runtime运行时</h3><p>云时代以容器为核心构建服务，进程的声明周期就可以通过Pod快捷管理。官方对Runtime的描述，更像是CICD+K8s调度服务的综合描述。</p>
+<h3 id="9-Store存储"><a href="#9-Store存储" class="headerlink" title="9.Store存储"></a>9.Store存储</h3><p>官方定义为支持过期+CRUD的K-V存储，用来保证无状态性。</p>
+<p>我们可以很直接与Redis类比，相当于<strong>把有状态的数据放在公共的缓存里</strong>。</p>
+<h3 id="10-Plugins插件化"><a href="#10-Plugins插件化" class="headerlink" title="10.Plugins插件化"></a>10.Plugins插件化</h3><p>插件化的概念很宽，框架并没有明确说明。</p>
+<p>从实现来说，任何一个组件最好都可以支持插件化，如router、存储、消息通知等，可以支持自定义log plugins。</p>
+<h2 id="模块总览"><a href="#模块总览" class="headerlink" title="模块总览"></a>模块总览</h2><p>前面的十大模块有很多与云平台的基础功能重合。为了更具有针对性地讨论，我们先聊清楚前提，这样才能更聚焦于框架上。</p>
+<h3 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h3><p>从当前主流与未来趋势来看，<strong>微服务框架应基于基础云平台能力，不应有过多的交集</strong>。基础平台能力主要包括两块：</p>
+<ul>
+<li><p>整套Devops流程（如代码版本管理、编译、部署、运行）</p>
+</li>
+<li><p>基础的云Paas平台（以k8s为代表）</p>
+</li>
+</ul>
+<blockquote>
+<p>虽然对很多基础建设不完善的团队来说，上面两者的落地会有挑战，但从长远发展来看，不应将由基础平台的维护的功能交由微服务框架。</p>
+<p>而如果追求短期内快速落地项目，我更建议这些团队借主流公有云服务的能力。</p>
+</blockquote>
+<h3 id="三大分类"><a href="#三大分类" class="headerlink" title="三大分类"></a>三大分类</h3><ol>
+<li>不合适引入到微服务框架中：Build、Config、Runtime</li>
+<li>通过Service Mesh实现：Auth、Network、Registry</li>
+<li>微服务框架的关键特性：Broker、Events、Store、Plugins</li>
+</ol>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>Micro框架提供了二进制工具micro，可以查看server、config、store等信息。虽然看起来使用起来很方便，但其实有诸多限制；比如说，线上环境的服务器，开发者往往没有权限登录。</p>
+<p>从整体来说，Micro是一个限制性很大的框架，主要特点是：</p>
+<ol>
+<li>适合基础平台不完善的团队，框架提供了很多基础平台的功能；</li>
+<li>使用框架的初始成本低，但后续切换成本、排查问题成本极高，高度依赖micro的生态；</li>
+<li>Micro屏蔽了底层实现细节，虽然能在一定程度上提效，但遇到性能、扩展性、底层原理等问题时，很难解决。</li>
+</ol>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>整体来说，我不建议以Micro作为新项目切入时的框架。如果用一个词概括原因，我会用 - <strong>不够透明</strong>。一方面，Micro的门槛不低、需要了解它一整套特有的概念；另一方面，后续团队的维护成本也很高，对个人提升也很有限。</p>
+<p>维护成本这个概念也许有的同学不能理解，我以Store为例（假设背后选用Redis作为存储）</p>
+<ul>
+<li>如果采用Micro框架，我们必须阅读相关代码（重点是封装部分），了解它的封装与底层，结合micro+redis工具排查</li>
+<li>如果调用的是Redis的官方库，那只要保证调用方式正确，那就只需要你掌握Redis的原理即可</li>
+</ul>
+<p>前者的排查链路需要框架+redis，后者只需要排查redis。我个人对编程语言框架有一个认知：<strong>不应过度屏蔽通用中间件的细节，如Redis、Kafka、MySQL等，往往直接在中间件查询问题，比通过框架查询问题更为高效</strong>。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>Github - <a target="_blank" rel="noopener" href="https://github.com/micro/micro">https://github.com/micro/micro</a></p>
+<p>文档 - <a target="_blank" rel="noopener" href="https://micro.mu/introduction">https://micro.mu/introduction</a></p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/my_wechat.jpeg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Tip/" rel="tag"># Go-Tip</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/12/20/go-tip/go-tip-9/" rel="prev" title="Go语言技巧 - 9.【浅析微服务框架】Kratos概览">
+                  <i class="fa fa-chevron-left"></i> Go语言技巧 - 9.【浅析微服务框架】Kratos概览
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/12/25/go-tip/go-tip-10/" rel="next" title="Go语言技巧 - 10.【初始化代码生成】Wire工具基础讲解">
+                  Go语言技巧 - 10.【初始化代码生成】Wire工具基础讲解 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
