@@ -240,7 +240,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-01-06 22:13:06" itemprop="dateModified" datetime="2022-01-06T22:13:06+08:00">2022-01-06</time>
+        <time title="修改时间：2022-01-07 20:29:57" itemprop="dateModified" datetime="2022-01-07T20:29:57+08:00">2022-01-07</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -378,6 +378,31 @@
 </ul>
 <p>在我看来，这类决策者往往是偏管理，技术上的掌控力不足，导致在决策时没有足够的倾向性；同时，与执行者之间的信任也不足，就希望把决策这件事下移、尝试着走平衡之道。</p>
 <p>我个人的想法是：先选择一个能力相对优秀的执行者，认真评估其方案，然后交由对方执行；最后哪怕失败了，也可以通过复盘改进，想想下次如何更好地决策，更好地把控方案；当然，如果你认为纯粹是执行者的问题，那就换个可信赖的人。</p>
+<h2 id="2022-01-07-CNCF-Kubernetes"><a href="#2022-01-07-CNCF-Kubernetes" class="headerlink" title="2022-01-07 CNCF-Kubernetes"></a>2022-01-07 CNCF-Kubernetes</h2><p>今天，我们一起来看看CNCF中的最核心项目 - <code>Kubernetes</code>。<code>Kubernetes</code>相关内容非常庞大，我们依旧关注聚焦于核心能力。</p>
+<p><code>Kubernetes</code> 位于CNCF核心的 <strong>调度与编排</strong> 模块，也就是整个解决方案的基石。在CNCF上的介绍为：</p>
+<blockquote>
+<p>Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.</p>
+</blockquote>
+<p>对这个定义，我们关注两个点：</p>
+<ul>
+<li><code>automating deployment, scaling, and management</code> 自动化的部署、扩缩容和管理，这是k8s核心能力；</li>
+<li><code>containerized applications</code> 容器化应用，这是k8s操作的基本对象；</li>
+</ul>
+<p>为了更好地介绍Kubernetes，我对<a target="_blank" rel="noopener" href="https://kubernetes.io/">官方首页</a>描述中的关键特性再做一些更详细地说明：</p>
+<h3 id="Automated-rollouts-and-rollbacks"><a href="#Automated-rollouts-and-rollbacks" class="headerlink" title="Automated rollouts and rollbacks"></a>Automated rollouts and rollbacks</h3><p>自动化扩缩容和升级回滚。这个特性是k8s最核心的，也是大规模推广的根本原因。</p>
+<p>看起来，这功能描述与<code>CICD</code>流程差不多，但使用体验差距很大。在传统的模式下，我们执行的是一个<strong>具体的动作</strong>，比如扩1个机器、升级2个程序等；而在k8s里，使用者只要<strong>声明最终的预期状态</strong>，比如5台机器运行v1.0版本的程序，那么整个系统该扩容还是缩容、该升级还是回滚，都由k8s自行根据当前状态进行判断。</p>
+<p>这个，就是云原生的一大特性：<strong>声明式API</strong> ，而不是传统上的<strong>命令式API</strong>。</p>
+<blockquote>
+<p>声明式API不一定比命令式API好。在应用程序开发时，命令式API更容易理解。</p>
+</blockquote>
+<h3 id="Service-discovery-and-load-balancing"><a href="#Service-discovery-and-load-balancing" class="headerlink" title="Service discovery and load balancing"></a>Service discovery and load balancing</h3><p>服务发现与负载均衡。这个功能很大程度上减少了分布式软件运行模式的复杂性。</p>
+<p>服务发现，以前非常依赖<code>zookeeper</code>/<code>etcd</code>等这类注册中心，往往需要侵入到业务代码；而负载均衡，则很依赖<code>nginx</code>这类软件，并在上面做复杂配置。</p>
+<p>当然，k8s给出的只是通用解法，对一些具备很强业务属性的服务发现与负载均衡，仍需要程序自行实现。</p>
+<h3 id="Storage-orchestration"><a href="#Storage-orchestration" class="headerlink" title="Storage orchestration"></a>Storage orchestration</h3><p>存储编排。存储的编排是k8s重点演进的功能。</p>
+<p>k8s抽象了存储概念，从传统的本地存储扩展为分布式云存储，对上层应用屏蔽了存储这块的复杂度。</p>
+<h3 id="Designed-for-extensibility"><a href="#Designed-for-extensibility" class="headerlink" title="Designed for extensibility"></a>Designed for extensibility</h3><p>为扩展性而设计。</p>
+<p>扩展性是k8s非常重视的点，无论是开放出容器、网络、存储等接口规范，还是像自定义资源(CRD)等插件的开放，都体现出了一种开放的精神，也是k8s如今能作为云原生标志性的软件的立足之本。</p>
+<p>有一个点希望大家认识到：k8s的成功不是简单地因为开放性，更重要的是，它定义的这些开放性的规范与接口，都是<code>Google</code>经过实践总结出来的经验，符合主流厂商的趋势与开发者的需求。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
