@@ -240,7 +240,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-01-13 21:39:29" itemprop="dateModified" datetime="2022-01-13T21:39:29+08:00">2022-01-13</time>
+        <time title="修改时间：2022-01-13 22:47:21" itemprop="dateModified" datetime="2022-01-13T22:47:21+08:00">2022-01-13</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -365,7 +365,7 @@
 <p>作为一名开发者，我们实现功能的思路往往是按照顺序的逻辑步骤；一个一个步骤的串联，才能保证最后的功能实现。但这个时候，如果要我们去关注各类错误的发生，小到网络波动、程序崩溃，大到机房断电，很容易无所适从。</p>
 <p>这里，我谈谈自己的理解：<strong>主要从发生的概率与影响的严重程度来思考，不要过度追求细节</strong>。这里有一个很重要的权衡点 - **健壮性 **与 <strong>简单性</strong> ：一般来说，要保证程序足够健壮，会引入各种异常的容错性设计，增加系统的复杂度，但这一点并不是绝对的。</p>
 <p><strong>从系统整体功能的维度，虽然看起来增加了复杂度，但通过分层、模块化、服务拆分等方式，分而治之 - 一些简单的模块用简单的规则组合成一个大模块，可维护性远远高于一个复杂的模块。</strong></p>
-<h2 id="2022-01-13-CoreDNS"><a href="#2022-01-13-CoreDNS" class="headerlink" title="2022-01-13 CoreDNS"></a>2022-01-13 CoreDNS</h2><p><code>CoreDNS</code>是CNCF全景图中 <strong>协调与服务发现</strong> 模块的核心项目，在<code>Kubernetes</code>1.12版本之后成为了默认的DNS服务。熟悉<code>CoreDNS</code>是掌握<code>Kubernetes</code>必不可少的技能。</p>
+<h2 id="2022-01-13-CNCF-CoreDNS"><a href="#2022-01-13-CNCF-CoreDNS" class="headerlink" title="2022-01-13 CNCF-CoreDNS"></a>2022-01-13 CNCF-CoreDNS</h2><p><code>CoreDNS</code>是CNCF全景图中 <strong>协调与服务发现</strong> 模块的核心项目，在<code>Kubernetes</code>1.12版本之后成为了默认的DNS服务。熟悉<code>CoreDNS</code>是掌握<code>Kubernetes</code>必不可少的技能。</p>
 <p>照例，我们先一起看下其核心定义，非常简洁明了：</p>
 <blockquote>
 <p>官网 - CoreDNS: DNS and Service Discovery</p>
@@ -392,9 +392,9 @@
 <li><strong>无需兼容历史问题</strong> - 很多的工具都存在大量的历史版本，很难做到完全兼容这种表达形式；而<code>CoreDNS</code>在设计之初就强制采用这种规范，没有历史包袱；</li>
 <li><strong>每个插件的输入与输出保持一致</strong> - 作为一种链式调用，为了保证前者输入可以作为后者输出，两者支持的数据格式必须一样（可以参考Unix中的管道）。DNS服务的功能比较简单，可以保证一致；</li>
 </ol>
-<p>同样的，链式调用带来了便利性，但其实也损失了一些东西，例如：</p>
+<p>同样的，Corefile这种声明方式，也或多或少带来了一些问题，例如：</p>
 <ol>
-<li><strong>文件解析的复杂性</strong> - 比如数据类型的问题，很难确定文件中的<code>5</code>是数字还是字符串；</li>
+<li><strong>文件解析的复杂性</strong>（这点与链式调用本身无关） - 比如数据类型的问题，很难确定文件中的<code>5</code>是数字还是字符串；</li>
 <li><strong>链式调用很难解决前后有依赖的情况</strong> - 如调用A插件的结果有个特别的输出，用于插件B的输入时，很难解决；</li>
 <li><strong>长链式调用的复杂度</strong> - 如果链式调用过长，一方面带来了异常情况下排查问题的复杂度，另一方面很容易出现性能问题；</li>
 </ol>
