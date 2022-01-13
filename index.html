@@ -240,7 +240,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-01-12 22:52:23" itemprop="dateModified" datetime="2022-01-12T22:52:23+08:00">2022-01-12</time>
+        <time title="修改时间：2022-01-13 21:39:29" itemprop="dateModified" datetime="2022-01-13T21:39:29+08:00">2022-01-13</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -363,8 +363,42 @@
 <p>目前云原生的Service Mesh技术还未完全形成行业标准，相信很快随着它的落地，将迎来微服务的又一波热潮。</p>
 <h3 id="容错性设计"><a href="#容错性设计" class="headerlink" title="容错性设计"></a>容错性设计</h3><p>容错性设计，也就是为错误而设计，这一点很反直觉。</p>
 <p>作为一名开发者，我们实现功能的思路往往是按照顺序的逻辑步骤；一个一个步骤的串联，才能保证最后的功能实现。但这个时候，如果要我们去关注各类错误的发生，小到网络波动、程序崩溃，大到机房断电，很容易无所适从。</p>
-<p>这里，我谈谈自己的理解：<strong>主要从发生的概率与影响的严重程度来思考，不要过度追求细节</strong>。这里有一个很重要的权衡点 - **健壮性 **与 <strong>简单性</strong>：一般来说，要保证程序足够健壮，会引入各种异常的容错性设计，增加系统的复杂度，但这一点并不是绝对的。</p>
+<p>这里，我谈谈自己的理解：<strong>主要从发生的概率与影响的严重程度来思考，不要过度追求细节</strong>。这里有一个很重要的权衡点 - **健壮性 **与 <strong>简单性</strong> ：一般来说，要保证程序足够健壮，会引入各种异常的容错性设计，增加系统的复杂度，但这一点并不是绝对的。</p>
 <p><strong>从系统整体功能的维度，虽然看起来增加了复杂度，但通过分层、模块化、服务拆分等方式，分而治之 - 一些简单的模块用简单的规则组合成一个大模块，可维护性远远高于一个复杂的模块。</strong></p>
+<h2 id="2022-01-13-CoreDNS"><a href="#2022-01-13-CoreDNS" class="headerlink" title="2022-01-13 CoreDNS"></a>2022-01-13 CoreDNS</h2><p><code>CoreDNS</code>是CNCF全景图中 <strong>协调与服务发现</strong> 模块的核心项目，在<code>Kubernetes</code>1.12版本之后成为了默认的DNS服务。熟悉<code>CoreDNS</code>是掌握<code>Kubernetes</code>必不可少的技能。</p>
+<p>照例，我们先一起看下其核心定义，非常简洁明了：</p>
+<blockquote>
+<p>官网 - CoreDNS: DNS and Service Discovery</p>
+<p>CNCF - CoreDNS is a DNS server that chains plugins</p>
+</blockquote>
+<p>今天，我们将围绕一个关键词<code>chains plugins</code> - <strong>链式插件</strong> 展开，这也是<code>CoreDNS</code>实现的核心特性。</p>
+<p>官方对这个特性的定义如下，</p>
+<blockquote>
+<p>CoreDNS chains plugins. Each plugin performs a DNS function, such as Kubernetes service discovery, prometheus metrics, rewriting queries, or just serving from zone files. And many more.</p>
+</blockquote>
+<p>从中不难看出，<code>CoreDNS</code>将各种<code>DNS</code>的功能抽象成一个插件，进行链式调用。</p>
+<p>我们用 <a target="_blank" rel="noopener" href="https://github.com/coredns/coredns">官方github上的Corefile</a> 来了解这个特性：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">example.org:1053 &#123;</span><br><span class="line">    file /var/lib/coredns/example.org.signed</span><br><span class="line">    transfer &#123;</span><br><span class="line">        to * 2001:500:8f::53</span><br><span class="line">    &#125;</span><br><span class="line">    errors</span><br><span class="line">    log</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">. &#123;</span><br><span class="line">    any</span><br><span class="line">    forward . 8.8.8.8:53</span><br><span class="line">    errors</span><br><span class="line">    log</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>当访问<code>example.org:1053</code> 时，依次触发 file、transfer、errors、log四个插件</li>
+<li>访问其余DNS时，依次触发 any、forward、errors、log四个插件</li>
+</ol>
+<p>上面的语法与<code>nginx</code>非常类似，而作者实际上是参考<code>Caddy</code>软件进行设计的，有兴趣的可以查阅相关资料，例如这个 <a target="_blank" rel="noopener" href="https://mritd.com/2021/06/30/understand-caddyfile-syntax/">博客</a>。</p>
+<p>链式调用是一种表述形式非常强的语法：<strong>它以一个大众容易接受的顺序逻辑，讲述了一个完整的调用过程，将各个细节也描述地很清晰</strong>。</p>
+<p>既然链式调用的描述方式那么棒，为什么目前没有大规模地推广到各类工具上呢？这里，我谈谈个人的三个理解：</p>
+<ol>
+<li><strong>核心模块支持插件化</strong> - 链式调用需要动态加载各类插件，这一点对核心的模块要求很高，很多软件设计之初就决定了很难走插件化的道路；</li>
+<li><strong>无需兼容历史问题</strong> - 很多的工具都存在大量的历史版本，很难做到完全兼容这种表达形式；而<code>CoreDNS</code>在设计之初就强制采用这种规范，没有历史包袱；</li>
+<li><strong>每个插件的输入与输出保持一致</strong> - 作为一种链式调用，为了保证前者输入可以作为后者输出，两者支持的数据格式必须一样（可以参考Unix中的管道）。DNS服务的功能比较简单，可以保证一致；</li>
+</ol>
+<p>同样的，链式调用带来了便利性，但其实也损失了一些东西，例如：</p>
+<ol>
+<li><strong>文件解析的复杂性</strong> - 比如数据类型的问题，很难确定文件中的<code>5</code>是数字还是字符串；</li>
+<li><strong>链式调用很难解决前后有依赖的情况</strong> - 如调用A插件的结果有个特别的输出，用于插件B的输入时，很难解决；</li>
+<li><strong>长链式调用的复杂度</strong> - 如果链式调用过长，一方面带来了异常情况下排查问题的复杂度，另一方面很容易出现性能问题；</li>
+</ol>
+<p><code>CoreDNS</code>的成功，<strong>链式调用插件</strong> 这个特性只体现了简单性的理念，并不是关键性的原因，而更多地是依赖大量开箱即用的<a target="_blank" rel="noopener" href="https://coredns.io/plugins/">插件</a>。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
