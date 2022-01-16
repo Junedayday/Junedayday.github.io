@@ -22,24 +22,24 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="大家好，我是六月天天。从今天开始，我将开启一个新的系列 - Go语言学习路线。  大家可以从 bilibili 的视频分享中看到观点的延伸思考  以成长为核心目前网上已有很多Go相关的教程，包括基础讲解、源码解析、面试技巧等，但我依然下决心来做一个具有强烈个人主观观点色彩的Go语言学习路线：这个系列的目标只有一个 - 成长 。我不求这个系列超越其它的教程，而是能做到去芜存菁 ，引发一批朋友的共鸣">
+  <meta name="description" content="2022-01-17 CNCF-gRPC今天，我们一起来看CNCF的 Remote Procedure Call - RPC 模块中最具代表性的项目 - gRPC。 gRPC官网的定义很简洁，重点强调了其高性能的特点：  A high performance, open source universal RPC framework.  我们再看一段官方更详细的描述：  gRPC is a mod">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Go语言学习路线 - 0.总览">
-<meta property="og:url" content="http://example.com/2021/02/21/go-study/go-study-0/index.html">
+<meta property="og:title" content="五分钟技术小分享 - 2022Week03">
+<meta property="og:url" content="http://example.com/2022/01/17/sharing-5min/2022-01/2022Week03/index.html">
 <meta property="og:site_name" content="Junedayday Blog">
-<meta property="og:description" content="大家好，我是六月天天。从今天开始，我将开启一个新的系列 - Go语言学习路线。  大家可以从 bilibili 的视频分享中看到观点的延伸思考  以成长为核心目前网上已有很多Go相关的教程，包括基础讲解、源码解析、面试技巧等，但我依然下决心来做一个具有强烈个人主观观点色彩的Go语言学习路线：这个系列的目标只有一个 - 成长 。我不求这个系列超越其它的教程，而是能做到去芜存菁 ，引发一批朋友的共鸣">
+<meta property="og:description" content="2022-01-17 CNCF-gRPC今天，我们一起来看CNCF的 Remote Procedure Call - RPC 模块中最具代表性的项目 - gRPC。 gRPC官网的定义很简洁，重点强调了其高性能的特点：  A high performance, open source universal RPC framework.  我们再看一段官方更详细的描述：  gRPC is a mod">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57571641299795_.pic_hd.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
-<meta property="article:published_time" content="2021-02-21T03:27:15.000Z">
-<meta property="article:modified_time" content="2021-08-12T08:26:38.430Z">
+<meta property="article:published_time" content="2022-01-17T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-16T06:08:26.104Z">
 <meta property="article:author" content="Junedayday">
-<meta property="article:tag" content="Go-Study">
+<meta property="article:tag" content="Daily-Sharing">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57571641299795_.pic_hd.jpg">
 
 
-<link rel="canonical" href="http://example.com/2021/02/21/go-study/go-study-0/">
+<link rel="canonical" href="http://example.com/2022/01/17/sharing-5min/2022-01/2022Week03/">
 
 
 <script class="page-configurations">
@@ -52,7 +52,7 @@
   };
 </script>
 
-  <title>Go语言学习路线 - 0.总览 | Junedayday Blog</title>
+  <title>五分钟技术小分享 - 2022Week03 | Junedayday Blog</title>
   
 
 
@@ -153,7 +153,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A5%E6%88%90%E9%95%BF%E4%B8%BA%E6%A0%B8%E5%BF%83"><span class="nav-number">1.</span> <span class="nav-text">以成长为核心</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF%E6%A6%82%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text">学习路线概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E6%88%91%E7%AE%80%E4%BB%8B"><span class="nav-number">3.</span> <span class="nav-text">自我简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">4.</span> <span class="nav-text">目标</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-01-17-CNCF-gRPC"><span class="nav-number">1.</span> <span class="nav-text">2022-01-17 CNCF-gRPC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Simple-service-definition"><span class="nav-number">1.1.</span> <span class="nav-text">Simple service definition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Start-quickly-and-scale"><span class="nav-number">1.2.</span> <span class="nav-text">Start quickly and scale</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Works-across-languages-and-platforms"><span class="nav-number">1.3.</span> <span class="nav-text">Works across languages and platforms</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bi-directional-streaming-and-integrated-auth"><span class="nav-number">1.4.</span> <span class="nav-text">Bi-directional streaming and integrated auth</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -213,7 +213,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/21/go-study/go-study-0/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/17/sharing-5min/2022-01/2022Week03/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -229,7 +229,7 @@
     
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Go语言学习路线 - 0.总览
+          五分钟技术小分享 - 2022Week03
         </h1>
 
         <div class="post-meta-container">
@@ -240,14 +240,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2021-02-21 11:27:15" itemprop="dateCreated datePublished" datetime="2021-02-21T11:27:15+08:00">2021-02-21</time>
+      <time title="创建时间：2022-01-17 12:00:00" itemprop="dateCreated datePublished" datetime="2022-01-17T12:00:00+08:00">2022-01-17</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-12 16:26:38" itemprop="dateModified" datetime="2021-08-12T16:26:38+08:00">2021-08-12</time>
+        <time title="修改时间：2022-01-16 14:08:26" itemprop="dateModified" datetime="2022-01-16T14:08:26+08:00">2022-01-16</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -255,7 +255,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
         </span>
     </span>
 
@@ -269,45 +269,36 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
-<p>大家好，我是六月天天。从今天开始，我将开启一个新的系列 - <strong>Go语言学习路线</strong>。</p>
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57571641299795_.pic_hd.jpg" alt="2022-01"></p>
+<h2 id="2022-01-17-CNCF-gRPC"><a href="#2022-01-17-CNCF-gRPC" class="headerlink" title="2022-01-17 CNCF-gRPC"></a>2022-01-17 CNCF-gRPC</h2><p>今天，我们一起来看CNCF的 <strong>Remote Procedure Call - RPC</strong> 模块中最具代表性的项目 - gRPC。</p>
+<p>gRPC官网的定义很简洁，重点强调了其<strong>高性能</strong>的特点：</p>
 <blockquote>
-<p>大家可以从 <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">bilibili</a> 的视频分享中看到观点的延伸思考</p>
+<p>A high performance, open source universal RPC framework.</p>
 </blockquote>
-<h2 id="以成长为核心"><a href="#以成长为核心" class="headerlink" title="以成长为核心"></a>以成长为核心</h2><p>目前网上已有很多Go相关的教程，包括基础讲解、源码解析、面试技巧等，但我依然下决心来做一个具有强烈个人主观观点色彩的<strong>Go语言学习路线</strong>：这个系列的目标只有一个 - <strong>成长</strong> 。我不求这个系列超越其它的教程，而是能做到<strong>去芜存菁</strong> ，引发一批朋友的共鸣。</p>
-<p>整个系列中，我会输出大量的主观观点，大家不一定能全盘接受，我也不希望大家全盘接受。我坚信，<strong>没有碰撞的技术观点无法引起大家的深度思考</strong> ，犹如上课时老师对你进行单方面的内容输出；同时，<strong>主观观点会更具现实色彩与实践意义</strong> ，我经历的公司和方向都很丰富，或多或少会和大家的实际工作产生共鸣。</p>
-<span id="more"></span>
-
-<h2 id="学习路线概览"><a href="#学习路线概览" class="headerlink" title="学习路线概览"></a>学习路线概览</h2><ol>
-<li>方向篇 - 明确学习的 <strong>短期目标</strong> 和 <strong>长期目标</strong> ，以及我的一些主观建议</li>
-<li>准备篇 - <strong>工欲善其事，必先利其器</strong> ，一套好的工具和方法，不仅能让你更高效地学习，更能让你 <strong>坚持下来</strong></li>
-<li>入门篇 - <strong>基础语法</strong> 的学习思路，提纲挈领，但不会细化到语法的讲解</li>
-<li>基础篇 - <strong>简单web项目</strong> 的实现思路，介绍 <strong>项目布局</strong>、<strong>模块职责</strong>、<strong>业务特点</strong></li>
-<li>提效篇 - <strong>提升开发效率</strong> ，常见思路是采用一些优秀的 <strong>编程实践</strong>、<strong>开源库</strong>、<strong>研发工具</strong>等</li>
-<li>进阶篇 - 抛开日常的CRUD，根据自己的目标，找到适合自己的 <strong>进阶路线</strong></li>
-<li>高级篇 - 根据互联网上相关信息，结合我的个人经验，谈谈<strong>Go语言的后续发展</strong></li>
+<p>我们再看一段官方更详细的描述：</p>
+<blockquote>
+<p>gRPC is a modern open source high performance Remote Procedure Call (RPC) framework that can run in any environment. It can efficiently connect services in and across data centers with pluggable support for load balancing, tracing, health checking and authentication. It is also applicable in last mile of distributed computing to connect devices, mobile applications and browsers to backend services.</p>
+</blockquote>
+<p>除了高性能，这里还提到了两个重要特性：</p>
+<ul>
+<li><strong>插件化的支持</strong>：负载均衡、tracing、健康监测、认证等</li>
+<li><strong>最后一公里</strong>：将手机app、浏览器与后端服务器的联通</li>
+</ul>
+<p>第一点体现出了gRPC的高度可扩展性。这里的插件化不仅体现在上面列举的这些具体功能，甚至像序列化的方案、底层通信的协议，都可以做到快速替换与迭代。</p>
+<p>第二点在实际生产上应用的case并不多，仍需要大量的实践与经验沉淀后，才建议大家尝试。目前，绝大多数的gRPC通信都是发生在后端服务之间。</p>
+<p>接下来，我们来谈谈官网列举的四个特性：</p>
+<h3 id="Simple-service-definition"><a href="#Simple-service-definition" class="headerlink" title="Simple service definition"></a>Simple service definition</h3><p>gRPC采用<code>Protocol Buffers</code>进行定义，从整体来说阅读体验确实是比较简洁的，但在实际工程中仍存在两个问题：</p>
+<ol>
+<li><strong>迁移成本大</strong>：gRPC没有提供从很多历史RPC解决方案中迁移的途径，如Thrift等，完全是另起炉灶，这对有历史包袱的团队来说很难接收；</li>
+<li><strong>配套开发工具缺失</strong>：高频使用<code>Protocol Buffers</code>的朋友都有了解，主流IDE对<code>pb</code>文件的错误提示和文件格式化都有缺失，很多问题都无法在coding的过程中实时提示，而是需要运行二进制命令<code>protoc</code>后才能了解。</li>
 </ol>
-<blockquote>
-<p>可能部分朋友会看重 <strong>入门、基础这些偏实践的模块</strong> ，但我花了大量心血在 <strong>方向及进阶相关的内容</strong> 上：</p>
-<ul>
-<li>入门的方式各有不同，快的一个月，慢的半年，但最终达到的效果差不了多少</li>
-<li>方向错误会严重影响到个人的长远发展，拘泥于自己的舒适圈，越到后期，沉没成本越高</li>
-</ul>
-</blockquote>
-<h2 id="自我简介"><a href="#自我简介" class="headerlink" title="自我简介"></a>自我简介</h2><p>我简单地介绍一下自己重要的编程经历，让大家更好地了解我：</p>
-<ul>
-<li>4年<code>C++</code> / 4年<code>Go</code> 开发，<code>Python</code>/<code>Java</code>/<code>Js</code>等也都有中小平台的研发经验</li>
-<li>曾在某中型公司（已上市，1000+人）的运维开发团队中作为技术负责人，搭建研发效能平台</li>
-<li>目前在某一线大厂任职，参与商用业务平台的开发</li>
-<li>用<code>Go</code>语言研发过公司内部的 <strong>私有云平台</strong> 和已商用的 <strong>业务平台</strong></li>
-</ul>
-<h2 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h2><p>最后，我再谈一谈自己对 <strong>Go语言学习路线</strong> 这个系列的期许，也是我希望能区别于其它教程的点：</p>
-<ul>
-<li><strong>可落地</strong> - 不停留于泛泛而谈，实践的具体路线清晰</li>
-<li><strong>正反馈</strong> - 持续激励自己，避免半途而废</li>
-<li><strong>阶梯式</strong> - 层层递进，有明确的进步目标</li>
-<li><strong>通用性</strong> - 可延伸至各种技术的学习，形成自己的学习方法</li>
-<li><strong>及时性</strong> - 定期更新，保证学习路线的内容不过时</li>
+<h3 id="Start-quickly-and-scale"><a href="#Start-quickly-and-scale" class="headerlink" title="Start quickly and scale"></a>Start quickly and scale</h3><p><strong>快速启动</strong> - 强调的是通过<code>Protocol Buffers</code>生成的代码，可以在各语言内用简洁的代码就可运行（这部分与各语言强相关）</p>
+<p><strong>快速扩容</strong> - 这个特性需要与<code>Kubernetes</code>的能力结合。</p>
+<h3 id="Works-across-languages-and-platforms"><a href="#Works-across-languages-and-platforms" class="headerlink" title="Works across languages and platforms"></a>Works across languages and platforms</h3><p>跨语言与平台的特性，非常依赖背后的生态 - 需要大量的工作去兼容多语言，也要兼顾性能、稳定性等问题。</p>
+<p>所以，这不仅仅是技术上的问题，更需要社区、资金等复杂因素的支持。</p>
+<h3 id="Bi-directional-streaming-and-integrated-auth"><a href="#Bi-directional-streaming-and-integrated-auth" class="headerlink" title="Bi-directional streaming and integrated auth"></a>Bi-directional streaming and integrated auth</h3><ul>
+<li><strong>双向流式通信</strong> - 这点是gRPC的核心特性，体现出了与其它RPC方案的差异</li>
+<li><strong>集成认证功能</strong> - Auth是gRPC插件化生态中的重要一环，这部分其实与服务网格的功能存在一定的重叠</li>
 </ul>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
@@ -325,21 +316,18 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Go-Study/" rel="tag"># Go-Study</a>
+              <a href="/tags/Daily-Sharing/" rel="tag"># Daily-Sharing</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/02/20/grpc/grpc-4/" rel="prev" title="gRPC源码分析(四)：剖析Proto序列化">
-                  <i class="fa fa-chevron-left"></i> gRPC源码分析(四)：剖析Proto序列化
+                <a href="/2022/01/10/sharing-5min/2022-01/2022Week02/" rel="prev" title="五分钟技术小分享 - 2022Week02">
+                  <i class="fa fa-chevron-left"></i> 五分钟技术小分享 - 2022Week02
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/03/05/go-study/go-study-1/" rel="next" title="Go语言学习路线 - 1.方向篇:明确Go语言的成长方向">
-                  Go语言学习路线 - 1.方向篇:明确Go语言的成长方向 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
