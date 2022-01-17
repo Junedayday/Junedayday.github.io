@@ -232,16 +232,10 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2022-01-17 12:00:00" itemprop="dateCreated datePublished" datetime="2022-01-17T12:00:00+08:00">2022-01-17</time>
+      <time title="创建时间：2022-01-17 12:00:00 / 修改时间：21:24:12" itemprop="dateCreated datePublished" datetime="2022-01-17T12:00:00+08:00">2022-01-17</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-01-16 14:08:26" itemprop="dateModified" datetime="2022-01-16T14:08:26+08:00">2022-01-16</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -293,6 +287,32 @@
 <li><strong>双向流式通信</strong> - 这点是gRPC的核心特性，体现出了与其它RPC方案的差异</li>
 <li><strong>集成认证功能</strong> - Auth是gRPC插件化生态中的重要一环，这部分其实与服务网格的功能存在一定的重叠</li>
 </ul>
+<h2 id="2022-01-18-CNCF-Envoy"><a href="#2022-01-18-CNCF-Envoy" class="headerlink" title="2022-01-18 CNCF-Envoy"></a>2022-01-18 CNCF-Envoy</h2><p>作为云原生Service Mesh代表性的产品之一，Envoy占据了大壁江山。</p>
+<blockquote>
+<p>Envoy is an L7 proxy and communication bus designed for large modern service oriented architectures.</p>
+</blockquote>
+<ol>
+<li>定位：L7 代理和通信总线</li>
+<li>重点服务对象：SOA面向服务架构（也完全适用于微服务架构）</li>
+</ol>
+<p>核心理念：</p>
+<blockquote>
+<p>The network should be transparent to applications. When network and application problems do occur it should be easy to determine the source of the problem.</p>
+<p>网络应对应用程序透明。当网络和应用程序出现问题时，应该很容易地确定问题根源。</p>
+</blockquote>
+<p>文档资料：</p>
+<ul>
+<li>官方：<a target="_blank" rel="noopener" href="https://www.envoyproxy.io/docs/envoy/latest/intro/intro">https://www.envoyproxy.io/docs/envoy/latest/intro/intro</a></li>
+<li>中文版：<a target="_blank" rel="noopener" href="https://www.servicemesher.com/envoy/">https://www.servicemesher.com/envoy/</a></li>
+</ul>
+<p>我们依旧挑选三个核心特性展开：</p>
+<h3 id="Out-of-process-architecture-进程外架构"><a href="#Out-of-process-architecture-进程外架构" class="headerlink" title="Out of process architecture 进程外架构"></a>Out of process architecture 进程外架构</h3><p>进程外架构，其实就是一种微服务理念的体现，它的利与弊也是和微服务强相关的。</p>
+<p>优点很直观 - Envoy可以支持多语言，也可以独立于业务快速迭代与发展。</p>
+<p>而弊端在官网上没有体现，最关键的一点是：<strong>性能损耗</strong>。作为一种side-car模式，Envoy是在本机内、进程间进行通信，远远地比进程内调用的压栈、出栈更花时间。</p>
+<h3 id="Service-discovery-and-dynamic-configuration-服务发现和动态配置"><a href="#Service-discovery-and-dynamic-configuration-服务发现和动态配置" class="headerlink" title="Service discovery and dynamic configuration 服务发现和动态配置"></a>Service discovery and dynamic configuration 服务发现和动态配置</h3><p>很多运维同学都会拿Envoy去对比Nginx，确实在很多特性上，两者有很大的相似之处。但在这个特性上，Envoy有得天独厚的优势。</p>
+<p>以一个常见的动态负载均衡为例，nginx需要结合consul template来实现，还需要对应用程序做一定的侵入。而Envoy可以与Kubernetes完美契合，大幅度减少维护成本。</p>
+<h3 id="Best-in-class-observability-最佳的可观察性"><a href="#Best-in-class-observability-最佳的可观察性" class="headerlink" title="Best in class observability 最佳的可观察性"></a>Best in class observability 最佳的可观察性</h3><p>Envoy 的最主要目标是使网络透明，而最佳的可观测性往往会从OpenTelemetry推荐的三点入手：Metrics、Logging、Tracing。</p>
+<p>Envoy提供了大量的插件，一方面保证了Envoy内部的问题清晰明了，同时也能快速地协助定位到应用侧的问题。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
