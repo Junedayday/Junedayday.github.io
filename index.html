@@ -240,7 +240,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-01-18 23:14:44" itemprop="dateModified" datetime="2022-01-18T23:14:44+08:00">2022-01-18</time>
+        <time title="修改时间：2022-01-19 23:04:38" itemprop="dateModified" datetime="2022-01-19T23:04:38+08:00">2022-01-19</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -350,6 +350,36 @@
 <p>从架构层面来说，如果一层解决不了问题，那就再抽象一层。</p>
 </blockquote>
 <p>从具体的工程实践来说，数据平面主要负责的是底层实现，在保证稳定性的情况下更要兼具性能，所以不宜有太多丰富的功能。这时，引入了控制平面，我们可以将很多的配置信息通过界面UI方式进行管理，下发到各个控制平面，然后控制平面再针对性地进行转发到数据平面，就能大幅度地提高整个Service Mesh方案的可维护性。</p>
+<h2 id="2022-01-20-CNCF-Emissary-Ingress"><a href="#2022-01-20-CNCF-Emissary-Ingress" class="headerlink" title="2022-01-20 CNCF-Emissary-Ingress"></a>2022-01-20 CNCF-Emissary-Ingress</h2><p>Emissary-Ingress是CNCF中又一个与网络相关的项目。这款软件的前身叫作Ambassador。但Ambassador是一款商业软件，为了避免相关的问题，更名为Emissary-Ingress后被捐献给了CNCF。因为网上资料更多的都是Ambassador，下面统一用Ambassador对这款软件进行描述。</p>
+<p>CNCF上的定义为：</p>
+<blockquote>
+<p>open source Kubernetes-native API gateway for microservices built on the Envoy Proxy</p>
+</blockquote>
+<p>我们很容易将这个产品与Istio、Envoy混淆起来，那它们之间的区别是什么呢？这里有篇<a target="_blank" rel="noopener" href="https://itnext.io/ambassador-and-istio-edge-proxy-and-service-mesh-814aac9f23df">文章</a>，介绍了具体的实践，但我们直接可以从标题中得到关键信息：</p>
+<ul>
+<li>Ambassador - Edge proxy</li>
+<li>Istio - service mesh</li>
+</ul>
+<p>而Envoy+Contour对标的是Istio，所以不难看出，云原生推荐将Ambassador作为一种边缘网关，更多地是作整体流量的出入口。如果说service mesh是一种对网络的精细化管理，那么边缘网关更多地是对整体流量的管理。</p>
+<p>但在实际使用中，两者有大量的重叠功能，如路由、认证、限速等，而我也没有在网上找到相关的Best Practice，这部分就很需要大家的经验与摸索了。从我的角度来看，更倾向于大家多使用Envoy的特性，毕竟它的生态最成熟。即便后续有了替代品，对方也往往会提供对应的兼容方案。</p>
+<p>这里，我引用了一个<a target="_blank" rel="noopener" href="https://www.getambassador.io/docs/emissary/latest/topics/concepts/microservices-api-gateways/#microservices-api-gateways-vs-enterprise-api-gateways">链接</a>，讲述了微服务网关(Emissary-Ingress定位)与传统企业级网关的差异。</p>
+<h3 id="Primary-Purpose-主要目标"><a href="#Primary-Purpose-主要目标" class="headerlink" title="Primary Purpose 主要目标"></a>Primary Purpose 主要目标</h3><ul>
+<li>传统企业级网关 - Expose, compose, and manage internal business APIs</li>
+<li>微服务网关 - Expose and observe internal business services</li>
+</ul>
+<p>微服务网关相对而言会更轻量级，而且对外以服务的维度呈现。</p>
+<h3 id="Publishing-Functionality-发布功能"><a href="#Publishing-Functionality-发布功能" class="headerlink" title="Publishing Functionality 发布功能"></a>Publishing Functionality 发布功能</h3><ul>
+<li>传统企业级网关 - API management team or service team registers / updates gateway via admin API</li>
+<li>微服务网关 - Service team registers / updates gateway via declarative code as part of the deployment process</li>
+</ul>
+<p>微服务网关更倡导自运维的方式。</p>
+<h3 id="Handling-and-Debugging-Issues-处理和Debug问题"><a href="#Handling-and-Debugging-Issues-处理和Debug问题" class="headerlink" title="Handling and Debugging Issues 处理和Debug问题"></a>Handling and Debugging Issues 处理和Debug问题</h3><ul>
+<li><p>传统企业级网关 - L7 error-handling (e.g. custom error page or payload). Run gateway/API with additional logging. Troubleshoot issue in staging environment</p>
+</li>
+<li><p>微服务网关 - Configure more detailed monitoring. Enable traffic shadowing and / or canarying</p>
+</li>
+</ul>
+<p>微服务网关更强调的是网络侧的更细致化的管理，突出了灵活性。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
