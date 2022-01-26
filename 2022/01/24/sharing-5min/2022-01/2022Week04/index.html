@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/control-plane.png">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 <meta property="article:published_time" content="2022-01-24T04:00:00.000Z">
-<meta property="article:modified_time" content="2022-01-25T13:24:13.876Z">
+<meta property="article:modified_time" content="2022-01-26T13:14:12.250Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Daily-Sharing">
 <meta name="twitter:card" content="summary">
@@ -154,7 +154,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-01-24-CNCF-Linkerd"><span class="nav-number">1.</span> <span class="nav-text">2022-01-24 CNCF-Linkerd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-01-25-Go1-18%E7%9A%84%E4%B8%A4%E4%B8%AA%E6%95%99%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">2022-01-25 Go1.18的两个教程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Generics"><span class="nav-number">2.1.</span> <span class="nav-text">Generics</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fuzzing"><span class="nav-number">2.2.</span> <span class="nav-text">Fuzzing</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-01-26-%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">3.</span> <span class="nav-text">2022-01-26 如何避免分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8MQ%E4%B8%AD%E9%87%8D%E8%AF%95"><span class="nav-number">3.1.</span> <span class="nav-text">在MQ中重试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8trace-id-ELK"><span class="nav-number">3.2.</span> <span class="nav-text">利用trace-id+ELK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">3.3.</span> <span class="nav-text">注意点</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-01-24-CNCF-Linkerd"><span class="nav-number">1.</span> <span class="nav-text">2022-01-24 CNCF-Linkerd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-01-25-Go1-18%E7%9A%84%E4%B8%A4%E4%B8%AA%E6%95%99%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">2022-01-25 Go1.18的两个教程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Generics"><span class="nav-number">2.1.</span> <span class="nav-text">Generics</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fuzzing"><span class="nav-number">2.2.</span> <span class="nav-text">Fuzzing</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-01-26-%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">3.</span> <span class="nav-text">2022-01-26 如何避免分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8MQ%E4%B8%AD%E9%87%8D%E8%AF%95"><span class="nav-number">3.1.</span> <span class="nav-text">在MQ中重试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8trace-id-ELK"><span class="nav-number">3.2.</span> <span class="nav-text">利用trace-id+ELK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">3.3.</span> <span class="nav-text">注意点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-01-27-CNCF-TiKV"><span class="nav-number">4.</span> <span class="nav-text">2022-01-27 CNCF-TiKV</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Low-and-stable-latency"><span class="nav-number">4.1.</span> <span class="nav-text">Low and stable latency</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#High-scalabilit"><span class="nav-number">4.2.</span> <span class="nav-text">High scalabilit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Consistent-distributed-transactions"><span class="nav-number">4.3.</span> <span class="nav-text">Consistent distributed transactions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Adjustable-consistency"><span class="nav-number">4.4.</span> <span class="nav-text">Adjustable consistency</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -248,7 +248,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-01-25 21:24:13" itemprop="dateModified" datetime="2022-01-25T21:24:13+08:00">2022-01-25</time>
+        <time title="修改时间：2022-01-26 21:14:12" itemprop="dateModified" datetime="2022-01-26T21:14:12+08:00">2022-01-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -359,6 +359,46 @@
 <li>补偿更多体现的是一种<strong>最终一致性</strong>的思想，会有延时，我们要保证中间状态的数据不会污染系统；</li>
 </ol>
 <p>在微服务+云原生时代，我们非常提倡 <strong>面向错误编程</strong>，正是为了能更好地面对各种不确定的异常case。分布式事务带来了大量的复杂度，目前也没有一套跨语言、跨组件的通用解决方案，目前主流几个方案对应用的侵入性很强，所以我不太建议大部分朋友在生产环境使用，而花更多时间学习相关理论、应付面试就行了。</p>
+<h2 id="2022-01-27-CNCF-TiKV"><a href="#2022-01-27-CNCF-TiKV" class="headerlink" title="2022-01-27 CNCF-TiKV"></a>2022-01-27 CNCF-TiKV</h2><p>了解完核心的 <strong>调度与管理</strong> 相关的软件后，我们接下来开始接触 <strong>应用定义与开发</strong> 的相关软件，这部分与我们实际开发接触最为紧密，也更容易理解。</p>
+<ul>
+<li>官网 - <a target="_blank" rel="noopener" href="https://tikv.org/">https://tikv.org/</a></li>
+<li>Github - <a target="_blank" rel="noopener" href="https://github.com/tikv/tikv">https://github.com/tikv/tikv</a></li>
+</ul>
+<p>官方的定义为：</p>
+<blockquote>
+<p>TiKV provides both raw and ACID-compliant transactional key-value API, which is widely used in online serving services, such as the metadata storage system for object storage service, the storage system for recommendation systems, the online feature store, etc.</p>
+</blockquote>
+<p>也就是TiKV支持 <strong>简单的与满足ACID事务性的KV存储</strong>，被应用在各种存储系统上，如关系型数据库、非关系型数据库、分布式文件系统，最具有代表性的即同属一个公司的TiDB。按官方的定义，我们可以将它对标Redis。</p>
+<p>我们结合TiKV的核心特性来看看。</p>
+<h3 id="Low-and-stable-latency"><a href="#Low-and-stable-latency" class="headerlink" title="Low and stable latency"></a>Low and stable latency</h3><blockquote>
+<p>RawKV’s average response time less than 1 ms (P99=10 ms).</p>
+</blockquote>
+<p>延迟是IO相关的软件很重要的特性。但对于这个特性，我们要注意两点：</p>
+<ol>
+<li>只针对简单KV，而不针对事务</li>
+<li>真实延迟很依赖存储介质</li>
+</ol>
+<p>从这点来看，在TiKV层面引入事务的特性前，需要我们要斟酌一下它对延迟的影响。</p>
+<h3 id="High-scalabilit"><a href="#High-scalabilit" class="headerlink" title="High scalabilit"></a>High scalabilit</h3><blockquote>
+<p>With the Placement Driver and carefully designed Raft groups, TiKV excels in horizontal scalability and can easily scale to 100+ terabytes of data. Scale-out your TiKV cluster to fit the data size growth without any impact on the application.</p>
+</blockquote>
+<p>强调了高扩展性，可支持100TB+的数据。</p>
+<p>TiKV采用了Raft作为分布式一致性的协议，这一点与Etcd一致。关于Raft这块是目前工程化的主流，相对于Paxos更容易落地。不过，各家在实现Raft时都或多或少有一些变种，这块我们暂时不细聊。</p>
+<h3 id="Consistent-distributed-transactions"><a href="#Consistent-distributed-transactions" class="headerlink" title="Consistent distributed transactions"></a>Consistent distributed transactions</h3><blockquote>
+<p>Similar to Google’s Spanner, TiKV (TxnKV mode) supports externally consistent distributed transactions.</p>
+</blockquote>
+<p>支持一致性的分布式事务。</p>
+<p>分布式事务对强一致性的业务非常有价值，但它的实现必然会带来一定的性能问题，尤其体现在延迟上。以金融服务为例，分布式事务能保证资金的一致性，不产生资损；但延迟问题又会带来一些异常case，所以需要做好权衡。</p>
+<h3 id="Adjustable-consistency"><a href="#Adjustable-consistency" class="headerlink" title="Adjustable consistency"></a>Adjustable consistency</h3><blockquote>
+<p>In RawKV and TxnKV modes, you can customize the balance between consistency and performance.</p>
+</blockquote>
+<p>对简单KV模式与事务性的KV模式，提供了可调节的一致性功能。</p>
+<p>这就是一致性与性能上的权衡。关于这点，大家可以了解一下ACID与BASE的对业务的价值。从我的观察来看，目前越来越多的服务倾向于最终一致性，主要有以下优点：</p>
+<ol>
+<li><strong>对外部服务来说视角清晰，更容易理解</strong> - 从外部服务视角来看，本服务最终会趋于一致，而不需要关心各种异常的中间状态，这非常有助于微服务的边界划分；</li>
+<li><strong>服务更具健壮性</strong> - 软件系统的不稳定因素很多，最终一致性可以更好地处理这些异常。</li>
+</ol>
+<p>当然，对应的代价是该服务需要引入重试、幂等、状态机、异步校验、状态机、恢复日志等特性，自身的复杂度是比较高的。这些技术我也会在后面和大家分享。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
