@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="go-zero概况go-zero是当前处于CNCF孵化中的一个Goz语言框架项目，在Github上的star数目前达到14.3K。 作为一款起源于国内的项目，go-zero的中文资料比较齐全，对国内开发者相对友好。但前景如何，还需要进一步的观察。今天我们一起来了解这个项目。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言技巧 - 14.【浅析微服务框架】go-zero概览">
+<meta property="og:url" content="http://example.com/2022/02/02/go-tip/go-tip-14/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="go-zero概况go-zero是当前处于CNCF孵化中的一个Goz语言框架项目，在Github上的star数目前达到14.3K。 作为一款起源于国内的项目，go-zero的中文资料比较齐全，对国内开发者相对友好。但前景如何，还需要进一步的观察。今天我们一起来了解这个项目。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/architecture-en.png">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/my_wechat.jpeg">
+<meta property="article:published_time" content="2022-02-02T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-02-02T13:59:21.507Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Tip">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg">
+
+
+<link rel="canonical" href="http://example.com/2022/02/02/go-tip/go-tip-14/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言技巧 - 14.【浅析微服务框架】go-zero概览 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#go-zero%E6%A6%82%E5%86%B5"><span class="nav-number">1.</span> <span class="nav-text">go-zero概况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">具体实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E5%85%B7"><span class="nav-number">3.1.</span> <span class="nav-text">准备工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#API-Gateway%E4%BB%A3%E7%A0%81"><span class="nav-number">3.2.</span> <span class="nav-text">API Gateway代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rpc%E6%9C%8D%E5%8A%A1%E4%BB%A3%E7%A0%81"><span class="nav-number">3.3.</span> <span class="nav-text">rpc服务代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E8%81%94API-Gateway%E5%92%8Crpc%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.4.</span> <span class="nav-text">关联API Gateway和rpc服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rpc%E6%9C%8D%E5%8A%A1%E6%9C%80%E7%BB%88%E8%B0%83%E7%94%A8%E5%88%B0model%E5%B1%82"><span class="nav-number">3.5.</span> <span class="nav-text">rpc服务最终调用到model层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%B6%E6%9E%84%E6%A6%82%E8%A7%88"><span class="nav-number">4.</span> <span class="nav-text">架构概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go%E8%AF%AD%E8%A8%80%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%A1%86%E6%9E%B6%E7%9A%84%E8%81%9A%E7%84%A6%E7%82%B9"><span class="nav-number">5.</span> <span class="nav-text">Go语言微服务框架的聚焦点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E4%B8%AA%E5%88%86%E5%B1%82"><span class="nav-number">5.1.</span> <span class="nav-text">三个分层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%94%E4%B8%AA%E8%81%9A%E7%84%A6%E7%82%B9"><span class="nav-number">5.2.</span> <span class="nav-text">五个聚焦点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E5%BF%83%E4%B8%ADGo%E6%A1%86%E6%9E%B6%E7%9A%84%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC"><span class="nav-number">5.3.</span> <span class="nav-text">我心中Go框架的核心价值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/02/go-tip/go-tip-14/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言技巧 - 14.【浅析微服务框架】go-zero概览
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-02-02 12:00:00 / 修改时间：21:59:21" itemprop="dateCreated datePublished" datetime="2022-02-02T12:00:00+08:00">2022-02-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
+<h2 id="go-zero概况"><a href="#go-zero概况" class="headerlink" title="go-zero概况"></a>go-zero概况</h2><p><code>go-zero</code>是当前处于CNCF孵化中的一个<code>Go</code>z语言框架项目，在Github上的star数目前达到14.3K。</p>
+<p>作为一款起源于国内的项目，<code>go-zero</code>的中文资料比较齐全，对国内开发者相对友好。但前景如何，还需要进一步的观察。今天我们一起来了解这个项目。</p>
+<span id="more"></span>
+
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>官方文档 - <a target="_blank" rel="noopener" href="https://go-zero.dev/cn/">https://go-zero.dev/cn/</a></p>
+<p>Github - <a target="_blank" rel="noopener" href="https://github.com/zeromicro/zero-doc">https://github.com/zeromicro/zero-doc</a></p>
+<blockquote>
+<p>go-zero is a web and rpc framework written in Go. It’s born to ensure the stability of the busy sites with resilient design. Builtin goctl greatly improves the development productivity.</p>
+</blockquote>
+<p>官方核心将自己定位为一个 <strong>Go语言的web和rpc框架</strong>。其余描述内容的意义不大，如稳定的、可伸缩的，更多依赖的是Paas平台与程序自身的设计。</p>
+<h2 id="具体实例"><a href="#具体实例" class="headerlink" title="具体实例"></a>具体实例</h2><p>有了前面三个框架的基础，了解<code>go-zero</code>会相对容易。这次，我将换一个思路讲解，先从官方的示例出发，再回过头来看看这个框架的核心思想。</p>
+<p>以下内容，来自<code>go-zero</code>提供的中文示例 - <a target="_blank" rel="noopener" href="https://go-zero.dev/cn/shorturl.html">https://go-zero.dev/cn/shorturl.html</a></p>
+<h3 id="准备工具"><a href="#准备工具" class="headerlink" title="准备工具"></a>准备工具</h3><p>主要安装的二进制工具包括以下三个：</p>
+<ul>
+<li>protoc-gen-go</li>
+<li>protoc</li>
+<li>goctl</li>
+</ul>
+<p>其中第三个是<code>go-zero</code>自研的。不难看出，<code>go-zero</code>是强依赖protobuffer生态的。</p>
+<h3 id="API-Gateway代码"><a href="#API-Gateway代码" class="headerlink" title="API Gateway代码"></a>API Gateway代码</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> (</span><br><span class="line">  shortenReq &#123;</span><br><span class="line">    url <span class="keyword">string</span> <span class="string">`form:&quot;url&quot;`</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  shortenResp &#123;</span><br><span class="line">    shorten <span class="keyword">string</span> <span class="string">`json:&quot;shorten&quot;`</span></span><br><span class="line">  &#125;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">service shorturl-api &#123;</span><br><span class="line">  @server(</span><br><span class="line">    handler: ShortenHandler</span><br><span class="line">  )</span><br><span class="line">  get /shorten(shortenReq) returns(shortenResp)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是一套 <code>go-zero</code> 特定的语法。虽说这个语法阅读起来很容易理解，里面有Go语言和protobuffer的影子，但就是一个完全独立的一套方案。</p>
+<p>值得注意的是，我们如果要在这个语法中引入各类网关层的特性，如限流参数等，会导致这个语法的学习成本越来越高。</p>
+<h3 id="rpc服务代码"><a href="#rpc服务代码" class="headerlink" title="rpc服务代码"></a>rpc服务代码</h3><p>核心为一个protobuffer的定义，如下：</p>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">syntax = <span class="string">&quot;proto3&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> transform;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">shortenReq</span> </span>&#123;</span><br><span class="line">    <span class="built_in">string</span> url = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">shortenResp</span> </span>&#123;</span><br><span class="line">    <span class="built_in">string</span> shorten = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">service</span> <span class="title">transformer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">rpc</span> shorten(shortenReq) <span class="keyword">returns</span>(shortenResp)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来工具会生成相应的代码，以及会有相关的配置文件可供修改。</p>
+<h3 id="关联API-Gateway和rpc服务"><a href="#关联API-Gateway和rpc服务" class="headerlink" title="关联API Gateway和rpc服务"></a>关联API Gateway和rpc服务</h3><p>由于API Gateway与rpc服务是两个独立的进程，所以需要修改对应的配置（端口等信息），进行打通。</p>
+<p>核心代码如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(l *ShortenLogic)</span> <span class="title">Shorten</span><span class="params">(req types.ShortenReq)</span> <span class="params">(types.ShortenResp, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 手动代码开始</span></span><br><span class="line">    resp, err := l.svcCtx.Transformer.Shorten(l.ctx, &amp;transformer.ShortenReq&#123;</span><br><span class="line">        Url: req.Url,</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> types.ShortenResp&#123;&#125;, err</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> types.ShortenResp&#123;</span><br><span class="line">      Shorten: resp.Shorten,</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">    <span class="comment">// 手动代码结束</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>即新建出一个rpc服务的对象<code>Transformer</code>，调用对应的方法<code>Shorten</code>。</p>
+<h3 id="rpc服务最终调用到model层"><a href="#rpc服务最终调用到model层" class="headerlink" title="rpc服务最终调用到model层"></a>rpc服务最终调用到model层</h3><p>关于model层的生成，也就是对<code>MySQL</code>的CRUD方案，我这里就不专门写了。</p>
+<p>我们关注一下最终调用到<code>MySQL</code>层的代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(l *ShortenLogic)</span> <span class="title">Shorten</span><span class="params">(in *transform.ShortenReq)</span> <span class="params">(*transform.ShortenResp, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 手动代码开始，生成短链接</span></span><br><span class="line">  key := hash.Md5Hex([]<span class="keyword">byte</span>(in.Url))[:<span class="number">6</span>]</span><br><span class="line">  _, err := l.svcCtx.Model.Insert(model.Shorturl&#123;</span><br><span class="line">    Shorten: key,</span><br><span class="line">    Url:     in.Url,</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> &amp;transform.ShortenResp&#123;</span><br><span class="line">    Shorten: key,</span><br><span class="line">  &#125;, <span class="literal">nil</span></span><br><span class="line">  <span class="comment">// 手动代码结束</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="架构概览"><a href="#架构概览" class="headerlink" title="架构概览"></a>架构概览</h2><p>有了这么一个实例，我们再回过头来看看整体的架构：</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/architecture-en.png" alt="go-zero"></p>
+<p><code>go-zero</code>的架构图包含了五层，但它的核心聚焦于API Gateway与Services这两层。</p>
+<ul>
+<li>Clients层：对接的是API Gateway上的HTTP服务，要考虑能否自动生成跨语言的SDK</li>
+<li>Cache+DB：关注高频+重复性高CRUD代码的自动生成功能，抽象成model</li>
+<li>API Gateway：这部分功能更像是Go语言+Service Mesh的一个结合方案</li>
+<li>Services：业务代码的具体实现，提供了很多常用的工具集</li>
+</ul>
+<p>从框架分层来看，我个人是不太认同这种划分方式。这张图中的架构，更多地是为了体现出<code>go-zero</code>的两层结构而产出的架构图。尤其是API Gateway这个设计，表现出了团队在Service Mesh上能力的不足、而引入的功能。</p>
+<h2 id="Go语言微服务框架的聚焦点"><a href="#Go语言微服务框架的聚焦点" class="headerlink" title="Go语言微服务框架的聚焦点"></a>Go语言微服务框架的聚焦点</h2><p>目前为止，我们已经一起看了四个不同的微服务框架，也许有同学会觉得我总是在到处挑刺，那么我理想中的微服务框架是怎么样的呢？我来谈谈：</p>
+<h3 id="三个分层"><a href="#三个分层" class="headerlink" title="三个分层"></a>三个分层</h3><ul>
+<li>控制层controller - 处理数据格式的转换，做一些panic处理等通用性较强的工作</li>
+<li>业务层service - 聚焦于service层的业务逻辑代码编写</li>
+<li>数据存储层model - 通用性强的数据存储，对接MySQL、Redis等存储</li>
+</ul>
+<h3 id="五个聚焦点"><a href="#五个聚焦点" class="headerlink" title="五个聚焦点"></a>五个聚焦点</h3><ol>
+<li><strong>控制层以上</strong> - 即请求是怎么进入微服务的，不应该由微服务框架关心，而应交由Paas平台层的产品，尤其是Kubernetes和Service Mesh；</li>
+<li><strong>控制层</strong> - 以protobuffer定义+gRPC生态为核心，自动生成代码框架，在对应的server层提供大量通用的middleware处理panic、context、logging等能力；</li>
+<li><strong>业务层</strong> - 业务层应高度关注代码的可测试性，也就是单元测试尽可能在这里闭环，这就需要下层的Mock能力+DI的代码风格；</li>
+<li><strong>数据存储层</strong> - 数据存储层必须结合code generation实现高度的自动化，尽可能地引用主流库、而非自研，而且有可能的话，后续可以提供多种库的切换方案，如MySQL用原生库/gorm/ent/sqlx等方案；</li>
+<li><strong>数据存储层以下</strong> - 如怎么对接分布式的数据库、或者怎么对接其余的微服务，这一类的问题，不应由微服务框架自行解决，而应由底层服务提供SDK或库（如服务发现能力），结合到微服务框架里</li>
+</ol>
+<p>这么聊下来，可能还是有点抽象，我再结合两个例子谈谈这块：</p>
+<ol>
+<li>服务熔断功能<ol>
+<li>在Service Mesh层配置熔断条件(如错误码和错误次数)，在达到具体条件后实现熔断，阻断后续的请求到微服务</li>
+<li>Go微服务框架应保证按照Service Mesh层地定义的协议格式返回错误码；</li>
+</ol>
+</li>
+<li>对接分布式服务（Client-Client模式）<ol>
+<li>在Paas层提供服务发现的SDK，包括两块功能：获取目标服务的地址列表与多种负载均衡策略</li>
+<li>Go微服务框架引入这个SDK，填写目标服务名称+负载均衡策略，SDK选择一个最合适的节点并进行请请求，而如何请求由微服务框架之间的通信协议决定，如HTTP或gRPC；</li>
+</ol>
+</li>
+</ol>
+<h3 id="我心中Go框架的核心价值"><a href="#我心中Go框架的核心价值" class="headerlink" title="我心中Go框架的核心价值"></a>我心中Go框架的核心价值</h3><ol>
+<li>Controller层 - 利用<code>gRPC</code>的生态生成具体的代码，充分利用middleware(拦截器)的特性实现panic recovery+logging+metrcis等通用的能力；</li>
+<li>Model层是体现自动化的最核心模块，必须要充分利用代码生成的技术，体现出两个价值：<ol>
+<li>能自动化地实现Mocking，为上层Service的单元测试提供基础保障</li>
+<li>降低用户使用成本，尽可能避免学习一套新的语法</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>最后一点有部分人会不好理解，以MySQL ORM框架为例，它们在函数中提供的查询方法名是Find/Query/Search等，但对应到SQL的关键词是SELECT，这就对熟悉MySQL的同学来说需要一种思维转变，有一定的成本。更好的方式，那就是ORM里的函数直接使用SELECT这种关键词。</p>
+</blockquote>
+<p>Controller这层的开发量很有限，基本已经由社区提供能力，更应该关注如何能形成一套标准规范；而框架更多的精力应关注在Model这层，它需要大量的、易用的SDK积累，能便捷地对接各类中间件，才能体现出框架的价值。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>总体来说，我觉得<code>go-zero</code>是一个早期云原生环境下的框架，在目前Service Mesh大规模落地后，有大量的特性造成了冲突。从研发体验、维护成本和稳定性角度来看，这部分功能更应该交给跨语言的Service Mesh来解决，而不是编程语言强相关的框架。目前，国内互联网大公司基本不会采用<code>go-zero</code>，这点占据很大因素。</p>
+<p>不过，<code>go-zero</code>在Model层做了一定的自动化，是一个很值得学习的能力。作为CNCF的项目之一，<code>go-zero</code>后续是否会有大的转变、更加贴合整个CNCF的氛围，我个人还是非常期待的。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/my_wechat.jpeg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Tip/" rel="tag"># Go-Tip</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/01/24/sharing-5min/2022-01/2022Week04/" rel="prev" title="五分钟技术小分享 - 2022Week04">
+                  <i class="fa fa-chevron-left"></i> 五分钟技术小分享 - 2022Week04
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/02/07/sharing-5min/2022-02/2022Week06/" rel="next" title="五分钟技术小分享 - 2022Week06">
+                  五分钟技术小分享 - 2022Week06 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
