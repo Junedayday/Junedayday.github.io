@@ -232,10 +232,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2022-02-07 12:00:00 / 修改时间：19:54:07" itemprop="dateCreated datePublished" datetime="2022-02-07T12:00:00+08:00">2022-02-07</time>
+      <time title="创建时间：2022-02-07 12:00:00" itemprop="dateCreated datePublished" datetime="2022-02-07T12:00:00+08:00">2022-02-07</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-02-08 22:32:12" itemprop="dateModified" datetime="2022-02-08T22:32:12+08:00">2022-02-08</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -332,7 +338,43 @@
 <li>解耦强依赖：从调用关系可以看到，其实Publisher是要将信息传递给Subscriber；但增加了Queue后，Publisher只与Queue交互，Subscriber也只与Queue交互。可以想象，即便Subscriber短暂地挂了，重启后依旧可以正常使用。</li>
 </ol>
 <p>分布式的消息队列还有很多注意点，这里我就不一一列举了，更多的资料大家可以自行搜索。</p>
-<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>虽然从生产环境的应用范围来看，NATS仍与老牌的重量级消息队列Kafka有相当大的差距，尤其是在大数据的系统中。但对比RocketMQ、RabbitMQ等轻量级产品，NATS的优势已经越来越明显，尤其是在性能与多语言的SDK上，建议有条件的朋友可以尝试使用。</p>
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>虽然从生产环境的应用范围来看，<code>NATS</code>仍与老牌的重量级消息队列Kafka有相当大的差距，尤其是在大数据的系统中。但对比RocketMQ、RabbitMQ等轻量级产品，<code>NATS</code>的优势已经越来越明显，尤其是在性能与多语言的SDK上，建议有条件的朋友可以尝试使用。</p>
+<h2 id="2022-02-09-CNCF-Helm"><a href="#2022-02-09-CNCF-Helm" class="headerlink" title="2022-02-09 CNCF-Helm"></a>2022-02-09 CNCF-Helm</h2><p><code>Helm</code>是CNCF中为数不多的一款起源于中国的项目，它在整个云原生平台中扮演了重要角色。值得注意的是，<code>Helm</code>自身的复杂度并不高，它更多依赖的是优秀的设计理念与当前包含大量软件的生态。</p>
+<p>官方的定义很简洁，即Kubernetes中的包管理者，即一个公共的软件仓。</p>
+<blockquote>
+<p>The Kubernetes Package Manager</p>
+</blockquote>
+<ul>
+<li>官网 - <a target="_blank" rel="noopener" href="https://helm.sh/">https://helm.sh/</a></li>
+<li>Github - <a target="_blank" rel="noopener" href="https://github.com/helm/helm">https://github.com/helm/helm</a></li>
+<li>仓库 - <a target="_blank" rel="noopener" href="https://artifacthub.io/packages">https://artifacthub.io/packages</a></li>
+</ul>
+<h3 id="使用Helm"><a href="#使用Helm" class="headerlink" title="使用Helm"></a>使用Helm</h3><p>类似于Dockerhub，<code>Helm</code>的一大特色就是使用起来非常简单，可快速地在Kubernetes环境中安装软件。</p>
+<p>以Kubernetes中的证书管理为例，我们可以参考链接 - <a target="_blank" rel="noopener" href="https://artifacthub.io/packages/helm/cert-manager/cert-manager">https://artifacthub.io/packages/helm/cert-manager/cert-manager</a> ，可以快速地通过几个命令就能完成下载与部署。</p>
+<p>我希望大家能注意到：<strong>低门槛是吸引用户的重要因素，但真正决定软件长期走向的，是它自身的核心功能</strong>。所以，<code>Helm</code>中的软件有三点需要特别关注：</p>
+<ol>
+<li>契合Kubernetes平台：许多软件原生并不支持Kubernetes，需要做一定的改造；</li>
+<li>保证常规功能：如安装时要判断依赖项、卸载时清理哪些数据、升降版本兼容性等等，都是很琐碎、又是很重要的事情；</li>
+<li>人工维护问题：软件是高频迭代的，尤其是在云原生环境下，核心项目往往要大量的人力投入到 FAQ、配置参数说明、兼容性问题的处理；</li>
+</ol>
+<p>这三点给<code>Helm</code>带来的是一种滚雪球效应，即越滚越大、越难以被替代；而这种雪球最终能支撑多大的市场，非常依赖<code>Helm</code>内部的核心设计，尤其是扩展性部分。</p>
+<h3 id="Charts"><a href="#Charts" class="headerlink" title="Charts"></a>Charts</h3><p><code>Helm</code>称自己是Kubernetes平台中的包管理器，而这个包的格式被称为Charts，我们一起来看看一个官方示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">wordpress/</span><br><span class="line">  Chart.yaml          # A YAML file containing information about the chart</span><br><span class="line">  LICENSE             # OPTIONAL: A plain text file containing the license for the chart</span><br><span class="line">  README.md           # OPTIONAL: A human-readable README file</span><br><span class="line">  values.yaml         # The default configuration values for this chart</span><br><span class="line">  values.schema.json  # OPTIONAL: A JSON Schema for imposing a structure on the values.yaml file</span><br><span class="line">  charts/             # A directory containing any charts upon which this chart depends.</span><br><span class="line">  crds/               # Custom Resource Definitions</span><br><span class="line">  templates/          # A directory of templates that, when combined with values,</span><br><span class="line">                      # will generate valid Kubernetes manifest files.</span><br><span class="line">  templates/NOTES.txt # OPTIONAL: A plain text file containing short usage notes</span><br></pre></td></tr></table></figure>
+
+<p>关键在于三个目录：</p>
+<ol>
+<li>charts - 保存当前chart的依赖子chart</li>
+<li>crds - 这是chart依赖Kubernetes实现软件运行的关键（CRD是k8s可扩展性的一大特色）</li>
+<li>templates - 用来绑定chart自定义参数</li>
+</ol>
+<p>换一个视角，这三个文件夹体现了三种能力：</p>
+<ol>
+<li>charts - package能力复用</li>
+<li>crds - 自定义对接Paas平台（k8s）</li>
+<li>templates - 定制化参数</li>
+</ol>
+<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><p><code>Helm</code>是Kubernetes使用人员需要非常重视的一个产品，它能快速地帮助我们安装与部署软件。</p>
+<p>不过，我不建议大家去阅读它的相关源码，它的代码并不优秀；相反地，我更建议大家可以去尝试自己做一个chart（最好能结合自己开发的程序+依赖的中间件，如go程序+redis），这样既能结合<code>Helm</code>实现应用程序的快速部署，又能去实践Kubernetes的CRD。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
