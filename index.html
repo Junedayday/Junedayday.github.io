@@ -240,7 +240,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-02-08 22:32:12" itemprop="dateModified" datetime="2022-02-08T22:32:12+08:00">2022-02-08</time>
+        <time title="修改时间：2022-02-09 21:43:51" itemprop="dateModified" datetime="2022-02-09T21:43:51+08:00">2022-02-09</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -339,7 +339,7 @@
 </ol>
 <p>分布式的消息队列还有很多注意点，这里我就不一一列举了，更多的资料大家可以自行搜索。</p>
 <h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>虽然从生产环境的应用范围来看，<code>NATS</code>仍与老牌的重量级消息队列Kafka有相当大的差距，尤其是在大数据的系统中。但对比RocketMQ、RabbitMQ等轻量级产品，<code>NATS</code>的优势已经越来越明显，尤其是在性能与多语言的SDK上，建议有条件的朋友可以尝试使用。</p>
-<h2 id="2022-02-09-CNCF-Helm"><a href="#2022-02-09-CNCF-Helm" class="headerlink" title="2022-02-09 CNCF-Helm"></a>2022-02-09 CNCF-Helm</h2><p><code>Helm</code>是CNCF中为数不多的一款起源于中国的项目，它在整个云原生平台中扮演了重要角色。值得注意的是，<code>Helm</code>自身的复杂度并不高，它更多依赖的是优秀的设计理念与当前包含大量软件的生态。</p>
+<h2 id="2022-02-09-CNCF-Helm"><a href="#2022-02-09-CNCF-Helm" class="headerlink" title="2022-02-09 CNCF-Helm"></a>2022-02-09 CNCF-Helm</h2><p><code>Helm</code>在整个云原生平台中扮演了重要角色。值得注意的是，<code>Helm</code>自身的复杂度并不高，它更多依赖的是优秀的设计理念与当前包含大量软件的生态。</p>
 <p>官方的定义很简洁，即Kubernetes中的包管理者，即一个公共的软件仓。</p>
 <blockquote>
 <p>The Kubernetes Package Manager</p>
@@ -375,6 +375,31 @@
 </ol>
 <h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><p><code>Helm</code>是Kubernetes使用人员需要非常重视的一个产品，它能快速地帮助我们安装与部署软件。</p>
 <p>不过，我不建议大家去阅读它的相关源码，它的代码并不优秀；相反地，我更建议大家可以去尝试自己做一个chart（最好能结合自己开发的程序+依赖的中间件，如go程序+redis），这样既能结合<code>Helm</code>实现应用程序的快速部署，又能去实践Kubernetes的CRD。</p>
+<h2 id="2022-02-10-CNCF-Buildpacks"><a href="#2022-02-10-CNCF-Buildpacks" class="headerlink" title="2022-02-10 CNCF-Buildpacks"></a>2022-02-10 CNCF-Buildpacks</h2><p><code>Buildpacks</code>是一款对标<code>Docker</code>的镜像打包工具，虽然在CNCF中作为核心项目，但在目前的主流开发场景中用到的并不多。</p>
+<ul>
+<li>官网 - <a target="_blank" rel="noopener" href="https://buildpacks.io/">https://buildpacks.io/</a></li>
+<li>Github - <a target="_blank" rel="noopener" href="https://github.com/buildpacks/pack">https://github.com/buildpacks/pack</a></li>
+</ul>
+<p>我们不妨来思考一下<code>Buildpacks</code>与竞品的核心优势：</p>
+<p><code>Buildpacks</code>官网介绍自身的核心特性为3个：<code>Control</code>、<code>Compliance</code>和<code>Maintainability</code>。我们今天挑选两个关键性的特征来聊一聊。</p>
+<h3 id="Control-Balanced-control-between-App-Devs-and-Operators"><a href="#Control-Balanced-control-between-App-Devs-and-Operators" class="headerlink" title="Control - Balanced control between App Devs and Operators."></a>Control - Balanced control between App Devs and Operators.</h3><p>平衡开发者与运维人员。这个也是<code>Buildpacks</code>对标<code>Docker</code>的最大优势。</p>
+<p>刚熟悉Dockerfile的同学，会觉得体验很棒，只需要少数几行就能快速制作出一个镜像；但是，如果你是重度使用的用户，就会有不一样的体验：</p>
+<ol>
+<li>多应用的Dockerfile中有大量重复、但又有少量定制化的内容（如依赖的软件）</li>
+<li>由于定制化的内容存在，往往需要开发工程师编写Dockerfile</li>
+</ol>
+<p>所以，维护Dockerfile成为了开发工程师很琐碎的工作，而<code>Buildpacks</code>则是希望将部分工作转移给运维人员。但在我看来，这个收益并不明显：</p>
+<ol>
+<li>现状：大部分的公司会封装一些基础镜像，在基础镜像上的Dockerfile所需要的命令已经很少了，整体的复杂度不会很高；</li>
+<li>工作平衡：平衡的意义并没有减少整体的工作量，将两种角色的人数总量仍不会有大的变化；</li>
+<li>责任明确：目前大型公司的运维人员越来越少，更强调的是开发人员自己管理应用的整个生命周期；</li>
+</ol>
+<p>但换一个角度，<code>Buildpacks</code>理念是可以降低开发人员对Dockerfile这块的门槛，更专注于业务代码的开发。但是，编写Dockerfile这项技能本身难度不高，而且有利于研发自行排查问题，我个人是非常建议开发人员去学习的。</p>
+<h3 id="Maintainability-Perform-upgrades-with-minimal-effort-and-intervention"><a href="#Maintainability-Perform-upgrades-with-minimal-effort-and-intervention" class="headerlink" title="Maintainability - Perform upgrades with minimal effort and intervention."></a>Maintainability - Perform upgrades with minimal effort and intervention.</h3><p>这一点是<code>Buildpacks</code>的一大特色。</p>
+<p>如果你对Docker的镜像底层有一定的了解，会清楚一个镜像就是一层层layer的堆叠；从最上层来看，就是一个完整的操作系统。但如果只对某个layer进行更改，就得销毁老容器、再起一个新的。而<code>Buildpacks</code>则提供了rebase的能力，也就是在运行中的容器中做到快速替换某个layer，而不需要整个重建。</p>
+<p>举一个例子，当前运行的容器有层layer是设置环境变量（参考Dockerfile中的ENV指令），我们要进行增加或者更改参数，就能快速实现rebase。当然，rebase肯定是有不少限制条件的，尤其是rebase中的内容不能影响到程序的运行。</p>
+<p>我们不妨发散地思考这个特性的价值：由于它核心解决了无需重启整个容器的作用，所以对启动成本比较大的程序，它的意义是很大的，尤其是Java程序。</p>
+<h2 id="小结-3"><a href="#小结-3" class="headerlink" title="小结"></a>小结</h2><p><code>Buildpacks</code>在社区中活跃度并不高，这也间接证明了<code>Docker</code>的统治地位，而它则需要一个合适的契机才可能得到大幅度的应用。这也提醒了我们，不要一味地追求新的技术，更应该结合现状理性分析。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
