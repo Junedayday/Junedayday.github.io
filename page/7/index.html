@@ -159,13 +159,13 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">79</span>
+          <span class="site-state-item-count">81</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -201,6 +201,280 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/go-patterns/go-patterns-8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/02/20/go-patterns/go-patterns-8/" class="post-title-link" itemprop="url">Go编程模式 - 8-装饰、管道和访问者模式</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-20 18:32:09" itemprop="dateCreated datePublished" datetime="2021-02-20T18:32:09+08:00">2021-02-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BB%8F%E5%85%B8%E5%93%81%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">经典品读</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p> 注：本文的灵感来源于GOPHER 2020年大会陈皓的分享，原PPT的<a target="_blank" rel="noopener" href="https://www2.slideshare.net/haoel/go-programming-patterns?from_action=save">链接</a>可能并不方便获取，所以我下载了一份<a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading/tree/master/doc/Go_Programming_Patterns.pdf">PDF</a>到git仓，方便大家阅读。我将结合自己的实际项目经历，与大家一起细品这份文档。</p>
+</blockquote>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#Decoration">装饰模式</a></li>
+<li><a href="#Pipeline">管道模式</a></li>
+<li><a href="#Visitorl">访问者模式</a></li>
+</ul>
+<p>今天，我会抛开官方的定义，简单介绍一下三种设计模式。</p>
+<blockquote>
+<p> 后续会有介绍Go语言设计模式Design Patterns的系列，会更具理论性。</p>
+</blockquote>
+<h2 id="Decoration"><a href="#Decoration" class="headerlink" title="Decoration"></a>Decoration</h2><p>代码实例</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">decorator</span><span class="params">(f <span class="keyword">func</span>(s <span class="keyword">string</span>)</span>) <span class="title">func</span><span class="params">(s <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(s <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">&quot;Started&quot;</span>)</span><br><span class="line">		f(s)</span><br><span class="line">		fmt.Println(<span class="string">&quot;Done&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一句话解释：<strong>在函数f前后，添加装饰性的功能函数，但不改变函数本身的行为</strong>。</p>
+<p>这种设计模式，对一些被高频率调用的代码非常有用：</p>
+<ol>
+<li>HTTP Server被调用的handler</li>
+<li>HTTP Client发送请求</li>
+<li>对MySQL的操作</li>
+</ol>
+<p>而装饰性的功能，常见的有：</p>
+<ol>
+<li>打印相关的日志信息（Debug中非常有用！）</li>
+<li>耗时相关的计算</li>
+<li>监控埋点</li>
+</ol>
+<h2 id="Pipeline"><a href="#Pipeline" class="headerlink" title="Pipeline"></a>Pipeline</h2><p>代码示例</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> HttpHandlerDecorator <span class="function"><span class="keyword">func</span><span class="params">(http.HandlerFunc)</span> <span class="title">http</span>.<span class="title">HandlerFunc</span></span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Handler</span><span class="params">(h http.HandlerFunc, decors ...HttpHandlerDecorator)</span> <span class="title">http</span>.<span class="title">HandlerFunc</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> i := <span class="keyword">range</span> decors &#123;</span><br><span class="line">        d := decors[<span class="built_in">len</span>(decors)<span class="number">-1</span>-i] <span class="comment">// iterate in reverse</span></span><br><span class="line">        h = d(h)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> h</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一句话解释：<strong>用不定参数的特性，将入参中的函数，逐个应用到对象上</strong></p>
+<blockquote>
+<p>看到这里，如果你能想起之前 <code>Functional Option</code> 那篇，会发现有这块的影子。</p>
+</blockquote>
+<p>主要应用于： 有多种可选择的配置（对应Field）或处理（对应方法）的复杂对象。</p>
+<p>耗子叔在后面又增加了一些用Goroutine+Channel的方式，其实就是讲Channel作为一个管道的承载体。</p>
+<h2 id="Visitor"><a href="#Visitor" class="headerlink" title="Visitor"></a>Visitor</h2><p>关于访问者设计者模式，我之前在Kubernetes源码分析中专门分析了源码。今天，我们也简单地过一下。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义访问的函数类型</span></span><br><span class="line"><span class="keyword">type</span> VisitorFunc <span class="function"><span class="keyword">func</span><span class="params">(*Info, error)</span> <span class="title">error</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Visitor接口设计</span></span><br><span class="line"><span class="keyword">type</span> Visitor <span class="keyword">interface</span> &#123;</span><br><span class="line">	Visit(VisitorFunc) error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 资源对象</span></span><br><span class="line"><span class="keyword">type</span> Info <span class="keyword">struct</span> &#123;</span><br><span class="line">	Namespace   <span class="keyword">string</span></span><br><span class="line">	Name        <span class="keyword">string</span></span><br><span class="line">	OtherThings <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将Visitor函数应用到资源对象上</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(info *Info)</span> <span class="title">Visit</span><span class="params">(fn VisitorFunc)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> fn(info, <span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后看其中一个实现：NameVisitor，其余的也类似，这样就能注入对应的Visitor</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> NameVisitor <span class="keyword">struct</span> &#123;</span><br><span class="line">	visitor Visitor</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(v NameVisitor)</span> <span class="title">Visit</span><span class="params">(fn VisitorFunc)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> v.visitor.Visit(<span class="function"><span class="keyword">func</span><span class="params">(info *Info, err error)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">		<span class="comment">// 这里是运行入参中的VisitorFunc，这一块的逻辑有点像pipeline</span></span><br><span class="line">		err = fn(info, err)</span><br><span class="line">		<span class="comment">// NameVisitor自己实现的Visit逻辑</span></span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然，Kubernetes中的Visitor还有进一步的封装，包括遇到错误时的处理，这里不细讲，有兴趣的朋友可以看看我对那一篇的分析。</p>
+<p>Visitor模式最大的优点就是 <code>解耦了数据和程序</code>。回头看Kubernetes的Visitor应用场景，主要是从各种输入源中解析出资源<code>Info</code>。这个过程中Info是数据，各类解析方法是资源。</p>
+<p>所以，我认为Visitor模式比较适合的是：<strong>目标数据明确，但获取数据的方法多样且复杂</strong>。但由于多层Visitor调用复杂，建议大家可以在外面再简单地封一层，提供常用的几种Visitor组合后的接口，供使用方调用。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号：golangcoding</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/go-patterns/go-patterns-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/02/20/go-patterns/go-patterns-7/" class="post-title-link" itemprop="url">Go编程模式 - 7-代码生成</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-20 18:32:05" itemprop="dateCreated datePublished" datetime="2021-02-20T18:32:05+08:00">2021-02-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BB%8F%E5%85%B8%E5%93%81%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">经典品读</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p> 注：本文的灵感来源于GOPHER 2020年大会陈皓的分享，原PPT的<a target="_blank" rel="noopener" href="https://www2.slideshare.net/haoel/go-programming-patterns?from_action=save">链接</a>可能并不方便获取，所以我下载了一份<a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading/tree/master/doc/Go_Programming_Patterns.pdf">PDF</a>到git仓，方便大家阅读。我将结合自己的实际项目经历，与大家一起细品这份文档。</p>
+</blockquote>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#Simple-Script">简单脚本准备</a><ul>
+<li><a href="#Template">模板文件</a></li>
+<li><a href="#Shell">运行脚本</a></li>
+<li><a href="#Generate-File">入口文件</a></li>
+<li><a href="#Generation">运行原理</a></li>
+</ul>
+</li>
+<li><a href="#genny">类型替换工具genny</a></li>
+<li><a href="#go-bindata">任意文件转Go</a></li>
+<li><a href="#stringer">字符串生成工具stringer</a></li>
+</ul>
+<h2 id="Simple-Script"><a href="#Simple-Script" class="headerlink" title="Simple Script"></a>Simple Script</h2><p>为了让大家快速了解这块，我们从一个最简单的例子入手。</p>
+<h3 id="Template"><a href="#Template" class="headerlink" title="Template"></a>Template</h3><p>首先创建一个模板Go文件，即容器模板：container.tmp.go</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> PACKAGE_NAME</span><br><span class="line"><span class="keyword">type</span> GENERIC_NAMEContainer <span class="keyword">struct</span> &#123;</span><br><span class="line">    s []GENERIC_TYPE</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewGENERIC_NAMEContainer</span><span class="params">()</span> *<span class="title">GENERIC_NAMEContainer</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;GENERIC_NAMEContainer&#123;s: []GENERIC_TYPE&#123;&#125;&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *GENERIC_NAMEContainer)</span> <span class="title">Put</span><span class="params">(val GENERIC_TYPE)</span></span> &#123;</span><br><span class="line">    c.s = <span class="built_in">append</span>(c.s, val)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *GENERIC_NAMEContainer)</span> <span class="title">Get</span><span class="params">()</span> <span class="title">GENERIC_TYPE</span></span> &#123;</span><br><span class="line">    r := c.s[<span class="number">0</span>]</span><br><span class="line">    c.s = c.s[<span class="number">1</span>:]</span><br><span class="line">    <span class="keyword">return</span> r</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Shell"><a href="#Shell" class="headerlink" title="Shell"></a>Shell</h3><p>生成的shell脚本，gen.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">set -e</span><br><span class="line"></span><br><span class="line">SRC_FILE=$&#123;1&#125;</span><br><span class="line">PACKAGE=$&#123;2&#125;</span><br><span class="line">TYPE=$&#123;3&#125;</span><br><span class="line">DES=$&#123;4&#125;</span><br><span class="line"><span class="meta">#</span><span class="bash">uppcase the first char</span></span><br><span class="line">PREFIX=&quot;$(tr &#x27;[:lower:]&#x27; &#x27;[:upper:]&#x27; &lt;&lt;&lt; $&#123;TYPE:0:1&#125;)$&#123;TYPE:1&#125;&quot;</span><br><span class="line"></span><br><span class="line">DES_FILE=$(echo $&#123;TYPE&#125;| tr &#x27;[:upper:]&#x27; &#x27;[:lower:]&#x27;)_$&#123;DES&#125;.go</span><br><span class="line"></span><br><span class="line">sed &#x27;s/PACKAGE_NAME/&#x27;&quot;$&#123;PACKAGE&#125;&quot;&#x27;/g&#x27; $&#123;SRC_FILE&#125; | \</span><br><span class="line">    sed &#x27;s/GENERIC_TYPE/&#x27;&quot;$&#123;TYPE&#125;&quot;&#x27;/g&#x27; | \</span><br><span class="line">    sed &#x27;s/GENERIC_NAME/&#x27;&quot;$&#123;PREFIX&#125;&quot;&#x27;/g&#x27; &gt; $&#123;DES_FILE&#125;</span><br></pre></td></tr></table></figure>
+
+<p>四个参数分别为</p>
+<ul>
+<li>源文件名</li>
+<li>包名</li>
+<li>类型</li>
+<li>文件后缀名</li>
+</ul>
+<h3 id="Generate-File"><a href="#Generate-File" class="headerlink" title="Generate File"></a>Generate File</h3><p>最后，增加一个创建代码的go文件。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//go:generate ./gen.sh ./template/container.tmp.go gen uint32 container</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">generateUint32Example</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> u <span class="keyword">uint32</span> = <span class="number">42</span></span><br><span class="line">    c := NewUint32Container()</span><br><span class="line">    c.Put(u)</span><br><span class="line">    v := c.Get()</span><br><span class="line">    fmt.Printf(<span class="string">&quot;generateExample: %d (%T)\n&quot;</span>, v, v)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//go:generate ./gen.sh ./template/container.tmp.go gen string container</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">generateStringExample</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> s <span class="keyword">string</span> = <span class="string">&quot;Hello&quot;</span></span><br><span class="line">    c := NewStringContainer()</span><br><span class="line">    c.Put(s)</span><br><span class="line">    v := c.Get()</span><br><span class="line">    fmt.Printf(<span class="string">&quot;generateExample: %s (%T)\n&quot;</span>, v, v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h3><p>我们运行一下 <code>go generate</code>，就能产生对应的文件。</p>
+<ol>
+<li>运行go generate，工具会扫描所有的文件</li>
+<li>如果发现注释有带 go:generate的，会自动运行后面的命令</li>
+<li>通过命令生成的代码，会在源文件添加提示，告诉他人这是自动生成的代码，不要编辑</li>
+</ol>
+<p>因此，我们不仅仅可以用<code>shell</code>脚本，也可以用各种二进制工具来生成代码。值得一提的是，像Kubernetes这种重量级的项目，大量地应用了这种特性。后面我也会和大家分享在开发web项目中的应用。</p>
+<p>下面，我也来介绍几个个人认为比较有用的工具。</p>
+<h2 id="genny"><a href="#genny" class="headerlink" title="genny"></a>genny</h2><p>源项目链接：<a target="_blank" rel="noopener" href="https://github.com/cheekybits/genny">https://github.com/cheekybits/genny</a></p>
+<h3 id="Go文件示例"><a href="#Go文件示例" class="headerlink" title="Go文件示例"></a>Go文件示例</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> queue</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;github.com/cheekybits/genny/generic&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// <span class="doctag">NOTE:</span> this is how easy it is to define a generic type</span></span><br><span class="line"><span class="keyword">type</span> Something generic.Type</span><br><span class="line"></span><br><span class="line"><span class="comment">// SomethingQueue is a queue of Somethings.</span></span><br><span class="line"><span class="keyword">type</span> SomethingQueue <span class="keyword">struct</span> &#123;</span><br><span class="line">  items []Something</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSomethingQueue</span><span class="params">()</span> *<span class="title">SomethingQueue</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> &amp;SomethingQueue&#123;items: <span class="built_in">make</span>([]Something, <span class="number">0</span>)&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *SomethingQueue)</span> <span class="title">Push</span><span class="params">(item Something)</span></span> &#123;</span><br><span class="line">  q.items = <span class="built_in">append</span>(q.items, item)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(q *SomethingQueue)</span> <span class="title">Pop</span><span class="params">()</span> <span class="title">Something</span></span> &#123;</span><br><span class="line">  item := q.items[<span class="number">0</span>]</span><br><span class="line">  q.items = q.items[<span class="number">1</span>:]</span><br><span class="line">  <span class="keyword">return</span> item</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat source.go | genny gen &quot;Something=string&quot;</span><br></pre></td></tr></table></figure>
+
+<p>官方示例还是采用的是shell脚本，建议替换到 go:generate 中，这样的代码更统一</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>可以简单地理解成一个类型替换的工具（PS：擅长用sed脚本的朋友也可直接通过shell脚本实现）</p>
+<h2 id="go-bindata"><a href="#go-bindata" class="headerlink" title="go-bindata"></a>go-bindata</h2><p>源网站链接：<a target="_blank" rel="noopener" href="https://github.com/go-bindata/go-bindata">https://github.com/go-bindata/go-bindata</a></p>
+<p>go-bindata的功能是将任意格式的源文件，转化为Go代码，使我们无需再去打开文件读取了。</p>
+<p>这个工具多用在静态网页转化为Go代码（不符合前后端分离的实践），所以具体的使用方式我就不细讲了，大家有兴趣的可以自行阅读教程。</p>
+<p>但它有两个优点值得我们关注：无需再进行文件读取操作、压缩。</p>
+<h2 id="stringer"><a href="#stringer" class="headerlink" title="stringer"></a>stringer</h2><p>stringer是官方提供一个字符串工具，我个人非常推荐大家使用</p>
+<p>文档链接：<a target="_blank" rel="noopener" href="https://pkg.go.dev/golang.org/x/tools/cmd/stringer">https://pkg.go.dev/golang.org/x/tools/cmd/stringer</a> </p>
+<h3 id="Go文件"><a href="#Go文件" class="headerlink" title="Go文件"></a>Go文件</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> painkiller</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Pill <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	Placebo Pill = <span class="literal">iota</span></span><br><span class="line">	Aspirin</span><br><span class="line">	Ibuprofen</span><br><span class="line">	Paracetamol</span><br><span class="line">	Acetaminophen = Paracetamol</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="脚本-1"><a href="#脚本-1" class="headerlink" title="脚本"></a>脚本</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//go:generate stringer -type=Pill</span></span><br></pre></td></tr></table></figure>
+
+<p>于是，就会生成对应的方法<code>func (Pill) String() string</code>，也就是直接转化成了其命名。</p>
+<h3 id="价值"><a href="#价值" class="headerlink" title="价值"></a>价值</h3><p>Go语言在调用 <code>fmt</code> 等相关包时，如果要将某个变量转化为字符串，默认会寻找它的<code>String()</code>方法。</p>
+<p>这时，<strong>良好的命名</strong> 能体现出其价值。尤其是在错误码的处理上，无需再去查询错误码对应的错误内容，直接可以通过命名了解。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号：golangcoding</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -1227,265 +1501,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/18/k8s/k8s-011/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/18/k8s/k8s-011/" class="post-title-link" itemprop="url">【K8s源码品读】011：Phase 1 - kube-scheduler - 了解分配pod的大致流程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-18 16:55:57" itemprop="dateCreated datePublished" datetime="2021-02-18T16:55:57+08:00">2021-02-18</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="聚焦目标"><a href="#聚焦目标" class="headerlink" title="聚焦目标"></a>聚焦目标</h2><p>理解一个pod的被调度的大致流程 </p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
-<li><a href="#Scheduler">分析Scheduler的结构体</a></li>
-<li><a href="#SchedulingQueue">往SchedulingQueue里</a></li>
-<li><a href="#scheduleOne">调度一个pod对象</a><ol>
-<li><a href="#ScheduleResult">调度计算结果 - ScheduleResult</a></li>
-<li><a href="#Assume">初步推算 - Assume</a></li>
-<li><a href="#Bind">实际绑定 - Bind</a></li>
-</ol>
-</li>
-<li><a href="#update-to-etcd">将绑定成功后的数据更新到etcd</a></li>
-<li><a href="#Summary">pod绑定Node的总结</a></li>
-</ol>
-<h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>在前面，我们了解了<code>Pod调度算法的注册</code>和<code>Informer机制来监听kube-apiserver上的资源变化</code>，今天这一讲，我们就将两者串联起来，看看在kube-scheduler中，Informer监听到资源变化后，如何用调度算法将pod进行调度。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在运行 kube-scheduler 的初期，我们创建了一个Scheduler的数据结构，回头再看看有什么和pod调度算法相关的</span></span><br><span class="line"><span class="keyword">type</span> Scheduler <span class="keyword">struct</span> &#123;</span><br><span class="line">	SchedulerCache internalcache.Cache</span><br><span class="line">	Algorithm core.ScheduleAlgorithm</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 获取下一个需要调度的Pod</span></span><br><span class="line">	NextPod <span class="function"><span class="keyword">func</span><span class="params">()</span> *<span class="title">framework</span>.<span class="title">QueuedPodInfo</span></span></span><br><span class="line"></span><br><span class="line">	Error <span class="function"><span class="keyword">func</span><span class="params">(*framework.QueuedPodInfo, error)</span></span></span><br><span class="line">	StopEverything &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 等待调度的Pod队列，我们重点看看这个队列是什么</span></span><br><span class="line">	SchedulingQueue internalqueue.SchedulingQueue</span><br><span class="line"></span><br><span class="line">	Profiles profile.Map</span><br><span class="line">	scheduledPodsHasSynced <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">bool</span></span></span><br><span class="line">	client clientset.Interface</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Scheduler的实例化函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="keyword">var</span> sched *Scheduler</span><br><span class="line">	<span class="keyword">switch</span> &#123;</span><br><span class="line">  <span class="comment">// 从 Provider 创建</span></span><br><span class="line">	<span class="keyword">case</span> source.Provider != <span class="literal">nil</span>:</span><br><span class="line">		sc, err := configurator.createFromProvider(*source.Provider)</span><br><span class="line">		sched = sc</span><br><span class="line">  <span class="comment">// 从文件或者ConfigMap中创建</span></span><br><span class="line">	<span class="keyword">case</span> source.Policy != <span class="literal">nil</span>:</span><br><span class="line">		sc, err := configurator.createFromConfig(*policy)</span><br><span class="line">		sched = sc</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">&quot;unsupported algorithm source: %v&quot;</span>, source)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 两个创建方式，底层都是调用的 create 函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">createFromProvider</span><span class="params">(providerName <span class="keyword">string</span>)</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> c.create()</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">createFromConfig</span><span class="params">(policy schedulerapi.Policy)</span> <span class="params">(*Scheduler, error)</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> c.create()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">create</span><span class="params">()</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 实例化 podQueue</span></span><br><span class="line">	podQueue := internalqueue.NewSchedulingQueue(</span><br><span class="line">		lessFn,</span><br><span class="line">		internalqueue.WithPodInitialBackoffDuration(time.Duration(c.podInitialBackoffSeconds)*time.Second),</span><br><span class="line">		internalqueue.WithPodMaxBackoffDuration(time.Duration(c.podMaxBackoffSeconds)*time.Second),</span><br><span class="line">		internalqueue.WithPodNominator(nominator),</span><br><span class="line">	)</span><br><span class="line">  </span><br><span class="line">	<span class="keyword">return</span> &amp;Scheduler&#123;</span><br><span class="line">		SchedulerCache:  c.schedulerCache,</span><br><span class="line">		Algorithm:       algo,</span><br><span class="line">		Profiles:        profiles,</span><br><span class="line">    <span class="comment">// NextPod 函数依赖于 podQueue</span></span><br><span class="line">		NextPod:         internalqueue.MakeNextPodFunc(podQueue),</span><br><span class="line">		Error:           MakeDefaultErrorFunc(c.client, c.informerFactory.Core().V1().Pods().Lister(), podQueue, c.schedulerCache),</span><br><span class="line">		StopEverything:  c.StopEverything,</span><br><span class="line">    <span class="comment">// 调度队列被赋值为podQueue</span></span><br><span class="line">		SchedulingQueue: podQueue,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 再看看这个调度队列的初始化函数，从命名可以看到是一个优先队列，它的实现细节暂不细看</span></span><br><span class="line"><span class="comment">// 结合实际情况思考下，pod会有重要程度的区分，所以调度的顺序需要考虑优先级的</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSchedulingQueue</span><span class="params">(lessFn framework.LessFunc, opts ...Option)</span> <span class="title">SchedulingQueue</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> NewPriorityQueue(lessFn, opts...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="SchedulingQueue"><a href="#SchedulingQueue" class="headerlink" title="SchedulingQueue"></a>SchedulingQueue</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在上面实例化Scheduler后，有个注册事件 Handler 的函数：addAllEventHandlers(sched, informerFactory, podInformer)</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addAllEventHandlers</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">	sched *Scheduler,</span></span></span><br><span class="line"><span class="params"><span class="function">	informerFactory informers.SharedInformerFactory,</span></span></span><br><span class="line"><span class="params"><span class="function">	podInformer coreinformers.PodInformer,</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> &#123;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	函数前后有很多注册的Handler，但是和未调度pod添加到队列相关的，只有这个</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	podInformer.Informer().AddEventHandler(</span><br><span class="line">		cache.FilteringResourceEventHandler&#123;</span><br><span class="line">      <span class="comment">// 定义过滤函数：必须为未调度的pod</span></span><br><span class="line">			FilterFunc: <span class="function"><span class="keyword">func</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">				<span class="keyword">switch</span> t := obj.(<span class="keyword">type</span>) &#123;</span><br><span class="line">				<span class="keyword">case</span> *v1.Pod:</span><br><span class="line">					<span class="keyword">return</span> !assignedPod(t) &amp;&amp; responsibleForPod(t, sched.Profiles)</span><br><span class="line">				<span class="keyword">case</span> cache.DeletedFinalStateUnknown:</span><br><span class="line">					<span class="keyword">if</span> pod, ok := t.Obj.(*v1.Pod); ok &#123;</span><br><span class="line">						<span class="keyword">return</span> !assignedPod(pod) &amp;&amp; responsibleForPod(pod, sched.Profiles)</span><br><span class="line">					&#125;</span><br><span class="line">					utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;unable to convert object %T to *v1.Pod in %T&quot;</span>, obj, sched))</span><br><span class="line">					<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">				<span class="keyword">default</span>:</span><br><span class="line">					utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;unable to handle object in %T: %T&quot;</span>, sched, obj))</span><br><span class="line">					<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">				&#125;</span><br><span class="line">			&#125;,</span><br><span class="line">     	<span class="comment">// 增改删三个操作对应的Handler，操作到对应的Queue</span></span><br><span class="line">			Handler: cache.ResourceEventHandlerFuncs&#123;</span><br><span class="line">				AddFunc:    sched.addPodToSchedulingQueue,</span><br><span class="line">				UpdateFunc: sched.updatePodInSchedulingQueue,</span><br><span class="line">				DeleteFunc: sched.deletePodFromSchedulingQueue,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">	)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 牢记我们第一阶段要分析的对象：create nginx pod，所以进入这个add的操作，对应加入到队列</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">addPodToSchedulingQueue</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	pod := obj.(*v1.Pod)</span><br><span class="line">	klog.V(<span class="number">3</span>).Infof(<span class="string">&quot;add event for unscheduled pod %s/%s&quot;</span>, pod.Namespace, pod.Name)</span><br><span class="line">  <span class="comment">// 加入到队列</span></span><br><span class="line">	<span class="keyword">if</span> err := sched.SchedulingQueue.Add(pod); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;unable to queue %T: %v&quot;</span>, obj, err))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 入队操作我们清楚了，那出队呢？我们回过头去看看上面定义的NextPod的方法实现</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">MakeNextPodFunc</span><span class="params">(queue SchedulingQueue)</span> <span class="title">func</span><span class="params">()</span> *<span class="title">framework</span>.<span class="title">QueuedPodInfo</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span> *<span class="title">framework</span>.<span class="title">QueuedPodInfo</span></span> &#123;</span><br><span class="line">    <span class="comment">// 从队列中弹出</span></span><br><span class="line">		podInfo, err := queue.Pop()</span><br><span class="line">		<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">			klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;About to try and schedule pod %v/%v&quot;</span>, podInfo.Pod.Namespace, podInfo.Pod.Name)</span><br><span class="line">			<span class="keyword">return</span> podInfo</span><br><span class="line">		&#125;</span><br><span class="line">		klog.Errorf(<span class="string">&quot;Error while retrieving next pod from scheduling queue: %v&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="scheduleOne"><a href="#scheduleOne" class="headerlink" title="scheduleOne"></a>scheduleOne</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 了解入队和出队操作后，我们看一下Scheduler运行的过程</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">Run</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> !cache.WaitForCacheSync(ctx.Done(), sched.scheduledPodsHasSynced) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	sched.SchedulingQueue.Run()</span><br><span class="line">  <span class="comment">// 调度一个pod对象</span></span><br><span class="line">	wait.UntilWithContext(ctx, sched.scheduleOne, <span class="number">0</span>)</span><br><span class="line">	sched.SchedulingQueue.Close()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接下来scheduleOne方法代码很长，我们一步一步来看</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">scheduleOne</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">  <span class="comment">// podInfo 就是从队列中获取到的pod对象</span></span><br><span class="line">	podInfo := sched.NextPod()</span><br><span class="line">	<span class="comment">// 检查pod的有效性</span></span><br><span class="line">	<span class="keyword">if</span> podInfo == <span class="literal">nil</span> || podInfo.Pod == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	pod := podInfo.Pod</span><br><span class="line">  <span class="comment">// 根据定义的 pod.Spec.SchedulerName 查到对应的profile</span></span><br><span class="line">	prof, err := sched.profileForPod(pod)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		klog.Error(err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 可以跳过调度的情况，一般pod进不来</span></span><br><span class="line">	<span class="keyword">if</span> sched.skipPodSchedule(prof, pod) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 调用调度算法，获取结果</span></span><br><span class="line">	scheduleResult, err := sched.Algorithm.Schedule(schedulingCycleCtx, prof, state, pod)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">		出现调度失败的情况：</span></span><br><span class="line"><span class="comment">		这个时候可能会触发抢占preempt，抢占是一套复杂的逻辑，后面我们专门会讲</span></span><br><span class="line"><span class="comment">		目前假设各类资源充足，能正常调度</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">	&#125;</span><br><span class="line">	metrics.SchedulingAlgorithmLatency.Observe(metrics.SinceInSeconds(start))</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// assumePod 是假设这个Pod按照前面的调度算法分配后，进行验证</span></span><br><span class="line">	assumedPodInfo := podInfo.DeepCopy()</span><br><span class="line">	assumedPod := assumedPodInfo.Pod</span><br><span class="line">	<span class="comment">// SuggestedHost 为建议的分配的Host</span></span><br><span class="line">	err = sched.assume(assumedPod, scheduleResult.SuggestedHost)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">// 失败就重新分配，不考虑这种情况</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 运行相关插件的代码先跳过</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 异步绑定pod</span></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    </span><br><span class="line">		<span class="comment">// 有一系列的检查工作</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 真正做绑定的动作</span></span><br><span class="line">		err := sched.bind(bindingCycleCtx, prof, assumedPod, scheduleResult.SuggestedHost, state)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="comment">// 错误处理，清除状态并重试</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">// 打印结果，调试时将log level调整到2以上</span></span><br><span class="line">			<span class="keyword">if</span> klog.V(<span class="number">2</span>).Enabled() &#123;</span><br><span class="line">				klog.InfoS(<span class="string">&quot;Successfully bound pod to node&quot;</span>, <span class="string">&quot;pod&quot;</span>, klog.KObj(pod), <span class="string">&quot;node&quot;</span>, scheduleResult.SuggestedHost, <span class="string">&quot;evaluatedNodes&quot;</span>, scheduleResult.EvaluatedNodes, <span class="string">&quot;feasibleNodes&quot;</span>, scheduleResult.FeasibleNodes)</span><br><span class="line">			&#125;</span><br><span class="line">      <span class="comment">// metrics中记录相关的监控指标</span></span><br><span class="line">			metrics.PodScheduled(prof.Name, metrics.SinceInSeconds(start))</span><br><span class="line">			metrics.PodSchedulingAttempts.Observe(<span class="keyword">float64</span>(podInfo.Attempts))</span><br><span class="line">      metrics.PodSchedulingDuration.WithLabelValues(getAttemptsLabel(podInfo)).Observe(metrics.SinceInSeconds(podInfo.InitialAttemptTimestamp))</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 运行绑定后的插件</span></span><br><span class="line">			prof.RunPostBindPlugins(bindingCycleCtx, state, assumedPod, scheduleResult.SuggestedHost)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="ScheduleResult"><a href="#ScheduleResult" class="headerlink" title="ScheduleResult"></a>ScheduleResult</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 调用算法下的Schedule</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span></span>&#123;</span><br><span class="line">  scheduleResult, err := sched.Algorithm.Schedule(schedulingCycleCtx, prof, state, pod)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">create</span><span class="params">()</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">  algo := core.NewGenericScheduler(</span><br><span class="line">		c.schedulerCache,</span><br><span class="line">		c.nodeInfoSnapshot,</span><br><span class="line">		extenders,</span><br><span class="line">		c.informerFactory.Core().V1().PersistentVolumeClaims().Lister(),</span><br><span class="line">		c.disablePreemption,</span><br><span class="line">		c.percentageOfNodesToScore,</span><br><span class="line">	)</span><br><span class="line">  <span class="keyword">return</span> &amp;Scheduler&#123;</span><br><span class="line">		Algorithm:       algo,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// genericScheduler 的 Schedule 的实现</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *genericScheduler)</span> <span class="title">Schedule</span><span class="params">(ctx context.Context, prof *profile.Profile, state *framework.CycleState, pod *v1.Pod)</span> <span class="params">(result ScheduleResult, err error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 对 pod 进行 pvc 的信息检查</span></span><br><span class="line">	<span class="keyword">if</span> err := podPassesBasicChecks(pod, g.pvcLister); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> result, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 对当前的信息做一个快照</span></span><br><span class="line">	<span class="keyword">if</span> err := g.snapshot(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> result, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Node 节点数量为0，表示无可用节点</span></span><br><span class="line">	<span class="keyword">if</span> g.nodeInfoSnapshot.NumNodes() == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> result, ErrNoNodesAvailable</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// Predict阶段：找到所有满足调度条件的节点feasibleNodes，不满足的就直接过滤</span></span><br><span class="line">	feasibleNodes, filteredNodesStatuses, err := g.findNodesThatFitPod(ctx, prof, state, pod)</span><br><span class="line">	<span class="comment">// 没有可用节点直接报错</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(feasibleNodes) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> result, &amp;FitError&#123;</span><br><span class="line">			Pod:                   pod,</span><br><span class="line">			NumAllNodes:           g.nodeInfoSnapshot.NumNodes(),</span><br><span class="line">			FilteredNodesStatuses: filteredNodesStatuses,</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 只有一个节点就直接选用</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(feasibleNodes) == <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> ScheduleResult&#123;</span><br><span class="line">			SuggestedHost:  feasibleNodes[<span class="number">0</span>].Name,</span><br><span class="line">			EvaluatedNodes: <span class="number">1</span> + <span class="built_in">len</span>(filteredNodesStatuses),</span><br><span class="line">			FeasibleNodes:  <span class="number">1</span>,</span><br><span class="line">		&#125;, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Priority阶段：通过打分，找到一个分数最高、也就是最优的节点</span></span><br><span class="line">	priorityList, err := g.prioritizeNodes(ctx, prof, state, pod, feasibleNodes)</span><br><span class="line">	host, err := g.selectHost(priorityList)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> ScheduleResult&#123;</span><br><span class="line">		SuggestedHost:  host,</span><br><span class="line">		EvaluatedNodes: <span class="built_in">len</span>(feasibleNodes) + <span class="built_in">len</span>(filteredNodesStatuses),</span><br><span class="line">		FeasibleNodes:  <span class="built_in">len</span>(feasibleNodes),</span><br><span class="line">	&#125;, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">Predict 和 Priority 是选择调度节点的两个关键性步骤， 它的底层调用了各种algorithm算法。我们暂时不细看。</span></span><br><span class="line"><span class="comment">以我们前面讲到过的 NodeName 算法为例，节点必须与 NodeName 匹配，它是属于Predict阶段的。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="Assume"><a href="#Assume" class="headerlink" title="Assume"></a>Assume</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">assume</span><span class="params">(assumed *v1.Pod, host <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="comment">// 将 host 填入到 pod spec字段的nodename，假定分配到对应的节点上</span></span><br><span class="line">	assumed.Spec.NodeName = host</span><br><span class="line">  <span class="comment">// 调用 SchedulerCache 下的 AssumePod</span></span><br><span class="line">	<span class="keyword">if</span> err := sched.SchedulerCache.AssumePod(assumed); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		klog.Errorf(<span class="string">&quot;scheduler cache AssumePod failed: %v&quot;</span>, err)</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> sched.SchedulingQueue != <span class="literal">nil</span> &#123;</span><br><span class="line">		sched.SchedulingQueue.DeleteNominatedPodIfExists(assumed)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 回头去找 SchedulerCache 初始化的地方</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Configurator)</span> <span class="title">create</span><span class="params">()</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;Scheduler&#123;</span><br><span class="line">		SchedulerCache:  c.schedulerCache,</span><br><span class="line">	&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">()</span> <span class="params">(*Scheduler, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 这里就是初始化的实例 schedulerCache</span></span><br><span class="line">	schedulerCache := internalcache.New(<span class="number">30</span>*time.Second, stopEverything)</span><br><span class="line">	configurator := &amp;Configurator&#123;</span><br><span class="line">		schedulerCache:           schedulerCache,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 看看AssumePod做了什么</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(cache *schedulerCache)</span> <span class="title">AssumePod</span><span class="params">(pod *v1.Pod)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="comment">// 获取 pod 的 uid</span></span><br><span class="line">	key, err := framework.GetPodKey(pod)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 加锁操作，保证并发情况下的一致性</span></span><br><span class="line">	cache.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> cache.mu.Unlock()</span><br><span class="line">  <span class="comment">// 根据 uid 找不到 pod 当前的状态</span></span><br><span class="line">	<span class="keyword">if</span> _, ok := cache.podStates[key]; ok &#123;</span><br><span class="line">		<span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;pod %v is in the cache, so can&#x27;t be assumed&quot;</span>, key)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 把 Assume Pod 的信息放到对应 Node 节点中</span></span><br><span class="line">	cache.addPod(pod)</span><br><span class="line">  <span class="comment">// 把 pod 状态设置为 Assume 成功</span></span><br><span class="line">	ps := &amp;podState&#123;</span><br><span class="line">		pod: pod,</span><br><span class="line">	&#125;</span><br><span class="line">	cache.podStates[key] = ps</span><br><span class="line">	cache.assumedPods[key] = <span class="literal">true</span></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="Bind"><a href="#Bind" class="headerlink" title="Bind"></a>Bind</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sched *Scheduler)</span> <span class="title">bind</span><span class="params">(ctx context.Context, prof *profile.Profile, assumed *v1.Pod, targetNode <span class="keyword">string</span>, state *framework.CycleState)</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">	start := time.Now()</span><br><span class="line">  <span class="comment">// 把 assumed 的 pod 信息保存下来</span></span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		sched.finishBinding(prof, assumed, targetNode, start, err)</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="comment">// 阶段1： 运行扩展绑定进行验证，如果已经绑定报错</span></span><br><span class="line">	bound, err := sched.extendersBinding(assumed, targetNode)</span><br><span class="line">	<span class="keyword">if</span> bound &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// 阶段2：运行绑定插件验证状态</span></span><br><span class="line">	bindStatus := prof.RunBindPlugins(ctx, state, assumed, targetNode)</span><br><span class="line">	<span class="keyword">if</span> bindStatus.IsSuccess() &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> bindStatus.Code() == framework.Error &#123;</span><br><span class="line">		<span class="keyword">return</span> bindStatus.AsError()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> fmt.Errorf(<span class="string">&quot;bind status: %s, %v&quot;</span>, bindStatus.Code().String(), bindStatus.Message())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="Update-To-Etcd"><a href="#Update-To-Etcd" class="headerlink" title="Update To Etcd"></a>Update To Etcd</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这块的代码我不做细致的逐层分析了，大家根据兴趣自行探索</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b DefaultBinder)</span> <span class="title">Bind</span><span class="params">(ctx context.Context, state *framework.CycleState, p *v1.Pod, nodeName <span class="keyword">string</span>)</span> *<span class="title">framework</span>.<span class="title">Status</span></span> &#123;</span><br><span class="line">	klog.V(<span class="number">3</span>).Infof(<span class="string">&quot;Attempting to bind %v/%v to %v&quot;</span>, p.Namespace, p.Name, nodeName)</span><br><span class="line">	binding := &amp;v1.Binding&#123;</span><br><span class="line">		ObjectMeta: metav1.ObjectMeta&#123;Namespace: p.Namespace, Name: p.Name, UID: p.UID&#125;,</span><br><span class="line">		Target:     v1.ObjectReference&#123;Kind: <span class="string">&quot;Node&quot;</span>, Name: nodeName&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">// ClientSet就是访问kube-apiserver的客户端，将数据更新上去</span></span><br><span class="line">	err := b.handle.ClientSet().CoreV1().Pods(binding.Namespace).Bind(ctx, binding, metav1.CreateOptions&#123;&#125;)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> framework.NewStatus(framework.Error, err.Error())</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>今天这一次分享比较长，我们一起来总结一下：</p>
-<ol>
-<li>Pod的调度是通过一个队列<code>SchedulingQueue</code>异步工作的<ol>
-<li>监听到对应pod事件后，放入队列</li>
-<li>有个消费者从队列中获取pod，进行调度</li>
-</ol>
-</li>
-<li>单个pod的调度主要分为3个步骤：<ol>
-<li>根据Predict和Priority两个阶段，调用各自的算法插件，选择最优的Node</li>
-<li>Assume这个Pod被调度到对应的Node，保存到cache</li>
-<li>用extender和plugins进行验证，如果通过则绑定</li>
-</ol>
-</li>
-<li>绑定成功后，将数据通过client向kube-apiserver发送，更新etcd</li>
-</ol>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/18/k8s/k8s-010/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/18/k8s/k8s-010/" class="post-title-link" itemprop="url">【K8s源码品读】010：Phase 1 - kube-scheduler - Informer是如何保存数据的</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-18 16:55:56" itemprop="dateCreated datePublished" datetime="2021-02-18T16:55:56+08:00">2021-02-18</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="聚焦目标"><a href="#聚焦目标" class="headerlink" title="聚焦目标"></a>聚焦目标</h2><p>了解Informer在发现资源变化后，是怎么处理的</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol start="5">
-<li><a href="#Process">查看消费的过程</a></li>
-<li><a href="#Index">掌握Index数据结构</a></li>
-<li><a href="#distribute">信息的分发distribute</a></li>
-<li><a href="#Summary">Informer的综合思考</a></li>
-</ol>
-<h2 id="Process"><a href="#Process" class="headerlink" title="Process"></a>Process</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *controller)</span> <span class="title">processLoop</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">    <span class="comment">// Pop出Object元素</span></span><br><span class="line">		obj, err := c.config.Queue.Pop(PopProcessFunc(c.config.Process))</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> err == ErrFIFOClosed &#123;</span><br><span class="line">				<span class="keyword">return</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> c.config.RetryOnError &#123;</span><br><span class="line">				<span class="comment">// 重新进队列</span></span><br><span class="line">				c.config.Queue.AddIfNotPresent(obj)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 去查看Pop的具体实现</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *FIFO)</span> <span class="title">Pop</span><span class="params">(process PopProcessFunc)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">	f.lock.Lock()</span><br><span class="line">	<span class="keyword">defer</span> f.lock.Unlock()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="comment">// 调用process去处理item，然后返回</span></span><br><span class="line">		item, ok := f.items[id]</span><br><span class="line">		<span class="built_in">delete</span>(f.items, id)</span><br><span class="line">		err := process(item)</span><br><span class="line">		<span class="keyword">return</span> item, err</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 然后去查一下 PopProcessFunc 的定义，在创建controller前</span></span><br><span class="line">cfg := &amp;Config&#123;</span><br><span class="line">		Process:           s.HandleDeltas,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *sharedIndexInformer)</span> <span class="title">HandleDeltas</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	s.blockDeltas.Lock()</span><br><span class="line">	<span class="keyword">defer</span> s.blockDeltas.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> _, d := <span class="keyword">range</span> obj.(Deltas) &#123;</span><br><span class="line">		<span class="keyword">switch</span> d.Type &#123;</span><br><span class="line">    <span class="comment">// 增、改、替换、同步</span></span><br><span class="line">		<span class="keyword">case</span> Sync, Replaced, Added, Updated:</span><br><span class="line">			s.cacheMutationDetector.AddObject(d.Object)</span><br><span class="line">      <span class="comment">// 先去indexer查询</span></span><br><span class="line">			<span class="keyword">if</span> old, exists, err := s.indexer.Get(d.Object); err == <span class="literal">nil</span> &amp;&amp; exists &#123;</span><br><span class="line">        <span class="comment">// 如果数据已经存在，就执行Update逻辑</span></span><br><span class="line">				<span class="keyword">if</span> err := s.indexer.Update(d.Object); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="keyword">return</span> err</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				isSync := <span class="literal">false</span></span><br><span class="line">				<span class="keyword">switch</span> &#123;</span><br><span class="line">				<span class="keyword">case</span> d.Type == Sync:</span><br><span class="line">					isSync = <span class="literal">true</span></span><br><span class="line">				<span class="keyword">case</span> d.Type == Replaced:</span><br><span class="line">					<span class="keyword">if</span> accessor, err := meta.Accessor(d.Object); err == <span class="literal">nil</span> &#123;</span><br><span class="line">							isSync = accessor.GetResourceVersion() == oldAccessor.GetResourceVersion()</span><br><span class="line">						&#125;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">      	<span class="comment">// 分发Update事件</span></span><br><span class="line">				s.processor.distribute(updateNotification&#123;oldObj: old, newObj: d.Object&#125;, isSync)</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      	<span class="comment">// 没查到数据，就执行Add操作</span></span><br><span class="line">				<span class="keyword">if</span> err := s.indexer.Add(d.Object); err != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="keyword">return</span> err</span><br><span class="line">				&#125;</span><br><span class="line">      	<span class="comment">// 分发 Add 事件</span></span><br><span class="line">				s.processor.distribute(addNotification&#123;newObj: d.Object&#125;, <span class="literal">false</span>)</span><br><span class="line">			&#125;</span><br><span class="line">   	<span class="comment">// 删除</span></span><br><span class="line">		<span class="keyword">case</span> Deleted:</span><br><span class="line">    	<span class="comment">// 去indexer删除</span></span><br><span class="line">			<span class="keyword">if</span> err := s.indexer.Delete(d.Object); err != <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> err</span><br><span class="line">			&#125;</span><br><span class="line">    	<span class="comment">// 分发 delete 事件</span></span><br><span class="line">			s.processor.distribute(deleteNotification&#123;oldObj: d.Object&#125;, <span class="literal">false</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="Index"><a href="#Index" class="headerlink" title="Index"></a>Index</h2><p><code>Index</code> 的定义为资源的本地存储，保持与etcd中的资源信息一致。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 我们去看看Index是怎么创建的</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSharedIndexInformer</span><span class="params">(lw ListerWatcher, exampleObject runtime.Object, defaultEventHandlerResyncPeriod time.Duration, indexers Indexers)</span> <span class="title">SharedIndexInformer</span></span> &#123;</span><br><span class="line">	realClock := &amp;clock.RealClock&#123;&#125;</span><br><span class="line">	sharedIndexInformer := &amp;sharedIndexInformer&#123;</span><br><span class="line">		processor:                       &amp;sharedProcessor&#123;clock: realClock&#125;,</span><br><span class="line">    <span class="comment">// indexer 的初始化</span></span><br><span class="line">		indexer:                         NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers),</span><br><span class="line">		listerWatcher:                   lw,</span><br><span class="line">		objectType:                      exampleObject,</span><br><span class="line">		resyncCheckPeriod:               defaultEventHandlerResyncPeriod,</span><br><span class="line">		defaultEventHandlerResyncPeriod: defaultEventHandlerResyncPeriod,</span><br><span class="line">		cacheMutationDetector:           NewCacheMutationDetector(fmt.Sprintf(<span class="string">&quot;%T&quot;</span>, exampleObject)),</span><br><span class="line">		clock:                           realClock,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sharedIndexInformer</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 生成一个map和func组合而成的Indexer</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewIndexer</span><span class="params">(keyFunc KeyFunc, indexers Indexers)</span> <span class="title">Indexer</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;cache&#123;</span><br><span class="line">		cacheStorage: NewThreadSafeStore(indexers, Indices&#123;&#125;),</span><br><span class="line">		keyFunc:      keyFunc,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ThreadSafeStore的底层是一个并发安全的map，具体实现我们暂不考虑</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewThreadSafeStore</span><span class="params">(indexers Indexers, indices Indices)</span> <span class="title">ThreadSafeStore</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;threadSafeMap&#123;</span><br><span class="line">		items:    <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>&#123;&#125;&#123;&#125;,</span><br><span class="line">		indexers: indexers,</span><br><span class="line">		indices:  indices,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="distribute"><a href="#distribute" class="headerlink" title="distribute"></a>distribute</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在上面的Process代码中，我们看到了将数据存储到Indexer后，调用了一个分发的函数</span></span><br><span class="line">s.processor.distribute()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 分发process的创建</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewSharedIndexInformer</span><span class="params">()</span> <span class="title">SharedIndexInformer</span></span> &#123;</span><br><span class="line">	sharedIndexInformer := &amp;sharedIndexInformer&#123;</span><br><span class="line">		processor:                       &amp;sharedProcessor&#123;clock: realClock&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sharedIndexInformer</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// sharedProcessor的结构</span></span><br><span class="line"><span class="keyword">type</span> sharedProcessor <span class="keyword">struct</span> &#123;</span><br><span class="line">	listenersStarted <span class="keyword">bool</span></span><br><span class="line"> 	<span class="comment">// 读写锁</span></span><br><span class="line">	listenersLock    sync.RWMutex</span><br><span class="line">  <span class="comment">// 普通监听列表</span></span><br><span class="line">	listeners        []*processorListener</span><br><span class="line">  <span class="comment">// 同步监听列表</span></span><br><span class="line">	syncingListeners []*processorListener</span><br><span class="line">	clock            clock.Clock</span><br><span class="line">	wg               wait.Group</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 查看distribute函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *sharedProcessor)</span> <span class="title">distribute</span><span class="params">(obj <span class="keyword">interface</span>&#123;&#125;, sync <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">	p.listenersLock.RLock()</span><br><span class="line">	<span class="keyword">defer</span> p.listenersLock.RUnlock()</span><br><span class="line">	<span class="comment">// 将object分发到 同步监听 或者 普通监听 的列表</span></span><br><span class="line">	<span class="keyword">if</span> sync &#123;</span><br><span class="line">		<span class="keyword">for</span> _, listener := <span class="keyword">range</span> p.syncingListeners &#123;</span><br><span class="line">			listener.add(obj)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> _, listener := <span class="keyword">range</span> p.listeners &#123;</span><br><span class="line">			listener.add(obj)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这个add的操作是利用了channel</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *processorListener)</span> <span class="title">add</span><span class="params">(notification <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	p.addCh &lt;- notification</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><ol>
-<li><code>Informer</code> 依赖于 <code>Reflector</code> 模块，它有个组件为 xxxInformer，如 <code>podInformer</code> </li>
-<li>具体资源的 <code>Informer</code> 包含了一个连接到<code>kube-apiserver</code>的<code>client</code>，通过<code>List</code>和<code>Watch</code>接口查询资源变更情况</li>
-<li>检测到资源发生变化后，通过<code>Controller</code> 将数据放入队列<code>DeltaFIFOQueue</code>里，生产阶段完成</li>
-<li>在<code>DeltaFIFOQueue</code>的另一端，有消费者在不停地处理资源变化的事件，处理逻辑主要分2步<ol>
-<li>将数据保存到本地存储Indexer，它的底层实现是一个并发安全的threadSafeMap</li>
-<li>有些组件需要实时关注资源变化，会实时监听listen，就将事件分发到对应注册上来的listener上，自行处理</li>
-</ol>
-</li>
-</ol>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
