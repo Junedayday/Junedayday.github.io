@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/chaos-mesh-arch.png">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 <meta property="article:published_time" content="2022-02-28T04:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-01T12:29:59.183Z">
+<meta property="article:modified_time" content="2022-03-02T14:01:02.984Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Daily-Sharing">
 <meta name="twitter:card" content="summary">
@@ -156,7 +156,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-02-28-CNCF-OpenTelemetry%E7%AD%89"><span class="nav-number">1.</span> <span class="nav-text">2022-02-28 CNCF-OpenTelemetry等</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OpenTelemetry"><span class="nav-number">1.1.</span> <span class="nav-text">OpenTelemetry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metrics-OpenMetrics"><span class="nav-number">1.2.</span> <span class="nav-text">Metrics - OpenMetrics</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Logs-Fluentd"><span class="nav-number">1.3.</span> <span class="nav-text">Logs - Fluentd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Traces-Jaeger"><span class="nav-number">1.4.</span> <span class="nav-text">Traces - Jaeger</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-01-CNCF-Litmus-ChaosMesh"><span class="nav-number">2.</span> <span class="nav-text">2022-03-01 CNCF-Litmus&#x2F;ChaosMesh</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Litmus"><span class="nav-number">2.1.</span> <span class="nav-text">Litmus</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ChaosMesh"><span class="nav-number">2.2.</span> <span class="nav-text">ChaosMesh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%B3%A8%E5%85%A5%E8%83%BD%E5%8A%9B"><span class="nav-number">2.3.</span> <span class="nav-text">故障注入能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-02-CNCF-Rook-Longhorn"><span class="nav-number">3.</span> <span class="nav-text">2022-03-02 CNCF-Rook&#x2F;Longhorn</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CSI-Container-Storage-Interface"><span class="nav-number">3.1.</span> <span class="nav-text">CSI - Container Storage Interface</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ceph"><span class="nav-number">3.2.</span> <span class="nav-text">Ceph</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rook"><span class="nav-number">3.3.</span> <span class="nav-text">Rook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Longhorn"><span class="nav-number">3.4.</span> <span class="nav-text">Longhorn</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-2"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-02-28-CNCF-OpenTelemetry%E7%AD%89"><span class="nav-number">1.</span> <span class="nav-text">2022-02-28 CNCF-OpenTelemetry等</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OpenTelemetry"><span class="nav-number">1.1.</span> <span class="nav-text">OpenTelemetry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metrics-OpenMetrics"><span class="nav-number">1.2.</span> <span class="nav-text">Metrics - OpenMetrics</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Logs-Fluentd"><span class="nav-number">1.3.</span> <span class="nav-text">Logs - Fluentd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Traces-Jaeger"><span class="nav-number">1.4.</span> <span class="nav-text">Traces - Jaeger</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-01-CNCF-Litmus-ChaosMesh"><span class="nav-number">2.</span> <span class="nav-text">2022-03-01 CNCF-Litmus&#x2F;ChaosMesh</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Litmus"><span class="nav-number">2.1.</span> <span class="nav-text">Litmus</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ChaosMesh"><span class="nav-number">2.2.</span> <span class="nav-text">ChaosMesh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E6%B3%A8%E5%85%A5%E8%83%BD%E5%8A%9B"><span class="nav-number">2.3.</span> <span class="nav-text">故障注入能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-02-CNCF-Rook-Longhorn"><span class="nav-number">3.</span> <span class="nav-text">2022-03-02 CNCF-Rook&#x2F;Longhorn</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CSI-Container-Storage-Interface"><span class="nav-number">3.1.</span> <span class="nav-text">CSI - Container Storage Interface</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ceph"><span class="nav-number">3.2.</span> <span class="nav-text">Ceph</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rook"><span class="nav-number">3.3.</span> <span class="nav-text">Rook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Longhorn"><span class="nav-number">3.4.</span> <span class="nav-text">Longhorn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-2"><span class="nav-number">3.5.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-03-CNCF-containerd-cri-o"><span class="nav-number">4.</span> <span class="nav-text">2022-03-03 CNCF-containerd&#x2F;cri-o</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CRI"><span class="nav-number">4.1.</span> <span class="nav-text">CRI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#containerd"><span class="nav-number">4.2.</span> <span class="nav-text">containerd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cri-o"><span class="nav-number">4.3.</span> <span class="nav-text">cri-o</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-3"><span class="nav-number">4.4.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -250,7 +250,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-01 20:29:59" itemprop="dateModified" datetime="2022-03-01T20:29:59+08:00">2022-03-01</time>
+        <time title="修改时间：2022-03-02 22:01:02" itemprop="dateModified" datetime="2022-03-02T22:01:02+08:00">2022-03-02</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -393,13 +393,54 @@
 <blockquote>
 <p>官网 - <a target="_blank" rel="noopener" href="https://longhorn.io/">https://longhorn.io/</a></p>
 </blockquote>
-<h2 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h2><p>分布式存储是一块仍在快速发展的领域，对大部分公司或团队来说选择比较有限：</p>
+<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><p>分布式存储是一块仍在快速发展的领域，对大部分公司或团队来说选择比较有限：</p>
 <ol>
 <li>优先考虑云服务</li>
 <li>有Ceph维护经验+一定二次开发能力的，考虑rook+ceph</li>
 <li>有强烈的技术信心的，可以考虑小规模落地Longhorn体验</li>
 </ol>
 <p>到这里，我再补充一点：我们千万不要过度迷恋分布式存储中的“分布式”这个词，很多时候单点存储（本地存储和远程存储）就能满足我们的开发要求了。</p>
+<h2 id="2022-03-03-CNCF-containerd-cri-o"><a href="#2022-03-03-CNCF-containerd-cri-o" class="headerlink" title="2022-03-03 CNCF-containerd/cri-o"></a>2022-03-03 CNCF-containerd/cri-o</h2><p>容器的运行时是Kubernetes运行容器的基础。与CSI类似，Kubernetes提出了CRI - Container Runtime Interface的概念。</p>
+<p>今天，我们会更多地关注到CRI这个规范，而不会对这两个项目底层进行分析 - 毕竟，虽然提供了开放的接口，但目前绝大部分的k8s依然是以Docker容器作为具体实现的，并且这现象会持续相当一段时间。</p>
+<p>我会侧重讲讲它们之间的联系。</p>
+<h3 id="CRI"><a href="#CRI" class="headerlink" title="CRI"></a>CRI</h3><p>CRI主要是针对的是Kubernetes中<code>kubelet</code>这个组件的，它用于在各个Node节点管理满足标准的OCI容器。</p>
+<blockquote>
+<p>OCI是一个容器界的事实标准，主流的容器都满足该规范，我们在这里了解即可。</p>
+</blockquote>
+<p>CRI最新的版本可以参考这个链接 - <a target="_blank" rel="noopener" href="https://github.com/kubernetes/cri-api/blob/release-1.23/pkg/apis/runtime/v1alpha2/api.proto">https://github.com/kubernetes/cri-api/blob/release-1.23/pkg/apis/runtime/v1alpha2/api.proto</a></p>
+<p>CRI里主要分为如下：</p>
+<ol>
+<li>RuntimeService 运行时服务<ol>
+<li>PodSandbox 相关，即Pod中的根容器，一般也叫做pause容器；</li>
+<li>Container 相关，即普通的容器；</li>
+</ol>
+</li>
+<li>ImageService 镜像服务</li>
+</ol>
+<p>CRI里的内容很多，我这边分享个人阅读大型<code>protobuffer</code>文件的两个技巧：</p>
+<ol>
+<li>弄懂高频词汇，如上面的Sandbox</li>
+<li>聚焦核心的枚举enum</li>
+</ol>
+<p>这里有两个枚举值得关注：</p>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">PodSandboxState</span> </span>&#123;</span><br><span class="line">    SANDBOX_READY    = <span class="number">0</span>;</span><br><span class="line">    SANDBOX_NOTREADY = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">ContainerState</span> </span>&#123;</span><br><span class="line">    CONTAINER_CREATED = <span class="number">0</span>;</span><br><span class="line">    CONTAINER_RUNNING = <span class="number">1</span>;</span><br><span class="line">    CONTAINER_EXITED  = <span class="number">2</span>;</span><br><span class="line">    CONTAINER_UNKNOWN = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到这两个定义，如果你对容器/Pod有一定的了解，能很快地联系到它们的生命周期管理了。</p>
+<h3 id="containerd"><a href="#containerd" class="headerlink" title="containerd"></a>containerd</h3><p>我们看看Docker与Kubernetes的分层：</p>
+<ul>
+<li><p>Docker Engine -&gt; containerd -&gt; runc</p>
+</li>
+<li><p>Kubernetes（Kubelet组件） -&gt; containerd -&gt; runc</p>
+</li>
+</ul>
+<p>所以，containerd的作用很直观：对上层（Docker Engine/Kubernetes）屏蔽下层（runc等）的实现细节。</p>
+<h3 id="cri-o"><a href="#cri-o" class="headerlink" title="cri-o"></a>cri-o</h3><blockquote>
+<p>LIGHTWEIGHT CONTAINER RUNTIME FOR KUBERNETES</p>
+</blockquote>
+<p>从定义不难看出，它是面向Kubernetes的、更为轻量级的CRI。cri-o属于我们前面聊过的OCI项目之一。</p>
+<p>对应上面的分层，cri-o封装的是runc这种具体的实现，让上层（Kubernetes）不需要关心下层具体运行容器的引擎。</p>
+<h3 id="小结-3"><a href="#小结-3" class="headerlink" title="小结"></a>小结</h3><p>今天涉及的概念有很多，其实问题起源是 Docker没有捐献给CNCF基金会，为了摆脱不确定性，Kubernetes想解耦Docker这个强依赖。</p>
+<p>无论是抽象出标准接口，还是通过分层设计，从理论上的确可以脱离了对Docker的依赖，但现实情况依旧有相当一段路要走，毕竟Docker的存量市场实在太过庞大。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
