@@ -22,24 +22,24 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="2022-03-11 Go垃圾回收之旅（二）Go静态编译Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。我们一般会拿JAVA程序对比：  Go: Linux -&gt; 二进制文件 JAVA:  Linux -&gt; JVM -&gt;  JAR包  我们常谈到的 运行时，Go语言是直接编译成二进制、放到二进制文件里的；而JAVA是在JVM里实现的。Go的主要优劣点如下：  优">
+  <meta name="description" content="2022-03-14 Go垃圾回收之旅3 - 静态编译Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。那么，这对学习GC有什么意义呢？让我们一起看看今天的内容。  《Go垃圾回收之旅》原文链接 - https:&#x2F;&#x2F;go.dev&#x2F;blog&#x2F;ismmkeynote  我们先和JAVA程序做个对比：  Go Go编译的二进制文件 Linux   JAVA Java打包的JAR文件 JV">
 <meta property="og:type" content="article">
 <meta property="og:title" content="五分钟技术小分享 - 2022Week11">
-<meta property="og:url" content="http://example.com/2022/03/11/sharing-5min/2022-03/2022Week11/index.html">
+<meta property="og:url" content="http://example.com/2022/03/14/sharing-5min/2022-03/2022Week11/index.html">
 <meta property="og:site_name" content="Junedayday Blog">
-<meta property="og:description" content="2022-03-11 Go垃圾回收之旅（二）Go静态编译Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。我们一般会拿JAVA程序对比：  Go: Linux -&gt; 二进制文件 JAVA:  Linux -&gt; JVM -&gt;  JAR包  我们常谈到的 运行时，Go语言是直接编译成二进制、放到二进制文件里的；而JAVA是在JVM里实现的。Go的主要优劣点如下：  优">
+<meta property="og:description" content="2022-03-14 Go垃圾回收之旅3 - 静态编译Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。那么，这对学习GC有什么意义呢？让我们一起看看今天的内容。  《Go垃圾回收之旅》原文链接 - https:&#x2F;&#x2F;go.dev&#x2F;blog&#x2F;ismmkeynote  我们先和JAVA程序做个对比：  Go Go编译的二进制文件 Linux   JAVA Java打包的JAR文件 JV">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
-<meta property="article:published_time" content="2022-03-11T04:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-11T15:08:10.063Z">
+<meta property="article:published_time" content="2022-03-14T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-12T12:48:57.416Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Daily-Sharing">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg">
 
 
-<link rel="canonical" href="http://example.com/2022/03/11/sharing-5min/2022-03/2022Week11/">
+<link rel="canonical" href="http://example.com/2022/03/14/sharing-5min/2022-03/2022Week11/">
 
 
 <script class="page-configurations">
@@ -153,7 +153,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-11-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%85%EF%BC%88%E4%BA%8C%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">2022-03-11 Go垃圾回收之旅（二）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Go%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91"><span class="nav-number">1.1.</span> <span class="nav-text">Go静态编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E9%AB%98%E5%B3%B0%E6%9C%9F%E7%9A%84Go%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.2.</span> <span class="nav-text">业务高峰期的Go程序</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-14-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%853-%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91"><span class="nav-number">1.</span> <span class="nav-text">2022-03-14 Go垃圾回收之旅3 - 静态编译</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -213,7 +213,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/11/sharing-5min/2022-03/2022Week11/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/14/sharing-5min/2022-03/2022Week11/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -239,10 +239,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2022-03-11 12:00:00 / 修改时间：23:08:10" itemprop="dateCreated datePublished" datetime="2022-03-11T12:00:00+08:00">2022-03-11</time>
+      <time title="创建时间：2022-03-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-14T12:00:00+08:00">2022-03-14</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-03-12 20:48:57" itemprop="dateModified" datetime="2022-03-12T20:48:57+08:00">2022-03-12</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -264,49 +270,45 @@
     
     <div class="post-body" itemprop="articleBody">
         <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
-<h2 id="2022-03-11-Go垃圾回收之旅（二）"><a href="#2022-03-11-Go垃圾回收之旅（二）" class="headerlink" title="2022-03-11 Go垃圾回收之旅（二）"></a>2022-03-11 Go垃圾回收之旅（二）</h2><h3 id="Go静态编译"><a href="#Go静态编译" class="headerlink" title="Go静态编译"></a>Go静态编译</h3><p>Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。我们一般会拿JAVA程序对比：</p>
-<ul>
-<li><strong>Go</strong>: Linux -&gt; 二进制文件</li>
-<li><strong>JAVA</strong>:  Linux -&gt; JVM -&gt;  JAR包</li>
-</ul>
-<p>我们常谈到的 运行时，Go语言是直接编译成二进制、放到二进制文件里的；而JAVA是在JVM里实现的。Go的主要优劣点如下：</p>
-<ul>
-<li>优点： 程序的运行更具备 <strong>确定性</strong>，即编码人员可以预期到程序的运行逻辑，对应性地优化</li>
-<li>缺点：运行时没有JIT机制，无法针对具体的运行结果进行反馈优化</li>
-</ul>
-<p>简单地说：Go程序会怎么运行，往往在编码阶段就可以预期到了；而JAVA引入的JIT能力，可以在程序运行后，根据具体的对象创建频率等情况，做针对性地优化。</p>
-<p>孰优孰劣，看团队的具体选择。单针对Go语言开发者来说，排查线上问题相对有JIT机制的JAVA程序简单很多；同时，Go的GC也相对更具备确定性。</p>
-<h3 id="业务高峰期的Go程序"><a href="#业务高峰期的Go程序" class="headerlink" title="业务高峰期的Go程序"></a>业务高峰期的Go程序</h3><blockquote>
-<p>Out of memory, OOMs, are tough on Go; </p>
-<p>temporary spikes in memory usage should be handled by increasing CPU costs, not by aborting. </p>
-<p>Basically if the GC sees memory pressure it informs the application that it should shed load. Once things are back to normal the GC informs the application that it can go back to its regular load.</p>
+<h2 id="2022-03-14-Go垃圾回收之旅3-静态编译"><a href="#2022-03-14-Go垃圾回收之旅3-静态编译" class="headerlink" title="2022-03-14 Go垃圾回收之旅3 - 静态编译"></a>2022-03-14 Go垃圾回收之旅3 - 静态编译</h2><p>Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。那么，这对学习GC有什么意义呢？让我们一起看看今天的内容。</p>
+<blockquote>
+<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
 </blockquote>
-<p>这段话包含了Go语言GC时，在CPU和内存的决策：</p>
+<p>我们先和JAVA程序做个对比：</p>
+<ul>
+<li><strong>Go</strong><ul>
+<li>Go编译的二进制文件</li>
+<li>Linux</li>
+</ul>
+</li>
+<li><strong>JAVA</strong><ul>
+<li>Java打包的JAR文件</li>
+<li>JVM</li>
+<li>Linux</li>
+</ul>
+</li>
+</ul>
+<p>从这个架构不难猜到，上文谈到的 运行时，Go语言是直接编译到二进制文件里的；而JAVA是在JVM里实现的。</p>
+<p>Go的这种实现方式，主要优劣点如下：</p>
+<ul>
+<li>优点： 程序的运行更具备 <strong>确定性</strong>，即开发人员可以根据代码，预期到程序的运行逻辑，更容易针对性地优化</li>
+<li>缺点：运行时没有<code>JIT</code>机制，无法针对具体的运行结果进行反馈优化</li>
+</ul>
+<p><code>JIT</code>的优化方向很多，我这里举一个热点函数优化的例子：</p>
 <ol>
-<li><strong>Go程序很少会OOM</strong><ol>
-<li>这句话有一定前提，即内存设置是合理的</li>
+<li>在代码中，函数f需要输入参数a和b</li>
+<li>运行了一段时间后，<code>JIT</code>发现b的输入参数一直都是某个固定值b1</li>
+<li>这时，<code>JIT</code>进行编译优化，将函数f编译成一个新函数f1<ol>
+<li>f1只需要入参a</li>
+<li>b参数被替换为固定值b1</li>
+<li>减少参数复杂度，能提升程序效率，尤其是热点函数</li>
 </ol>
 </li>
-<li><strong>业务高峰时内存使用率过高，应该通过提升CPU能力来解决，而不是停止</strong><ol>
-<li>CPU是对内存使用率有帮助的，因为GC是需要CPU资源进行计算的</li>
-<li>要保证内存能支持程序，主要分两个思路<ol>
-<li>清理已有的内存 - 通过GC来清理无用的内存</li>
-<li>限制新增的内存 - 即运行时尽可能地避免新内存的产生，最简单的方法就是不运行代码</li>
+<li>如果参数b突然变成了b2，那<code>JIT</code>就会从f1回退到f</li>
 </ol>
-</li>
-</ol>
-</li>
-<li><strong>GC压力高时，通知应用减少负载；而当恢复正常后，GC再通知应用可以恢复到正常模式了</strong><ol>
-<li>我们可以将上述分为两类工作<ol>
-<li>业务逻辑的Goroutine</li>
-<li>GC的Goroutine</li>
-</ol>
-</li>
-<li>这两类Goroutine都会消耗CPU资源，区别在于运行业务逻辑往往会增加内存，而GC是回收内存</li>
-<li>这里就能体现出Go运行时的一个策略：内存压力会让GC更容易抢占到资源，代价是业务处理逻辑会有一定性能损耗；也就是说，Go更追求程序的可靠性</li>
-</ol>
-</li>
-</ol>
+<p>简单来说：<strong>Go程序会怎么运行，往往在编码阶段就可以预期到了</strong>；而JAVA引入的<code>JIT</code>能力，可以在程序运行后，根据具体的运行情况，做针对性地优化，提升效率的同时也带了很多的不确定性。</p>
+<p>两种实现方式各有利弊，团队可以根据实际情况自行选择。单从Go语言开发者来说，排查线上问题相对有<code>JIT</code>机制的JAVA程序简单很多。</p>
+<p>这种确定性也Go的GC相对简单不少，方便我们的学习。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
