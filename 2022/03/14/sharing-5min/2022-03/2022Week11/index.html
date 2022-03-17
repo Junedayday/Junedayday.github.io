@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 <meta property="article:published_time" content="2022-03-14T04:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-14T12:55:37.641Z">
+<meta property="article:modified_time" content="2022-03-17T13:07:56.952Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Daily-Sharing">
 <meta name="twitter:card" content="summary">
@@ -153,7 +153,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-14-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%853-%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91"><span class="nav-number">1.</span> <span class="nav-text">2022-03-14 Go垃圾回收之旅3 - 静态编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-15-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%854-%E6%80%A7%E8%83%BD%E5%8E%8B%E5%8A%9B%E4%B8%8B%E7%9A%84Go%E7%A8%8B%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">2022-03-15 Go垃圾回收之旅4 - 性能压力下的Go程序</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-14-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%853-%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91"><span class="nav-number">1.</span> <span class="nav-text">2022-03-14 Go垃圾回收之旅3 - 静态编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-15-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%854-%E6%80%A7%E8%83%BD%E5%8E%8B%E5%8A%9B%E4%B8%8B%E7%9A%84Go%E7%A8%8B%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">2022-03-15 Go垃圾回收之旅4 - 性能压力下的Go程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-17-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%855-GC-Pacer"><span class="nav-number">3.</span> <span class="nav-text">2022-03-17 Go垃圾回收之旅5 - GC Pacer</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -239,10 +239,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2022-03-14 12:00:00 / 修改时间：20:55:37" itemprop="dateCreated datePublished" datetime="2022-03-14T12:00:00+08:00">2022-03-14</time>
+      <time title="创建时间：2022-03-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-14T12:00:00+08:00">2022-03-14</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-03-17 21:07:56" itemprop="dateModified" datetime="2022-03-17T21:07:56+08:00">2022-03-17</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -347,6 +353,37 @@
 </ol>
 <p>GC最直观的影响就体现在延迟上。尤其是在STW - Stop The World情况下，程序会暂停所有非GC的工作，进行全量的垃圾回收。即便整个GC只花费了1s，所有涉及到这个程序的业务调用，都会增加1s延迟；在微服务场景下，这个问题会变得尤为复杂。</p>
 <p>而GC的方案迭代，最直观的效果就体现在这个延迟优化上。</p>
+<h2 id="2022-03-17-Go垃圾回收之旅5-GC-Pacer"><a href="#2022-03-17-Go垃圾回收之旅5-GC-Pacer" class="headerlink" title="2022-03-17 Go垃圾回收之旅5 - GC Pacer"></a>2022-03-17 Go垃圾回收之旅5 - GC Pacer</h2><p>今天我们会重点讨论Go语言GC Pacer这个概念。</p>
+<blockquote>
+<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
+</blockquote>
+<p>要理解透彻GC Pacer的非常困难，底层实现细节必须深入到源码。这里，我们会通过分享中的关键性描述，来思考GC Pacer的设计理念。</p>
+<blockquote>
+<p>It is basically based on a feedback loop that determines when to best start a GC cycle. </p>
+</blockquote>
+<p>我们聚焦到两个词：</p>
+<ul>
+<li><code>feedback loop</code> 反馈循环，GC Pacer是会根据实际GC情况会不断迭代、反馈的</li>
+<li><code> when to best start a GC cycle</code> 强调了GC Pacer的目标 - 为了决定一个最佳启动GC的时机</li>
+</ul>
+<p>GC Pacer的内部原理也和它的定义非常贴切，它是根据步长来决定GC的：</p>
+<ul>
+<li>对象：堆上的内存分配</li>
+<li>步长：设定值，如100%</li>
+<li>触发时机：当前堆上内存大小 &gt;= 上次堆上内存大小 * (1 + 100%)</li>
+</ul>
+<p>简单来说，就是一种 <strong>按比例增长</strong> 的触发机制。但这个机制没有那么简单，我们看下面这段：</p>
+<blockquote>
+<p>If need be, the Pacer slows down allocation while speeding up marking. </p>
+<p>At a high level the Pacer stops the Goroutine, which is doing a lot of the allocation, and puts it to work doing marking. </p>
+</blockquote>
+<p>这两句描述和我们上一讲的内容对应上了 - 在一定的性能压力下，Pacer会减少内存的分配，而花更多的时间在对象的标记（marking）上，它是GC里的最耗性能的步骤。</p>
+<p>对应到上面提到的反馈呢，也就是GC Pacer并不是单纯的一种 按比例增长 的触发机制，还有一些其余因素的影响：比如，当前这次的GC花费的CPU计算资源与标记的耗时超过了预期，表示当前整个GC存在一定压力，下次的GC的开始时间需要适当提前。</p>
+<p>GC Pacer最近也重新做了一次大的改动，有兴趣的可以参考这篇文章：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/a216b56e743c5b6b300b3ef1673ee62684b5b63b/design/44167-gc-pacer-redesign.md">https://go.googlesource.com/proposal/+/a216b56e743c5b6b300b3ef1673ee62684b5b63b/design/44167-gc-pacer-redesign.md</a></p>
+</blockquote>
+<p>深入研究GC Pacer需要很多数学知识储备，留给有兴趣的同学自行探索了。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
