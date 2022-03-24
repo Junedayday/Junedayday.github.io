@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 <meta property="article:published_time" content="2022-03-21T04:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-21T13:41:27.536Z">
+<meta property="article:modified_time" content="2022-03-24T12:48:59.377Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Daily-Sharing">
 <meta name="twitter:card" content="summary">
@@ -153,7 +153,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-21-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%856-ROC%E4%B8%8EWrite-Barrier"><span class="nav-number">1.</span> <span class="nav-text">2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ROC-%E9%9D%A2%E5%90%91%E8%AF%B7%E6%B1%82%E7%9A%84%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="nav-number">1.1.</span> <span class="nav-text">ROC-面向请求的回收器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Write-Barrier-%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="nav-number">1.2.</span> <span class="nav-text">Write Barrier-写屏障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.3.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-21-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%856-ROC%E4%B8%8EWrite-Barrier"><span class="nav-number">1.</span> <span class="nav-text">2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ROC-%E9%9D%A2%E5%90%91%E8%AF%B7%E6%B1%82%E7%9A%84%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="nav-number">1.1.</span> <span class="nav-text">ROC-面向请求的回收器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Write-Barrier-%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="nav-number">1.2.</span> <span class="nav-text">Write Barrier-写屏障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-24-Go1-5%E7%9A%84GC%E6%A6%82%E8%A7%881-%E5%AE%98%E6%96%B9Talk"><span class="nav-number">2.</span> <span class="nav-text">2022-03-24 Go1.5的GC概览1 - 官方Talk</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Go%E4%B8%8EJava%E7%9A%84GC%E5%B7%AE%E5%BC%82"><span class="nav-number">2.1.</span> <span class="nav-text">Go与Java的GC差异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GC%E6%A6%82%E8%A7%88"><span class="nav-number">2.2.</span> <span class="nav-text">GC概览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.3.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -239,10 +239,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2022-03-21 12:00:00 / 修改时间：21:41:27" itemprop="dateCreated datePublished" datetime="2022-03-21T12:00:00+08:00">2022-03-21</time>
+      <time title="创建时间：2022-03-21 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-21T12:00:00+08:00">2022-03-21</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-03-24 20:48:59" itemprop="dateModified" datetime="2022-03-24T20:48:59+08:00">2022-03-24</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -298,6 +304,53 @@
 </blockquote>
 <h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>ROC的思想很朴素，非常符合我们的直觉，具有一定的参考价值。</p>
 <p>而写屏障目前被广泛地应用在各类GC中，今天我们也借ROC对它有了初步印象。</p>
+<h2 id="2022-03-24-Go1-5的GC概览1-官方Talk"><a href="#2022-03-24-Go1-5的GC概览1-官方Talk" class="headerlink" title="2022-03-24 Go1.5的GC概览1 - 官方Talk"></a>2022-03-24 Go1.5的GC概览1 - 官方Talk</h2><p>在上一个系列，我们通过阅读 <strong>Go垃圾回收之旅</strong> 的相关资料，对Go中GC的很多概念有了基本的认识，这就给我们接下来的学习铺好了路。</p>
+<p>今天开始，我们将一起阅读下一篇内容，也就是官方博客对Go1.5版本GC的讲解。</p>
+<blockquote>
+<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a> </p>
+<p>为什么我不选择最新版本进行讲解呢？</p>
+<p>Go1.5的GC实现是具有一定里程碑意义的，实现了 <strong>并发标记清扫</strong>，与最新的GC实现差异并不大，作为入门学习资料更容易理解。</p>
+</blockquote>
+<p>在这篇博客中，作者先引入了一个Talk，里面重点讲述了GC的实现与性能，而实现部分使我们今天的重点。</p>
+<blockquote>
+<p>请跳转阅读 - <a target="_blank" rel="noopener" href="https://go.dev/talks/2015/go-gc.pdf">https://go.dev/talks/2015/go-gc.pdf</a></p>
+</blockquote>
+<h3 id="Go与Java的GC差异"><a href="#Go与Java的GC差异" class="headerlink" title="Go与Java的GC差异"></a>Go与Java的GC差异</h3><table>
+<thead>
+<tr>
+<th align="center">维度</th>
+<th align="center">GO</th>
+<th align="center">java</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">运行线程</td>
+<td align="center">1000+Goroutine</td>
+<td align="center">10+线程</td>
+</tr>
+<tr>
+<td align="center">同步机制</td>
+<td align="center">channel</td>
+<td align="center">锁</td>
+</tr>
+<tr>
+<td align="center">运行时实现</td>
+<td align="center">Go语言实现</td>
+<td align="center">C语言实现</td>
+</tr>
+<tr>
+<td align="center">内存分布</td>
+<td align="center">具备局部性</td>
+<td align="center">通过指针跳转</td>
+</tr>
+</tbody></table>
+<h3 id="GC概览"><a href="#GC概览" class="headerlink" title="GC概览"></a>GC概览</h3><ol>
+<li>Scan Phase 扫描</li>
+<li>Mark Phase 标记</li>
+<li>Sweep Phase 清理</li>
+</ol>
+<p>关于更细节的 <strong>GC Algorithm Phases</strong> 实现，我们会在下一讲描述。</p>
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>本篇内容主要结合这个Talk，讲述了Go1.5版本的GC基本实现，希望大家能对GC背景和三阶段操作有基本了解。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
