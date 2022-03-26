@@ -30,9 +30,10 @@
 <meta property="og:description" content="2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier今天，我们来看GC的一种设计 - ROC(Request Oriented Collector)。虽然ROC并没有被实际工程采用，但很值得我们学习，加深理解。  《Go垃圾回收之旅》原文链接 - https:&#x2F;&#x2F;go.dev&#x2F;blog&#x2F;ismmkeynote  ROC-面向请求的回收器ROC提出了一种假设： Obje">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go1.5-gc.png">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 <meta property="article:published_time" content="2022-03-21T04:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-24T14:16:56.620Z">
+<meta property="article:modified_time" content="2022-03-26T12:05:56.880Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Daily-Sharing">
 <meta name="twitter:card" content="summary">
@@ -153,7 +154,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-21-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%856-ROC%E4%B8%8EWrite-Barrier"><span class="nav-number">1.</span> <span class="nav-text">2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ROC-%E9%9D%A2%E5%90%91%E8%AF%B7%E6%B1%82%E7%9A%84%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="nav-number">1.1.</span> <span class="nav-text">ROC-面向请求的回收器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Write-Barrier-%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="nav-number">1.2.</span> <span class="nav-text">Write Barrier-写屏障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-24-Go1-5%E7%9A%84GC%E6%A6%82%E8%A7%881-%E5%AE%98%E6%96%B9Talk"><span class="nav-number">2.</span> <span class="nav-text">2022-03-24 Go1.5的GC概览1 - 官方Talk</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GC%E7%9B%B8%E5%85%B3%E7%9A%84%E5%B7%AE%E5%BC%82%EF%BC%88Go%E4%B8%8EJava%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">GC相关的差异（Go与Java）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GC%E6%A6%82%E8%A7%88"><span class="nav-number">2.2.</span> <span class="nav-text">GC概览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.3.</span> <span class="nav-text">小结</span></a></li></ol></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-21-Go%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E4%B9%8B%E6%97%856-ROC%E4%B8%8EWrite-Barrier"><span class="nav-number">1.</span> <span class="nav-text">2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ROC-%E9%9D%A2%E5%90%91%E8%AF%B7%E6%B1%82%E7%9A%84%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="nav-number">1.1.</span> <span class="nav-text">ROC-面向请求的回收器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Write-Barrier-%E5%86%99%E5%B1%8F%E9%9A%9C"><span class="nav-number">1.2.</span> <span class="nav-text">Write Barrier-写屏障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-24-Go1-5%E7%9A%84GC%E6%A6%82%E8%A7%881-%E5%AE%98%E6%96%B9Talk"><span class="nav-number">2.</span> <span class="nav-text">2022-03-24 Go1.5的GC概览1 - 官方Talk</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GC%E7%9B%B8%E5%85%B3%E7%9A%84%E5%B7%AE%E5%BC%82%EF%BC%88Go%E4%B8%8EJava%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">GC相关的差异（Go与Java）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GC%E6%A6%82%E8%A7%88"><span class="nav-number">2.2.</span> <span class="nav-text">GC概览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2022-03-26-Go1-5%E7%9A%84GC%E6%A6%82%E8%A7%882-GC-Algorithm-Phases"><span class="nav-number">3.</span> <span class="nav-text">2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Stack-scan-%E6%A0%88%E6%89%AB%E6%8F%8F"><span class="nav-number">3.1.</span> <span class="nav-text">Stack scan 栈扫描</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mark-%E6%A0%87%E8%AE%B0"><span class="nav-number">3.2.</span> <span class="nav-text">Mark 标记</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mark-Termination-%E6%A0%87%E8%AE%B0%E7%BB%93%E6%9D%9F"><span class="nav-number">3.3.</span> <span class="nav-text">Mark Termination 标记结束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sweep-%E6%B8%85%E6%89%AB"><span class="nav-number">3.4.</span> <span class="nav-text">Sweep 清扫</span></a></li></ol></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -247,7 +248,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-24 22:16:56" itemprop="dateModified" datetime="2022-03-24T22:16:56+08:00">2022-03-24</time>
+        <time title="修改时间：2022-03-26 20:05:56" itemprop="dateModified" datetime="2022-03-26T20:05:56+08:00">2022-03-26</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -349,8 +350,36 @@
 <li>Mark Phase 标记</li>
 <li>Sweep Phase 清理</li>
 </ol>
+<blockquote>
+<p>关于这三个阶段是怎么实现的，可以对照着ppt看，或者观看视频 - <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV18r4y1q7p3">https://www.bilibili.com/video/BV18r4y1q7p3</a></p>
+</blockquote>
 <p>关于更细节的 <strong>GC Algorithm Phases</strong> 实现，我们会在下一讲描述。</p>
 <h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>本篇内容主要结合这个Talk，讲述了Go1.5版本的GC基本实现，希望大家能对GC背景和三阶段操作有基本了解。</p>
+<h2 id="2022-03-26-Go1-5的GC概览2-GC-Algorithm-Phases"><a href="#2022-03-26-Go1-5的GC概览2-GC-Algorithm-Phases" class="headerlink" title="2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases"></a>2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases</h2><p>在上一篇，我们从这篇Talk - <a target="_blank" rel="noopener" href="https://go.dev/talks/2015/go-gc.pdf">https://go.dev/talks/2015/go-gc.pdf</a> 里了解标记清理算法。</p>
+<p>今天，我们将对着下面这张Go1.5 GC算法的各个阶段，串讲一下GC这个过程。</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go1.5-gc.png" alt="Go 1.5 GC"></p>
+<h3 id="Stack-scan-栈扫描"><a href="#Stack-scan-栈扫描" class="headerlink" title="Stack scan 栈扫描"></a>Stack scan 栈扫描</h3><p>栈扫描的启动阶段有一小段STW，这是因为GC要启动写屏障，所以必须先暂停所有Goroutine的运行。这个时间段很短，大概耗时在几十微秒。</p>
+<p>runtime中的写屏障的数据结构如下：    </p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> writeBarrier <span class="keyword">struct</span> &#123;</span><br><span class="line">	enabled <span class="keyword">bool</span>    <span class="comment">// compiler emits a check of this before calling write barrier</span></span><br><span class="line">	pad     [<span class="number">3</span>]<span class="keyword">byte</span> <span class="comment">// compiler uses 32-bit load for &quot;enabled&quot; field</span></span><br><span class="line">	needed  <span class="keyword">bool</span>    <span class="comment">// whether we need a write barrier for current GC phase</span></span><br><span class="line">	cgo     <span class="keyword">bool</span>    <span class="comment">// whether we need a write barrier for a cgo check</span></span><br><span class="line">	alignme <span class="keyword">uint64</span>  <span class="comment">// guarantee alignment so that compiler can use a 32 or 64-bit load</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成启动后，就进入这一步的工作：<strong>从全局变量和各个Goroutine的栈上收集指针信息</strong>。这一步，也就是初始化所有标记对象的集合。</p>
+<h3 id="Mark-标记"><a href="#Mark-标记" class="headerlink" title="Mark 标记"></a>Mark 标记</h3><p>标记阶段即根据扫描出的初始指针对象，做BFS的遍历，也就将所有可触达的对象加上标记。这里有一句话：</p>
+<p><strong>Write barrier tracks pointer changes by mutator.</strong> 也就是在标记阶段中，如果有程序变更了指针，就需要添加写屏障。</p>
+<p>关于写屏障的实现细节我们先不细聊，先一起来看看GC中的三个概念：</p>
+<ol>
+<li>mutator：一般指应用程序，在运行过程中，会不停地修改堆对象里的指向关系</li>
+<li>collector：垃圾回收期，更多地是指GC线程</li>
+<li>allocator：内存分配器，也就是程序向操作系统申请内存、释放内存，这一点在GC里很重要，往往被我们忽视</li>
+</ol>
+<h3 id="Mark-Termination-标记结束"><a href="#Mark-Termination-标记结束" class="headerlink" title="Mark Termination 标记结束"></a>Mark Termination 标记结束</h3><p>完成标记后，主要分为三个工作：</p>
+<ol>
+<li>Rescan - 重新扫描其中变化的内容</li>
+<li>Clean Up Tasks - 这里的清理并不是清理对象，而是对整个Mark标记的收尾工作，比如收缩栈</li>
+<li>关闭写屏障</li>
+</ol>
+<p>注意，这一整个阶段都是STW的。</p>
+<h3 id="Sweep-清扫"><a href="#Sweep-清扫" class="headerlink" title="Sweep 清扫"></a>Sweep 清扫</h3><p>Sweep就是将未标记的堆上对象进行清理，回收资源。这一阶段是并发的。</p>
+<p>值得一提的是，我们之前谈论过的GC Paging算法就是在这一步启动的，用在估算下一次启动GC的最佳时间。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
