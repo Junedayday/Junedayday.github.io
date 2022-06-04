@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">91</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -170,7 +170,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -205,7 +205,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/10/go-leetcode/go-leetcode-2/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/26/go-study/go-study-8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -222,7 +222,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/07/10/go-leetcode/go-leetcode-2/" class="post-title-link" itemprop="url">Go算法实战 - 2.【两数相加LeetCode-2】非递归解法</a>
+            <a href="/2021/07/26/go-study/go-study-8/" class="post-title-link" itemprop="url">Go语言学习路线 - 8.高级篇:从五个问题来畅想Go工程师的未来发展</a>
         </h2>
 
         <div class="post-meta-container">
@@ -232,23 +232,17 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2021-07-10 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-10T12:00:00+08:00">2021-07-10</time>
+      <time title="创建时间：2021-07-26 12:00:00 / 修改时间：13:10:11" itemprop="dateCreated datePublished" datetime="2021-07-26T12:00:00+08:00">2021-07-26</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-02-19 13:52:19" itemprop="dateModified" datetime="2022-02-19T13:52:19+08:00">2022-02-19</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
         </span>
     </span>
 
@@ -262,18 +256,195 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
-<p>我们继续看上一个题目，这次我们尝试写一个非递归的解法。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>为了能保证代码都能执行，我会贴出所有代码，<strong>重点会用注释着重说明</strong>。</p>
-<blockquote>
-<p>我个人认为，非递归比递归写法更加麻烦，所以放到了第二讲。一开始直接上手用非递归的解法，很容易迷失在 边界条件 和 循环条件 中，排查问题也比较麻烦。</p>
-</blockquote>
+          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="编程语言对软件工程师的意义"><a href="#编程语言对软件工程师的意义" class="headerlink" title="编程语言对软件工程师的意义"></a>编程语言对软件工程师的意义</h2><p>有人常说，编程语言对软件工程师来说并不重要，更重要的是<strong>软件工程思想</strong>、<strong>架构设计能力</strong>等更高层面的内容。</p>
+<p>这个观点本身没有问题，但它更多的是针对有相当工作经验的程序员。对于绝大多数的人，<strong>编程语言依然是最重要、最核心的技能，也是通往更高层面的敲门砖</strong>。所以，<strong>精通一门编程语言，不仅仅要熟悉其语法与原理，更要了解其周边的生态，包括框架、开源库、中间件等，以及掌握它适用的业务场景</strong>。</p>
+<p>所以，作为一名将Go语言作为主要开发语言的工程师，如果你能合理地利用好这个敲门砖，你的职业发展必将更加通畅。下面，我会从几个常见问题谈起，分享我的经验与见解，希望能给各位带来启发。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2021/07/10/go-leetcode/go-leetcode-2/#more" rel="contents">
+              <a class="btn" href="/2021/07/26/go-study/go-study-8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/25/go-study/go-study-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/25/go-study/go-study-7/" class="post-title-link" itemprop="url">Go语言学习路线 - 7.进阶篇:一名软件工程师的价值沉淀</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-25 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-25T12:00:00+08:00">2021-07-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-18 20:14:24" itemprop="dateModified" datetime="2021-08-18T20:14:24+08:00">2021-08-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="阶段性的思考"><a href="#阶段性的思考" class="headerlink" title="阶段性的思考"></a>阶段性的思考</h2><p>通过前面几讲的分享，相信大家已经能清楚地看到一名普通软件工程师的发展路线：<strong>不断学习技能，提高研发效能，实现业务功能</strong>。</p>
+<p>如果我们尝试回头看，可能会对自己的定位存在疑问：这些日常CRUD的开发工作，很多不具备太高的技术难度，可以靠人力堆积来实现。那么，如何在研发团队里打造自己的<strong>技术壁垒</strong>、体现个人价值呢？</p>
+<p>下面，我将分多个层面和大家聊聊，大家可以根据自己的发展目标和工作环境，选择性地发展几项。今天的内容会抛开编程语言之争，从更高的维度来看问题。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/25/go-study/go-study-7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/21/go-study/go-study-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/21/go-study/go-study-6/" class="post-title-link" itemprop="url">Go语言学习路线 - 6.提效篇:不懈地追求提升研发效率</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-21 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-21T12:00:00+08:00">2021-07-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-26 13:10:50" itemprop="dateModified" datetime="2021-07-26T13:10:50+08:00">2021-07-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
+<h2 id="为什么要追求研发效能"><a href="#为什么要追求研发效能" class="headerlink" title="为什么要追求研发效能"></a>为什么要追求研发效能</h2><p>在<strong>入门篇</strong>与<strong>基础篇</strong>之后，我选择做了这一讲<strong>提效篇</strong>。而在提效篇的推出之前，我也开启<a target="_blank" rel="noopener" href="https://junedayday.github.io/tags/Go-Tip/">Go语言技巧系列</a>的更新，着重分享一些具体的工程化实例，包括错误处理、Go Module等。</p>
+<p>也许有读者会好奇为什么会把提效篇放在这里，在我看来，<strong>如果工程师已经度过了入门阶段，就应该重点关注研发效能</strong>。</p>
+<blockquote>
+<p>严格意义来说，基础篇的<strong>分层思想</strong>，就是一个很有效的提升研发效能的手段。</p>
+</blockquote>
+<p><strong>研发效能</strong>涉及的面很广，但这里我们聚焦于讨论<strong>软件编码阶段</strong>的工作，专注于提升工程师在开发阶段的效率。</p>
+<p>提升了研发效能后，我不太建议大家去<strong>主动接手更多的开发工作</strong>，而是<strong>投入到不断地学习和提升自己，持续提高效率，实现正反馈循环</strong>。至于投入到哪些方面更有价值，则是我今天分享的重点。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/21/go-study/go-study-6/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -334,7 +505,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-02-20 21:23:40" itemprop="dateModified" datetime="2022-02-20T21:23:40+08:00">2022-02-20</time>
+        <time title="修改时间：2022-04-10 13:01:10" itemprop="dateModified" datetime="2022-04-10T13:01:10+08:00">2022-04-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -357,6 +528,7 @@
     
     <div class="post-body" itemprop="articleBody">
           <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<p>为了提升大家学习和刷题的效率，现将这部分做一次大的改版</p>
 <h2 id="Leetcode经典"><a href="#Leetcode经典" class="headerlink" title="Leetcode经典"></a>Leetcode经典</h2><ul>
 <li>Leetcode-2 两数相加<ul>
 <li><a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/07/10/go-leetcode/go-leetcode-1/">递归</a></li>
@@ -370,6 +542,9 @@
 <li>Leetcode-11 <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/08/02/go-leetcode/go-leetcode-7/">盛最多水的容器</a></li>
 <li>Leetcode-15 <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/08/08/go-leetcode/go-leetcode-8/">三数之和</a></li>
 <li>Leetcode-17 <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/08/18/go-leetcode/go-leetcode-9/">电话号码的字母组合</a></li>
+<li>Leetcode-19 删除链表的倒数第 N 个结点</li>
+<li>Leetcode-206 反转链表</li>
+<li>Leetcode-704 二分查找</li>
 </ul>
 <h2 id="经典面试题"><a href="#经典面试题" class="headerlink" title="经典面试题"></a>经典面试题</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://junedayday.github.io/2022/02/19/go-leetcode/go-leetcode-10/">圆环回原点问题</a></li>
@@ -960,201 +1135,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/17/go-study/go-study-4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/17/go-study/go-study-4/" class="post-title-link" itemprop="url">Go语言学习路线 - 4.入门篇:快速体系化地入门Go语言</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-04-17 12:00:00" itemprop="dateCreated datePublished" datetime="2021-04-17T12:00:00+08:00">2021-04-17</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-26 13:10:58" itemprop="dateModified" datetime="2021-07-26T13:10:58+08:00">2021-07-26</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
-<h2 id="从一本书入门Go语言"><a href="#从一本书入门Go语言" class="headerlink" title="从一本书入门Go语言"></a>从一本书入门Go语言</h2><p>如今互联网资料泛滥，入门编程语言的途径有很多种选择，但如果要我推荐，只有一个建议 - <strong>研读一本该编程语言最优秀的基础书籍</strong>。 </p>
-<p>对于Go语言，我推荐 《Go程序设计语言》(The Go Programming Language)，也被称为 <strong>Go语言圣经</strong>。参考链接:<a target="_blank" rel="noopener" href="http://product.dangdang.com/25072202.html">当当链接</a> 和 <a target="_blank" rel="noopener" href="https://docs.hacknode.org/gopl-zh/">网页版链接</a>。</p>
-<blockquote>
-<p>我认为，尽量避免只通过网上的博客或视频去学习基础。</p>
-<p><strong>体系化</strong> 是建立知识体系最重要的一点。网上的资料最缺乏的就是 <strong>体系化</strong>，而经典书籍都经过了反复的精雕细琢。</p>
-</blockquote>
-<p>虽然这本书很经典，但在新手在学习的过程中还是会遇到三个经典的疑问：</p>
-<ul>
-<li>这本书出版已经有4年多，是否有些知识点已经 <strong>过时</strong>？</li>
-<li>书籍中的知识点有深有浅，新手只想快速入门，该如何 <strong>权衡知识点</strong>？</li>
-<li>书中的知识点虽然是体系化的，但新手很难 <strong>串联</strong> 起来。</li>
-</ul>
-<p>所以，本章的核心是为了解决上面三个问题的，也可以认为是我对于 <strong>Go语言圣经的导读</strong>。</p>
-<blockquote>
-<p>基础因人而异，根据自己的实际情况适当提高或降低预期。</p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/17/go-study/go-study-4/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/04/05/go-study/go-study-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/05/go-study/go-study-3/" class="post-title-link" itemprop="url">Go语言学习路线 - 3.准备篇:打造个人专属的学习环境</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-04-05 12:00:00" itemprop="dateCreated datePublished" datetime="2021-04-05T12:00:00+08:00">2021-04-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-26 13:11:02" itemprop="dateModified" datetime="2021-07-26T13:11:02+08:00">2021-07-26</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/02/28/BnVH86E5owhsaFd.jpg" alt="Go-Study"></p>
-<h2 id="为何我们需要持续学习"><a href="#为何我们需要持续学习" class="headerlink" title="为何我们需要持续学习"></a>为何我们需要持续学习</h2><p><strong>终身成长</strong> 一词已被广泛认可，意味着我们将比前人花费更多的时间在 <strong>学习成长</strong> 中，才能将个人的认知跟上社会的步伐。且不论是否应该放慢脚步，但我们大部分人不得不跟随社会的节奏，<strong>持续学习并提高自己</strong>。</p>
-<p>相信有不少朋友跟我一样，在学习的过程中经常会 <strong>半途而废</strong>。那么我在这里分享一些方法和技巧（包括但不仅限于Go语言），希望能给大家带来一些启发。</p>
-<p>这部分内容依旧会带有一些强烈的个人主观色彩，大家按需选用~</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/05/go-study/go-study-3/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 

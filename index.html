@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">91</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -170,7 +170,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -205,7 +205,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/28/sharing-5min/2022-03/2022Week13/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/03/thinking/promotion/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -222,132 +222,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/28/sharing-5min/2022-03/2022Week13/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week13</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-03-28 12:00:00 / 修改时间：21:40:14" itemprop="dateCreated datePublished" datetime="2022-03-28T12:00:00+08:00">2022-03-28</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
-<h2 id="2022-03-28-Go1-5的GC概览3-Tri-color"><a href="#2022-03-28-Go1-5的GC概览3-Tri-color" class="headerlink" title="2022-03-28 Go1.5的GC概览3 - Tri-color"></a>2022-03-28 Go1.5的GC概览3 - Tri-color</h2><p>在标记阶段，Go语言使用了 tri-color，也就是著名的三色标记法。在这篇文章里，详细地描述了这部分的实现。</p>
-<blockquote>
-<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a></p>
-</blockquote>
-<p>三色标记法是一种堆上对象的图算法。这里图的边Edge即指针，所以这里的关系是<strong>单向</strong>的。</p>
-<blockquote>
-<p> In a tri-color collector, every object is either white, grey, or black and we view the heap as a graph of connected objects.</p>
-</blockquote>
-<p>接下来，就是具体的三色标记法的工作了：</p>
-<blockquote>
-<p>At the start of a GC cycle all objects are white. The GC visits all <em>roots</em>, which are objects directly accessible by the application such as globals and things on the stack, and colors these grey. The GC then chooses a grey object, blackens it, and then scans it for pointers to other objects. When this scan finds a pointer to a white object, it turns that object grey. This process repeats until there are no more grey objects. At this point, white objects are known to be unreachable and can be reused.</p>
-</blockquote>
-<p>这一段内容很长，但描述得很直白，我简单概括下：</p>
-<ul>
-<li>GC初始化<ul>
-<li>将所有的对象设置为 <strong>白色</strong></li>
-</ul>
-</li>
-<li>Mark的初始化<ul>
-<li>将全局变量和栈上的对象，标记为 <strong>灰色</strong></li>
-<li>这些灰色对象会被放入队列中</li>
-</ul>
-</li>
-<li>Mark的核心流程<ul>
-<li>从队列中弹出一个灰色对象</li>
-<li>访问这个灰色对象的指针，将<strong>白色对象</strong>的转变为<strong>灰色对象</strong>，并加入到队列中</li>
-<li>将这个<strong>灰色对象</strong>标记为<strong>黑色</strong>，表示访问完毕</li>
-<li>重复上述过程，直到队列为空</li>
-</ul>
-</li>
-<li>清理阶段<ul>
-<li>将所有剩余的 <strong>白色对象</strong> 进行垃圾回收</li>
-</ul>
-</li>
-</ul>
-<p>我们重点看这里的 <strong>Mark的核心流程</strong>，里面有个关键问题：<code>mutator</code>（也就是运行中的程序）在不停地修改对象的指针，所以会出现各种异常情况，比如说让一个黑色对象指向白色对象（正常情况下，黑色对象指向的是黑色或者灰色）。</p>
-<blockquote>
-<p>网上有很多关于三色标记的资料，不太清楚的朋友需要自行搜索，比如 <a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000022030353">https://segmentfault.com/a/1190000022030353</a> 。</p>
-<p>重点可以结合写屏障要解决的问题，进行理解。</p>
-</blockquote>
-<p>这个时候，就引入了我们前面说的内容 - <strong>写屏障write barrier</strong>。</p>
-<blockquote>
-<p>Go’s write barrier colors the now-reachable object grey if it is currently white, ensuring that the garbage collector will eventually scan it for pointers.</p>
-</blockquote>
-<p>写屏障即会在每次发生指针变更时，加入一小段代码：比如检测到新的被指向的对象是白色，就将它修改为灰色，需要扫描。这只是一个简单例子，后续Go语言对写屏障进行了迭代，采用的写屏障技术是 <strong>混合写屏障</strong>，也就是 <strong>插入写屏障</strong>+<strong>删除写屏障</strong>。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/21/sharing-5min/2022-03/2022Week12/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/03/21/sharing-5min/2022-03/2022Week12/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week12</a>
+            <a href="/2022/06/03/thinking/promotion/" class="post-title-link" itemprop="url">技术闲聊1 - 晋升</a>
         </h2>
 
         <div class="post-meta-container">
@@ -358,878 +233,15 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-03-21 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-21T12:00:00+08:00">2022-03-21</time>
+      <time title="创建时间：2022-06-03 12:00:00" itemprop="dateCreated datePublished" datetime="2022-06-03T12:00:00+08:00">2022-06-03</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-27 08:33:45" itemprop="dateModified" datetime="2022-03-27T08:33:45+08:00">2022-03-27</time>
+        <time title="修改时间：2022-06-04 11:21:34" itemprop="dateModified" datetime="2022-06-04T11:21:34+08:00">2022-06-04</time>
       </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
-<h2 id="2022-03-21-Go垃圾回收之旅6-ROC与Write-Barrier"><a href="#2022-03-21-Go垃圾回收之旅6-ROC与Write-Barrier" class="headerlink" title="2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier"></a>2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier</h2><p>今天，我们来看GC的一种设计 - ROC(Request Oriented Collector)。虽然ROC并没有被实际工程采用，但很值得我们学习，加深理解。</p>
-<blockquote>
-<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
-</blockquote>
-<h3 id="ROC-面向请求的回收器"><a href="#ROC-面向请求的回收器" class="headerlink" title="ROC-面向请求的回收器"></a>ROC-面向请求的回收器</h3><p>ROC提出了一种假设：</p>
-<p><strong>Objects associated with a completed request or a dormant goroutine die at a higher rate than other object.</strong></p>
-<p>与一个完整请求 或 休眠 goroutine 所关联的对象们`，比其它对象更容易死亡。</p>
-<p>我们假设存在两个Goroutine - G1和G2，它们的对象分为如下三类：</p>
-<ul>
-<li>G1私有</li>
-<li>G2私有</li>
-<li>G1和G2共有</li>
-</ul>
-<p>当G1的生命周期结束时，即Goroutine退出，G1私有的的对象就应该被回收，这一点很容易理解。</p>
-<p>但是，程序实际运行的过程中，对象一直在变化，也就是G1私有的对象变成了G1和G2共有的。这个时候，我们就必须引入一个新的概念 - write barrier。</p>
-<h3 id="Write-Barrier-写屏障"><a href="#Write-Barrier-写屏障" class="headerlink" title="Write Barrier-写屏障"></a>Write Barrier-写屏障</h3><p>我们通过一句话来了解的写屏障功能：</p>
-<blockquote>
-<p>Whenever there was a write, we would have to see if it was writing a pointer to a private object into a public object.</p>
-</blockquote>
-<p>也就是说，当有个写请求时，我们就必须检查它是否将一个指针从私有对象变成了公共对象。这里注意两个点：</p>
-<ol>
-<li><strong>对象的复杂性</strong> - 如果一个对象从私有变成共有，那么它内部的子对象也需要变化</li>
-<li><strong>针对指针</strong> - 不用考虑一些值拷贝的对象</li>
-</ol>
-<p>由于第一点的存在，ROC需要始终开启写屏障，给整个程序带来了大量的成本，所以ROC最终没有被采用。</p>
-<blockquote>
-<p>我们不妨延伸地思考一下，当一个共有对象变成私有时，该怎么操作？我这边提供2个思路：</p>
-<ol>
-<li>每次删除指针引用时，看一下这个对象、是否只有一个Goroutine的引用，是的话转为私有</li>
-<li>不处理。等这个对象没有任何引用时，用GC清理</li>
-</ol>
-</blockquote>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>ROC的思想很朴素，非常符合我们的直觉，具有一定的参考价值。</p>
-<p>而写屏障目前被广泛地应用在各类GC中，今天我们也借ROC对它有了初步印象。</p>
-<h2 id="2022-03-24-Go1-5的GC概览1-官方Talk"><a href="#2022-03-24-Go1-5的GC概览1-官方Talk" class="headerlink" title="2022-03-24 Go1.5的GC概览1 - 官方Talk"></a>2022-03-24 Go1.5的GC概览1 - 官方Talk</h2><p>在上一个系列，我们通过阅读 <strong>Go垃圾回收之旅</strong> 的相关资料，对Go中GC的很多概念有了基本的认识，这就给我们接下来的学习铺好了路。</p>
-<p>今天开始，我们将一起阅读下一篇内容，也就是官方博客对Go1.5版本GC的讲解。</p>
-<blockquote>
-<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a> </p>
-<p>为什么我不选择最新版本进行讲解呢？</p>
-<p>Go1.5的GC实现是具有一定里程碑意义的，实现了 <strong>并发标记清扫</strong>，与最新的GC实现差异并不大，作为入门学习资料更容易理解。</p>
-</blockquote>
-<p>在这篇博客中，作者先引入了一个Talk，里面重点讲述了GC的实现与性能，而实现部分使我们今天的重点。</p>
-<blockquote>
-<p>请跳转阅读 - <a target="_blank" rel="noopener" href="https://go.dev/talks/2015/go-gc.pdf">https://go.dev/talks/2015/go-gc.pdf</a></p>
-</blockquote>
-<h3 id="GC相关的差异（Go与Java）"><a href="#GC相关的差异（Go与Java）" class="headerlink" title="GC相关的差异（Go与Java）"></a>GC相关的差异（Go与Java）</h3><table>
-<thead>
-<tr>
-<th align="center">维度</th>
-<th align="center">GO</th>
-<th align="center">java</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">运行线程</td>
-<td align="center">1000+Goroutine</td>
-<td align="center">10+线程</td>
-</tr>
-<tr>
-<td align="center">同步机制</td>
-<td align="center">channel</td>
-<td align="center">锁</td>
-</tr>
-<tr>
-<td align="center">运行时实现</td>
-<td align="center">Go语言实现</td>
-<td align="center">C语言实现</td>
-</tr>
-<tr>
-<td align="center">内存分布</td>
-<td align="center">具备局部性</td>
-<td align="center">通过指针跳转</td>
-</tr>
-</tbody></table>
-<h3 id="GC概览"><a href="#GC概览" class="headerlink" title="GC概览"></a>GC概览</h3><ol>
-<li>Scan Phase 扫描</li>
-<li>Mark Phase 标记</li>
-<li>Sweep Phase 清理</li>
-</ol>
-<blockquote>
-<p>关于这三个阶段是怎么实现的，可以对照着ppt看，或者观看视频 - <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV18r4y1q7p3">https://www.bilibili.com/video/BV18r4y1q7p3</a></p>
-</blockquote>
-<p>关于更细节的 <strong>GC Algorithm Phases</strong> 实现，我们会在下一讲描述。</p>
-<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>本篇内容主要结合这个Talk，讲述了Go1.5版本的GC基本实现，希望大家能对GC背景和三阶段操作有基本了解。</p>
-<h2 id="2022-03-26-Go1-5的GC概览2-GC-Algorithm-Phases"><a href="#2022-03-26-Go1-5的GC概览2-GC-Algorithm-Phases" class="headerlink" title="2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases"></a>2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases</h2><p>在上一篇，我们从这篇Talk - <a target="_blank" rel="noopener" href="https://go.dev/talks/2015/go-gc.pdf">https://go.dev/talks/2015/go-gc.pdf</a> 里了解标记清理算法。</p>
-<p>今天，我们将对着下面这张Go1.5 GC算法的各个阶段，串讲一下GC这个过程。</p>
-<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go1.5-gc.png" alt="Go 1.5 GC"></p>
-<h3 id="Stack-scan-栈扫描"><a href="#Stack-scan-栈扫描" class="headerlink" title="Stack scan 栈扫描"></a>Stack scan 栈扫描</h3><p>栈扫描的启动阶段有一小段STW，这是因为GC要启动写屏障，所以必须先暂停所有Goroutine的运行。这个时间很短，大概耗时在几十微秒。</p>
-<p>runtime中的写屏障的数据结构如下：    </p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> writeBarrier <span class="keyword">struct</span> &#123;</span><br><span class="line">	enabled <span class="keyword">bool</span>    <span class="comment">// compiler emits a check of this before calling write barrier</span></span><br><span class="line">	pad     [<span class="number">3</span>]<span class="keyword">byte</span> <span class="comment">// compiler uses 32-bit load for &quot;enabled&quot; field</span></span><br><span class="line">	needed  <span class="keyword">bool</span>    <span class="comment">// whether we need a write barrier for current GC phase</span></span><br><span class="line">	cgo     <span class="keyword">bool</span>    <span class="comment">// whether we need a write barrier for a cgo check</span></span><br><span class="line">	alignme <span class="keyword">uint64</span>  <span class="comment">// guarantee alignment so that compiler can use a 32 or 64-bit load</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>完成启动后，就进入这一步的工作：<strong>从全局变量和各个Goroutine的栈上收集指针信息</strong>。这一步，也就是初始化所有标记对象的集合。</p>
-<h3 id="Mark-标记"><a href="#Mark-标记" class="headerlink" title="Mark 标记"></a>Mark 标记</h3><p>标记阶段即根据扫描出的初始指针对象，做BFS遍历，也就将所有可触达的对象加上标记。这里有一句话：</p>
-<p><strong>Write barrier tracks pointer changes by mutator.</strong> 也就是在标记阶段中，如果有程序变更了指针，就需要添加写屏障。</p>
-<p>关于写屏障的实现细节我们先不细聊，先一起来看看GC中的三个概念：</p>
-<ol>
-<li>mutator：一般指应用程序，在运行过程中，会不停地修改堆对象里的指向关系</li>
-<li>collector：垃圾回收期，更多地是指GC线程</li>
-<li>allocator：内存分配器，也就是程序向操作系统申请内存、释放内存，这一点在GC里很重要，往往被我们忽视</li>
-</ol>
-<h3 id="Mark-Termination-标记结束"><a href="#Mark-Termination-标记结束" class="headerlink" title="Mark Termination 标记结束"></a>Mark Termination 标记结束</h3><p>完成标记后，主要分为三个工作：</p>
-<ol>
-<li>Rescan - 重新扫描其中变化的内容</li>
-<li>Clean Up Tasks - 这里的清理并不是清理对象，而是对整个Mark标记的收尾工作，比如收缩栈</li>
-<li>关闭写屏障</li>
-</ol>
-<p>注意，这一整个阶段都是STW的。</p>
-<h3 id="Sweep-清扫"><a href="#Sweep-清扫" class="headerlink" title="Sweep 清扫"></a>Sweep 清扫</h3><p>Sweep就是将未标记的堆上对象进行清理，回收资源。这一阶段是并发的。</p>
-<p>值得一提的是，我们之前谈论过的GC Paging算法就是在这一步启动的，用在估算下一次启动GC的最佳时间。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/14/sharing-5min/2022-03/2022Week11/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/03/14/sharing-5min/2022-03/2022Week11/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week11</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-03-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-14T12:00:00+08:00">2022-03-14</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-24 22:20:32" itemprop="dateModified" datetime="2022-03-24T22:20:32+08:00">2022-03-24</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
-<h2 id="2022-03-14-Go垃圾回收之旅3-静态编译"><a href="#2022-03-14-Go垃圾回收之旅3-静态编译" class="headerlink" title="2022-03-14 Go垃圾回收之旅3 - 静态编译"></a>2022-03-14 Go垃圾回收之旅3 - 静态编译</h2><p>Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。那么，这对学习GC有什么意义呢？让我们一起看看今天的内容。</p>
-<blockquote>
-<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
-</blockquote>
-<p>我们先和JAVA程序做个对比：</p>
-<ul>
-<li><strong>Go</strong><ul>
-<li>Go编译的二进制文件</li>
-<li>Linux</li>
-</ul>
-</li>
-<li><strong>JAVA</strong><ul>
-<li>Java打包的JAR文件</li>
-<li>JVM</li>
-<li>Linux</li>
-</ul>
-</li>
-</ul>
-<p>从这个架构不难猜到，上文谈到的 运行时，Go语言是直接编译到二进制文件里的；而JAVA是在JVM里实现的。</p>
-<p>Go的这种实现方式，主要优劣点如下：</p>
-<ul>
-<li>优点： 程序的运行更具备 <strong>确定性</strong>，即开发人员可以根据代码，预测到程序的运行逻辑，更容易针对性地优化</li>
-<li>缺点：运行时没有<code>JIT</code>机制，无法针对具体的运行结果进行反馈优化</li>
-</ul>
-<p><code>JIT</code>的优化方向很多，我这里举一个热点函数优化的例子：</p>
-<ol>
-<li>在代码中，函数f需要输入参数a和b</li>
-<li>运行了一段时间后，<code>JIT</code>发现b的输入参数一直都是某个固定值b1</li>
-<li>这时，<code>JIT</code>进行编译优化，将函数f编译成一个新函数f1<ol>
-<li>f1只需要入参a</li>
-<li>b参数被替换为固定值b1</li>
-<li>减少参数复杂度，能提升程序效率，尤其是热点函数</li>
-</ol>
-</li>
-<li>如果参数b突然变成了b2，那<code>JIT</code>就会从f1回退到f</li>
-</ol>
-<p>简单来说：<strong>Go程序会怎么运行，往往在编码阶段就可以预期到了</strong>；而JAVA引入的<code>JIT</code>能力，可以在程序运行后，根据具体的运行情况，做针对性地优化，提升效率的同时也带了很多的不确定性。</p>
-<p>两种实现方式各有利弊，团队可以根据实际情况自行选择。单从Go语言开发者来说，排查线上问题相对有<code>JIT</code>机制的JAVA程序简单很多。</p>
-<p>这种确定性也让Go的GC相对简单不少，方便我们的学习。</p>
-<h2 id="2022-03-15-Go垃圾回收之旅4-性能压力下的Go程序"><a href="#2022-03-15-Go垃圾回收之旅4-性能压力下的Go程序" class="headerlink" title="2022-03-15 Go垃圾回收之旅4 - 性能压力下的Go程序"></a>2022-03-15 Go垃圾回收之旅4 - 性能压力下的Go程序</h2><p>在<a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">这篇演讲</a>中，有这么一段很有意思的描述：</p>
-<blockquote>
-<p>Out of memory, OOMs, are tough on Go; </p>
-<p>temporary spikes in memory usage should be handled by increasing CPU costs, not by aborting. </p>
-<p>Basically if the GC sees memory pressure it informs the application that it should shed load. Once things are back to normal the GC informs the application that it can go back to its regular load.</p>
-</blockquote>
-<p>这段话包含了Go语言的GC，在面对CPU和内存压力下的决策：</p>
-<ol>
-<li><strong>Go程序很少会OOM</strong><ol>
-<li>这句话有一定前提，即内存设置是合理的，代码也没有明显的内存泄露问题</li>
-<li>至于具体原因，我们看下文</li>
-</ol>
-</li>
-<li><strong>业务高峰时内存使用率过高，应该通过提升CPU能力来解决，而不是中止程序</strong><ol>
-<li>自动GC是需要CPU的计算资源做支持，来清理无用内存</li>
-<li>要保证内存资源能支持程序的正常运行，有两个思路：<ol>
-<li>减少已有内存 - 通过GC来回收无用的内存</li>
-<li>限制新增内存 - 即运行时尽可能地避免新内存的分配，最简单的方法就是不运行代码</li>
-</ol>
-</li>
-<li>显然，中止程序对业务的影响很大，我们更倾向于通过GC去回收内存，腾出新的空间</li>
-</ol>
-</li>
-<li><strong>GC压力高时，通知应用减少负载；而当恢复正常后，GC再通知应用可以恢复到正常模式了</strong><ol>
-<li>我们可以将上述分为两类工作<ol>
-<li>业务逻辑的Goroutine</li>
-<li>GC的Goroutine</li>
-</ol>
-</li>
-<li>这两类Goroutine都会消耗CPU资源，区别在于：<ol>
-<li>运行业务逻辑往往会增加内存</li>
-<li>GC是回收内存</li>
-</ol>
-</li>
-<li>这里就能体现出Go运行时的策略<ol>
-<li>内存压力高时，GC线程更容易抢占到CPU资源，进行内存回收</li>
-<li>代价是业务处理逻辑会有一定性能损耗，被分配的计算资源减少</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-<p>GC最直观的影响就体现在延迟上。尤其是在STW - Stop The World情况下，程序会暂停所有非GC的工作，进行全量的垃圾回收。即便整个GC只花费了1s，所有涉及到这个程序的业务调用，都会增加1s延迟；在微服务场景下，这个问题会变得尤为复杂。</p>
-<p>而GC的方案迭代，最直观的效果就体现在这个延迟优化上。</p>
-<h2 id="2022-03-17-Go垃圾回收之旅5-GC-Pacer"><a href="#2022-03-17-Go垃圾回收之旅5-GC-Pacer" class="headerlink" title="2022-03-17 Go垃圾回收之旅5 - GC Pacer"></a>2022-03-17 Go垃圾回收之旅5 - GC Pacer</h2><p>今天我们会重点讨论Go语言GC Pacer这个概念。</p>
-<blockquote>
-<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
-</blockquote>
-<p>要理解透彻GC Pacer的非常困难，底层实现细节必须深入到源码。这里，我们会通过分享中的关键性描述，来思考GC Pacer的设计理念。</p>
-<blockquote>
-<p>It is basically based on a feedback loop that determines when to best start a GC cycle. </p>
-</blockquote>
-<p>我们聚焦到两个词：</p>
-<ul>
-<li><code>feedback loop</code> 反馈循环，GC Pacer是会根据实际GC情况会不断迭代、反馈的</li>
-<li><code> when to best start a GC cycle</code> 强调了GC Pacer的目标 - 为了决定一个最佳启动GC的时机</li>
-</ul>
-<p>GC Pacer的内部原理也和它的定义非常贴切，它是根据步长来决定GC的：</p>
-<ul>
-<li>对象：堆上的内存分配</li>
-<li>步长：设定值，如100%</li>
-<li>触发时机：当前堆上内存大小 &gt;= 上次堆上内存大小 * (1 + 100%)</li>
-</ul>
-<p>简单来说，就是一种 <strong>按比例增长</strong> 的触发机制。但这个机制没有那么简单，我们看下面这段：</p>
-<blockquote>
-<p>If need be, the Pacer slows down allocation while speeding up marking. </p>
-<p>At a high level the Pacer stops the Goroutine, which is doing a lot of the allocation, and puts it to work doing marking. </p>
-</blockquote>
-<p>这两句描述和我们上一讲的内容对应上了 - 在一定的性能压力下，Pacer会减少内存的分配，而花更多的时间在对象的标记（marking）上，它是GC里的最耗性能的步骤。</p>
-<p>对应到上面提到的反馈呢，也就是GC Pacer并不是单纯的一种 按比例增长 的触发机制，还有一些其余因素的影响：比如，当前这次的GC花费的CPU计算资源与标记的耗时超过了预期，表示当前整个GC存在一定压力，下次的GC的开始时间需要适当提前。</p>
-<p>GC Pacer最近也重新做了一次大的改动，有兴趣的可以参考这篇文章：</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/a216b56e743c5b6b300b3ef1673ee62684b5b63b/design/44167-gc-pacer-redesign.md">https://go.googlesource.com/proposal/+/a216b56e743c5b6b300b3ef1673ee62684b5b63b/design/44167-gc-pacer-redesign.md</a></p>
-</blockquote>
-<p>深入研究GC Pacer需要很多数学知识储备，留给有兴趣的同学自行探索了。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/07/sharing-5min/2022-03/2022Week10/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/03/07/sharing-5min/2022-03/2022Week10/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week10</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-03-07 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-07T12:00:00+08:00">2022-03-07</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-12 12:34:04" itemprop="dateModified" datetime="2022-03-12T12:34:04+08:00">2022-03-12</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
-<h2 id="2022-03-07-CNCF-Provisioning层"><a href="#2022-03-07-CNCF-Provisioning层" class="headerlink" title="2022-03-07 CNCF-Provisioning层"></a>2022-03-07 CNCF-Provisioning层</h2><p>今天，我们将加快进度，来对Provisioning这一层的项目做一下概览。Provisioning层是一种工具性质的项目，能一定程度上提升Kubernetes的综合能力，尤其是镜像管理和安全性。</p>
-<h3 id="KubeEdge"><a href="#KubeEdge" class="headerlink" title="KubeEdge"></a>KubeEdge</h3><p>KubeEdge在近几年非常火，贴合边缘计算这个概念。</p>
-<p>众所周知，由于Kubernetes是一个以master为核心的调度系统，许多核心能力都依赖master节点，会导致边端能力的受限。KubeEdge就是以这个为切入点。</p>
-<p>目前落地KubeEdge的公司主要就是以华为为代表，其余大厂并没有加入到这个阵营。我之前的公司也引入过KubeEdge，但整体效果不佳。</p>
-<blockquote>
-<p>在引入KubeEdge前，我们需要思考一个问题：边缘计算的系统一定要结合Kubernetes吗？</p>
-</blockquote>
-<h3 id="Harbor"><a href="#Harbor" class="headerlink" title="Harbor"></a>Harbor</h3><p>Harbor是云原生的制品仓库，用来存储镜像等内容。它非常强调自身的安全性。</p>
-<p>Harbor整体的学习与使用成本较低，也提供大量的界面化工具，主要存在新老版本的兼容问题。对于新团队，强烈建议直接使用Harbor。</p>
-<h3 id="Dragonfly"><a href="#Dragonfly" class="headerlink" title="Dragonfly"></a>Dragonfly</h3><p>Dragonfly这个项目利用了P2P的思想，进行镜像、文件的分发，对多机房、多数据中心且传输的文件量大的场景才能突出其价值。</p>
-<p>一般情况下我们无需考虑。</p>
-<h3 id="Open-Policy-Agent"><a href="#Open-Policy-Agent" class="headerlink" title="Open Policy Agent"></a>Open Policy Agent</h3><p>OPA是一个很有意思的项目，我们可以看看它的实际构成。一个具体的OPA主要包括2块：</p>
-<ol>
-<li>Policy - Rego语法、特有</li>
-<li>Data - JSON语法</li>
-</ol>
-<p>Policy即策略，例如大于某个值时执行策略；而Data则是配置Policy的具体数据，例如将Policy的某个值设置为10。组合了Policy+Data，这个策略才能真正地执行，可以使用OPA的库或者服务。</p>
-<p>OPA的思想对项目的可读性和扩展性很有意义，尤其是对于一些需要大量策略配置的服务，如Envoy。</p>
-<h3 id="TUF-Notary"><a href="#TUF-Notary" class="headerlink" title="TUF/Notary"></a>TUF/Notary</h3><p>TUF是软件更新系统的行业事实上的标准，对于实际开发的意义不大。</p>
-<p>Notary是一个允许任何人信任任意数据集合的项目，是TUF的一个具体实现。目前主要应用在镜像上。</p>
-<h3 id="Falco"><a href="#Falco" class="headerlink" title="Falco"></a>Falco</h3><p>Falco是一个保证运行时安全的项目，用来检测云原生运行时的各种异常与安全问题。</p>
-<p>运行时的安全问题是系统安全的最后一道防线，往往需要研发团队紧急处理。</p>
-<h3 id="SPIFFE-SPIRE"><a href="#SPIFFE-SPIRE" class="headerlink" title="SPIFFE/SPIRE"></a>SPIFFE/SPIRE</h3><p>SPIFFE 定义了服务的认证标准和认证信息的标准，SPIRE 是它的一个具体实现。</p>
-<p>这块内容仍处于初期，我们了解即可。</p>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>今天，我们走马观花地查看了Provisioning层的项目，大家重点关注Harbor和KubeEdge即可。其中Harbor操作难度低，可以快速上手使用；而KubeEdge面向的边缘计算领域比较窄，适用于特定人群。</p>
-<p>到这里，我们的CNCF之旅已经基本完成了。后续有机会，我会挑选几个受欢迎的项目做细致的分析。</p>
-<h2 id="2022-03-10-Go垃圾回收之旅1-调度概览"><a href="#2022-03-10-Go垃圾回收之旅1-调度概览" class="headerlink" title="2022-03-10 Go垃圾回收之旅1 - 调度概览"></a>2022-03-10 Go垃圾回收之旅1 - 调度概览</h2><p>关于Go语言的垃圾回收<code>Garbage Collector</code>，相信大家都在网上看过很多相关的文章：有的是科普性质的讲解，有的是直接对着源码的分析，也有的是与其余语言的对比。但文章往往具有时效性，或多或少与最新的Go语言实现有一些偏差。</p>
-<p>从这篇开始，我将分析更具权威和参考价值的官方资料，让大家对Go的GC有深刻而长远的认识。</p>
-<p>我们今天看的这一篇文章，来自内存管理大师理查德·哈德森的一次分享。我将挑选其中的一些关键点来描述。</p>
-<blockquote>
-<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
-</blockquote>
-<p>今天我们先来看第一块 - <strong>调度概览</strong>。</p>
-<blockquote>
-<p>The Go scheduler multiplexes Goroutines onto OS threads which hopefully run with one OS thread per HW thread.</p>
-</blockquote>
-<p>学习GC前，我们先得对Go的GMP模型有一定的了解。这句话包括了三个关键对象：</p>
-<ul>
-<li><strong>Goroutines</strong> - 即Go语言中通过关键词<code>go</code>产生的协程</li>
-<li><strong>OS thread</strong> - 系统线程，一般由操作系统创建</li>
-<li><strong>HW thread</strong> - 硬件线程，一般1核（物理核）CPU对应2个硬件线程</li>
-</ul>
-<p>这三者，分别对应GMP模型中的G、M、P。</p>
-<p>我们再聚焦于两个关键的描述：</p>
-<ul>
-<li><strong>Go scheduler multiplexes Goroutines</strong> - Go的调度器参考多路复用的机制，调度Goroutines的运行；</li>
-<li><strong>hopefully run with one OS thread per HW thread</strong> - 尽可能地将系统线程与硬件线程绑定，这样可以减少切换上下文时带来的开销。</li>
-</ul>
-<p>关于GMP，我们到这里浅尝辄止。更多的实现细节，会在后面单独开启一个系列。</p>
-<h2 id="2022-03-11-Go垃圾回收之旅2-value-oriented"><a href="#2022-03-11-Go垃圾回收之旅2-value-oriented" class="headerlink" title="2022-03-11 Go垃圾回收之旅2 - value-oriented"></a>2022-03-11 Go垃圾回收之旅2 - value-oriented</h2><p>我们继续看理查德·哈德森的分享 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote%EF%BC%8C">https://go.dev/blog/ismmkeynote，</a> 原文中有这么一句描述：</p>
-<blockquote>
-<p>Go is a value-oriented language.</p>
-</blockquote>
-<p>理解value-oriented与reference-oriented的差别，对我们学习与理解GC意义很大。以官方<code>tar</code>包中的<code>Reader</code>为例：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Reader <span class="keyword">struct</span> &#123;</span><br><span class="line">	r    io.Reader</span><br><span class="line">	pad  <span class="keyword">int64</span>      <span class="comment">// Amount of padding (ignored) after current file entry</span></span><br><span class="line">	curr fileReader <span class="comment">// Reader for current file entry</span></span><br><span class="line">	blk  block      <span class="comment">// Buffer to use as temporary local storage</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// err is a persistent error.</span></span><br><span class="line">	<span class="comment">// It is only the responsibility of every exported method of Reader to</span></span><br><span class="line">	<span class="comment">// ensure that this error is sticky.</span></span><br><span class="line">	err error</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>为了方便理解，举一个最简单的实现：</p>
-<ul>
-<li><p><strong>value-oriented</strong>语言，<code>Reader</code>结构体里的所有数据（各个field）都是放在 <strong>栈上连续的内存</strong> </p>
-</li>
-<li><p><strong>reference-oriented</strong>语言，会将<code>Reader</code>结构体保存在堆空间里，而在栈上分配一个指针，记录<code>Reader</code>的起始地址，方便找到。</p>
-</li>
-</ul>
-<p>所以，两者的内存分配大致情况如下：</p>
-<ul>
-<li><strong>value-oriented</strong><ul>
-<li>栈：sizeof(Reader) </li>
-<li>堆：无</li>
-</ul>
-</li>
-<li><strong>reference-oriented</strong><ul>
-<li>栈：1个指针(如64bit) </li>
-<li>堆：Reader主对象+以及Reader内部的子对象</li>
-</ul>
-</li>
-</ul>
-<p>强调一下，上面只是一个最简单的实现，实际情况会复杂得多。比如说复杂情况下的reference-oriented：</p>
-<ul>
-<li><p>栈：指针 + 对象信息</p>
-</li>
-<li><p>堆：Reader对象以及Reader内部的各子对象</p>
-</li>
-</ul>
-<p>两种实现各有优劣。为了加深大家的印象，我这边以 <strong>运行时</strong> 作为考量点，来分析分析：</p>
-<blockquote>
-<p><strong>运行时</strong> 可以简单理解为：</p>
-<p>在一个程序开始运行后，内部的数据量越多、数据变化越频繁、运行时间越长，运行时就越复杂，需要在内存中维护大量的信息。</p>
-</blockquote>
-<ul>
-<li><strong>value-oriented</strong> - 更适合轻量级的运行时，在栈上维护会更省空间、访问起来也高效</li>
-<li><strong>reference-oriented</strong> - 适合重量级的运行时，当对象数量达到一定级别后，统一在堆上管理更为方便</li>
-</ul>
-<p>再次提醒：以上内容只是为了更好地描述value-oriented，简化了问题，不可以偏概全。比如，在Go语言中会涉及到变量的逃逸分析，可能会分配到堆上。</p>
-<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>本篇文章需要大家对 <strong>程序的堆与栈</strong> 有一定的基础了解，如果有同学不太清楚，建议花几分钟的时间去补一补。</p>
-<p>文中提到了两个value-oriented的价值，建议了解大致原理即可，对理解GC意义不大。</p>
-<ul>
-<li><strong>提高缓存命中</strong> - 将相关的字段临近分配</li>
-<li><strong>支持跨语言接口的访问</strong> - 如Go访问C/C++</li>
-</ul>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/28/sharing-5min/2022-02/2022Week09/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/02/28/sharing-5min/2022-02/2022Week09/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week09</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-02-28 12:00:00" itemprop="dateCreated datePublished" datetime="2022-02-28T12:00:00+08:00">2022-02-28</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-07 20:46:41" itemprop="dateModified" datetime="2022-03-07T20:46:41+08:00">2022-03-07</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57581641299795_.pic_hd.jpg" alt="2022-02"></p>
-<h2 id="2022-02-28-CNCF-OpenTelemetry等"><a href="#2022-02-28-CNCF-OpenTelemetry等" class="headerlink" title="2022-02-28 CNCF-OpenTelemetry等"></a>2022-02-28 CNCF-OpenTelemetry等</h2><p>今天，我们会以OpenTelemetry的三个核心Metrics、Logs、Traces为切入点，来看看OpenMetrics、Fluentd、Jaeger这三个具有代表性的项目。</p>
-<h3 id="OpenTelemetry"><a href="#OpenTelemetry" class="headerlink" title="OpenTelemetry"></a>OpenTelemetry</h3><p>OpenTelemetry主要分为三大块：Metrics、Logs、Traces。</p>
-<ul>
-<li>Metrics指标：程序将运行中关键的一些指标数据保存下来，常通过RPC的方式Pull/Push到统一的平台</li>
-<li>Logs日志：依赖程序自身的打印。可通过ELK/EFK等工具采集到统一的平台并展示</li>
-<li>Traces分布式追踪：遵循Dapper等协议，获取一个请求在整个系统中的调用链路</li>
-</ul>
-<p>OpenTelemetry有多语言的、具体落地的现成库，供业务方快速落地实践。</p>
-<blockquote>
-<p>更多可以参考 <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/10/14/readings/go-digest-2/">https://junedayday.github.io/2021/10/14/readings/go-digest-2/</a></p>
-</blockquote>
-<h3 id="Metrics-OpenMetrics"><a href="#Metrics-OpenMetrics" class="headerlink" title="Metrics - OpenMetrics"></a>Metrics - OpenMetrics</h3><blockquote>
-<p>Evolving the Prometheus exposition format into a standard.</p>
-</blockquote>
-<p>这个项目更多的是一种规范性质，基本就是以Prometheus的指标为标准。</p>
-<p>更多的信息可以参考 <a target="_blank" rel="noopener" href="https://prometheus.io/docs/instrumenting/exposition_formats/%E3%80%82">https://prometheus.io/docs/instrumenting/exposition_formats/。</a></p>
-<h3 id="Logs-Fluentd"><a href="#Logs-Fluentd" class="headerlink" title="Logs - Fluentd"></a>Logs - Fluentd</h3><blockquote>
-<p>unified logging layer 统一的日志层</p>
-</blockquote>
-<p>我们这里谈的Logs并不是指各编程语言的日志库，更多是指对日志产生后，<strong>如何进行解析与采集</strong>，而Fluentd就是一个代表性的项目。</p>
-<p>当前主流的日志采集与分析方案，也由ELK转变成了EFK，也就是Logstash被Fluentd所替代。</p>
-<p>Fluentd最核心的优势，在于它提供了大量的可供快速接入的插件 - <a target="_blank" rel="noopener" href="https://www.fluentd.org/plugins%E3%80%82">https://www.fluentd.org/plugins。</a></p>
-<h3 id="Traces-Jaeger"><a href="#Traces-Jaeger" class="headerlink" title="Traces - Jaeger"></a>Traces - Jaeger</h3><blockquote>
-<p>open source, end-to-end distributed tracing</p>
-</blockquote>
-<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/jaeger-architecture-v1.png" alt="jaeger"></p>
-<p>Jaeger为OpenTracing提供了一套具体落地的方案，在Jaeger-Client侧也提供了多语言的SDK，我们就可以在分布式系统中查到请求的整个生命周期的具体数据。但落地到平台时，我们要重点思考以下两点：</p>
-<ol>
-<li>Traces与Logs的关联：两者的收集、推送、分析、展示的整个链路非常相似，而且我们也往往希望在Trace里查询信息时，能查到应用程序中自行打印的日志；</li>
-<li>Traces与Service Mesh的关联：Jaeger-Agent与Service Mesh的Sidecar模式非常类似，两者该怎么配合实践</li>
-</ol>
-<p>我们可以独立建设Traces、Logs、Service Mesh这三块技术，但如果能将它们有机结合起来，有助于整个基础平台的统一化。</p>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>OpenTelemetry提倡的可观测性在复杂工程中非常重要，能大幅提高程序的可维护性。如果有机会实践，建议大家应优先理解它的理念，再结合当前开源生态进行落地。</p>
-<h2 id="2022-03-01-CNCF-Litmus-ChaosMesh"><a href="#2022-03-01-CNCF-Litmus-ChaosMesh" class="headerlink" title="2022-03-01 CNCF-Litmus/ChaosMesh"></a>2022-03-01 CNCF-Litmus/ChaosMesh</h2><p>随着Kubernetes的落地，混沌工程在近几年越来越流行，CNCF也将它作为重点项目。如果用一个词概括混沌工程，最常用的就是 <strong>故障注入</strong>。</p>
-<p>今天我将针对其中两个重要项目 - Litmus 和 ChaosMesh 做简单介绍，让大家对混沌工程有基本理解。</p>
-<h3 id="Litmus"><a href="#Litmus" class="headerlink" title="Litmus"></a>Litmus</h3><p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/litmus-arch.png" alt="litmus"></p>
-<p>Litmus的架构分为控制平面和执行平面。前者更多是提供可交互的web界面与整体的功能管理；而后者更专注于具体故障功能的实现。</p>
-<p>整体来说，Litmus的架构是比较重量级的：</p>
-<ol>
-<li>平台组件复杂</li>
-<li>和Argo/Prometheus等软件有一定的交叉</li>
-</ol>
-<h3 id="ChaosMesh"><a href="#ChaosMesh" class="headerlink" title="ChaosMesh"></a>ChaosMesh</h3><p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/chaos-mesh-arch.png" alt="chaos-mesh"></p>
-<p>相对而言，Chaos Mesh是一个比较轻量级的实现，整体的架构分为三块：</p>
-<ol>
-<li>Dashboard - 提供界面化交互能力</li>
-<li>Controller Manager - 统一管理多种CRD</li>
-<li>Daemon - 负责Pod端具体的故障注入</li>
-</ol>
-<p>我们可以仔细分析这里的三大块，都有不少的扩展点：</p>
-<ol>
-<li>可通过kubectl或自定义客户端下发指令</li>
-<li>Controller Manager 可实现工作流等复杂CRD</li>
-<li>Daemon可通过直接请求、容器运行时和Sidecar三种方式注入错误</li>
-</ol>
-<h3 id="故障注入能力"><a href="#故障注入能力" class="headerlink" title="故障注入能力"></a>故障注入能力</h3><p>我个人更看好ChaosMesh这个项目，它的架构图中所呈现的扩展性非常棒。那么，接下来我就以Chaos Mesh为例，看看它所提供的的故障注入能力：</p>
-<ul>
-<li>基本故障:<ul>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-pod-chaos-on-kubernetes/">PodChaos</a>: Pod</li>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-network-chaos-on-kubernetes/">NetworkChaos</a>: 网络</li>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-dns-chaos-on-kubernetes/">DNSChaos</a>: DNS</li>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-http-chaos-on-kubernetes/">HTTPChaos</a>: HTTP</li>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-heavy-stress-on-kubernetes/">StressChaos</a>: CPU或内存</li>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-io-chaos-on-kubernetes/">IOChaos</a>: IO</li>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-time-chaos-on-kubernetes/">TimeChaos</a>: 时间</li>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-kernel-chaos-on-kubernetes/">KernelChaos</a>: 内核</li>
-</ul>
-</li>
-<li>平台故障:<ul>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-aws-chaos/">AWSChaos</a>: AWS</li>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-gcp-chaos/">GCPChaos</a>: GCP</li>
-</ul>
-</li>
-<li>应用故障:<ul>
-<li><a target="_blank" rel="noopener" href="https://chaos-mesh.org/docs/simulate-jvm-application-chaos/">JVMChaos</a>: JVM</li>
-</ul>
-</li>
-</ul>
-<p>要覆盖基本故障这些case，已经需要投入非常多的人力物力了。</p>
-<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>我个人认为，混沌工程更多地是面向Iaas/Paas/Saas这类通用服务而提供的能力：</p>
-<ol>
-<li>Iaas/Paas/Saas这类服务是大规模共用的，对稳定性要求极高，才能体现出混沌工程的价值；</li>
-<li>在业务系统中引入混沌工程有两大问题：<ol>
-<li>一方面，ROI是非常低的，业务变化多、迭代快，从业务开发的角度来看，更希望基础平台侧能覆盖这些异常情况</li>
-<li>另一方面，混沌工程会带来很多不确定性，可能导致业务受损</li>
-</ol>
-</li>
-</ol>
-<p>对大部分的开发者来说，可以学习混沌工程的理念，提高自己设计系统时的健壮性，但不要过于追求完美。</p>
-<h2 id="2022-03-02-CNCF-Rook-Longhorn"><a href="#2022-03-02-CNCF-Rook-Longhorn" class="headerlink" title="2022-03-02 CNCF-Rook/Longhorn"></a>2022-03-02 CNCF-Rook/Longhorn</h2><p>今天，我们一起看看CNCF中存储这块。在云原生的环境下，分布式存储绝对是排名前三的技术难点，我也不可能通过短短五分钟描述清楚。</p>
-<p>所以，我将针对性地介绍核心概念，帮助大家有个初步印象。</p>
-<h3 id="CSI-Container-Storage-Interface"><a href="#CSI-Container-Storage-Interface" class="headerlink" title="CSI - Container Storage Interface"></a>CSI - Container Storage Interface</h3><p>容器存储之所以能在市场中蓬勃发展，离不开一个优秀的接口定义 - CSI。有了标准可依，各家百花齐放、优胜劣汰。</p>
-<blockquote>
-<p>CSI规范链接 - <a target="_blank" rel="noopener" href="https://github.com/container-storage-interface/spec/blob/master/spec.md">https://github.com/container-storage-interface/spec/blob/master/spec.md</a></p>
-</blockquote>
-<p>CSI整套规范内容很多，非存储这块的专业人士无需深入研究。不过，我们可以将它作为一个学习资料，花10分钟看看如下内容：</p>
-<ol>
-<li>记住核心术语概念 - <a target="_blank" rel="noopener" href="https://github.com/container-storage-interface/spec/blob/master/spec.md#terminology">https://github.com/container-storage-interface/spec/blob/master/spec.md#terminology</a></li>
-<li>了解架构 - <a target="_blank" rel="noopener" href="https://github.com/container-storage-interface/spec/blob/master/spec.md#architecture">https://github.com/container-storage-interface/spec/blob/master/spec.md#architecture</a></li>
-<li>学习核心RPC的命名 - <a target="_blank" rel="noopener" href="https://github.com/container-storage-interface/spec/blob/master/spec.md#rpc-interface">https://github.com/container-storage-interface/spec/blob/master/spec.md#rpc-interface</a></li>
-</ol>
-<h3 id="Ceph"><a href="#Ceph" class="headerlink" title="Ceph"></a>Ceph</h3><p>开源中最有名的分布式存储系统当属Ceph了。它并没有被捐献给CNCF组织，所以我们无法在全景图里找到它。</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://docs.ceph.com/en/latest/start/intro/">https://docs.ceph.com/en/latest/start/intro/</a></p>
-</blockquote>
-<p>这里不会讨论Ceph的细节，但还是希望大家能够了解：Ceph的维护成本不低，不要把它当作分布式存储的“银弹”。</p>
-<p>所以，对于中小型公司来说，核心业务优先考虑使用公有云的存储产品。</p>
-<h3 id="Rook"><a href="#Rook" class="headerlink" title="Rook"></a>Rook</h3><p>Rook这个项目其实分为两类概念：</p>
-<ol>
-<li>云原生存储编排引擎 - Rook</li>
-<li>对接具体文件系统的实现 - rook-ceph/rook-nfs</li>
-</ol>
-<p>Rook将Ceph的存储抽象为了Kubernetes系统中的Pod，进行统一调度，更加贴合云原生的设计理念。</p>
-<p>Rook在市场上的应用基本集中在rook-ceph上，不太建议使用rook-nfs。</p>
-<h3 id="Longhorn"><a href="#Longhorn" class="headerlink" title="Longhorn"></a>Longhorn</h3><p>CNCF中另一个项目 - Longhorn则选择脱离Ceph的生态，实现了一整个从编排到具体存储的链路。</p>
-<p>从其官方介绍来说，它更聚焦于微服务的场景，也就是能调度更大量级的Volume。</p>
-<p>关于Longhorn的实践资料并不多，很难对其下结论，不过官方提供了完善的文档资料，给对应的开发者不小信心。</p>
-<blockquote>
-<p>官网 - <a target="_blank" rel="noopener" href="https://longhorn.io/">https://longhorn.io/</a></p>
-</blockquote>
-<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><p>分布式存储是一块仍在快速发展的领域，对大部分公司或团队来说选择比较有限：</p>
-<ol>
-<li>优先考虑云服务</li>
-<li>有Ceph维护经验+一定二次开发能力的，考虑rook+ceph</li>
-<li>有强烈的技术信心的，可以考虑小规模落地Longhorn体验</li>
-</ol>
-<p>到这里，我再补充一点：我们千万不要过度迷恋分布式存储中的“分布式”这个词，很多时候单点存储（本地存储和远程存储）就能满足我们的开发要求了。</p>
-<h2 id="2022-03-03-CNCF-containerd-cri-o"><a href="#2022-03-03-CNCF-containerd-cri-o" class="headerlink" title="2022-03-03 CNCF-containerd/cri-o"></a>2022-03-03 CNCF-containerd/cri-o</h2><p>容器的运行时是Kubernetes运行容器的基础。与CSI类似，Kubernetes提出了CRI - Container Runtime Interface的概念。</p>
-<p>今天，我们会更多地关注到CRI这个规范，而不会对这两个项目底层进行分析 - 毕竟，虽然提供了开放的接口，但目前绝大部分的k8s依然是以Docker容器作为具体实现的，并且这现象会持续相当一段时间。</p>
-<p>我会侧重讲讲它们之间的联系。</p>
-<h3 id="CRI"><a href="#CRI" class="headerlink" title="CRI"></a>CRI</h3><p>CRI主要是针对的是Kubernetes中<code>kubelet</code>这个组件的，它用于在各个Node节点管理满足标准的OCI容器。</p>
-<blockquote>
-<p>OCI是一个容器界的事实标准，主流的容器都满足该规范，我们在这里了解即可。</p>
-</blockquote>
-<p>CRI最新的版本可以参考这个链接 - <a target="_blank" rel="noopener" href="https://github.com/kubernetes/cri-api/blob/release-1.23/pkg/apis/runtime/v1alpha2/api.proto">https://github.com/kubernetes/cri-api/blob/release-1.23/pkg/apis/runtime/v1alpha2/api.proto</a></p>
-<p>CRI主要分为如下：</p>
-<ol>
-<li>RuntimeService 运行时服务<ol>
-<li>PodSandbox 相关，即Pod中的根容器，一般也叫做pause容器；</li>
-<li>Container 相关，即普通的容器；</li>
-</ol>
-</li>
-<li>ImageService 镜像服务</li>
-</ol>
-<p>CRI里的内容很多，我这边分享个人阅读大型<code>protobuffer</code>文件的两个技巧：</p>
-<ol>
-<li>弄懂高频词汇，如上面的Sandbox</li>
-<li>聚焦核心的枚举enum</li>
-</ol>
-<p>这里有两个枚举值得关注：</p>
-<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">PodSandboxState</span> </span>&#123;</span><br><span class="line">    SANDBOX_READY    = <span class="number">0</span>;</span><br><span class="line">    SANDBOX_NOTREADY = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">ContainerState</span> </span>&#123;</span><br><span class="line">    CONTAINER_CREATED = <span class="number">0</span>;</span><br><span class="line">    CONTAINER_RUNNING = <span class="number">1</span>;</span><br><span class="line">    CONTAINER_EXITED  = <span class="number">2</span>;</span><br><span class="line">    CONTAINER_UNKNOWN = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>看到这两个定义，如果你对容器/Pod有一定的了解，能很快地联系到它们的生命周期管理了。</p>
-<h3 id="containerd"><a href="#containerd" class="headerlink" title="containerd"></a>containerd</h3><p>我们看看Docker与Kubernetes的分层：</p>
-<ul>
-<li><p>Docker Engine -&gt; containerd -&gt; runc</p>
-</li>
-<li><p>Kubernetes（Kubelet组件） -&gt; containerd -&gt; runc</p>
-</li>
-</ul>
-<p>所以，containerd的作用很直观：对上层（Docker Engine/Kubernetes）屏蔽下层（runc等）的实现细节。</p>
-<h3 id="cri-o"><a href="#cri-o" class="headerlink" title="cri-o"></a>cri-o</h3><blockquote>
-<p>LIGHTWEIGHT CONTAINER RUNTIME FOR KUBERNETES</p>
-</blockquote>
-<p>从定义不难看出，它是面向Kubernetes的、更为轻量级的CRI。cri-o属于我们前面聊过的OCI项目之一。</p>
-<p>对应上面的分层，cri-o封装的是runc这种具体的实现，让上层（Kubernetes）不需要关心下层具体运行容器的引擎。</p>
-<h3 id="小结-3"><a href="#小结-3" class="headerlink" title="小结"></a>小结</h3><p>今天涉及的概念有很多，其实问题起源是 Docker没有捐献给CNCF基金会，为了摆脱不确定性，Kubernetes想解耦Docker这个强依赖。</p>
-<p>无论是抽象出标准接口，还是通过分层设计，从理论上的确可以脱离了对Docker的依赖，但现实情况依旧有相当一段路要走，毕竟Docker的存量市场实在太过庞大。</p>
-<h2 id="2022-03-04-CNCF-CNI-Cilium"><a href="#2022-03-04-CNCF-CNI-Cilium" class="headerlink" title="2022-03-04 CNCF-CNI/Cilium"></a>2022-03-04 CNCF-CNI/Cilium</h2><p>之前我们了解了CSI和CRI这两大块，今天我们将接触到Kubernetes另一个重要规范 - CNI，也就是Container Network Interface。</p>
-<p>了解分布式系统的同学都深有体会，网络绝对是最复杂的因素，无论是拥塞、延迟、丢包等常规情况，还是像网络分区等复杂难题，都需要大量的学习成本。无疑，CNI的学习难度也是非常高的。而Cilium作为CNI的一种实现，我今天依然会简单带过。</p>
-<h3 id="CNI规范"><a href="#CNI规范" class="headerlink" title="CNI规范"></a>CNI规范</h3><blockquote>
-<p>官方链接 - <a target="_blank" rel="noopener" href="https://github.com/containernetworking/cni">https://github.com/containernetworking/cni</a></p>
-</blockquote>
-<h4 id="解决什么问题"><a href="#解决什么问题" class="headerlink" title="解决什么问题"></a>解决什么问题</h4><p>CNI没有像CSI/CRI那样有一个明确的接口定义。要想了解它，我们先要理解它要解决的问题。</p>
-<p>简单来说，就是在Kubernetes的容器环境里， <strong>分配容器网络并保证互相联通</strong>。</p>
-<h4 id="核心五个规范"><a href="#核心五个规范" class="headerlink" title="核心五个规范"></a>核心五个规范</h4><ol>
-<li>A format for administrators to define network configuration. 网络配置的格式</li>
-<li>A protocol for container runtimes to make requests to network plugins.  执行协议</li>
-<li>A procedure for executing plugins based on a supplied configuration. 基于网络配置的执行过程</li>
-<li>A procedure for plugins to delegate functionality to other plugins. 插件授权</li>
-<li>Data types for plugins to return their results to the runtime. 返回的格式</li>
-</ol>
-<h4 id="CNI插件"><a href="#CNI插件" class="headerlink" title="CNI插件"></a>CNI插件</h4><p>我们通常谈到CNI的插件，会存在歧义，主要有两种理解：</p>
-<ol>
-<li>一种是涉及到CNI底层开发的插件，可参考 <a target="_blank" rel="noopener" href="https://www.cni.dev/plugins/current/">https://www.cni.dev/plugins/current/</a> ， 主要为自研提供基础能力；</li>
-<li>另一种是已经实现CNI的现有项目，如 Flannel、Calico、Canal 和 Weave 等</li>
-</ol>
-<h3 id="CNI项目对比"><a href="#CNI项目对比" class="headerlink" title="CNI项目对比"></a>CNI项目对比</h3><p>CNI的可选项目有很多，如市场上主流的Flannel和Calico，CNCF中的Cilium等。</p>
-<p>对于绝大多数的用户，我们不会关心具体实现，更多地是希望找到一个最适合自己的。横向对比的网络资料有很多，我这里提供一张图作为参考。</p>
-<blockquote>
-<p>链接 - <a target="_blank" rel="noopener" href="https://itnext.io/benchmark-results-of-kubernetes-network-plugins-cni-over-10gbit-s-network-updated-august-2020-6e1b757b9e49">https://itnext.io/benchmark-results-of-kubernetes-network-plugins-cni-over-10gbit-s-network-updated-august-2020-6e1b757b9e49</a></p>
-</blockquote>
-<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/benchmark-cni.png" alt="benchmark-cni"></p>
-<p>这里面的对比维度会让我们在选型时有所启发：</p>
-<ul>
-<li>配置</li>
-<li>性能（带宽）</li>
-<li>资源消耗</li>
-<li>安全特性</li>
-</ul>
-<p>注意，表格里的快与慢、高与低都是相对值，在Kubernetes集群规模较大时才有明显差异。</p>
-<h3 id="小结-4"><a href="#小结-4" class="headerlink" title="小结"></a>小结</h3><p>在落地Kubernetes时，我们不要盲目地追求速度快、性能高的方案，尤其是对规模小、没有资深运维经验的团队，应该优先实现最简单、最容易维护的方案。</p>
-<p>基于CNI的容器网络解决方案，替换性会比较强，可以在后续有了足够的经验、遇到了相关的瓶颈后，再考虑针对性地迁移。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/22/go-tip/go-tip-15/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/02/22/go-tip/go-tip-15/" class="post-title-link" itemprop="url">Go语言技巧 - 15.【Go并发编程】自顶向下地写出优雅的Goroutine</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-02-22 12:00:00 / 修改时间：15:45:25" itemprop="dateCreated datePublished" datetime="2022-02-22T12:00:00+08:00">2022-02-22</time>
-    </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -1250,208 +262,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
-<h2 id="导语"><a href="#导语" class="headerlink" title="导语"></a>导语</h2><p><code>Go</code>语言的Goroutine特性广受好评，初学者也能快速地实现并发。但随着不断地学习与深入，有很多开发者都陷入了对<code>goroutine</code>、<code>channel</code>、<code>context</code>、<code>select</code>等并发机制的迷惑中。</p>
-<p>这里，我将结合一个具体示例，自顶向下地介绍这部分的知识，帮助大家形成体系。具体代码以下面这段为例：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parent goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> SubFoo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">()</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里的<code>Foo()</code>为<strong>父Goroutine</strong>，内部开启了一个<strong>子Goroutine</strong> - <code>SubFoo()</code>。</p>
-<h2 id="Part1-父子Goroutine的生命周期管理"><a href="#Part1-父子Goroutine的生命周期管理" class="headerlink" title="Part1 - 父子Goroutine的生命周期管理"></a>Part1 - 父子Goroutine的生命周期管理</h2><h3 id="聚焦核心"><a href="#聚焦核心" class="headerlink" title="聚焦核心"></a>聚焦核心</h3><p><strong>父Goroutine</strong> 与 <strong>子Goroutine</strong> 最重要的交集 - 是两者的生命周期管理。包括三种：</p>
-<ol>
-<li><strong>互不影响</strong> - 两者完全独立、各自运行</li>
-<li><strong>parent控制children</strong> - 父Goroutine结束时，子Goroutine也能随即结束</li>
-<li><strong>children控制parent</strong> - 子Goroutine结束时，父Goroutine也能随即结束</li>
-</ol>
-<p>这个生命周期的关系，重点体现的是两个协程之间的控制关系。</p>
-<blockquote>
-<p>注意，这时不要过于关注具体的代码实现，如数据传递，容易绕晕。</p>
-</blockquote>
-<h3 id="1-互不影响"><a href="#1-互不影响" class="headerlink" title="1-互不影响"></a>1-互不影响</h3><p>两个Goroutine互不影响的代码很简单，如同示例。</p>
-<p>不过我们要注意一点，如果子goroutine需要context这个入参，尽量新建。更具体的内容我们看下一节。</p>
-<h3 id="2-parent控制children"><a href="#2-parent控制children" class="headerlink" title="2-parent控制children"></a>2-parent控制children</h3><p>下面是一个最常见的用法，也就是利用了context：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parent goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line">	<span class="comment">// 退出前执行，表示parent执行完了</span></span><br><span class="line">	<span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> SubFoo(ctx)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">		<span class="comment">// parent完成后，就退出</span></span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当然，context并不是唯一的解法，我们也可以自建一个channel用来通知关闭。但综合考虑整个Go语言的生态，更建议大家尽可能地使用context，这里不扩散了。</p>
-<blockquote>
-<p>延伸 - 如果1个parent要终止多个children时，context的这种方式依然适用，而channel就很麻烦了。</p>
-</blockquote>
-<h3 id="3-children控制parent"><a href="#3-children控制parent" class="headerlink" title="3-children控制parent"></a>3-children控制parent</h3><p>逻辑也比较直观，我们直接看代码：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parent goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> ch = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">	<span class="keyword">go</span> SubFoo(ch)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="comment">// 获取通知并退出</span></span><br><span class="line">	<span class="keyword">case</span> &lt;-ch:</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ch <span class="keyword">chan</span>&lt;- <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 通知parent的channel</span></span><br><span class="line">	ch &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="情况3的延伸"><a href="#情况3的延伸" class="headerlink" title="情况3的延伸"></a>情况3的延伸</h4><p>如果1个parent产生了n个children时，又会有以下两种情况：</p>
-<ol>
-<li>n个children都结束了，才停止parent</li>
-<li>n个children中有m个结束，就停止parent</li>
-</ol>
-<p>其中，前者的最常用的解决方案如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parent goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> wg = <span class="built_in">new</span>(sync.WaitGroup)</span><br><span class="line">	wg.Add(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> SubFoo(wg)</span><br><span class="line">	<span class="keyword">go</span> SubFoo(wg)</span><br><span class="line">	<span class="keyword">go</span> SubFoo(wg)</span><br><span class="line"></span><br><span class="line">	wg.Wait()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(wg *sync.WaitGroup)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> wg.Done()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这两种延伸情况有很多种解法，有兴趣的可以自行研究，网上也有不少实现。</p>
-<h3 id="Par1小结"><a href="#Par1小结" class="headerlink" title="Par1小结"></a>Par1小结</h3><p>从生命周期入手，我们能在脑海中快速形成代码的基本结构：</p>
-<ol>
-<li>互不影响 - 注意context独立</li>
-<li>parent控制children - 优先用context控制</li>
-<li>children控制parent - 一对一时用channel，一对多时用sync.WaitGroup等</li>
-</ol>
-<p>但在实际的开发场景中，parent和children的处理逻辑会有很多复杂的情况，导致我们很难像示例那样写出优雅的<code>select</code>等方法，我们会在下节继续分析，但不会影响这里梳理出的框架。</p>
-<h2 id="Part2-for-select的核心机制"><a href="#Part2-for-select的核心机制" class="headerlink" title="Part2 - for+select的核心机制"></a>Part2 - for+select的核心机制</h2><p>一次性的select机制的代码比较简单，单次执行后即退出，讨论的意义不大。接下来，我将重点讨论for+select相关的代码实现。</p>
-<h3 id="for-select的核心机制"><a href="#for-select的核心机制" class="headerlink" title="for+select的核心机制"></a>for+select的核心机制</h3><p>我们看一个来自官方的斐波那契数列的例子：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fibonacci</span><span class="params">(c, quit <span class="keyword">chan</span> <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	x, y := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> c &lt;- x:</span><br><span class="line">			x, y = y, x+y</span><br><span class="line">		<span class="keyword">case</span> &lt;-quit:</span><br><span class="line">			fmt.Println(<span class="string">&quot;quit&quot;</span>)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	quit := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">			fmt.Println(&lt;-c)</span><br><span class="line">		&#125;</span><br><span class="line">		quit &lt;- <span class="number">0</span></span><br><span class="line">	&#125;()</span><br><span class="line">	fibonacci(c, quit)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>代码很长，我们聚焦于for+select这块，它实现了两个功能：</p>
-<ol>
-<li><code>c</code>传递数据</li>
-<li><code>quit</code>传递停止的信号</li>
-</ol>
-<p>这时，如果你花时间去理解这两个channel的传递机制，容易陷入对select理解的误区；而我们应该从更高的维度，去看这两个case中获取到数据后的操作、即case中的执行逻辑，才能更好地理解整块代码。</p>
-<h3 id="分析select中的case"><a href="#分析select中的case" class="headerlink" title="分析select中的case"></a>分析select中的case</h3><p>我们要注意到，在case里代码运行的过程中，整块代码是无法再回到select、去判断各case的（这里不讨论panic，return，os.Exit()等情况）。</p>
-<p>以上面的代码为例，如果<code>x, y = y, x+y</code>函数的处理耗时，远大于<code>x</code>这个通道中塞入数据的速度，那么这个<code>x</code>的写入处将长期处于排队的阻塞状态。这时，不适合采用select这种模式。</p>
-<p>所以，<strong>select适合IO密集型逻辑，而不适合计算密集型</strong>。也就是说，select中的每个case（包括default），应消耗尽量少的时间，快速回到for循环、继续等待。IO密集型常指文件、网络等操作，它消耗的CPU很少、更多的时间是在等待返回，它能更好地体现出<strong>runtime调度Goroutine的价值</strong>。</p>
-<blockquote>
-<p>Go 的 select这个关键词，可以结合网络模型中的select进行理解。</p>
-</blockquote>
-<h3 id="父子进程中的长逻辑处理"><a href="#父子进程中的长逻辑处理" class="headerlink" title="父子进程中的长逻辑处理"></a>父子进程中的长逻辑处理</h3><p>这时，如果我们的父子进程里，就是有那么一长段的业务逻辑，那代码该怎么写呢？我们来看看下面这一段：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">			LongLogic()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">LongLogic</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 如1累加到10000000</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>由于<code>LongLogic()</code>会花费很长的运行时间，所以当外部的context取消了，也就是父Goroutine发出通知可以结束了，这个子Goroutine是无法快速触发到<code>&lt;-ctx.Done()</code>的，因为它还在跑<code>LongLogic()</code>里的代码。也就是说，子进程生命周期结束的时间点延长到<code>LongLogic()</code>之后了。</p>
-<p>这个问题的原因在于违背了我们上面讨论的点，即在select的case里包含了计算密集型任务。</p>
-<blockquote>
-<p>补充一下，case里包含长逻辑不代表程序一定有问题，但或多或少地不符合for+select+channel的设计理念。</p>
-</blockquote>
-<h3 id="两个长逻辑处理"><a href="#两个长逻辑处理" class="headerlink" title="两个长逻辑处理"></a>两个长逻辑处理</h3><p>这时，我们再来写个长进程处理，整个代码结构如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">			LongLogic()</span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh2:</span><br><span class="line">			LongLogic()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里，<code>dataCh</code>和<code>dataCh2</code>会产生竞争，也就是两个通道的 <strong>写长期阻塞、读都在等待LongLogic执行完成</strong>。给channel加个buffer可以减轻这个问题，但无法根治，运行一段时间依旧会阻塞。</p>
-<h3 id="改造思路"><a href="#改造思路" class="headerlink" title="改造思路"></a>改造思路</h3><p>有了上面代码的基础，改造思路比较直观了，将<code>LongLogic</code>异步化，我们先通过新建协程来简单实现：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">			<span class="keyword">go</span> LongLogic()</span><br><span class="line">		<span class="keyword">case</span> &lt;-finishedCh:</span><br><span class="line">			fmt.Println(<span class="string">&quot;LongLogic finished&quot;</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">LongLogic</span><span class="params">()</span></span> &#123;</span><br><span class="line">	time.Sleep(time.Minute)</span><br><span class="line">	finishedCh &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>代码里要注意一个点，如果<code>LongLogic()</code>是一段需要CPU密集计算的代码，比如计算1累加到10000，它是没有办法通过channel等其余方式突然中止的。它具备一定的原子性 - <strong>要么不跑，要么跑完，跑的过程中没有外部插手的地方</strong>。</p>
-<p>而如果硬要中断<code>LongLogic()</code>，那就往往只能杀掉整个进程。</p>
-<h3 id="Part2小结"><a href="#Part2小结" class="headerlink" title="Part2小结"></a>Part2小结</h3><p>我们记住for+select代码块设计的核心要领 - IO密集型。Go语言的goroutine特性，更多地是为了解决IO密集型程序的问题所设计的，对计算密集型的任务较其它语言没有太大优势。落到具体实践上，就是<strong>让每个case中代码的运行时间尽可能地短，快速回到for循环里的select去继续监听各个case中的channel</strong>。</p>
-<p>上面这段代码比较粗糙，在具体工程中会遇到很多问题，比如无限制地开启了大量的<code>LongLogic()</code>协程。我们会在下一节继续来看。</p>
-<h2 id="Part3-长耗时功能的优化"><a href="#Part3-长耗时功能的优化" class="headerlink" title="Part3 - 长耗时功能的优化"></a>Part3 - 长耗时功能的优化</h2><p>通过前面两篇的铺垫，我们对 <strong>父子Goroutine的生命周期管理</strong> 与 <strong>for+select的核心机制</strong> 有了基本的了解，把问题聚焦到了耗时较长的处理函数中。</p>
-<p>今天，我们再接着看看在具体工程中的优化点。</p>
-<h3 id="实时处理"><a href="#实时处理" class="headerlink" title="实时处理"></a>实时处理</h3><p>我们先回顾上一讲的这段代码：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">	<span class="keyword">go</span> LongLogic()</span><br></pre></td></tr></table></figure>
-
-<p>直觉会认为<code>go LongLogic()</code>这里会很容易出现性能问题：当<code>dataCh</code>的数据写入速度很快时，有大量的<code>LongLogic()</code>还未结束、仍在程序内运行，导致CPU超负荷。</p>
-<p>但是，如果这些代码编写的逻辑问题确实就是业务逻辑，即：<strong>程序确确实实需要实时处理这么多的数据</strong>，那我们该怎么做呢？</p>
-<p>常规思路中引入 <strong>排队机制</strong> 确实是一个方案，但很容易破坏原始需求 - <strong>实时计算处理</strong>，排队机制会导致延迟，这是业务无法接收的。在现实中，扩增资源是最直观的解决方案，最常见是利用Kubernetes平台的Pod水平扩容机制HPA，保证CPU使用率到达一定程度后自动扩容，而不用在程序中加上限制。</p>
-<p>从本质上来说，这个问题是对<strong>实时计算资源</strong>的需求。</p>
-<h3 id="非实时处理-程序外优化"><a href="#非实时处理-程序外优化" class="headerlink" title="非实时处理 - 程序外优化"></a>非实时处理 - 程序外优化</h3><p>在实际工程中，我们其实往往对实时性要求没有那么高，所以排队等限流机制带来的延时可以接受的，也就是准实时。而综合考虑到研发代码质量的不确定性，迭代过程可能中会引入bug导致调用量暴增，这时限流机制能大幅提升程序的健壮性。</p>
-<p>在程序外部，我们可以依赖消息队列进行削峰填谷，如：</p>
-<ul>
-<li>配置消息积压的告警来保证生产能力与消费能力的匹配</li>
-<li>配置限流参数来保证不要超过消费者程序的处理极限，避免雪崩</li>
-</ul>
-<p>这里的消息队列在软件架构中是一个 <strong>分离生产与消费程序</strong> 的设计，有利于两侧程序的健壮性。在计算密集型的场景中，意义尤为重大，只需要针对计算密集型的消费者进行快速地扩缩容。</p>
-<h3 id="非实时处理-程序内优化"><a href="#非实时处理-程序内优化" class="headerlink" title="非实时处理 - 程序内优化"></a>非实时处理 - 程序内优化</h3><p>上面消息队列方案虽然很棒，但从系统来说引入了一个新的组件，在业务体量小的场景里，有一种杀鸡用牛刀的感觉，对部分没有消息队列的团队来说成本也较高。</p>
-<p>那么，我们尝试在程序中做一下优化。首先，我们在上层要做一次抽象，将逻辑收敛到一个独立的package中(示例中为logic)，方便后续优化</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">			<span class="comment">// logic包内部保证</span></span><br><span class="line">			logic.Run()</span><br><span class="line">		<span class="keyword">case</span> result := &lt;-logic.Finish():</span><br><span class="line">			fmt.Println(<span class="string">&quot;result&quot;</span>, result)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而logic包中的大致框架如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> logic</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> finishedCh = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Run</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 在这里引入排队机制</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="comment">// long time process</span></span><br><span class="line">		</span><br><span class="line">		&lt;-finishedCh</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Finish</span><span class="params">()</span> &lt;-<span class="title">chan</span> <span class="title">struct</span></span>&#123;&#125; &#123;</span><br><span class="line">	<span class="keyword">return</span> finishedCh</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们也可以在这里加一个<code>error</code>返回，在排队满时返回给调用方，由调用方决定怎么处理，如丢弃或重新排队等。排队机制的代码是业务场景决定的，我就不具体写了。</p>
-<p>这种解法，可以类比到一个线程池管理。而更上层的for+select维度来看，类似于一个负责调度任务的master+多个负责执行任务的worker。</p>
-<h3 id="Part3小结"><a href="#Part3小结" class="headerlink" title="Part3小结"></a>Part3小结</h3><p>我们分别从三个场景分析了耗时较长的处理函数：</p>
-<ul>
-<li><strong>实时处理</strong> - 结合Paas平台进行资源扩容</li>
-<li><strong>非实时处理 - 程序外优化</strong> - 引入消息队列</li>
-<li><strong>非实时处理 - 程序内优化</strong> - 实现一个线程池控制资源</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文分享的内容只是Go并发编程的冰山一角，希望能对大家有所启发，也欢迎与我讨论~</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/my_wechat.jpeg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/21/go-leetcode/go-leetcode-11/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/02/21/go-leetcode/go-leetcode-11/" class="post-title-link" itemprop="url">Go算法实战 - 11.【全排列LeetCode-46】</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-02-21 12:00:00" itemprop="dateCreated datePublished" datetime="2022-02-21T12:00:00+08:00">2022-02-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-02-20 21:33:17" itemprop="dateModified" datetime="2022-02-20T21:33:17+08:00">2022-02-20</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-46-全排列"><a href="#Leetcode-46-全排列" class="headerlink" title="Leetcode-46 全排列"></a>Leetcode-46 全排列</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/permutations/">https://leetcode-cn.com/problems/permutations/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">permute</span><span class="params">(nums []<span class="keyword">int</span>)</span> [][]<span class="title">int</span></span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>晋升是每个技术人都应该经历的一次洗礼。一般来说，分为提名、准备、述职、答辩这四个步骤。</p>
+<p>尽管每个人的经历与体会都有不同，很难照搬硬套，但我相信只要是真心分享的经验，总会对人有帮助。接下来，我将从五个点展开。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/02/21/go-leetcode/go-leetcode-11/#more" rel="contents">
+              <a class="btn" href="/2022/06/03/thinking/promotion/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1477,7 +292,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/21/sharing-5min/2022-02/2022Week08/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/09/go-leetcode/go-leetcode-7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1494,193 +309,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/02/21/sharing-5min/2022-02/2022Week08/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week08</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-02-21 12:00:00" itemprop="dateCreated datePublished" datetime="2022-02-21T12:00:00+08:00">2022-02-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-03 10:25:09" itemprop="dateModified" datetime="2022-03-03T10:25:09+08:00">2022-03-03</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57581641299795_.pic_hd.jpg" alt="2022-02"></p>
-<h2 id="2022-02-21-自顶向下地写出优雅的Goroutine（下）"><a href="#2022-02-21-自顶向下地写出优雅的Goroutine（下）" class="headerlink" title="2022-02-21 自顶向下地写出优雅的Goroutine（下）"></a>2022-02-21 自顶向下地写出优雅的Goroutine（下）</h2><p>通过前面两篇的铺垫，我们对 <strong>父子进程的生命周期管理</strong> 与 <strong>select代码的核心机制</strong> 有了基本的了解。</p>
-<p>今天我们再接着看看在具体工程中的优化点。注意，在上一篇，我们已经把问题聚焦到了耗时较长的处理函数中。</p>
-<h3 id="实时处理"><a href="#实时处理" class="headerlink" title="实时处理"></a>实时处理</h3><p>我们先看回顾上一讲的这段代码：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">	<span class="keyword">go</span> LongLogic()</span><br></pre></td></tr></table></figure>
-
-<p>简单想一下，我们会觉得<code>LongLogic()</code>这里会很容易出现性能问题：当<code>dataCh</code>的数据写入速度很快时，有大量的<code>LongLogic()</code>还未结束、仍在程序内运行，导致CPU超负荷。</p>
-<p>但是，如果这些代码编写的逻辑问题确实就是业务逻辑，即：<strong>程序确确实实需要实时处理这么多的数据</strong>，那我们该怎么做呢？</p>
-<p>常规思路中引入 <strong>排队机制</strong> 确实是一个方案，但很容易破坏原始需求 - <strong>实时计算处理</strong>，排队机制会导致延迟，那这就是业务无法接受的。在现实中，扩增资源是最直观的解决方案，最常见是利用Kubernetes平台的Pod水平扩容机制，保证CPU使用率到达一定程度后自动扩容，而不用在程序中加上限制。</p>
-<p>这个问题的本质上是实时计算资源的需求。</p>
-<h3 id="非实时处理-程序外优化"><a href="#非实时处理-程序外优化" class="headerlink" title="非实时处理 - 程序外优化"></a>非实时处理 - 程序外优化</h3><p>在实际工程中，我们其实往往对实时性要求没有那么高，所以排队等限流机制带来的延时可以接受的。而综合考虑到研发代码质量的不确定性，迭代过程可能中会引入bug导致调用量暴增，这时限流机制能提升程序的健壮性。</p>
-<p>在程序外部，我们可以依赖消息队列进行削峰填谷：</p>
-<ul>
-<li>配置消息积压的告警来保证生产者程序的监控</li>
-<li>配置限流参数来保证不要超过消费者程序的处理极限</li>
-</ul>
-<p>在这里，消费队列在软件架构中是一个 <strong>分离生产与消费程序</strong> 的设计，有利于两侧程序的健壮性。在计算密集型的场景中，意义尤为重大。</p>
-<h3 id="非实时处理-程序内优化"><a href="#非实时处理-程序内优化" class="headerlink" title="非实时处理 - 程序内优化"></a>非实时处理 - 程序内优化</h3><p>上面消息队列方案虽然很棒，但从系统来说引入了一个新的组件，有时一种杀鸡用牛刀的感觉，对部分没有消息队列的团队来说也比较难以接受。</p>
-<p>那么，我们尝试在程序中做一下优化。首先，我们在上层要做一次抽象，将逻辑收敛到一个独立的package中(示例中为logic)，方便后续优化</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">			<span class="comment">// logic包内部保证</span></span><br><span class="line">			logic.Run()</span><br><span class="line">		<span class="keyword">case</span> result := &lt;-logic.Finish():</span><br><span class="line">			fmt.Println(<span class="string">&quot;result&quot;</span>, result)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而logic包中的大致框架如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> logic</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> finishedCh = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Run</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 在这里引入排队机制</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="comment">// long time process</span></span><br><span class="line">		</span><br><span class="line">		&lt;-finishedCh</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Finish</span><span class="params">()</span> &lt;-<span class="title">chan</span> <span class="title">struct</span></span>&#123;&#125; &#123;</span><br><span class="line">	<span class="keyword">return</span> finishedCh</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们也可以在这里加一个<code>error</code>返回，在排队满时返回给调用方，由调用方决定怎么处理，如丢弃或重新排队等。排队机制的代码是业务场景决定的，我就不具体写了，本质上类似于一个线程池管理。</p>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>从今天，我们分别从三个场景分析了耗时较长的处理函数：</p>
-<ul>
-<li><strong>实时处理</strong> - 结合Paas平台进行资源扩容</li>
-<li><strong>非实时处理 - 程序外优化</strong> - 引入消息队列</li>
-<li><strong>非实时处理 - 程序内优化</strong> - 程序内的线程池</li>
-</ul>
-<p>到这里，我们自顶向下地写出优雅的Goroutine的三讲已经完成了，希望对大家有所启发，也欢迎向我提问。</p>
-<h2 id="2022-02-22-CNCF-Prometheus"><a href="#2022-02-22-CNCF-Prometheus" class="headerlink" title="2022-02-22 CNCF-Prometheus"></a>2022-02-22 CNCF-Prometheus</h2><p>看完了调度管理层与应用层的项目后，我们接下来了解可观察性和分析这块。提升可观察性和分析能力，非常有助于对整套系统的掌控。</p>
-<p>今天的主角是CNCF中第二个毕业的项目 - Prometheus，它提供了软件系统核心的监控功能。我们今天就从核心架构入手，了解其特性。</p>
-<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/prom-architecture.png" alt="prom-architecture"></p>
-<p>这张图中的内容核心分为五块：</p>
-<ul>
-<li>指标收集端 - Exporters + Pushgateway<ul>
-<li>Exporters 长生命周期的进程，将指标保存在内存，重启后清零</li>
-<li>Pushgateway 作为短生命周期指标的“中转站”</li>
-</ul>
-</li>
-<li>服务端 - Prometheus Server</li>
-<li>服务发现 - Kubernetes等<ul>
-<li>对接Kubernetes平台原生兼容</li>
-<li>对接非k8s平台，可以选择consul或者直接采用静态文件配置</li>
-</ul>
-</li>
-<li>告警 - Alertmanager</li>
-<li>展示 - Prometheus web UI + Grafana等<ul>
-<li>web ui可以用来查看简单的指标</li>
-<li>Grafana是最主流的指标展示工具，没有之一</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>文档写得比较粗糙，欢迎大家通过这个视频链接看看更详细的说明 <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1PP4y1c7ps/">https://www.bilibili.com/video/BV1PP4y1c7ps/</a></p>
-</blockquote>
-<h3 id="八大特性"><a href="#八大特性" class="headerlink" title="八大特性"></a>八大特性</h3><ul>
-<li>多维度数据Dimensional data - Prometheus implements a highly dimensional data model. Time series are identified by a metric name and a set of key-value pairs.</li>
-<li>强力的查询Powerful queries - PromQL allows slicing and dicing of collected time series data in order to generate ad-hoc graphs, tables, and alerts.</li>
-<li>很棒的可视化Great visualization - Prometheus has multiple modes for visualizing data: a built-in expression browser, Grafana integration, and a console template language.</li>
-<li>高效存储Efficient storage - Prometheus stores time series in memory and on local disk in an efficient custom format. Scaling is achieved by functional sharding and federation.</li>
-<li>简单操作Simple operation - Each server is independent for reliability, relying only on local storage. Written in Go, all binaries are statically linked and easy to deploy.</li>
-<li>精确告警Precise alerting - Alerts are defined based on Prometheus’s flexible PromQL and maintain dimensional information. An alertmanager handles notifications and silencing.</li>
-<li>很多客户端库Many client libraries - Client libraries allow easy instrumentation of services. Over ten languages are supported already and custom libraries are easy to implement.</li>
-<li>大量现有集成Many integrations - Existing exporters allow bridging of third-party data into Prometheus. Examples: system statistics, as well as Docker, HAProxy, StatsD, and JMX metrics.</li>
-</ul>
-<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p><code>Prometheus</code>的官方文档 - <a target="_blank" rel="noopener" href="https://prometheus.io/docs/introduction/overview/">https://prometheus.io/docs/introduction/overview/</a> 提供了很多有价值的信息，尤其是原理和最佳实践。我也曾经实践过一套企业级的<code>Prometheus</code>平台，有机会的话会和大家分享分享。</p>
-<h2 id="2022-02-23-CNCF-Cortex-Thanos"><a href="#2022-02-23-CNCF-Cortex-Thanos" class="headerlink" title="2022-02-23 CNCF-Cortex/Thanos"></a>2022-02-23 CNCF-Cortex/Thanos</h2><p>今天，我将串讲两个基于Prometheus的扩展的项目：Cortex和Thanos。</p>
-<p>为了让大家更好地了解到大型监控系统的方案，我将结合Prometheus自带的联邦方案和大家聊聊。</p>
-<h3 id="Prometheus的联邦模式"><a href="#Prometheus的联邦模式" class="headerlink" title="Prometheus的联邦模式"></a>Prometheus的联邦模式</h3><p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/prometheus-federation.png" alt="prometheus-federation"></p>
-<p>联邦模式是一种树状的级联模式，核心体现出了一个点：<code>Prometheus</code>本身就是一种Exporter，可以用来采集指标。</p>
-<p>关于这个架构，我们还能发现以下特点：</p>
-<ol>
-<li>Prometheus高可用方案，是多个上层节点重复Pull下层数据，本质上仍然是单点保存全量数据</li>
-<li>Prometheus提供远程存储方案，但远程存储的能力很有限，往往只能支持异常后数据恢复</li>
-<li>Prometheus提供了record rule等指标加工能力，可以减少上层的数据存储</li>
-<li>可以更好地保证网络的安全性，减少防火墙的配置</li>
-</ol>
-<p>联邦模式基本能支持大多数Prometheus的场景，一般建议优先考虑。</p>
-<h3 id="Cortex"><a href="#Cortex" class="headerlink" title="Cortex"></a>Cortex</h3><p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/cortex-architecture.png" alt="cortex-architecture"></p>
-<p>对标到上面的Prometheus联邦模式，Cortex核心是依赖远程写的接口。写完数据后，Cortex就与Prometheus完全没有依赖了。也就是说，Cortex是构建在Prometheus之上的一套解决方案。</p>
-<p>上面的架构有很多细节上的实现，但我不想在这里聊得太细，主要考虑到：作为使用方，我们不需要过于关注Cortex的实现，毕竟它只依赖Prometheus远程写的接口，完全可以独立于Prometheus、快速迭代自身的架构。</p>
-<p>所以，如果你想使用Cortex，可以看看官方的介绍文档 - <a target="_blank" rel="noopener" href="https://cortexmetrics.io/%EF%BC%8C%E6%9C%89%E4%BB%80%E4%B9%88%E7%89%B9%E6%80%A7%E6%98%AF%E4%BD%A0%E7%89%B9%E5%88%AB%E5%85%B3%E6%B3%A8%E7%9A%84%E3%80%82">https://cortexmetrics.io/，有什么特性是你特别关注的。</a></p>
-<h3 id="Thanos"><a href="#Thanos" class="headerlink" title="Thanos"></a>Thanos</h3><p>Thanos提供了两种模式<code>Sidecar</code>和<code>Receive</code>，其中后者提出的时间不长，与Cortex的实现基本一致，我们就不细看了。我们重点看看边车的实现。</p>
-<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/thanos-architecture.png" alt="thanos-architecture"></p>
-<p>我们重点聚焦到Thanos和Prometheus的交互：</p>
-<ol>
-<li>读 - 从Thanos传到Prometheus远程读的接口，再进行数据查询</li>
-<li>写 - 由于是sidecar模式，两者共享Pod里的数据，所以Prometheus写入的数据可以由Thanos直接访问</li>
-</ol>
-<p>从这两点来看，Thanos好像什么都没做，那它的意义在哪呢？其实，Thanos的核心是：<strong>依赖图中的对象存储，实现出的一套分布式的解决方案</strong>。</p>
-<p>我们上文提到，Prometheus本质上还是一个单体的架构，而Thanos提供的分布式方案，从理论上可以解决单点计算力的问题。所以，Thanos对标Prometheus和Cortex的差异性价值，非常依赖它在分布式上的表现。</p>
-<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><p>整体来说，关于Prometheus的扩展方案，我个人的倾向如下：</p>
-<ol>
-<li>联邦模式：使用Prometheus的必要基础，有很多优化技巧，建议优先考虑；</li>
-<li>Cortex：对现有的Prometheus侵入小，适合快速解决问题，但长期来看很受限；</li>
-<li>Thanos：是对Prometheus从单体到分布式的一种改造，发展前景很棒，但遇到的问题也自然更多；</li>
-</ol>
-<p>今天聊的这三种方案理解起来不难，我更希望对大家在软件架构上有所启发。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/19/go-leetcode/go-leetcode-10/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/02/19/go-leetcode/go-leetcode-10/" class="post-title-link" itemprop="url">Go算法实战 - 10.【圆环回原点问题】</a>
+            <a href="/2022/04/09/go-leetcode/go-leetcode-7/" class="post-title-link" itemprop="url">Go算法实战 - 7.【盛最多水的容器LeetCode-11】</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1692,7 +321,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2022-02-19 12:00:00 / 修改时间：21:32:23" itemprop="dateCreated datePublished" datetime="2022-02-19T12:00:00+08:00">2022-02-19</time>
+      <time title="创建时间：2022-04-09 11:00:00 / 修改时间：11:40:31" itemprop="dateCreated datePublished" datetime="2022-04-09T11:00:00+08:00">2022-04-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1715,11 +344,11 @@
     
     <div class="post-body" itemprop="articleBody">
           <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="经典面试题-圆环回原点问题"><a href="#经典面试题-圆环回原点问题" class="headerlink" title="经典面试题 圆环回原点问题"></a>经典面试题 圆环回原点问题</h2><p>0-12共13个数构成一个环，从0出发，每次走1步，走n步回到0共有多少种走法？</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CircleToOrigin</span><span class="params">(n <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Leetcode-11-盛最多水的容器"><a href="#Leetcode-11-盛最多水的容器" class="headerlink" title="Leetcode-11 盛最多水的容器"></a>Leetcode-11 盛最多水的容器</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/container-with-most-water/">https://leetcode-cn.com/problems/container-with-most-water/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maxArea</span><span class="params">(height []<span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/02/19/go-leetcode/go-leetcode-10/#more" rel="contents">
+              <a class="btn" href="/2022/04/09/go-leetcode/go-leetcode-7/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1745,7 +374,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/14/sharing-5min/2022-02/2022Week07/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/09/go-leetcode/go-leetcode-8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1762,7 +391,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/02/14/sharing-5min/2022-02/2022Week07/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week07</a>
+            <a href="/2022/04/09/go-leetcode/go-leetcode-8/" class="post-title-link" itemprop="url">Go算法实战 - 8.【三数之和LeetCode-15】</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1773,14 +402,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-02-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-02-14T12:00:00+08:00">2022-02-14</time>
+      <time title="创建时间：2022-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2022-04-09T11:00:00+08:00">2022-04-09</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-02-18 21:50:32" itemprop="dateModified" datetime="2022-02-18T21:50:32+08:00">2022-02-18</time>
+        <time title="修改时间：2022-04-10 11:45:49" itemprop="dateModified" datetime="2022-04-10T11:45:49+08:00">2022-04-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1788,7 +417,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
         </span>
     </span>
 
@@ -1802,191 +431,616 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57581641299795_.pic_hd.jpg" alt="2022-02"></p>
-<h2 id="2022-02-14-CNCF-Argo"><a href="#2022-02-14-CNCF-Argo" class="headerlink" title="2022-02-14 CNCF-Argo"></a>2022-02-14 CNCF-Argo</h2><p><code>Argo</code>是Kubernetes上最受欢迎的工作流引擎，已经有大量的用户群体与软件生态。围绕着Workflow这个关键词，我们来一起初步了解<code>Argo</code>。</p>
-<blockquote>
-<p>Workflow engine for Kubernetes</p>
-</blockquote>
-<ul>
-<li>官网 - <a target="_blank" rel="noopener" href="https://argoproj.github.io/">https://argoproj.github.io/</a></li>
-<li>Github - <a target="_blank" rel="noopener" href="https://github.com/argoproj/argo-workflows">https://github.com/argoproj/argo-workflows</a></li>
-</ul>
-<h3 id="Argo-Workflow"><a href="#Argo-Workflow" class="headerlink" title="Argo Workflow"></a>Argo Workflow</h3><p>官方的介绍分为四点（前两点描述的是基本原理，后两者描述的是特定应用的价值）：</p>
-<ol>
-<li>工作流的每一个步骤都是一个容器；</li>
-<li>以DAG（有向无环图）来分析工作流的依赖；</li>
-<li>对计算密集型任务（如机器学习、大数据处理），能充分利用k8s集群的相对空闲的碎片时间；</li>
-<li>结合CICD流水线，让应用能运行在云原生环境里快速迭代；</li>
-</ol>
-<h3 id="为什么使用Argo-Workflow"><a href="#为什么使用Argo-Workflow" class="headerlink" title="为什么使用Argo Workflow"></a>为什么使用Argo Workflow</h3><p><code>Argo</code>的工作流对标传统的CICD有很多亮点，但如果谈论其核心价值，主要集中在两点：</p>
-<ol>
-<li>保证应用的整个生命周期都基于云原生生态，彻底抛弃原来的虚拟机等模式；</li>
-<li>完全对接云原生，有利于充分利用Kubernetes实现更便捷的并行、扩缩容等操作；</li>
-</ol>
-<p>我们就以一个经典的CICD Workflow的发展历程来看：</p>
-<ol>
-<li>传统Jenkins为核心的CICD<ol>
-<li>提交代码到Gitlab</li>
-<li>触发Jenkins编译任务，某VM服务器编译出二进制文件并发布</li>
-<li>触发Jenkins部署任务，将二进制文件发布到对应机器并重新运行程序</li>
-</ol>
-</li>
-<li>改进版 - 容器化，将Gitlab/Jenkins/编译服务器等都改造到容器化平台中</li>
-<li>云原生化 - 利用Argo Workflow</li>
-</ol>
-<blockquote>
-<p>第二与第三阶段的区分并不清晰，我个人会从 <strong>配置是否集中化</strong> 这个特点进行分析。</p>
-</blockquote>
-<p>目前很多大公司的CICD仍处于第二阶段，但它们沉淀出了不少类似于<code>Argo</code>工作流的能力。我们可以从以下三点进行思考：</p>
-<ol>
-<li><strong>工作流是和公司强相关的</strong>：往往依赖公司内的各种平台，如OA；</li>
-<li><strong>工作流的开发难度不高</strong>：只要规则清晰、要求严格，整体的开发量并不大，所以有能力、有资源的大公司，并不愿意太依赖开源生态；</li>
-<li><strong>云原生的工作流价值仍比较有限</strong>：<code>Argo</code>体现出的价值，有不少类似的方案可以替代；</li>
-</ol>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p><code>Argo</code>项目的用户在社区中日趋增长，这其实体现出了一个趋势 - <strong>互联网进入精耕细作的阶段</strong>。</p>
-<p>在野蛮生长阶段遇到瓶颈时，公司会趋向于用扩增大量的人力或机器资源来解决问题；而在精耕细作阶段，随着Kubenetes为代表的基础平台能力的标准化，整个生态提供了丰富的能力集，技术人员更应重视遵循规范，把时间投入到合理的方向，来快速地迭代业务。</p>
-<p>这时，以<code>Argo</code>为代表的工作流引擎，能帮助整个开发体系落地自动化的规范，自然越来越受到欢迎。</p>
-<h2 id="2022-02-15-谈谈对Go接口断言的误区"><a href="#2022-02-15-谈谈对Go接口断言的误区" class="headerlink" title="2022-02-15 谈谈对Go接口断言的误区"></a>2022-02-15 谈谈对Go接口断言的误区</h2><p>最近有好几个朋友和我聊到Go语言里的接口interface相关的使用方法，发现了一个常见的误区。今天，我分享一下我的思考，希望能给大家带来启发。</p>
-<h3 id="接口与实现"><a href="#接口与实现" class="headerlink" title="接口与实现"></a>接口与实现</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 接口定义</span></span><br><span class="line"><span class="keyword">type</span> Order <span class="keyword">interface</span> &#123;</span><br><span class="line">  Pay() error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实现1</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">orderImpl1</span> <span class="title">struct</span></span>&#123;</span><br><span class="line">  Id <span class="keyword">int64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(order *orderImpl1)</span><span class="title">Pay</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实现2</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">orderImpl2</span> <span class="title">struct</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(order *orderImpl2)</span><span class="title">Pay</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-15-三数之和"><a href="#Leetcode-15-三数之和" class="headerlink" title="Leetcode-15 三数之和"></a>Leetcode-15 三数之和</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/3sum/">https://leetcode-cn.com/problems/3sum/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">threeSum</span><span class="params">(nums []<span class="keyword">int</span>)</span> [][]<span class="title">int</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/09/go-leetcode/go-leetcode-8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
 
-<p>这是一个很常见的接口与实现的示例。</p>
-<h3 id="接口断言背后的真正问题"><a href="#接口断言背后的真正问题" class="headerlink" title="接口断言背后的真正问题"></a>接口断言背后的真正问题</h3><p>在代码中，我们经常会对抽象进行断言，来获取更详细的信息，例如：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 在这里是一个接口</span></span><br><span class="line">  <span class="keyword">var</span> order Order</span><br><span class="line">  <span class="comment">// 断言是orderImpl1，并打印其中内容</span></span><br><span class="line">  <span class="keyword">if</span> o,ok := order.(orderImpl1); ok &#123;</span><br><span class="line">    fmt.Println(o.Id)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+    
+    
 
-<p>这段代码很清晰，让我们层层递进，思考一下这段代码背后的真正逻辑：程序要使用 <strong>接口背后的具体实现</strong>（orderImpl1中的Id字段）。</p>
-<p>这种做法，就和接口所要解决的问题背道而驰了：接口是为了屏蔽具体的实现细节，而这里的代码又回退成了具体实现。所以，这个现象的真正问题是：<strong>接口抽象得不够完全</strong>。</p>
-<h3 id="解法1：新增获取方法"><a href="#解法1：新增获取方法" class="headerlink" title="解法1：新增获取方法"></a>解法1：新增获取方法</h3><p>这个解法很直接，我们增加一个接口方法即可，如:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Order <span class="keyword">interface</span> &#123;</span><br><span class="line">  Pay() error</span><br><span class="line">  GetId() <span class="keyword">int64</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
 
-<p>但是，如果要区分具体实现，即orderImpl2没有Id字段，我们最好采用一个error字段进行区分：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Order <span class="keyword">interface</span> &#123;</span><br><span class="line">  Pay() error</span><br><span class="line">  GetId() (<span class="keyword">int64</span>, error)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/09/go-leetcode/go-leetcode-6/">
 
-<h3 id="解法2：封装背后的真正逻辑"><a href="#解法2：封装背后的真正逻辑" class="headerlink" title="解法2：封装背后的真正逻辑"></a>解法2：封装背后的真正逻辑</h3><p>上面<code>GetId</code>这个方法，只是一个具体动作，按DDD的说法，这是一个贫血的模型。我们真正要关注的是 - <strong>获取Id后真正的业务逻辑，将其封装成一个方法</strong>。</p>
-<p>比如说，我们要获取这个Id后，想要根据这个Id取消这个订单，那么完全可以封装到一个<code>Cancel()</code>函数中；</p>
-<p>又比如说，我们仅仅想要打印具体实现的内部信息，那么完全可以实现一个<code>Debug() string</code>方法，将想要的内容都拼成字符串返回出来。</p>
-<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>今天讲的这个case在业务开发中非常常见，它是一种惯性思维解决问题的产物。我们无需苛求所有抽象都要到位，但心里一定要有明确的解决方案。</p>
-<h2 id="2022-02-16-CNCF-Flux"><a href="#2022-02-16-CNCF-Flux" class="headerlink" title="2022-02-16 CNCF-Flux"></a>2022-02-16 CNCF-Flux</h2><p>今天我们来看CNCF中另一款持续交付的项目 - <code>Flux</code>。相对于<code>Argo</code>，<code>Flux</code>的应用范围不广，但它的功能更加简洁、使用起来也更为便捷。</p>
-<ul>
-<li>官网 - <a target="_blank" rel="noopener" href="https://fluxcd.io/">https://fluxcd.io/</a></li>
-<li>Github - <a target="_blank" rel="noopener" href="https://github.com/fluxcd/flux2">https://github.com/fluxcd/flux2</a></li>
-</ul>
-<h3 id="核心流程"><a href="#核心流程" class="headerlink" title="核心流程"></a>核心流程</h3><p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/gitops-toolkit.png" alt="gitops-toolkit"></p>
-<p><code>Flux</code>的核心实现非常清晰，主要分为两块：</p>
-<ol>
-<li>Source controller用于监听Source的变化，如常见的github、gitlab、helm；</li>
-<li>将部署任务，交由Kustomize controller 或 Helm controller进行实现；</li>
-</ol>
-<blockquote>
-<p>这里有一个秀英语单词的技巧，在软件系统里经常会将定制化这个词，Customize用Kustomize代替。</p>
-</blockquote>
-<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><p>官方的核心概念如下：<a target="_blank" rel="noopener" href="https://fluxcd.io/docs/concepts/">https://fluxcd.io/docs/concepts/</a></p>
-<ol>
-<li>GitOps的理念有很多说法，可以简单认为就是：<strong>围绕着Git而展开的一套CICD机制</strong>。</li>
-</ol>
-<blockquote>
-<p>GitOps is a way of managing your infrastructure and applications so that whole system is described declaratively and version controlled (most likely in a Git repository), and having an automated process that ensures that the deployed environment matches the state specified in a repository.</p>
-</blockquote>
-<ol start="2">
-<li>Source源，包括期望状态与获取的途径。</li>
-</ol>
-<blockquote>
-<p>A <em>Source</em> defines the origin of a repository containing the desired state of the system and the requirements to obtain it (e.g. credentials, version selectors). </p>
-</blockquote>
-<ol start="3">
-<li>Reconciliation协调，重点是怎么协调、也就是Controller执行的逻辑，最常见的就是自己编写一个Operator。</li>
-</ol>
-<blockquote>
-<p>Reconciliation refers to ensuring that a given state (e.g. application running in the cluster, infrastructure) matches a desired state declaratively defined somewhere (e.g. a Git repository).</p>
-</blockquote>
-<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><p>CICD相关软件目前的格局还不是很清晰，建议大家多花时间在选型上，尽可能地符合自己的业务场景，而不建议做过多的二次开发。<code>Flux</code>是一个非常轻量级的CD项目，对接起来很方便，很适合无历史包袱的研发团队快速落地。</p>
-<h2 id="2022-02-17-自顶向下地写出优雅的Goroutine（上）"><a href="#2022-02-17-自顶向下地写出优雅的Goroutine（上）" class="headerlink" title="2022-02-17 自顶向下地写出优雅的Goroutine（上）"></a>2022-02-17 自顶向下地写出优雅的Goroutine（上）</h2><p><code>Go</code>语言的Goroutine特性广受好评，让初学者也能快速地实现并发。但随着不断地学习与深入，有很多开发者都陷入了对<code>goroutine</code>、<code>channel</code>、<code>context</code>、<code>select</code>等并发机制的迷惑中。</p>
-<p>那么，我将自顶向下地介绍这部分的知识，帮助大家形成体系。具体的代码以下面这段为例：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parent goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">go</span> SubFoo()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">()</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
 
-<p>这里的<code>Foo()</code>为<strong>父Goroutine</strong>，内部开启了一个<strong>子Goroutine</strong> - <code>SubFoo()</code>。</p>
-<h3 id="聚焦核心"><a href="#聚焦核心" class="headerlink" title="聚焦核心"></a>聚焦核心</h3><p><strong>父Goroutine</strong> 与 <strong>子Goroutine</strong> 最重要的交集 - 是两者的生命周期管理。包括三种：</p>
-<ol>
-<li>互不影响 - 两者完全独立</li>
-<li>parent控制children - 父Goroutine结束时，子Goroutine也能随即结束</li>
-<li>children控制parent - 子Goroutine结束时，父Goroutine也能随即结束</li>
-</ol>
-<p>这个生命周期的关系，体现了一种控制流的思想。</p>
-<blockquote>
-<p>注意，这个时候不要去关注具体的数据或代码实现，初学者容易绕晕。</p>
-</blockquote>
-<h3 id="1-互不影响"><a href="#1-互不影响" class="headerlink" title="1-互不影响"></a>1-互不影响</h3><p>两个Goroutine互不影响的代码很简单，如同示例。</p>
-<p>不过我们要注意一点，如果子goroutine需要context这个入参，尽量新建。这点我们看第二个例子就清楚了。</p>
-<h3 id="2-parent控制children"><a href="#2-parent控制children" class="headerlink" title="2-parent控制children"></a>2-parent控制children</h3><p>下面是一个最常见的用法，也就是利用了context：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parent goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line">	<span class="comment">// 退出前执行，表示parent执行完了</span></span><br><span class="line">	<span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> SubFoo(ctx)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">		<span class="comment">// parent完成后，就退出</span></span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
 
-<p>当然，context并不是唯一的解法，我们也可以自建一个channel用来通知关闭。但综合考虑整个Go语言的生态，更建议大家尽可能地使用context，这里不扩散了。</p>
-<blockquote>
-<p>延伸 - 如果1个parent要终止多个children时，context的这种方式依然适用。</p>
-</blockquote>
-<h3 id="3-children控制parent"><a href="#3-children控制parent" class="headerlink" title="3-children控制parent"></a>3-children控制parent</h3><p>这部分的逻辑也比较直观：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parent goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> ch = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">	<span class="keyword">go</span> SubFoo(ch)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="comment">// 获取通知并退出</span></span><br><span class="line">	<span class="keyword">case</span> &lt;-ch:</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ch <span class="keyword">chan</span>&lt;- <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 通知parent的channel</span></span><br><span class="line">	ch &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/09/go-leetcode/go-leetcode-6/" class="post-title-link" itemprop="url">Go算法实战 - 6.【正则表达式匹配LeetCode-10】</a>
+        </h2>
 
-<h3 id="情况3的延伸"><a href="#情况3的延伸" class="headerlink" title="情况3的延伸"></a>情况3的延伸</h3><p>如果1个parent产生了n个children时，又会有以下两种情况：</p>
-<ol>
-<li>n个children都结束了，才停止parent</li>
-<li>n个children中有m个结束，就停止parent</li>
-</ol>
-<p>其中，前者的最常用的解决方案如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// parent goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> wg = <span class="built_in">new</span>(sync.WaitGroup)</span><br><span class="line">	wg.Add(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> SubFoo(wg)</span><br><span class="line">	<span class="keyword">go</span> SubFoo(wg)</span><br><span class="line">	<span class="keyword">go</span> SubFoo(wg)</span><br><span class="line"></span><br><span class="line">	wg.Wait()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(wg *sync.WaitGroup)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> wg.Done()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
 
-<p>关于这两个延伸情况更多的解法，就留给大家自己去思考了，它们有不止一种解法。</p>
-<h3 id="小结-3"><a href="#小结-3" class="headerlink" title="小结"></a>小结</h3><p>从生命周期入手，我们能快速地形成代码的基本结构：</p>
-<ol>
-<li>互不影响 - 注意context独立</li>
-<li>parent控制children - 优先用context控制</li>
-<li>children控制parent - 一对一时用channel，一对多时用sync.WaitGroup等</li>
-</ol>
-<p>但在实际的开发场景中，parent和children的处理逻辑会有很多复杂的情况，导致我们很难像示例那样写出优雅的<code>select</code>等方法，我们会在下期继续分析，但不会影响我们今天梳理出的框架。</p>
-<h2 id="2022-02-18-自顶向下地写出优雅的Goroutine（中）"><a href="#2022-02-18-自顶向下地写出优雅的Goroutine（中）" class="headerlink" title="2022-02-18 自顶向下地写出优雅的Goroutine（中）"></a>2022-02-18 自顶向下地写出优雅的Goroutine（中）</h2><p>通过上一篇，我们通过生命周期管理了解了父子进程的大致模型。</p>
-<p>今天，我们将更进一步，分析优雅的Goroutine的核心语法 - select。</p>
-<h3 id="了解select的核心意义"><a href="#了解select的核心意义" class="headerlink" title="了解select的核心意义"></a>了解select的核心意义</h3><p>我们看一个官方的例子：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fibonacci</span><span class="params">(c, quit <span class="keyword">chan</span> <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	x, y := <span class="number">0</span>, <span class="number">1</span></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> c &lt;- x:</span><br><span class="line">			x, y = y, x+y</span><br><span class="line">		<span class="keyword">case</span> &lt;-quit:</span><br><span class="line">			fmt.Println(<span class="string">&quot;quit&quot;</span>)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	quit := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">			fmt.Println(&lt;-c)</span><br><span class="line">		&#125;</span><br><span class="line">		quit &lt;- <span class="number">0</span></span><br><span class="line">	&#125;()</span><br><span class="line">	fibonacci(c, quit)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      <time title="创建时间：2022-04-09 08:00:00 / 修改时间：11:40:11" itemprop="dateCreated datePublished" datetime="2022-04-09T08:00:00+08:00">2022-04-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+        </span>
+    </span>
 
-<p>代码很长，我们聚焦于select这块，它实现了两个功能：</p>
-<ol>
-<li>传递数据</li>
-<li>传递停止的信号</li>
-</ol>
-<p>这时，如果你深入去理解这两个channel的用法，容易陷入对select理解的误区；而我们应该从更高的维度，去看这两个case中获取到数据后的操作，才能真正掌握。</p>
-<h3 id="分析select中的case"><a href="#分析select中的case" class="headerlink" title="分析select中的case"></a>分析select中的case</h3><p>我们要注意到，在case里代码运行的过程中，整个goroutine都是忙碌的（除非调用panic，return，os.Exit()等函数退出）。</p>
-<p>以上面的代码为例，如果<code>x, y = y, x+y</code>函数的处理耗时，远大于<code>x</code>这个通道中塞入数据的速度，那么这个<code>x</code>的写入处，将长期处于排队的阻塞状态。这时，不适合采用select这种模式。</p>
-<p>所以说，<strong>select适合IO密集型逻辑，而不适合计算密集型</strong>。也就是说，select中的每个case，应尽量花费少的时间。IO密集型常指文件、网络等操作，它消耗的CPU很少、更多的时间在等待返回。</p>
-<blockquote>
-<p>Go 的 select这个关键词，可以结合网络模型中的select进行理解。</p>
-</blockquote>
-<h3 id="父子进程中的长逻辑处理"><a href="#父子进程中的长逻辑处理" class="headerlink" title="父子进程中的长逻辑处理"></a>父子进程中的长逻辑处理</h3><p>这时，如果我们的父子进程里，就是有那么一长段的业务逻辑，那代码该怎么写呢？我们来看看下面这一段：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">			LongLogic()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">LongLogic</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 如1累加到10000000</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  
+</div>
 
-<p>由于<code>LongLogic()</code>会花费很长的运行时间，所以当外部的context取消了，也就是父Goroutine发出通知可以结束了，这个子Goroutine是无法快速触发到<code>&lt;-ctx.Done()</code>的，因为它还在跑<code>LongLogic()</code>里的代码。也就是说，子进程生命周期结束的时间点延长到<code>LongLogic()</code>之后了。</p>
-<p>所以，根本原因在于违背了我们上面说的原则，即在select的case/default里包含了计算密集型任务。</p>
-<blockquote>
-<p>case里包含长逻辑不代表程序一定有问题，但或多或少地不符合select+channel的设计理念。</p>
-</blockquote>
-<h3 id="两个长逻辑处理"><a href="#两个长逻辑处理" class="headerlink" title="两个长逻辑处理"></a>两个长逻辑处理</h3><p>这时，我们再来写个长进程处理，整个代码结构如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">			LongLogic()</span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh2:</span><br><span class="line">			LongLogic()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+      </header>
 
-<p>这时，dataCh和dataCh2会产生竞争，也就是两个通道的 <strong>写长期阻塞、读都在等待LongLogic执行完成</strong>。给channel加个buffer可以减轻这个问题，但无法根治，运行一段时间依旧阻塞。</p>
-<h3 id="改造思路"><a href="#改造思路" class="headerlink" title="改造思路"></a>改造思路</h3><p>有了上面代码的基础，改造思路比较直观了，将<code>LongLogic</code>异步化：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// children goroutine</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SubFoo</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-ctx.Done():</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> &lt;-dataCh:</span><br><span class="line">			<span class="keyword">go</span> LongLogic()</span><br><span class="line">		<span class="keyword">case</span> &lt;-finishedCh:</span><br><span class="line">			fmt.Println(<span class="string">&quot;LongLogic finished&quot;</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">LongLogic</span><span class="params">()</span></span> &#123;</span><br><span class="line">	time.Sleep(time.Minute)</span><br><span class="line">	finishedCh &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-10-正则表达式匹配"><a href="#Leetcode-10-正则表达式匹配" class="headerlink" title="Leetcode-10 正则表达式匹配"></a>Leetcode-10 正则表达式匹配</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/regular-expression-matching/">https://leetcode-cn.com/problems/regular-expression-matching/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/09/go-leetcode/go-leetcode-6/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
 
-<p>我们要注意一个点，如果<code>LongLogic()</code>是一段需要CPU密集计算的代码，比如计算1累加到10000，它是没有办法通过channel等其余方式突然中止的。它具备一定的原子性 - <strong>要么不跑，要么跑完，没有Channel的插手的地方</strong>。</p>
-<p>而如果硬要中断<code>LongLogic()</code>，那就是杀掉整个进程。</p>
-<h3 id="小结-4"><a href="#小结-4" class="headerlink" title="小结"></a>小结</h3><p>今天的内容是围绕着select这个关键词展开的，我们记住select代码块设计的核心要领 - IO密集型。Go语言的goroutine特性，更多地是为了解决IO密集型程序的问题所设计的编程语言，对计算密集型的任务较其它语言很难体现出其价值。</p>
-<p>落到具体实践上，就是让每个case中代码的运行时间尽可能地短，快速回到for循环里的select去继续监听各个case中的channel。</p>
-<p>上面这段代码比较粗糙，在具体工程中会遇到很多问题，比如无脑地开启了大量的<code>LongLogic()</code>协程。我们会放在最后一讲再来细谈。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
+    
+    
+    
 
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/08/go-leetcode/go-leetcode-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/08/go-leetcode/go-leetcode-5/" class="post-title-link" itemprop="url">Go算法实战 - 5.【最长回文子串LeetCode-5】</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-08 08:00:00" itemprop="dateCreated datePublished" datetime="2022-04-08T08:00:00+08:00">2022-04-08</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-09 11:40:04" itemprop="dateModified" datetime="2022-04-09T11:40:04+08:00">2022-04-09</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-5-最长回文子串"><a href="#Leetcode-5-最长回文子串" class="headerlink" title="Leetcode-5 最长回文子串"></a>Leetcode-5 最长回文子串</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/longest-palindromic-substring/">https://leetcode-cn.com/problems/longest-palindromic-substring/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/08/go-leetcode/go-leetcode-5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/07/go-leetcode/go-leetcode-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/07/go-leetcode/go-leetcode-4/" class="post-title-link" itemprop="url">Go算法实战 - 4.【寻找两个正序数组的中位数LeetCode-4】</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-04-07 08:00:00 / 修改时间：07:46:13" itemprop="dateCreated datePublished" datetime="2022-04-07T08:00:00+08:00">2022-04-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-4-寻找两个正序数组的中位数"><a href="#Leetcode-4-寻找两个正序数组的中位数" class="headerlink" title="Leetcode-4 寻找两个正序数组的中位数"></a>Leetcode-4 寻找两个正序数组的中位数</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/median-of-two-sorted-arrays/">https://leetcode-cn.com/problems/median-of-two-sorted-arrays/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findMedianSortedArrays</span><span class="params">(nums1 []<span class="keyword">int</span>, nums2 []<span class="keyword">int</span>)</span> <span class="title">float64</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/07/go-leetcode/go-leetcode-4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/06/go-leetcode/go-leetcode-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/06/go-leetcode/go-leetcode-3/" class="post-title-link" itemprop="url">Go算法实战 - 3.【无重复字符的最长子串LeetCode-3】</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-06 12:00:00" itemprop="dateCreated datePublished" datetime="2022-04-06T12:00:00+08:00">2022-04-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-07 07:46:02" itemprop="dateModified" datetime="2022-04-07T07:46:02+08:00">2022-04-07</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-3-无重复字符的最长子串"><a href="#Leetcode-3-无重复字符的最长子串" class="headerlink" title="Leetcode-3 无重复字符的最长子串"></a>Leetcode-3 无重复字符的最长子串</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/">https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">lengthOfLongestSubstring</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/06/go-leetcode/go-leetcode-3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/06/go-leetcode/go-leetcode-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/06/go-leetcode/go-leetcode-2/" class="post-title-link" itemprop="url">Go算法实战 - 2.【两数相加LeetCode-2】非递归解法</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-04-06 08:00:00 / 修改时间：23:01:28" itemprop="dateCreated datePublished" datetime="2022-04-06T08:00:00+08:00">2022-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
+<p>我们继续看上一个题目，这次我们尝试写一个非递归的解法。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/06/go-leetcode/go-leetcode-2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/05/go-leetcode/go-leetcode-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/05/go-leetcode/go-leetcode-1/" class="post-title-link" itemprop="url">Go算法实战 - 1.【两数相加LeetCode-2】递归解法</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-05 08:00:00" itemprop="dateCreated datePublished" datetime="2022-04-05T08:00:00+08:00">2022-04-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-06 23:01:06" itemprop="dateModified" datetime="2022-04-06T23:01:06+08:00">2022-04-06</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 - <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/05/go-leetcode/go-leetcode-1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/01/go-leetcode/go-leetcode-12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/01/go-leetcode/go-leetcode-12/" class="post-title-link" itemprop="url">Go算法实战 - 12.【二分查找LeetCode-704】</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-01 13:00:00" itemprop="dateCreated datePublished" datetime="2022-04-01T13:00:00+08:00">2022-04-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-10 13:01:00" itemprop="dateModified" datetime="2022-04-10T13:01:00+08:00">2022-04-10</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-704-二分查找"><a href="#Leetcode-704-二分查找" class="headerlink" title="Leetcode-704 二分查找"></a>Leetcode-704 二分查找</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/binary-search/submissions/">https://leetcode-cn.com/problems/binary-search/submissions/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">search</span><span class="params">(nums []<span class="keyword">int</span>, target <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/01/go-leetcode/go-leetcode-12/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -2006,7 +1060,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
