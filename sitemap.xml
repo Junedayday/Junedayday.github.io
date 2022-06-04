@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://example.com/2022/06/03/thinking/promotion/</loc>
+    <loc>http://example.com/2022/06/04/readings/go-digest-4/</loc>
     
     <lastmod>2022-06-04</lastmod>
     
@@ -485,14 +485,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/categories/index.html</loc>
+    <loc>http://example.com/tags/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/tags/index.html</loc>
+    <loc>http://example.com/categories/index.html</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -541,14 +541,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-006/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-005/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-005/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-006/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -669,7 +669,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Leetcode/</loc>
+    <loc>http://example.com/tags/Go-Programming-Patterns/</loc>
     <lastmod>2022-06-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -683,7 +683,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Programming-Patterns/</loc>
+    <loc>http://example.com/tags/Go-Tip/</loc>
+    <lastmod>2022-06-04</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/Go-Leetcode/</loc>
     <lastmod>2022-06-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -691,13 +698,6 @@
   
   <url>
     <loc>http://example.com/tags/gRPC/</loc>
-    <lastmod>2022-06-04</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.com/tags/Go-Tip/</loc>
     <lastmod>2022-06-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -712,13 +712,6 @@
   
   <url>
     <loc>http://example.com/tags/Digest/</loc>
-    <lastmod>2022-06-04</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.com/tags/%CB%87Talking/</loc>
     <lastmod>2022-06-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -741,7 +734,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/</loc>
+    <loc>http://example.com/categories/%E7%BB%8F%E5%85%B8%E5%93%81%E8%AF%BB/</loc>
     <lastmod>2022-06-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -755,7 +748,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/categories/%E7%BB%8F%E5%85%B8%E5%93%81%E8%AF%BB/</loc>
+    <loc>http://example.com/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/</loc>
     <lastmod>2022-06-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
