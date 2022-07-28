@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="在上一讲，我们一起看了etcd server是怎么匹配到对应的处理函数的，如果忘记了请回顾一下。 今天，我们再进一步，看看PUT操作接下来是怎么执行的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="etcd源码分析 - 3.【打通核心流程】PUT键值对的执行链路">
+<meta property="og:url" content="http://example.com/2022/07/04/etcd/etcd-3/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="在上一讲，我们一起看了etcd server是怎么匹配到对应的处理函数的，如果忘记了请回顾一下。 今天，我们再进一步，看看PUT操作接下来是怎么执行的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd-1-main-Page-3.drawio%20(1).png">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2022-07-04T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-05T12:10:59.849Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-etcd">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg">
+
+
+<link rel="canonical" href="http://example.com/2022/07/04/etcd/etcd-3/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>etcd源码分析 - 3.【打通核心流程】PUT键值对的执行链路 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP1%E9%83%A8%E5%88%86"><span class="nav-number">1.</span> <span class="nav-text">HTTP1部分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#request-KV-Put-0"><span class="nav-number">1.1.</span> <span class="nav-text">request_KV_Put_0</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcdserverpb-kVClient"><span class="nav-number">1.2.</span> <span class="nav-text">etcdserverpb.kVClient</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gRPC%E9%83%A8%E5%88%86"><span class="nav-number">2.</span> <span class="nav-text">gRPC部分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#proto%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">proto文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcdserverpb-RegisterKVServer"><span class="nav-number">2.2.</span> <span class="nav-text">etcdserverpb.RegisterKVServer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NewQuotaKVServer"><span class="nav-number">2.3.</span> <span class="nav-text">NewQuotaKVServer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NewKVServer"><span class="nav-number">2.4.</span> <span class="nav-text">NewKVServer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kvServer-Put"><span class="nav-number">2.5.</span> <span class="nav-text">(*kvServer) Put</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EtcdServer-Put"><span class="nav-number">2.6.</span> <span class="nav-text">(*EtcdServer) Put</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EtcdServer-raftRequest"><span class="nav-number">2.7.</span> <span class="nav-text">(*EtcdServer) raftRequest</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EtcdServer-processInternalRaftRequestOnce"><span class="nav-number">2.8.</span> <span class="nav-text">(*EtcdServer) processInternalRaftRequestOnce</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#raftNode%E9%83%A8%E5%88%86"><span class="nav-number">3.</span> <span class="nav-text">raftNode部分</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#raftNode-Propose"><span class="nav-number">3.1.</span> <span class="nav-text">(raftNode)Propose</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">98</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/04/etcd/etcd-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          etcd源码分析 - 3.【打通核心流程】PUT键值对的执行链路
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-07-04 12:00:00" itemprop="dateCreated datePublished" datetime="2022-07-04T12:00:00+08:00">2022-07-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-07-05 20:10:59" itemprop="dateModified" datetime="2022-07-05T20:10:59+08:00">2022-07-05</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p>在上一讲，我们一起看了etcd server是怎么匹配到对应的处理函数的，如果忘记了请回顾一下。</p>
+<p>今天，我们再进一步，看看<code>PUT</code>操作接下来是怎么执行的。</p>
+<span id="more"></span>
+
+<h2 id="HTTP1部分"><a href="#HTTP1部分" class="headerlink" title="HTTP1部分"></a>HTTP1部分</h2><h3 id="request-KV-Put-0"><a href="#request-KV-Put-0" class="headerlink" title="request_KV_Put_0"></a>request_KV_Put_0</h3><p>整个函数主要分为两步：</p>
+<ol>
+<li>解析请求到<code>etcdserverpb.PutRequest</code>数据结构；</li>
+<li><code>client</code>执行<code>PUT</code>操作；</li>
+</ol>
+<p>关于解析部分，我们暂时不用关心如何反序列化的（反序列化是一种可替换的插件，常见的如json/protobuffer/xml），重点看看它的数据结构：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> PutRequest <span class="keyword">struct</span> &#123;</span><br><span class="line">	Key []<span class="keyword">byte</span> <span class="string">`protobuf:&quot;bytes,1,opt,name=key,proto3&quot; json:&quot;key,omitempty&quot;`</span></span><br><span class="line">	Value []<span class="keyword">byte</span> <span class="string">`protobuf:&quot;bytes,2,opt,name=value,proto3&quot; json:&quot;value,omitempty&quot;`</span></span><br><span class="line">	Lease <span class="keyword">int64</span> <span class="string">`protobuf:&quot;varint,3,opt,name=lease,proto3&quot; json:&quot;lease,omitempty&quot;`</span></span><br><span class="line">	PrevKv <span class="keyword">bool</span> <span class="string">`protobuf:&quot;varint,4,opt,name=prev_kv,json=prevKv,proto3&quot; json:&quot;prev_kv,omitempty&quot;`</span></span><br><span class="line">	IgnoreValue <span class="keyword">bool</span> <span class="string">`protobuf:&quot;varint,5,opt,name=ignore_value,json=ignoreValue,proto3&quot; json:&quot;ignore_value,omitempty&quot;`</span></span><br><span class="line">	IgnoreLease <span class="keyword">bool</span> <span class="string">`protobuf:&quot;varint,6,opt,name=ignore_lease,json=ignoreLease,proto3&quot; json:&quot;ignore_lease,omitempty&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从我们执行的<code>etcdctl put mykey &quot;this is awesome&quot;</code>为例，不难猜到：</p>
+<ul>
+<li>Key - mykey</li>
+<li>Value - this is awesome</li>
+</ul>
+<p>接下来，我们去看看client是如何执行<code>PUT</code>的。</p>
+<h3 id="etcdserverpb-kVClient"><a href="#etcdserverpb-kVClient" class="headerlink" title="etcdserverpb.kVClient"></a>etcdserverpb.kVClient</h3><p><code>request_KV_Put_0</code>函数中的client是一个接口<code>KVClient</code>，包括Range/Put/DeleteRange/Txn/Compact五种操作。</p>
+<blockquote>
+<p>这里提一下，很多开源库将接口与其实现，用大小写来区分，来强制要求外部模块依赖其接口：</p>
+<p>比如KVClient作为接口，而kVClient作为其实现是小写的，所以外部模块无法直接使用kVClient这个数据结构。</p>
+</blockquote>
+<p>它的实现可以很容易地翻阅代码找到，是<code>etcdserverpb.kVClient</code>。我们去看看对应的<code>PUT</code>方法。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *kVClient)</span> <span class="title">Put</span><span class="params">(ctx context.Context, in *PutRequest, opts ...grpc.CallOption)</span> <span class="params">(*PutResponse, error)</span></span> &#123;</span><br><span class="line">	out := <span class="built_in">new</span>(PutResponse)</span><br><span class="line">	err := grpc.Invoke(ctx, <span class="string">&quot;/etcdserverpb.KV/Put&quot;</span>, in, out, c.cc, opts...)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> out, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里，我们就找到了HTTP调用gRPC的影子，也就是这个<code>Invoke</code>方法。</p>
+<h2 id="gRPC部分"><a href="#gRPC部分" class="headerlink" title="gRPC部分"></a>gRPC部分</h2><h3 id="proto文件"><a href="#proto文件" class="headerlink" title="proto文件"></a>proto文件</h3><p>关于gRPC的调用部分，我比较推荐从最原始的<code>proto</code>文件开始阅读，主要包括2个文件：</p>
+<ul>
+<li><code>etcd/etcdserver/etcdserverpb/rpc.proto</code> 原始文件</li>
+<li><code>etcd/etcdserver/etcdserverpb/rpc.pb.go</code> 生成文件</li>
+</ul>
+<p>从下面的定义可以看到HTTP1采用了<code>POST</code>方法，对应URL为<code>/v3/kv/put</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">rpc Put(PutRequest) returns (PutResponse) &#123;</span><br><span class="line">  option (google.api.http) = &#123;</span><br><span class="line">    post: &quot;/v3/kv/put&quot;</span><br><span class="line">    body: &quot;*&quot;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="etcdserverpb-RegisterKVServer"><a href="#etcdserverpb-RegisterKVServer" class="headerlink" title="etcdserverpb.RegisterKVServer"></a>etcdserverpb.RegisterKVServer</h3><p>我们要注意，proto文件及其生成的go代码只是定义了server的接口，具体的实现需要开发者自行编码实现，通过注册函数<code>RegisterKVServer</code>将两者串联起来。</p>
+<p>查找该函数的调用，分为三个，各有用途：</p>
+<ol>
+<li><code>grpc.go</code> - server的调用处</li>
+<li><code>grpc_proxy.go</code> - proxy代理模式，忽略</li>
+<li><code>mockserver.go</code> - mock服务，忽略</li>
+</ol>
+<p>跳转到1对应的代码处，我们看到了注册函数<code>pb.RegisterKVServer(grpcServer, NewQuotaKVServer(s))</code>。</p>
+<h3 id="NewQuotaKVServer"><a href="#NewQuotaKVServer" class="headerlink" title="NewQuotaKVServer"></a>NewQuotaKVServer</h3><p>进一步跳转，来到了<code>NewKVServer</code>函数中。</p>
+<h3 id="NewKVServer"><a href="#NewKVServer" class="headerlink" title="NewKVServer"></a>NewKVServer</h3><p>这个函数新建了一个<code>kvServer</code>对象，它实现接口<code>etcdserverpb.KVServer</code>。我们再看对应的<code>PUT</code>方法。</p>
+<h3 id="kvServer-Put"><a href="#kvServer-Put" class="headerlink" title="(*kvServer) Put"></a>(*kvServer) Put</h3><p><code>Put</code>方法代码很少：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *kvServer)</span> <span class="title">Put</span><span class="params">(ctx context.Context, r *pb.PutRequest)</span> <span class="params">(*pb.PutResponse, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := checkPutRequest(r); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	resp, err := s.kv.Put(ctx, r)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, togRPCError(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	s.hdr.fill(resp.Header)</span><br><span class="line">	<span class="keyword">return</span> resp, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而这里的<code>s.kv</code>，其定义为接口<code>etcdserver.RaftKV</code>，定义了如下五个方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> RaftKV <span class="keyword">interface</span> &#123;</span><br><span class="line">  <span class="comment">// 范围操作</span></span><br><span class="line">	Range(ctx context.Context, r *pb.RangeRequest) (*pb.RangeResponse, error)</span><br><span class="line">  <span class="comment">// KV操作</span></span><br><span class="line">	Put(ctx context.Context, r *pb.PutRequest) (*pb.PutResponse, error)</span><br><span class="line">  <span class="comment">// 删除范围</span></span><br><span class="line">	DeleteRange(ctx context.Context, r *pb.DeleteRangeRequest) (*pb.DeleteRangeResponse, error)</span><br><span class="line">  <span class="comment">// 事务</span></span><br><span class="line">	Txn(ctx context.Context, r *pb.TxnRequest) (*pb.TxnResponse, error)</span><br><span class="line">  <span class="comment">// 压缩</span></span><br><span class="line">	Compact(ctx context.Context, r *pb.CompactionRequest) (*pb.CompactionResponse, error)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>etcd server集群之间采用的是RAFT协议，而<code>RaftKV</code>则是实现的关键。查找RaftKV的具体实现<code>EtcdServer</code>，我们就找到了如下代码：</p>
+<h3 id="EtcdServer-Put"><a href="#EtcdServer-Put" class="headerlink" title="(*EtcdServer) Put"></a>(*EtcdServer) Put</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">Put</span><span class="params">(ctx context.Context, r *pb.PutRequest)</span> <span class="params">(*pb.PutResponse, error)</span></span> &#123;</span><br><span class="line">	ctx = context.WithValue(ctx, traceutil.StartTimeKey, time.Now())</span><br><span class="line">	resp, err := s.raftRequest(ctx, pb.InternalRaftRequest&#123;Put: r&#125;)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> resp.(*pb.PutResponse), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是，这里将多种请求命令（如PUT/RANGE），都封装到了一个结构体<code>InternalRaftRequest</code>中。</p>
+<p>我们继续跳转。</p>
+<h3 id="EtcdServer-raftRequest"><a href="#EtcdServer-raftRequest" class="headerlink" title="(*EtcdServer) raftRequest"></a>(*EtcdServer) raftRequest</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *EtcdServer)</span> <span class="title">raftRequest</span><span class="params">(ctx context.Context, r pb.InternalRaftRequest)</span> <span class="params">(proto.Message, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> s.raftRequestOnce(ctx, r)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一般来说，带<code>Once</code>关键字的函数，强调只执行一次，简单的可以用<code>sync.Once</code>函数实现，复杂的会结合<code>sync</code>和<code>atomic</code>进行针对性的设计。</p>
+<p>我们再进一步跳转。</p>
+<h3 id="EtcdServer-processInternalRaftRequestOnce"><a href="#EtcdServer-processInternalRaftRequestOnce" class="headerlink" title="(*EtcdServer) processInternalRaftRequestOnce"></a>(*EtcdServer) processInternalRaftRequestOnce</h3><p>这部分的代码我做了个精简，如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 发起RAFT提案Propose（分布式共识算法的术语，不清楚的同学有个初步印象即可）</span></span><br><span class="line">err = s.r.Propose(cctx, data)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 监控的metrics，表示提案处于Pending计数+1，退出则-1</span></span><br><span class="line">proposalsPending.Inc()</span><br><span class="line"><span class="keyword">defer</span> proposalsPending.Dec()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 处理结果异步返回，分为三个情况</span></span><br><span class="line"><span class="keyword">select</span> &#123;</span><br><span class="line">  <span class="comment">// 正常返回结果</span></span><br><span class="line">	<span class="keyword">case</span> x := &lt;-ch:</span><br><span class="line">		<span class="keyword">return</span> x.(*applyResult), <span class="literal">nil</span></span><br><span class="line">  <span class="comment">// 超时等异常处理</span></span><br><span class="line">	<span class="keyword">case</span> &lt;-cctx.Done():</span><br><span class="line">		proposalsFailed.Inc()</span><br><span class="line">		s.w.Trigger(id, <span class="literal">nil</span>) <span class="comment">// GC wait</span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, s.parseProposeCtxErr(cctx.Err(), start)</span><br><span class="line">  <span class="comment">// 被正常关闭</span></span><br><span class="line">	<span class="keyword">case</span> &lt;-s.done:</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, ErrStopped</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="raftNode部分"><a href="#raftNode部分" class="headerlink" title="raftNode部分"></a>raftNode部分</h2><h3 id="raftNode-Propose"><a href="#raftNode-Propose" class="headerlink" title="(raftNode)Propose"></a>(raftNode)Propose</h3><p>如果我们对<code>Propose</code>方法感兴趣，就需要深入学习<code>raftNode</code>这一大块了，它是对RAFT协议的整体封装。</p>
+<p>在<code>etcd</code>里，<code>raftNode</code>是一个比较独立的模块，我们会在后续模块专门分析。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>通过本篇的代码阅读，我们经历了 HTTP1 -&gt; gRPC -&gt; raftNode 三层，对整个<code>PUT</code>调用链有了一个基本印象。</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd-1-main-Page-3.drawio%20(1).png"></p>
+<p>我在图中特别标注了一些关键的接口与实现。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-etcd/" rel="tag"># Go-etcd</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/06/28/etcd/etcd-2/" rel="prev" title="etcd源码分析 - 2.【打通核心流程】PUT键值对匹配处理函数">
+                  <i class="fa fa-chevron-left"></i> etcd源码分析 - 2.【打通核心流程】PUT键值对匹配处理函数
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/07/12/etcd/etcd-4/" rel="next" title="etcd源码分析 - 4.【打通核心流程】processInternalRaftRequestOnce四个细节">
+                  etcd源码分析 - 4.【打通核心流程】processInternalRaftRequestOnce四个细节 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

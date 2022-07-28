@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="之前，我在b站视频简单地讲述了etcd的功能与特性，有兴趣的可以参考相关视频。 但如果要更深入地研究etcd，就需要我们涉及到源码、并结合实践进行学习。那么，接下来，我将基于v3.4这个版本，做一期深入的环境搭建。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="etcd源码分析 - 0.搭建学习etcd的环境">
+<meta property="og:url" content="http://example.com/2022/06/14/etcd/etcd-0/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="之前，我在b站视频简单地讲述了etcd的功能与特性，有兴趣的可以参考相关视频。 但如果要更深入地研究etcd，就需要我们涉及到源码、并结合实践进行学习。那么，接下来，我将基于v3.4这个版本，做一期深入的环境搭建。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2022-06-14T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-04T06:12:40.046Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-etcd">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg">
+
+
+<link rel="canonical" href="http://example.com/2022/06/14/etcd/etcd-0/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>etcd源码分析 - 0.搭建学习etcd的环境 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">环境准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%B0%83%E8%AF%95"><span class="nav-number">2.</span> <span class="nav-text">基本调试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8EMakefile%E7%9C%8BGo%E7%9A%84%E7%BC%96%E8%AF%91%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">从Makefile看Go的编译步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GIT-SHA"><span class="nav-number">3.1.</span> <span class="nav-text">GIT_SHA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ldflags"><span class="nav-number">3.2.</span> <span class="nav-text">ldflags</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E9%80%92ldflags%E4%B8%AD%E7%9A%84%E5%8F%82%E6%95%B0"><span class="nav-number">4.</span> <span class="nav-text">传递ldflags中的参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">98</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/14/etcd/etcd-0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          etcd源码分析 - 0.搭建学习etcd的环境
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-06-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-06-14T12:00:00+08:00">2022-06-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-07-04 14:12:40" itemprop="dateModified" datetime="2022-07-04T14:12:40+08:00">2022-07-04</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p>之前，我在b站视频简单地讲述了etcd的功能与特性，有兴趣的可以参考<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV155411Y7Pq/">相关视频</a>。</p>
+<p>但如果要更深入地研究etcd，就需要我们涉及到源码、并结合实践进行学习。那么，接下来，我将基于<code>v3.4</code>这个版本，做一期深入的环境搭建。</p>
+<span id="more"></span>
+
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><ol>
+<li>Macbook - 为了方便读代码与编译运行，也可自行搭建Ubuntu等可视化系统</li>
+<li>Go语言 - v1.17，我选用的是v1.17.11</li>
+<li>Goland/VSCode</li>
+<li>etcd源码 - 建议用Github Desktop进行下载</li>
+</ol>
+<h2 id="基本调试"><a href="#基本调试" class="headerlink" title="基本调试"></a>基本调试</h2><p>为了保证etcd可运行，我们先在根目录上运行<code>go mod tidy</code>，保证依赖库没有问题。</p>
+<p>接着，我们阅读<code>Makefile</code>文件，发现其提供了<code>make build</code>指令。运行后，在<code>bin</code>目录下生成了<code>etcd</code>/<code>etcdctl</code>/<code>etcdutl</code>三个可执行文件，并且打印出了版本信息。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">./bin/etcd --version</span><br><span class="line">etcd Version: 3.4.18</span><br><span class="line">Git SHA: c2c9e7de0</span><br><span class="line">Go Version: go1.17.11</span><br><span class="line">Go OS/Arch: darwin/amd64</span><br><span class="line">./bin/etcdctl version</span><br><span class="line">etcdctl version: 3.4.18</span><br><span class="line">API version: 3.4</span><br></pre></td></tr></table></figure>
+
+<p>我们暂时只关注<code>etcd</code>与<code>etcdctl</code>，可以简单地将两者理解为服务端与客户端。我们分别在两个终端进行操作：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 运行etcd server</span></span><br><span class="line">./bin/etcd</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 写入一个key</span></span><br><span class="line">./bin/etcdctl put mykey &quot;this is awesome&quot;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 读取一个key</span></span><br><span class="line">./bin/etcdctl get mykey</span><br></pre></td></tr></table></figure>
+
+<p>如果你能读取到对应的信息，那么就证明整个环境已经很好地运行起来了。</p>
+<h2 id="从Makefile看Go的编译步骤"><a href="#从Makefile看Go的编译步骤" class="headerlink" title="从Makefile看Go的编译步骤"></a>从Makefile看Go的编译步骤</h2><p>在日常开发的过程中，我们对Go程序的编译往往只是一行简单的<code>go build</code>，但在大型工程中往往还不够。我们看看etcd做了什么。</p>
+<h3 id="GIT-SHA"><a href="#GIT-SHA" class="headerlink" title="GIT_SHA"></a>GIT_SHA</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GIT_SHA=$(git rev-parse --short HEAD || echo &quot;GitNotFound&quot;)</span><br><span class="line">GO_LDFLAGS=&quot;$GO_LDFLAGS -X $&#123;REPO_PATH&#125;/version.GitSHA=$&#123;GIT_SHA&#125;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这个参数是取git最新一次的commit的短hash，用来标识源码的版本，比如c2c9e7de0。</p>
+<p>然后，将这个相对唯一的值，作为GO_LDFLAGS中的一个参数，打入到go程序中。</p>
+<h3 id="ldflags"><a href="#ldflags" class="headerlink" title="ldflags"></a>ldflags</h3><p>在Makefile中的编译里，我们会用到<code>-ldflags &quot;$GO_LDFLAGS&quot;</code>这个参数。通过运行<code>go help build</code>，可以看到这么一段说明：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-ldflags &#x27;[pattern=]arg list&#x27;</span><br><span class="line">               arguments to pass on each go tool link invocation.</span><br></pre></td></tr></table></figure>
+
+<p>也就是用key=value对的格式，将想要的信息传递给Go程序。</p>
+<blockquote>
+<p>ldflags可以记忆为 load flags，即将标记信息加载到程序中。</p>
+</blockquote>
+<h2 id="传递ldflags中的参数"><a href="#传递ldflags中的参数" class="headerlink" title="传递ldflags中的参数"></a>传递ldflags中的参数</h2><p><code>ldflags</code>传递参数的方式是 <code>package_path.variable_name=new_value</code>。</p>
+<p>以示例中的build为例，这个值为<code>go.etcd.io/etcd/version.GitSHA=$&#123;GIT_SHA&#125;</code>，对应到三块：</p>
+<ol>
+<li>package_path = go.etcd.io/etcd/version</li>
+<li>variable_name = GitSHA</li>
+<li>new_value = ${GIT_SHA}</li>
+</ol>
+<p>所以，这里所做的就是将<code>go.etcd.io/etcd/version</code>这个package下的<code>GitSHA</code>变量替换为想要的值。我们去对应的代码里看，发现对应的代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line">	<span class="comment">// MinClusterVersion is the min cluster version this etcd binary is compatible with.</span></span><br><span class="line">	MinClusterVersion = <span class="string">&quot;3.0.0&quot;</span></span><br><span class="line">	Version           = <span class="string">&quot;3.4.18&quot;</span></span><br><span class="line">	APIVersion        = <span class="string">&quot;unknown&quot;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Git SHA Value will be set during build</span></span><br><span class="line">	GitSHA = <span class="string">&quot;Not provided (use ./build instead of go build)&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>所以，我们可以通过编译脚本实现代码中变量的替换。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>etcd的学习环境搭建并不复杂，主要是有一台Mac电脑。接下来，我们将逐步开始一起阅读代码。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-etcd/" rel="tag"># Go-etcd</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/06/07/go-tip/go-tip-16/" rel="prev" title="Go语言技巧 - 16.【Go泛型】何时使用泛型">
+                  <i class="fa fa-chevron-left"></i> Go语言技巧 - 16.【Go泛型】何时使用泛型
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/06/20/etcd/etcd-1/" rel="next" title="etcd源码分析 - 1.【打通核心流程】etcd server的启动流程">
+                  etcd源码分析 - 1.【打通核心流程】etcd server的启动流程 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
