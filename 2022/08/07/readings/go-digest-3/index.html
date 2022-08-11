@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="概览目前，Go语言在中国市场虽然蓬勃发展，但相较于JAVA语言的成熟面试体系，Go缺少了很多“八股文”性质的资料，出现了两个问题：  对新手来说，知识很难体系化； 对面试者来说，遇到的问题千奇百怪，甚至面试官之间的答案也不一样  那么，我将挑选五个概述类的问题，并给出我的思考，希望能对大家带来帮助。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="技术阅读摘要 - 5.Go语言面试概述类问题">
+<meta property="og:url" content="http://example.com/2022/08/07/readings/go-digest-3/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="概览目前，Go语言在中国市场虽然蓬勃发展，但相较于JAVA语言的成熟面试体系，Go缺少了很多“八股文”性质的资料，出现了两个问题：  对新手来说，知识很难体系化； 对面试者来说，遇到的问题千奇百怪，甚至面试官之间的答案也不一样  那么，我将挑选五个概述类的问题，并给出我的思考，希望能对大家带来帮助。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2022-08-07T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-08-09T12:24:15.474Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Digest">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+
+
+<link rel="canonical" href="http://example.com/2022/08/07/readings/go-digest-3/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>技术阅读摘要 - 5.Go语言面试概述类问题 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%B0%88%E8%B0%88%E4%BD%A0%E5%AF%B9Go%E8%AF%AD%E8%A8%80%E7%9A%84%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">2.</span> <span class="nav-text">1.谈谈你对Go语言的错误处理的思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%88%E8%B0%88%E4%BD%A0%E5%AF%B9Go%E7%A8%8B%E5%BA%8F%E6%95%85%E9%9A%9C%E7%9A%84%E6%8E%92%E6%9F%A5%E5%BF%83%E5%BE%97"><span class="nav-number">3.</span> <span class="nav-text">谈谈你对Go程序故障的排查心得</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%A0%E8%AE%A4%E4%B8%BAGo%E8%AF%AD%E8%A8%80%E7%9A%84%E5%BC%8A%E7%AB%AF%E6%9C%89%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">你认为Go语言的弊端有什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%93%E7%8E%B0%E4%BD%A0%E7%9A%84Go%E8%AF%AD%E8%A8%80%E6%B0%B4%E5%B9%B3"><span class="nav-number">5.</span> <span class="nav-text">如何体现你的Go语言水平</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%A0%B7%E7%9A%84%E9%A1%B9%E7%9B%AE%E9%80%82%E5%90%88%E7%94%A8Go%E8%AF%AD%E8%A8%80%E5%BC%80%E5%8F%91"><span class="nav-number">6.</span> <span class="nav-text">什么样的项目适合用Go语言开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">99</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/08/07/readings/go-digest-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          技术阅读摘要 - 5.Go语言面试概述类问题
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-07 12:00:00" itemprop="dateCreated datePublished" datetime="2022-08-07T12:00:00+08:00">2022-08-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-08-09 20:24:15" itemprop="dateModified" datetime="2022-08-09T20:24:15+08:00">2022-08-09</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>目前，Go语言在中国市场虽然蓬勃发展，但相较于JAVA语言的成熟面试体系，Go缺少了很多“八股文”性质的资料，出现了两个问题：</p>
+<ol>
+<li>对新手来说，知识很难体系化；</li>
+<li>对面试者来说，遇到的问题千奇百怪，甚至面试官之间的答案也不一样</li>
+</ol>
+<p>那么，我将挑选五个概述类的问题，并给出我的思考，希望能对大家带来帮助。</p>
+<span id="more"></span>
+
+<h2 id="1-谈谈你对Go语言的错误处理的思考"><a href="#1-谈谈你对Go语言的错误处理的思考" class="headerlink" title="1.谈谈你对Go语言的错误处理的思考"></a>1.谈谈你对Go语言的错误处理的思考</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在谈论这个话题前，我们最好先掌握两个知识点：</p>
+<ol>
+<li>了解以JAVA体系为代表的try-catch模式的错误处理方式</li>
+<li>Go语言error封装的常见技巧</li>
+</ol>
+<p>我们的回答先围绕这两个点展开：</p>
+<ol>
+<li>Go语言对错误处理的设计是偏向于过程性的。虽然会牺牲一定的简洁性、增加代码冗余，但在阅读代码时，我们能明确地知道，错误是在方法的哪一行产生的；</li>
+<li>推荐使用<code>github.com/pkg/errors</code>这个Go官方推荐的库（具体方法可以参考 <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/05/07/go-tip/go-tip-3/">我的博客</a>）。简单来说，将错误进行堆栈化，丰富错误所包含的信息。</li>
+</ol>
+<p>关于这个问题，你要谈到的三个关键点是：</p>
+<ol>
+<li>error处理的代码会导致冗余，牺牲一定的简洁性，但阅读者可以清晰地看到错误产生的源头；</li>
+<li>熟悉对error处理的技巧，如<code>bufio.Scanner</code>将error封装到结构体中；</li>
+<li>官方思路 - 以<code>github.com/pkg/errors</code>为代表的，将error进行堆栈化处理；</li>
+</ol>
+<h2 id="谈谈你对Go程序故障的排查心得"><a href="#谈谈你对Go程序故障的排查心得" class="headerlink" title="谈谈你对Go程序故障的排查心得"></a>谈谈你对Go程序故障的排查心得</h2><p>线下问题相对简单，可以通过 <strong>单元测试</strong> 或者 <strong>代码调试</strong> 的手段进行排查。</p>
+<p>我们讨论的重点是线上程序，我将思路分为3类：</p>
+<ol>
+<li>可观测性：重点是监控指标metrics与链路追踪tracing</li>
+<li>Go语言自带的pprof：主要用来分析复杂的程序瓶颈</li>
+<li>操作系统层面的工具：包括CPU、磁盘、网络等，如tracert、tcpdump等</li>
+</ol>
+<p>一般情况下，第1类成本最低，能解决绝大部分的问题，是稳定性重点建设的目标。</p>
+<h2 id="你认为Go语言的弊端有什么？"><a href="#你认为Go语言的弊端有什么？" class="headerlink" title="你认为Go语言的弊端有什么？"></a>你认为Go语言的弊端有什么？</h2><p>我将从小到大、谈谈Go语言的三个问题（主要与JAVA进行对比）：</p>
+<ol>
+<li>基础库：基础库提供的能力比较受限，这就导致大量各异的轮子被发明出来，很难统一；</li>
+<li>代码风格：风格迥异，如新手容易写出过程性的代码，资深人员会写出面向接口、高度抽象的代码；</li>
+<li>编程框架：业界没有统一的Go框架，框架间思路也差异很大；</li>
+</ol>
+<p>总体来说，Go现状依然是百家齐鸣。这对语言的丰富性来说是个好事，但对工程项目来说，很难统一约束，<strong>多样性会导致可维护性变差</strong>。</p>
+<h2 id="如何体现你的Go语言水平"><a href="#如何体现你的Go语言水平" class="headerlink" title="如何体现你的Go语言水平"></a>如何体现你的Go语言水平</h2><p>展示Go语言的能力发展分为两个方向：底层与上层。</p>
+<p>底层能力包括：源码理解、GMP、性能问题、runtime、编译器等方向，体现出了计算机基础功底。一般来说，在底层这块进一步深钻的话，技术栈需要重点扩充操作系统与网络方向，而编程语言上也需要有一定C++的能力。</p>
+<p>上层能力又可以区分为两块：工程化能力与特定业务领域的能力。通俗点说，工程化是怎么写出可维护的、优雅的Go代码，考验的是经验与基本功；特定业务领域能力则是掌握怎么用Go语言的特性或者特定库，去解决对应的领域问题，如云原生、区块链。</p>
+<h2 id="什么样的项目适合用Go语言开发"><a href="#什么样的项目适合用Go语言开发" class="headerlink" title="什么样的项目适合用Go语言开发"></a>什么样的项目适合用Go语言开发</h2><p>单从语言来看，任何一门语言都具备可替代性。那么Go语言的核心竞争力是什么呢？我看重的是两点；<strong>业务生态与语言特性</strong>，其中生态的重要性远超语言特性。</p>
+<p>先聊一下业务生态。成熟的生态会沉淀相关的工具或现成库，大幅度减少开发成本，逆主流的语言意味着重建生态。比如说，Kubernetes沉淀了Go相关的大量插件与工具，区块链领域也基本都是Go语言的天下。</p>
+<p>在没有绝对统治力的生态下、或者重建生态的成本很低，语言自身的特性才有参考价值。比如在devops领域，常见的有Python、Go、PHP，以及少量的JAVA。这时，Go语言以学习成本低、高性能等因素，脱颖而出，成为首选。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文和大家聊了5个Go语言概述类问题，它们相对于底层问题更容易快速记忆。</p>
+<p>希望能为大家在学习Go语言的过程中带来启发，也可以帮助大家在面试的回答中展现出亮点。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Digest/" rel="tag"># Digest</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/07/25/etcd/etcd-5/" rel="prev" title="etcd源码分析 - 5.【打通核心流程】EtcdServer消息的处理函数">
+                  <i class="fa fa-chevron-left"></i> etcd源码分析 - 5.【打通核心流程】EtcdServer消息的处理函数
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
