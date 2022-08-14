@@ -25,20 +25,20 @@
   <meta name="description" content="概览目前，Go语言在中国市场虽然蓬勃发展，但相较于JAVA语言的成熟面试体系，Go缺少了很多“八股文”性质的资料，出现了两个问题：  对新手来说，知识很难体系化； 对面试者来说，遇到的问题千奇百怪，甚至面试官之间的答案也不一样  那么，我将挑选五个概述类的问题，并给出我的思考，希望能对大家带来帮助。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="技术阅读摘要 - 5.Go语言面试概述类问题">
-<meta property="og:url" content="http://example.com/2022/08/07/readings/go-digest-3/index.html">
+<meta property="og:url" content="http://example.com/2022/08/07/readings/go-digest-5/index.html">
 <meta property="og:site_name" content="Junedayday Blog">
 <meta property="og:description" content="概览目前，Go语言在中国市场虽然蓬勃发展，但相较于JAVA语言的成熟面试体系，Go缺少了很多“八股文”性质的资料，出现了两个问题：  对新手来说，知识很难体系化； 对面试者来说，遇到的问题千奇百怪，甚至面试官之间的答案也不一样  那么，我将挑选五个概述类的问题，并给出我的思考，希望能对大家带来帮助。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 <meta property="article:published_time" content="2022-08-07T04:00:00.000Z">
-<meta property="article:modified_time" content="2022-08-09T12:24:15.474Z">
+<meta property="article:modified_time" content="2022-08-14T04:20:00.195Z">
 <meta property="article:author" content="Junedayday">
 <meta property="article:tag" content="Digest">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
 
 
-<link rel="canonical" href="http://example.com/2022/08/07/readings/go-digest-3/">
+<link rel="canonical" href="http://example.com/2022/08/07/readings/go-digest-5/">
 
 
 <script class="page-configurations">
@@ -152,7 +152,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%B0%88%E8%B0%88%E4%BD%A0%E5%AF%B9Go%E8%AF%AD%E8%A8%80%E7%9A%84%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">2.</span> <span class="nav-text">1.谈谈你对Go语言的错误处理的思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%88%E8%B0%88%E4%BD%A0%E5%AF%B9Go%E7%A8%8B%E5%BA%8F%E6%95%85%E9%9A%9C%E7%9A%84%E6%8E%92%E6%9F%A5%E5%BF%83%E5%BE%97"><span class="nav-number">3.</span> <span class="nav-text">谈谈你对Go程序故障的排查心得</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%A0%E8%AE%A4%E4%B8%BAGo%E8%AF%AD%E8%A8%80%E7%9A%84%E5%BC%8A%E7%AB%AF%E6%9C%89%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">你认为Go语言的弊端有什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%93%E7%8E%B0%E4%BD%A0%E7%9A%84Go%E8%AF%AD%E8%A8%80%E6%B0%B4%E5%B9%B3"><span class="nav-number">5.</span> <span class="nav-text">如何体现你的Go语言水平</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%A0%B7%E7%9A%84%E9%A1%B9%E7%9B%AE%E9%80%82%E5%90%88%E7%94%A8Go%E8%AF%AD%E8%A8%80%E5%BC%80%E5%8F%91"><span class="nav-number">6.</span> <span class="nav-text">什么样的项目适合用Go语言开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%B0%88%E8%B0%88%E4%BD%A0%E5%AF%B9Go%E8%AF%AD%E8%A8%80%E7%9A%84%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">2.</span> <span class="nav-text">1.谈谈你对Go语言的错误处理的思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%B0%88%E8%B0%88%E4%BD%A0%E5%AF%B9Go%E7%A8%8B%E5%BA%8F%E6%95%85%E9%9A%9C%E7%9A%84%E6%8E%92%E6%9F%A5%E5%BF%83%E5%BE%97"><span class="nav-number">3.</span> <span class="nav-text">2.谈谈你对Go程序故障的排查心得</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E4%BD%A0%E8%AE%A4%E4%B8%BAGo%E8%AF%AD%E8%A8%80%E7%9A%84%E5%BC%8A%E7%AB%AF%E6%9C%89%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">3.你认为Go语言的弊端有什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%A6%82%E4%BD%95%E4%BD%93%E7%8E%B0%E4%BD%A0%E7%9A%84Go%E8%AF%AD%E8%A8%80%E6%B0%B4%E5%B9%B3"><span class="nav-number">5.</span> <span class="nav-text">4.如何体现你的Go语言水平</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E4%BB%80%E4%B9%88%E6%A0%B7%E7%9A%84%E9%A1%B9%E7%9B%AE%E9%80%82%E5%90%88%E7%94%A8Go%E8%AF%AD%E8%A8%80%E5%BC%80%E5%8F%91"><span class="nav-number">6.</span> <span class="nav-text">5.什么样的项目适合用Go语言开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -212,7 +212,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/08/07/readings/go-digest-3/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/08/07/readings/go-digest-5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -246,7 +246,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-08-09 20:24:15" itemprop="dateModified" datetime="2022-08-09T20:24:15+08:00">2022-08-09</time>
+        <time title="修改时间：2022-08-14 12:20:00" itemprop="dateModified" datetime="2022-08-14T12:20:00+08:00">2022-08-14</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -294,7 +294,7 @@
 <li>熟悉对error处理的技巧，如<code>bufio.Scanner</code>将error封装到结构体中；</li>
 <li>官方思路 - 以<code>github.com/pkg/errors</code>为代表的，将error进行堆栈化处理；</li>
 </ol>
-<h2 id="谈谈你对Go程序故障的排查心得"><a href="#谈谈你对Go程序故障的排查心得" class="headerlink" title="谈谈你对Go程序故障的排查心得"></a>谈谈你对Go程序故障的排查心得</h2><p>线下问题相对简单，可以通过 <strong>单元测试</strong> 或者 <strong>代码调试</strong> 的手段进行排查。</p>
+<h2 id="2-谈谈你对Go程序故障的排查心得"><a href="#2-谈谈你对Go程序故障的排查心得" class="headerlink" title="2.谈谈你对Go程序故障的排查心得"></a>2.谈谈你对Go程序故障的排查心得</h2><p>线下问题相对简单，可以通过 <strong>单元测试</strong> 或者 <strong>代码调试</strong> 的手段进行排查。</p>
 <p>我们讨论的重点是线上程序，我将思路分为3类：</p>
 <ol>
 <li>可观测性：重点是监控指标metrics与链路追踪tracing</li>
@@ -302,17 +302,17 @@
 <li>操作系统层面的工具：包括CPU、磁盘、网络等，如tracert、tcpdump等</li>
 </ol>
 <p>一般情况下，第1类成本最低，能解决绝大部分的问题，是稳定性重点建设的目标。</p>
-<h2 id="你认为Go语言的弊端有什么？"><a href="#你认为Go语言的弊端有什么？" class="headerlink" title="你认为Go语言的弊端有什么？"></a>你认为Go语言的弊端有什么？</h2><p>我将从小到大、谈谈Go语言的三个问题（主要与JAVA进行对比）：</p>
+<h2 id="3-你认为Go语言的弊端有什么？"><a href="#3-你认为Go语言的弊端有什么？" class="headerlink" title="3.你认为Go语言的弊端有什么？"></a>3.你认为Go语言的弊端有什么？</h2><p>我将从小到大、谈谈Go语言的三个问题（主要与JAVA进行对比）：</p>
 <ol>
 <li>基础库：基础库提供的能力比较受限，这就导致大量各异的轮子被发明出来，很难统一；</li>
 <li>代码风格：风格迥异，如新手容易写出过程性的代码，资深人员会写出面向接口、高度抽象的代码；</li>
 <li>编程框架：业界没有统一的Go框架，框架间思路也差异很大；</li>
 </ol>
 <p>总体来说，Go现状依然是百家齐鸣。这对语言的丰富性来说是个好事，但对工程项目来说，很难统一约束，<strong>多样性会导致可维护性变差</strong>。</p>
-<h2 id="如何体现你的Go语言水平"><a href="#如何体现你的Go语言水平" class="headerlink" title="如何体现你的Go语言水平"></a>如何体现你的Go语言水平</h2><p>展示Go语言的能力发展分为两个方向：底层与上层。</p>
+<h2 id="4-如何体现你的Go语言水平"><a href="#4-如何体现你的Go语言水平" class="headerlink" title="4.如何体现你的Go语言水平"></a>4.如何体现你的Go语言水平</h2><p>展示Go语言的能力发展分为两个方向：底层与上层。</p>
 <p>底层能力包括：源码理解、GMP、性能问题、runtime、编译器等方向，体现出了计算机基础功底。一般来说，在底层这块进一步深钻的话，技术栈需要重点扩充操作系统与网络方向，而编程语言上也需要有一定C++的能力。</p>
 <p>上层能力又可以区分为两块：工程化能力与特定业务领域的能力。通俗点说，工程化是怎么写出可维护的、优雅的Go代码，考验的是经验与基本功；特定业务领域能力则是掌握怎么用Go语言的特性或者特定库，去解决对应的领域问题，如云原生、区块链。</p>
-<h2 id="什么样的项目适合用Go语言开发"><a href="#什么样的项目适合用Go语言开发" class="headerlink" title="什么样的项目适合用Go语言开发"></a>什么样的项目适合用Go语言开发</h2><p>单从语言来看，任何一门语言都具备可替代性。那么Go语言的核心竞争力是什么呢？我看重的是两点；<strong>业务生态与语言特性</strong>，其中生态的重要性远超语言特性。</p>
+<h2 id="5-什么样的项目适合用Go语言开发"><a href="#5-什么样的项目适合用Go语言开发" class="headerlink" title="5.什么样的项目适合用Go语言开发"></a>5.什么样的项目适合用Go语言开发</h2><p>单从语言来看，任何一门语言都具备可替代性。那么Go语言的核心竞争力是什么呢？我看重的是两点；<strong>业务生态与语言特性</strong>，其中生态的重要性远超语言特性。</p>
 <p>先聊一下业务生态。成熟的生态会沉淀相关的工具或现成库，大幅度减少开发成本，逆主流的语言意味着重建生态。比如说，Kubernetes沉淀了Go相关的大量插件与工具，区块链领域也基本都是Go语言的天下。</p>
 <p>在没有绝对统治力的生态下、或者重建生态的成本很低，语言自身的特性才有参考价值。比如在devops领域，常见的有Python、Go、PHP，以及少量的JAVA。这时，Go语言以学习成本低、高性能等因素，脱颖而出，成为首选。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文和大家聊了5个Go语言概述类问题，它们相对于底层问题更容易快速记忆。</p>
