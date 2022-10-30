@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-count">102</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,6 +201,139 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/20/grpc/grpc-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/02/20/grpc/grpc-1/" class="post-title-link" itemprop="url">gRPC源码分析（一）：gRPC的系统调用过程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-20 19:34:41" itemprop="dateCreated datePublished" datetime="2021-02-20T19:34:41+08:00">2021-02-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>参考<a target="_blank" rel="noopener" href="https://grpc.io/docs/quickstart/go/">官方文档</a>，进行部署并运行成功</p>
+<h2 id="分析思路：GRPC是怎么实现方法调用的"><a href="#分析思路：GRPC是怎么实现方法调用的" class="headerlink" title="分析思路：GRPC是怎么实现方法调用的"></a>分析思路：GRPC是怎么实现方法调用的</h2><ol>
+<li>分析PB生成的对应文件</li>
+<li>运行server</li>
+<li>运行client</li>
+</ol>
+<h2 id="1-分析PB生成的对应文件"><a href="#1-分析PB生成的对应文件" class="headerlink" title="1. 分析PB生成的对应文件"></a>1. 分析PB生成的对应文件</h2><h3 id="HelloRequest-HelloReply-结构分析"><a href="#HelloRequest-HelloReply-结构分析" class="headerlink" title="HelloRequest/HelloReply 结构分析"></a>HelloRequest/HelloReply 结构分析</h3><p>存在三个冗余字段 <code>XXX_NoUnkeyedLiteral</code> <code>XXX_unrecognized</code> <code>XXX_sizecache</code></p>
+<p>这部分主要是兼容proto2的，我们暂时不用细究</p>
+<h3 id="GreeterClient客户端"><a href="#GreeterClient客户端" class="headerlink" title="GreeterClient客户端"></a>GreeterClient客户端</h3><p>传入一个 cc grpc.ClientConnInterface 客户端连接</p>
+<p>可调用的方法为SayHello，其内部的method为”/helloworld.Greeter/SayHello”，也就是<code>/&#123;package&#125;.&#123;service&#125;/&#123;method&#125;</code> ，作为一个唯一的URI</p>
+<h3 id="GreeterServer服务端"><a href="#GreeterServer服务端" class="headerlink" title="GreeterServer服务端"></a>GreeterServer服务端</h3><p>需要自己实现一个SayHello的方法</p>
+<p>其中有个 UnimplementedGreeterServer 的接口，可以嵌入到对应的server结构体中（有方法未实现时，会返回codes.Unimplemented）</p>
+<h2 id="2-运行server"><a href="#2-运行server" class="headerlink" title="2. 运行server"></a>2. 运行server</h2><h3 id="定义server"><a href="#定义server" class="headerlink" title="定义server"></a>定义server</h3><p>这里pb.UnimplementedGreeterServer被嵌入了server结构，所以即使没有实现SayHello方法，编译也能通过。</p>
+<p>但是，我们通常要强制server在编译期就必须实现对应的方法，所以生产中建议不嵌入。</p>
+<h3 id="实现自己的业务逻辑"><a href="#实现自己的业务逻辑" class="headerlink" title="实现自己的业务逻辑"></a>实现自己的业务逻辑</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *server)</span> <span class="title">SayHello</span><span class="params">(ctx context.Context, in *pb.HelloRequest)</span> <span class="params">(*pb.HelloReply, error)</span></span>&#123;</span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="注册TCP监听端口"><a href="#注册TCP监听端口" class="headerlink" title="注册TCP监听端口"></a>注册TCP监听端口</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lis, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, port)</span><br></pre></td></tr></table></figure>
+
+<p>因为gRPC的应用层是基于HTTP2的，所以这里不出意外，监听的是tcp端口</p>
+<h3 id="grpc-NewServer"><a href="#grpc-NewServer" class="headerlink" title="grpc.NewServer()"></a>grpc.NewServer()</h3><ol>
+<li>入参为选项参数options</li>
+<li>自带一组defaultServerOptions，最大发送size、最大接收size、连接超时、发送缓冲、接收缓冲</li>
+<li><code>s.cv = sync.NewCond(&amp;s.mu)</code> 条件锁，用于关闭连接</li>
+<li>全局参数 <code>EnableTraciing</code> ，会调用golang.org/x/net/trace 这个包</li>
+</ol>
+<h3 id="pb-RegisterGreeterServer-s-amp-server"><a href="#pb-RegisterGreeterServer-s-amp-server" class="headerlink" title="pb.RegisterGreeterServer(s, &amp;server{})"></a>pb.RegisterGreeterServer(s, &amp;server{})</h3><p>对比自己创建的server和pb中定义的server，确定每个方法都已经实现</p>
+<p>service放在 <code>m map[string]*service</code> 中，所以一个server可以放多个proto定义的服务</p>
+<p>内部的method和stream放在 service 中的两个map中</p>
+<h3 id="s-Serve-lis"><a href="#s-Serve-lis" class="headerlink" title="s.Serve(lis)"></a>s.Serve(lis)</h3><ol>
+<li>listener 放到内部的map中</li>
+<li>for循环，进行tcp连接，这一部分和http源码中的ListenAndServe极其类似</li>
+<li>在协程中进行handleRawConn</li>
+<li>将tcp连接封装对应的creds认证信息</li>
+<li>新建newHTTP2Transport传输层连接</li>
+<li>在协程中进行serveStreams，而http1这里为阻塞的</li>
+<li>函数HandleStreams中参数为2个函数，前者为处理请求，后者用于trace</li>
+<li>进入handleStream，前半段被拆为service，后者为method，通过map查找</li>
+<li>method在processUnaryRPC处理，stream在processStreamingRPC处理，这两块内部就比较复杂了，涉及到具体的算法，以后有时间细读</li>
+</ol>
+<h2 id="3-运行client"><a href="#3-运行client" class="headerlink" title="3. 运行client"></a>3. 运行client</h2><h3 id="grpc-Dial"><a href="#grpc-Dial" class="headerlink" title="grpc.Dial"></a>grpc.Dial</h3><p>新建一个conn连接，这里是一个支持HTTP2.0的客户端，暂不细讲</p>
+<h3 id="pb-NewGreeterClient-conn"><a href="#pb-NewGreeterClient-conn" class="headerlink" title="pb.NewGreeterClient(conn)"></a>pb.NewGreeterClient(conn)</h3><p>新建一个client，包装对应的method，方便调用SayHello</p>
+<h3 id="调用SayHello"><a href="#调用SayHello" class="headerlink" title="调用SayHello"></a>调用SayHello</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r, err := c.SayHello(ctx, &amp;pb.HelloRequest&#123;Name: name&#125;)</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>核心调用的是 Invoke 方法，具体实现要看grpc.ClientConn中</li>
+<li>grpc.ClientConn中实现了Invoke方法，在call.go文件中，详情都在invoke中</li>
+</ol>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号：golangcoding</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -1357,127 +1490,6 @@
 <li><p><code>kubelet</code>会异步地对容器进行管理，调用对应容器的接口（Container Runtime Interface）</p>
 </li>
 </ol>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili：<a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号：golangcoding</p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/18/k8s/k8s-012/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/18/k8s/k8s-012/" class="post-title-link" itemprop="url">【K8s源码品读】012：Phase 1 - kube-controller-manager - 了解控制管理中心</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-18 16:55:58" itemprop="dateCreated datePublished" datetime="2021-02-18T16:55:58+08:00">2021-02-18</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-03-29 20:51:46" itemprop="dateModified" datetime="2021-03-29T20:51:46+08:00">2021-03-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">源码阅读</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="聚焦目标"><a href="#聚焦目标" class="headerlink" title="聚焦目标"></a>聚焦目标</h2><p>理解 kube-controller-manager 的运行机制</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
-<li><a href="#Run">运行的主函数</a></li>
-<li><a href="#StartControllers">控制器的启动函数</a></li>
-<li><a href="#ReplicaSet">引入概念ReplicaSet</a></li>
-<li><a href="#ReplicaSetController">查看ReplicaSetController</a></li>
-<li><a href="#syncReplicaSet">ReplicaSet的核心实现函数</a></li>
-<li><a href="#Summary">总结</a></li>
-</ol>
-<h2 id="Run"><a href="#Run" class="headerlink" title="Run"></a>Run</h2><p>我们找到了对应的主函数，看看其中的内容</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Run</span><span class="params">(c *config.CompletedConfig, stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// configz 模块，在kube-scheduler分析中已经了解</span></span><br><span class="line">	<span class="keyword">if</span> cfgz, err := configz.New(ConfigzName); err == <span class="literal">nil</span> &#123;</span><br><span class="line">		cfgz.Set(c.ComponentConfig)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		klog.Errorf(<span class="string">&quot;unable to register configz: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 健康监测与http服务，跳过</span></span><br><span class="line">	<span class="keyword">var</span> checks []healthz.HealthChecker</span><br><span class="line">	<span class="keyword">var</span> unsecuredMux *mux.PathRecorderMux</span><br><span class="line"></span><br><span class="line">	run := <span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">		rootClientBuilder := controller.SimpleControllerClientBuilder&#123;</span><br><span class="line">			ClientConfig: c.Kubeconfig,</span><br><span class="line">		&#125;</span><br><span class="line">   </span><br><span class="line">    <span class="comment">// client认证相关</span></span><br><span class="line">		<span class="keyword">var</span> clientBuilder controller.ControllerClientBuilder</span><br><span class="line">		</span><br><span class="line">    <span class="comment">// 创建controller的上下文context</span></span><br><span class="line">		controllerContext, err := CreateControllerContext(c, rootClientBuilder, clientBuilder, ctx.Done())</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			klog.Fatalf(<span class="string">&quot;error building controller context: %v&quot;</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line">		saTokenControllerInitFunc := serviceAccountTokenControllerStarter&#123;rootClientBuilder: rootClientBuilder&#125;.startServiceAccountTokenController</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> err := StartControllers(controllerContext, saTokenControllerInitFunc, NewControllerInitializers(controllerContext.LoopMode), unsecuredMux); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			klog.Fatalf(<span class="string">&quot;error starting controllers: %v&quot;</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里的 InformerFactory 和我们在kube-scheduler中看的 SharedInformerFactory 基本一致</span></span><br><span class="line">		controllerContext.InformerFactory.Start(controllerContext.Stop)</span><br><span class="line">		controllerContext.ObjectOrMetadataInformerFactory.Start(controllerContext.Stop)</span><br><span class="line">		<span class="built_in">close</span>(controllerContext.InformersStarted)</span><br><span class="line"></span><br><span class="line">		<span class="keyword">select</span> &#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 是否进行选举</span></span><br><span class="line">	<span class="keyword">if</span> !c.ComponentConfig.Generic.LeaderElection.LeaderElect &#123;</span><br><span class="line">		run(context.TODO())</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;unreachable&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 拼接出一个全局唯一的id</span></span><br><span class="line">	id, err := os.Hostname()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	id = id + <span class="string">&quot;_&quot;</span> + <span class="keyword">string</span>(uuid.NewUUID())</span><br><span class="line"></span><br><span class="line">	rl, err := resourcelock.New(c.ComponentConfig.Generic.LeaderElection.ResourceLock,</span><br><span class="line">		c.ComponentConfig.Generic.LeaderElection.ResourceNamespace,</span><br><span class="line">		c.ComponentConfig.Generic.LeaderElection.ResourceName,</span><br><span class="line">		c.LeaderElectionClient.CoreV1(),</span><br><span class="line">		c.LeaderElectionClient.CoordinationV1(),</span><br><span class="line">		resourcelock.ResourceLockConfig&#123;</span><br><span class="line">			Identity:      id,</span><br><span class="line">			EventRecorder: c.EventRecorder,</span><br><span class="line">		&#125;)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		klog.Fatalf(<span class="string">&quot;error creating lock: %v&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 正常情况下都是阻塞在RunOrDie这个函数中，不停地进行选举相关的工作</span></span><br><span class="line">	leaderelection.RunOrDie(context.TODO(), leaderelection.LeaderElectionConfig&#123;</span><br><span class="line">		Lock:          rl,</span><br><span class="line">		LeaseDuration: c.ComponentConfig.Generic.LeaderElection.LeaseDuration.Duration,</span><br><span class="line">		RenewDeadline: c.ComponentConfig.Generic.LeaderElection.RenewDeadline.Duration,</span><br><span class="line">		RetryPeriod:   c.ComponentConfig.Generic.LeaderElection.RetryPeriod.Duration,</span><br><span class="line">		Callbacks: leaderelection.LeaderCallbacks&#123;</span><br><span class="line">      <span class="comment">// 开始成为Leader的时候，调用run函数</span></span><br><span class="line">			OnStartedLeading: run,</span><br><span class="line">			OnStoppedLeading: <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">				klog.Fatalf(<span class="string">&quot;leaderelection lost&quot;</span>)</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">		WatchDog: electionChecker,</span><br><span class="line">		Name:     <span class="string">&quot;kube-controller-manager&quot;</span>,</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="built_in">panic</span>(<span class="string">&quot;unreachable&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="StartControllers"><a href="#StartControllers" class="headerlink" title="StartControllers"></a>StartControllers</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">StartControllers</span><span class="params">(ctx ControllerContext, startSATokenController InitFunc, controllers <span class="keyword">map</span>[<span class="keyword">string</span>]InitFunc, unsecuredMux *mux.PathRecorderMux)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// 关键性的循环，启动每个controllers，key为控制器名字，value为初始化函数</span></span><br><span class="line">	<span class="keyword">for</span> controllerName, initFn := <span class="keyword">range</span> controllers &#123;</span><br><span class="line">    <span class="comment">// 是否允许启动</span></span><br><span class="line">		<span class="keyword">if</span> !ctx.IsControllerEnabled(controllerName) &#123;</span><br><span class="line">			klog.Warningf(<span class="string">&quot;%q is disabled&quot;</span>, controllerName)</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		time.Sleep(wait.Jitter(ctx.ComponentConfig.Generic.ControllerStartInterval.Duration, ControllerStartJitter))</span><br><span class="line">		klog.V(<span class="number">1</span>).Infof(<span class="string">&quot;Starting %q&quot;</span>, controllerName)</span><br><span class="line">    <span class="comment">// 调用init函数进行启动</span></span><br><span class="line">		debugHandler, started, err := initFn(ctx)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			klog.Errorf(<span class="string">&quot;Error starting %q&quot;</span>, controllerName)</span><br><span class="line">			<span class="keyword">return</span> err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> !started &#123;</span><br><span class="line">			klog.Warningf(<span class="string">&quot;Skipping %q&quot;</span>, controllerName)</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">// 注册对应controller到debug的url中</span></span><br><span class="line">		<span class="keyword">if</span> debugHandler != <span class="literal">nil</span> &amp;&amp; unsecuredMux != <span class="literal">nil</span> &#123;</span><br><span class="line">			basePath := <span class="string">&quot;/debug/controllers/&quot;</span> + controllerName</span><br><span class="line">			unsecuredMux.UnlistedHandle(basePath, http.StripPrefix(basePath, debugHandler))</span><br><span class="line">			unsecuredMux.UnlistedHandlePrefix(basePath+<span class="string">&quot;/&quot;</span>, http.StripPrefix(basePath, debugHandler))</span><br><span class="line">		&#125;</span><br><span class="line">		klog.Infof(<span class="string">&quot;Started %q&quot;</span>, controllerName)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 我们再去传入controller的函数去看看，对应的controller有哪些，这里有我们很多常见的概念，今天不一一细讲</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewControllerInitializers</span><span class="params">(loopMode ControllerLoopMode)</span> <span class="title">map</span>[<span class="title">string</span>]<span class="title">InitFunc</span></span> &#123;</span><br><span class="line">	controllers := <span class="keyword">map</span>[<span class="keyword">string</span>]InitFunc&#123;&#125;</span><br><span class="line">	controllers[<span class="string">&quot;endpoint&quot;</span>] = startEndpointController</span><br><span class="line">	controllers[<span class="string">&quot;endpointslice&quot;</span>] = startEndpointSliceController</span><br><span class="line">	controllers[<span class="string">&quot;endpointslicemirroring&quot;</span>] = startEndpointSliceMirroringController</span><br><span class="line">	controllers[<span class="string">&quot;replicationcontroller&quot;</span>] = startReplicationController</span><br><span class="line">	controllers[<span class="string">&quot;podgc&quot;</span>] = startPodGCController</span><br><span class="line">	controllers[<span class="string">&quot;resourcequota&quot;</span>] = startResourceQuotaController</span><br><span class="line">	controllers[<span class="string">&quot;namespace&quot;</span>] = startNamespaceController</span><br><span class="line">	controllers[<span class="string">&quot;serviceaccount&quot;</span>] = startServiceAccountController</span><br><span class="line">	controllers[<span class="string">&quot;garbagecollector&quot;</span>] = startGarbageCollectorController</span><br><span class="line">	controllers[<span class="string">&quot;daemonset&quot;</span>] = startDaemonSetController</span><br><span class="line">	controllers[<span class="string">&quot;job&quot;</span>] = startJobController</span><br><span class="line">	controllers[<span class="string">&quot;deployment&quot;</span>] = startDeploymentController</span><br><span class="line">	controllers[<span class="string">&quot;replicaset&quot;</span>] = startReplicaSetController</span><br><span class="line">	controllers[<span class="string">&quot;horizontalpodautoscaling&quot;</span>] = startHPAController</span><br><span class="line">	controllers[<span class="string">&quot;disruption&quot;</span>] = startDisruptionController</span><br><span class="line">	controllers[<span class="string">&quot;statefulset&quot;</span>] = startStatefulSetController</span><br><span class="line">	controllers[<span class="string">&quot;cronjob&quot;</span>] = startCronJobController</span><br><span class="line">	controllers[<span class="string">&quot;csrsigning&quot;</span>] = startCSRSigningController</span><br><span class="line">	controllers[<span class="string">&quot;csrapproving&quot;</span>] = startCSRApprovingController</span><br><span class="line">	controllers[<span class="string">&quot;csrcleaner&quot;</span>] = startCSRCleanerController</span><br><span class="line">	controllers[<span class="string">&quot;ttl&quot;</span>] = startTTLController</span><br><span class="line">	controllers[<span class="string">&quot;bootstrapsigner&quot;</span>] = startBootstrapSignerController</span><br><span class="line">	controllers[<span class="string">&quot;tokencleaner&quot;</span>] = startTokenCleanerController</span><br><span class="line">	controllers[<span class="string">&quot;nodeipam&quot;</span>] = startNodeIpamController</span><br><span class="line">	controllers[<span class="string">&quot;nodelifecycle&quot;</span>] = startNodeLifecycleController</span><br><span class="line">	<span class="keyword">if</span> loopMode == IncludeCloudLoops &#123;</span><br><span class="line">		controllers[<span class="string">&quot;service&quot;</span>] = startServiceController</span><br><span class="line">		controllers[<span class="string">&quot;route&quot;</span>] = startRouteController</span><br><span class="line">		controllers[<span class="string">&quot;cloud-node-lifecycle&quot;</span>] = startCloudNodeLifecycleController</span><br><span class="line">	&#125;</span><br><span class="line">	controllers[<span class="string">&quot;persistentvolume-binder&quot;</span>] = startPersistentVolumeBinderController</span><br><span class="line">	controllers[<span class="string">&quot;attachdetach&quot;</span>] = startAttachDetachController</span><br><span class="line">	controllers[<span class="string">&quot;persistentvolume-expander&quot;</span>] = startVolumeExpandController</span><br><span class="line">	controllers[<span class="string">&quot;clusterrole-aggregation&quot;</span>] = startClusterRoleAggregrationController</span><br><span class="line">	controllers[<span class="string">&quot;pvc-protection&quot;</span>] = startPVCProtectionController</span><br><span class="line">	controllers[<span class="string">&quot;pv-protection&quot;</span>] = startPVProtectionController</span><br><span class="line">	controllers[<span class="string">&quot;ttl-after-finished&quot;</span>] = startTTLAfterFinishedController</span><br><span class="line">	controllers[<span class="string">&quot;root-ca-cert-publisher&quot;</span>] = startRootCACertPublisher</span><br><span class="line">	controllers[<span class="string">&quot;ephemeral-volume&quot;</span>] = startEphemeralVolumeController</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> controllers</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="ReplicaSet"><a href="#ReplicaSet" class="headerlink" title="ReplicaSet"></a>ReplicaSet</h2><p>由于我们的示例是创建一个nginx的pod，涉及到kube-controller-manager的内容很少。</p>
-<p>但是，为了加深大家对 kube-controller-manager 的认识，我们引入一个新的概念 - ReplicaSet，下面是官方说明：</p>
-<blockquote>
-<p>A ReplicaSet’s purpose is to maintain a stable set of replica Pods running at any given time. As such, it is often used to guarantee the availability of a specified number of identical Pods.</p>
-</blockquote>
-<blockquote>
-<p>ReplicaSet 的目的是维护一组在任何时候都处于运行状态的 Pod 副本的稳定集合。 因此，它通常用来保证给定数量的、完全相同的 Pod 的可用性。</p>
-</blockquote>
-<p>简单来说，ReplicaSet 就是用来生成指定个数的Pod。</p>
-<h2 id="ReplicaSetController"><a href="#ReplicaSetController" class="headerlink" title="ReplicaSetController"></a>ReplicaSetController</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">startReplicaSetController</span><span class="params">(ctx ControllerContext)</span> <span class="params">(http.Handler, <span class="keyword">bool</span>, error)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> !ctx.AvailableResources[schema.GroupVersionResource&#123;Group: <span class="string">&quot;apps&quot;</span>, Version: <span class="string">&quot;v1&quot;</span>, Resource: <span class="string">&quot;replicasets&quot;</span>&#125;] &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 用goroutine异步运行，包含了 ReplicaSet和Pod 的两个Informer</span></span><br><span class="line">  <span class="comment">// 这一点很好理解：我们是要控制ReplicaSet声明的数量和运行的Pod数量一致，需要同时观察者两种资源</span></span><br><span class="line">	<span class="keyword">go</span> replicaset.NewReplicaSetController(</span><br><span class="line">		ctx.InformerFactory.Apps().V1().ReplicaSets(),</span><br><span class="line">		ctx.InformerFactory.Core().V1().Pods(),</span><br><span class="line">		ctx.ClientBuilder.ClientOrDie(<span class="string">&quot;replicaset-controller&quot;</span>),</span><br><span class="line">		replicaset.BurstReplicas,</span><br><span class="line">	).Run(<span class="keyword">int</span>(ctx.ComponentConfig.ReplicaSetController.ConcurrentRSSyncs), ctx.Stop)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">true</span>, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 运行函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">Run</span><span class="params">(workers <span class="keyword">int</span>, stopCh &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> utilruntime.HandleCrash()</span><br><span class="line">	<span class="keyword">defer</span> rsc.queue.ShutDown()</span><br><span class="line"></span><br><span class="line">	controllerName := strings.ToLower(rsc.Kind)</span><br><span class="line">	klog.Infof(<span class="string">&quot;Starting %v controller&quot;</span>, controllerName)</span><br><span class="line">	<span class="keyword">defer</span> klog.Infof(<span class="string">&quot;Shutting down %v controller&quot;</span>, controllerName)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> !cache.WaitForNamedCacheSync(rsc.Kind, stopCh, rsc.podListerSynced, rsc.rsListerSynced) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; workers; i++ &#123;</span><br><span class="line">    <span class="comment">// 工作的函数</span></span><br><span class="line">		<span class="keyword">go</span> wait.Until(rsc.worker, time.Second, stopCh)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	&lt;-stopCh</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">worker</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 继续查找实现</span></span><br><span class="line">	<span class="keyword">for</span> rsc.processNextWorkItem() &#123;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">processNextWorkItem</span><span class="params">()</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">  <span class="comment">// 这里也有个queue的概念，可以类比kube-scheduler中的实现</span></span><br><span class="line">  <span class="comment">// 不同的是，这里的queue是 workqueue.RateLimitingInterface ，也就是限制速率的，具体实现今天不细看</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 获取元素</span></span><br><span class="line">	key, quit := rsc.queue.Get()</span><br><span class="line">	<span class="keyword">if</span> quit &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> rsc.queue.Done(key)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 处理对应的元素</span></span><br><span class="line">	err := rsc.syncHandler(key.(<span class="keyword">string</span>))</span><br><span class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">		rsc.queue.Forget(key)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;sync %q failed with %v&quot;</span>, key, err))</span><br><span class="line">	rsc.queue.AddRateLimited(key)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 再回过头，去查看syncHandler的具体实现</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewBaseController</span><span class="params">(rsInformer appsinformers.ReplicaSetInformer, podInformer coreinformers.PodInformer, kubeClient clientset.Interface, burstReplicas <span class="keyword">int</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">	gvk schema.GroupVersionKind, metricOwnerName, queueName <span class="keyword">string</span>, podControl controller.PodControlInterface)</span> *<span class="title">ReplicaSetController</span></span> &#123;</span><br><span class="line">	</span><br><span class="line">	rsc.syncHandler = rsc.syncReplicaSet</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> rsc</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="syncReplicaSet"><a href="#syncReplicaSet" class="headerlink" title="syncReplicaSet"></a>syncReplicaSet</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">syncReplicaSet</span><span class="params">(key <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	startTime := time.Now()</span><br><span class="line">	<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;Finished syncing %v %q (%v)&quot;</span>, rsc.Kind, key, time.Since(startTime))</span><br><span class="line">	&#125;()</span><br><span class="line">  </span><br><span class="line">	<span class="comment">// 从key中拆分出 namespace 和 name</span></span><br><span class="line">	namespace, name, err := cache.SplitMetaNamespaceKey(key)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 根据name，从 Lister 获取对应的 ReplicaSets 信息</span></span><br><span class="line">	rs, err := rsc.rsLister.ReplicaSets(namespace).Get(name)</span><br><span class="line">	<span class="keyword">if</span> errors.IsNotFound(err) &#123;</span><br><span class="line">		klog.V(<span class="number">4</span>).Infof(<span class="string">&quot;%v %v has been deleted&quot;</span>, rsc.Kind, key)</span><br><span class="line">		rsc.expectations.DeleteExpectations(key)</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	rsNeedsSync := rsc.expectations.SatisfiedExpectations(key)</span><br><span class="line">  <span class="comment">// 获取 selector (k8s 是根据selector中的label来匹配 ReplicaSets 和 Pod 的)</span></span><br><span class="line">	selector, err := metav1.LabelSelectorAsSelector(rs.Spec.Selector)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;error converting pod selector to selector: %v&quot;</span>, err))</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 根据namespace和labels获取所有的pod</span></span><br><span class="line">	allPods, err := rsc.podLister.Pods(rs.Namespace).List(labels.Everything())</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">  <span class="comment">// 过滤无效的pod</span></span><br><span class="line">	filteredPods := controller.FilterActivePods(allPods)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 根据selector再过滤pod</span></span><br><span class="line">	filteredPods, err = rsc.claimPods(rs, selector, filteredPods)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> manageReplicasErr error</span><br><span class="line">	<span class="keyword">if</span> rsNeedsSync &amp;&amp; rs.DeletionTimestamp == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="comment">// 管理 ReplicaSet，下面详细分析</span></span><br><span class="line">		manageReplicasErr = rsc.manageReplicas(filteredPods, rs)</span><br><span class="line">	&#125;</span><br><span class="line">	rs = rs.DeepCopy()</span><br><span class="line">	newStatus := calculateStatus(rs, filteredPods, manageReplicasErr)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 更新状态</span></span><br><span class="line">	updatedRS, err := updateReplicaSetStatus(rsc.kubeClient.AppsV1().ReplicaSets(rs.Namespace), rs, newStatus)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> manageReplicasErr == <span class="literal">nil</span> &amp;&amp; updatedRS.Spec.MinReadySeconds &gt; <span class="number">0</span> &amp;&amp;</span><br><span class="line">		updatedRS.Status.ReadyReplicas == *(updatedRS.Spec.Replicas) &amp;&amp;</span><br><span class="line">		updatedRS.Status.AvailableReplicas != *(updatedRS.Spec.Replicas) &#123;</span><br><span class="line">		rsc.queue.AddAfter(key, time.Duration(updatedRS.Spec.MinReadySeconds)*time.Second)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> manageReplicasErr</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 我们再一起看看，当Pod数量和ReplicaSet中声明的不同时，是怎么工作的</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(rsc *ReplicaSetController)</span> <span class="title">manageReplicas</span><span class="params">(filteredPods []*v1.Pod, rs *apps.ReplicaSet)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="comment">// diff = 当前pod数 - 期望pod数</span></span><br><span class="line">  diff := <span class="built_in">len</span>(filteredPods) - <span class="keyword">int</span>(*(rs.Spec.Replicas))</span><br><span class="line">	rsKey, err := controller.KeyFunc(rs)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		utilruntime.HandleError(fmt.Errorf(<span class="string">&quot;couldn&#x27;t get key for %v %#v: %v&quot;</span>, rsc.Kind, rs, err))</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// diff小于0，表示需要扩容，即新增Pod</span></span><br><span class="line">	<span class="keyword">if</span> diff &lt; <span class="number">0</span> &#123;</span><br><span class="line">		</span><br><span class="line">    <span class="comment">// 具体的实现暂时不细看</span></span><br><span class="line">    </span><br><span class="line">  <span class="comment">// diff 大于0，即需要缩容</span></span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> diff &gt; <span class="number">0</span> &#123;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>kube-controller-manager 的核心思想是： 根据<code>期望状态</code>和<code>当前状态</code>，管理Kubernetes中的资源。</p>
-<p>以ReplicaSet为例，它对比了<code>定义声明的Pod数</code>和<code>当前集群中满足条件的Pod数</code>，进行相对应的扩缩容。</p>
 <blockquote>
 <p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
 <p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>

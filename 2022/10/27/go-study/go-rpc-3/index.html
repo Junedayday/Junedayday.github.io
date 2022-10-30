@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="概览gRPC-Gateway是gRPC生态的一环，用于对HTTP协议的扩展，是一套高性能、高扩展的开源RPC框架。 因此，要掌握gRPC-Gateway，必须要对gRPC有一定的基础，才能明白它的定位与价值。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言学习 - RPC篇:gRPC-Gateway示例代码概览">
+<meta property="og:url" content="http://example.com/2022/10/27/go-study/go-rpc-3/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="概览gRPC-Gateway是gRPC生态的一环，用于对HTTP协议的扩展，是一套高性能、高扩展的开源RPC框架。 因此，要掌握gRPC-Gateway，必须要对gRPC有一定的基础，才能明白它的定位与价值。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go_study.jpeg">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/grpc-gateway.png">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2022-10-27T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-28T02:40:27.317Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Study">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go_study.jpeg">
+
+
+<link rel="canonical" href="http://example.com/2022/10/27/go-study/go-rpc-3/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言学习 - RPC篇:gRPC-Gateway示例代码概览 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E6%A6%82%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text">方案概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%B5%E5%90%91-RPC%E5%8D%8F%E8%AE%AE%E8%B0%83%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">纵向 - RPC协议调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%AA%E5%90%91-Protobuf%E7%9A%84%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-number">2.2.</span> <span class="nav-text">横向 - Protobuf的代码生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.3.</span> <span class="nav-text">开发工作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E6%80%9D%E8%B7%AF"><span class="nav-number">3.</span> <span class="nav-text">开发思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-RPC%E5%BC%80%E5%8F%91-proto%E6%96%87%E4%BB%B6%E7%9A%84%E7%BC%96%E5%86%99"><span class="nav-number">3.1.</span> <span class="nav-text">1. RPC开发 - proto文件的编写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-number">3.2.</span> <span class="nav-text">2. 代码生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%B8%9A%E5%8A%A1%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.3.</span> <span class="nav-text">3. 业务实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-main%E5%87%BD%E6%95%B0%E6%A1%86%E6%9E%B6"><span class="nav-number">3.4.</span> <span class="nav-text">4. main函数框架</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">参考示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">5.</span> <span class="nav-text">结论</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/10/27/go-study/go-rpc-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言学习 - RPC篇:gRPC-Gateway示例代码概览
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-10-27 12:00:00" itemprop="dateCreated datePublished" datetime="2022-10-27T12:00:00+08:00">2022-10-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-10-28 10:40:27" itemprop="dateModified" datetime="2022-10-28T10:40:27+08:00">2022-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go_study.jpeg"></p>
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>gRPC-Gateway是gRPC生态的一环，用于对HTTP协议的扩展，是一套高性能、高扩展的开源RPC框架。</p>
+<p>因此，要掌握gRPC-Gateway，必须要对gRPC有一定的基础，才能明白它的定位与价值。</p>
+<span id="more"></span>
+
+<h2 id="方案概览"><a href="#方案概览" class="headerlink" title="方案概览"></a>方案概览</h2><p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/grpc-gateway.png"></p>
+<p>整个方案分为两个方向：</p>
+<h3 id="纵向-RPC协议调用"><a href="#纵向-RPC协议调用" class="headerlink" title="纵向 - RPC协议调用"></a>纵向 - RPC协议调用</h3><p>三个模块：</p>
+<ul>
+<li>调用方 - API Client</li>
+<li>HTTP服务 - Reverse Proxy</li>
+<li>gRPC服务 - Your gRPC service</li>
+</ul>
+<p>两个协议：</p>
+<ul>
+<li>HTTP - 客户端发起的是HTTP协议，传输到反向代理</li>
+<li>gRPC - 反向代理与gRPC服务之间的协议是gRPC</li>
+</ul>
+<p>关键点：</p>
+<ol>
+<li>Reverse Proxy实现了的关键能力是：将HTTP协议转化为gRPC协议</li>
+<li>可同时提供2个服务：HTTP和gRPC，只是HTTP服务的最终实现还是调用到了gRPC</li>
+</ol>
+<h3 id="横向-Protobuf的代码生成"><a href="#横向-Protobuf的代码生成" class="headerlink" title="横向 - Protobuf的代码生成"></a>横向 - Protobuf的代码生成</h3><ul>
+<li>gRPC-Gateway部分：自动生成反向代理</li>
+<li>gRPC部分：自动生成stub</li>
+</ul>
+<p>stub这个单词很有意思，相对准确的翻译是存根、残端，和面向对象中的 <strong>接口</strong> 有异曲同工之妙：<strong>提供了实现的框架，但具体实现仍交由开发者</strong>。</p>
+<h3 id="开发工作"><a href="#开发工作" class="headerlink" title="开发工作"></a>开发工作</h3><p>对开发者来说，整个方案的工作分为两部分：</p>
+<ol>
+<li>RPC部分 - 编写<code>proto</code>文件</li>
+<li>业务逻辑部分 - 编写gRPC中的<code>stub</code>的实现</li>
+</ol>
+<h2 id="开发思路"><a href="#开发思路" class="headerlink" title="开发思路"></a>开发思路</h2><h3 id="1-RPC开发-proto文件的编写"><a href="#1-RPC开发-proto文件的编写" class="headerlink" title="1. RPC开发 - proto文件的编写"></a>1. RPC开发 - proto文件的编写</h3><p>我们看一个官方github上的示例<code>proto</code>文件：</p>
+<figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">syntax = <span class="string">&quot;proto3&quot;</span>;</span><br><span class="line"><span class="keyword">package</span> your.service.v1;</span><br><span class="line"><span class="keyword">option</span> go_package = <span class="string">&quot;github.com/yourorg/yourprotos/gen/go/your/service/v1&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;google/api/annotations.proto&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">message</span> <span class="title">StringMessage</span> </span>&#123;</span><br><span class="line">  <span class="built_in">string</span> value = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">service</span> <span class="title">YourService</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> Echo(StringMessage) <span class="keyword">returns</span> (StringMessage) </span>&#123;</span><br><span class="line">    <span class="keyword">option</span> (google.api.http) = &#123;</span><br><span class="line">      post: <span class="string">&quot;/v1/example/echo&quot;</span></span><br><span class="line">      body: <span class="string">&quot;*&quot;</span></span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们从上到下，对里面的语法做简单的分析：</p>
+<ul>
+<li>proto3版本</li>
+<li>proto的包名称</li>
+<li>生成Go语言代码后的Go Package</li>
+<li>导入依赖的proto文件</li>
+<li>Message - 表示RPC的数据结构，按规则生成到各语言的代码</li>
+<li>Service - 一组RPC的抽象</li>
+<li>rpc - 一个具体方法，包括 方法名（请求Message） returns （返回Message）</li>
+<li>google.api.http - HTTP协议的定义，如示例中的方法和URL</li>
+</ul>
+<h3 id="2-代码生成"><a href="#2-代码生成" class="headerlink" title="2. 代码生成"></a>2. 代码生成</h3><p>如何将proto文件生成为Go语言的<code>stub</code>代码，官方提供了两个路径：</p>
+<ul>
+<li>buf（新方式，配置简单，推荐）</li>
+<li>protoc（经典方式，配置较为复杂）</li>
+</ul>
+<p>具体的操作方法可以参考： <a target="_blank" rel="noopener" href="https://github.com/grpc-ecosystem/grpc-gateway#usage">https://github.com/grpc-ecosystem/grpc-gateway#usage</a> 。</p>
+<h3 id="3-业务实现"><a href="#3-业务实现" class="headerlink" title="3. 业务实现"></a>3. 业务实现</h3><p>代码生成的只是一个<code>stub</code>，具体实现需要我们自己编码。上述方法生成的函数签名大致如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Echo</span><span class="params">(ctx context.Context, request *proto.StringMessage)</span> <span class="title">returns</span> <span class="params">(response *proto.StringMessage, err error)</span></span>&#123;</span><br><span class="line">  <span class="comment">// 自己实现的业务逻辑</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关于其中的context与error，我在上一讲已经讲过大致的规范。而在gRPC-Gateway中怎么使用呢？我们会在具体示例中再去讲。</p>
+<h3 id="4-main函数框架"><a href="#4-main函数框架" class="headerlink" title="4. main函数框架"></a>4. main函数框架</h3><p>1~3步骤将一个RPC请求的开发过程串联了起来，作为web服务的高频迭代部分。</p>
+<p>但如果要作为一个完整的服务，还需要包括基础的server启动代码，很少需要改动。我们接着看官方的示例代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;context&quot;</span></span><br><span class="line">  <span class="string">&quot;flag&quot;</span></span><br><span class="line">  <span class="string">&quot;net/http&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="string">&quot;github.com/golang/glog&quot;</span></span><br><span class="line">  <span class="string">&quot;github.com/grpc-ecosystem/grpc-gateway/v2/runtime&quot;</span></span><br><span class="line">  <span class="string">&quot;google.golang.org/grpc&quot;</span></span><br><span class="line">  <span class="string">&quot;google.golang.org/grpc/credentials/insecure&quot;</span></span><br><span class="line"></span><br><span class="line">  gw <span class="string">&quot;github.com/yourorg/yourrepo/proto/gen/go/your/service/v1/your_service&quot;</span>  <span class="comment">// Update</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">  <span class="comment">// command-line options:</span></span><br><span class="line">  <span class="comment">// gRPC server endpoint</span></span><br><span class="line">  grpcServerEndpoint = flag.String(<span class="string">&quot;grpc-server-endpoint&quot;</span>,  <span class="string">&quot;localhost:9090&quot;</span>, <span class="string">&quot;gRPC server endpoint&quot;</span>)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">run</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  ctx := context.Background()</span><br><span class="line">  ctx, cancel := context.WithCancel(ctx)</span><br><span class="line">  <span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Register gRPC server endpoint</span></span><br><span class="line">  <span class="comment">// Note: Make sure the gRPC server is running properly and accessible</span></span><br><span class="line">  mux := runtime.NewServeMux()</span><br><span class="line">  opts := []grpc.DialOption&#123;grpc.WithTransportCredentials(insecure.NewCredentials())&#125;</span><br><span class="line">  err := gw.RegisterYourServiceHandlerFromEndpoint(ctx, mux,  *grpcServerEndpoint, opts)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Start HTTP server (and proxy calls to gRPC server endpoint)</span></span><br><span class="line">  <span class="keyword">return</span> http.ListenAndServe(<span class="string">&quot;:8081&quot;</span>, mux)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  flag.Parse()</span><br><span class="line">  <span class="keyword">defer</span> glog.Flush()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> err := run(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    glog.Fatal(err)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们要明确一点：这部分代码并没有包括gRPC服务的启动代码，它已经默认在<code>grpcServerEndpoint</code>这个地址+端口上启动了。如果没有进程隔离的强要求，我们可以在<code>main</code>函数中同时启动 gRPC server和gRPC-Gateway server。</p>
+<p>gRPC-Gateway启动时有4个重要参数：</p>
+<ul>
+<li>mux，多路复用，功能最为强大，可以添加各种自定义的拦截器等</li>
+<li>grpcServerEndpoint，将HTTP转换成gRPC，再发给gRPC的地址</li>
+<li>opts，服务的启动选项</li>
+<li>:8081，启动地址</li>
+</ul>
+<blockquote>
+<p>关于gRPC部分内容可以参考： <a target="_blank" rel="noopener" href="https://grpc.io/docs/languages/go/quickstart/">https://grpc.io/docs/languages/go/quickstart/</a></p>
+</blockquote>
+<h2 id="参考示例"><a href="#参考示例" class="headerlink" title="参考示例"></a>参考示例</h2><p>整套框架的完整示例可以参考这个文件 - <a target="_blank" rel="noopener" href="https://github.com/Junedayday/micro_web_service/blob/master/main.go">https://github.com/Junedayday/micro_web_service/blob/master/main.go</a></p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>本篇重点是对gRPC-Gateway最基础的原理和使用进行了分析。</p>
+<p>如果你能通过本篇文章，对这个方案有一个基本认识，那么接下来我会带你玩转这个框架。你也无需担心无法实践到日常项目中：gRPC-Gateway中的能力与gin等框架都是共通的，可以轻松地举一反三。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Study/" rel="tag"># Go-Study</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/09/26/go-study/go-rpc-2/" rel="prev" title="Go语言学习 - RPC篇:gin框架的基础能力剖析">
+                  <i class="fa fa-chevron-left"></i> Go语言学习 - RPC篇:gin框架的基础能力剖析
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
