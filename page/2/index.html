@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-count">104</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,6 +201,182 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/20/etcd/etcd-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/06/20/etcd/etcd-1/" class="post-title-link" itemprop="url">etcd源码分析 - 1.【打通核心流程】etcd server的启动流程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-06-20 12:00:00" itemprop="dateCreated datePublished" datetime="2022-06-20T12:00:00+08:00">2022-06-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-06-27 13:55:00" itemprop="dateModified" datetime="2022-06-27T13:55:00+08:00">2022-06-27</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p><code>etcd</code>的源码相对<code>Kubernetes</code>少了很多，但学习成本依旧在。</p>
+<p>在第一阶段，我将从主流程出发，讲述一个<code>PUT</code>指令是怎么将数据更新到<code>etcd server</code>中的。今天，我们先来看看server是怎么启动的。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/06/20/etcd/etcd-1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/14/etcd/etcd-0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/06/14/etcd/etcd-0/" class="post-title-link" itemprop="url">etcd源码分析 - 0.搭建学习etcd的环境</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-06-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-06-14T12:00:00+08:00">2022-06-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-07-04 14:12:40" itemprop="dateModified" datetime="2022-07-04T14:12:40+08:00">2022-07-04</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p>之前，我在b站视频简单地讲述了etcd的功能与特性，有兴趣的可以参考<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV155411Y7Pq/">相关视频</a>。</p>
+<p>但如果要更深入地研究etcd，就需要我们涉及到源码、并结合实践进行学习。那么，接下来，我将基于<code>v3.4</code>这个版本，做一期深入的环境搭建。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/06/14/etcd/etcd-0/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -859,177 +1035,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/04/06/go-leetcode/go-leetcode-3/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/06/go-leetcode/go-leetcode-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/04/06/go-leetcode/go-leetcode-2/" class="post-title-link" itemprop="url">Go算法实战 - 2.【两数相加LeetCode-2】非递归解法</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-04-06 08:00:00 / 修改时间：23:01:28" itemprop="dateCreated datePublished" datetime="2022-04-06T08:00:00+08:00">2022-04-06</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
-<p>我们继续看上一个题目，这次我们尝试写一个非递归的解法。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/04/06/go-leetcode/go-leetcode-2/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/05/go-leetcode/go-leetcode-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/04/05/go-leetcode/go-leetcode-1/" class="post-title-link" itemprop="url">Go算法实战 - 1.【两数相加LeetCode-2】递归解法</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-04-05 08:00:00" itemprop="dateCreated datePublished" datetime="2022-04-05T08:00:00+08:00">2022-04-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-04-06 23:01:06" itemprop="dateModified" datetime="2022-04-06T23:01:06+08:00">2022-04-06</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 - <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/04/05/go-leetcode/go-leetcode-1/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
