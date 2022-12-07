@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">104</span>
+          <span class="site-state-item-count">105</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,6 +201,232 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/04/sharing-5min/2022-01/2022Week01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/01/04/sharing-5min/2022-01/2022Week01/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week01</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-01-04 12:00:00" itemprop="dateCreated datePublished" datetime="2022-01-04T12:00:00+08:00">2022-01-04</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-01-11 14:50:57" itemprop="dateModified" datetime="2022-01-11T14:50:57+08:00">2022-01-11</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57571641299795_.pic_hd.jpg" alt="2022-01"></p>
+<h2 id="2022-01-04-Go1-18概览"><a href="#2022-01-04-Go1-18概览" class="headerlink" title="2022-01-04 Go1.18概览"></a>2022-01-04 Go1.18概览</h2><p>在2021年年底，<code>Go</code>推出了<code>1.18Beta</code>版本。由于正式版本没有完全敲定，普通开发人员没有必要研究到底层实现，但如果能先形成一个全局上的认知，能帮助我们领先一步。</p>
+<p>关于1.18的核心改动，是 <strong>对泛型(Generics)的支持</strong>。Go语言的泛型语法比较简单，如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> numeric <span class="keyword">interface</span> &#123;</span><br><span class="line">	<span class="keyword">type</span> <span class="keyword">int</span>, <span class="keyword">int8</span>, <span class="keyword">int16</span>, <span class="keyword">int32</span>, <span class="keyword">int64</span>, <span class="keyword">uint</span>, <span class="keyword">uint8</span>, <span class="keyword">uint16</span>, <span class="keyword">uint32</span>, <span class="keyword">uint64</span>, <span class="keyword">float32</span>, <span class="keyword">float64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">min</span>[<span class="title">T</span> <span class="title">numeric</span>]<span class="params">(a, b T)</span> <span class="title">T</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> a &lt; b &#123;</span><br><span class="line">		<span class="keyword">return</span> a</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果要在实际工程上落地，还有很多考量点，我这边重点提三点：</p>
+<ol>
+<li><strong>主流IDE的支持</strong> - 包括Goland与VSCode，尽量帮助开发者能在编码时发现问题；</li>
+<li><strong>历史库的迁移与兼容</strong> - 实现泛型后，许多主流库会有大量的冗余函数，如何提供迁移方案，值得我们去关注；</li>
+<li><strong>泛型的最佳工程实践</strong> - 作为一种新特性，Go的泛型如何应用在工程中、尤其是复杂工程中，需要一定的实践摸索，并总结规律（可借鉴其余支持泛型的语言）；</li>
+</ol>
+<p>除了泛型，另外一个比较大的特性就是<code>Fuzzy Testing</code>。</p>
+<p>这个特性是为<strong>单元测试提供更全面的数据输入</strong>，这样就能覆盖更多的case，提前发现问题。关键词<code>Fuzzy</code>支持的主要特性是将一个输入参数，<strong>从具体的值变成范围</strong>，如原先输入<code>a=1</code>，现在支持<code>a</code>输入范围为<code>[-10,10]</code>。在跑单元测试时，大量的<code>Fuzzy</code>肯定会带来一定的性能压力，这时可以引入一定的并发特性。</p>
+<p>总体来说，<code>Go1.18</code>对工程侧的影响更多地是提高代码的 <strong>简洁性</strong>。新特性的学习成本很低，我们不用过于急着引入，可以多花时间学习底层原理。</p>
+<blockquote>
+<p><strong>Go Blog</strong> - <a target="_blank" rel="noopener" href="https://go.dev/blog/go1.18beta1">https://go.dev/blog/go1.18beta1</a></p>
+<p><strong>Medium</strong> - <a target="_blank" rel="noopener" href="https://betterprogramming.pub/golang-1-18-what-you-need-to-know-a5701f7e14ab">https://betterprogramming.pub/golang-1-18-what-you-need-to-know-a5701f7e14ab</a></p>
+</blockquote>
+<h2 id="2022-01-05-CNCF-概览"><a href="#2022-01-05-CNCF-概览" class="headerlink" title="2022-01-05 CNCF-概览"></a>2022-01-05 CNCF-概览</h2><p>CNCF作为云原生的代表性组织，提供了大量开源的软件，以及配套的、开箱即用的解决方案。有很多朋友对CNCF和云原生的认识可能仍停留在新闻报道里。今天，我先带大家在整体上入个门，后续选择具有代表性的软件进行分析。</p>
+<blockquote>
+<p>由于篇幅所限，我的分享只会提重点知识，帮大家建立这部分的知识框架，更详细的内容需要大家自行学习。</p>
+</blockquote>
+<p>CNCF的概览可以参考这个全景图 - <a target="_blank" rel="noopener" href="https://landscape.cncf.io/%EF%BC%8C%E6%9B%B4%E6%96%B0%E8%BF%AD%E4%BB%A3%E9%9D%9E%E5%B8%B8%E9%A2%91%E7%B9%81%E3%80%82%E5%85%B6%E4%B8%AD%EF%BC%8C%E6%9C%80%E6%A0%B8%E5%BF%83%E7%9A%84%E4%B8%BA%E4%B8%8B%E9%9D%A2%E4%BA%94%E5%9D%97%EF%BC%9A">https://landscape.cncf.io/，更新迭代非常频繁。其中，最核心的为下面五块：</a></p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/landscape.png" alt="landscape"></p>
+<ul>
+<li>App Definition and Development 应用定义与开发<ul>
+<li>Database 数据库</li>
+<li>Streaming &amp; Messaging 流处理和消息通信</li>
+<li>Application Definition &amp; Image Build 应用定义与镜像构建</li>
+<li>Continuous Integration &amp; Delivery 持续集成与交付</li>
+</ul>
+</li>
+<li>Orchestration &amp; Management 编排和管理<ul>
+<li>Scheduling &amp; Orchestration 调度与编排</li>
+<li>Coordination &amp; Service Discovery 协调与服务发现</li>
+<li>Remote Procedure Call 远程过程调用</li>
+<li>Service Proxy 服务代理</li>
+<li>API Gateway API网关</li>
+<li>Service Mesh 服务网格</li>
+</ul>
+</li>
+<li>RunTime 运行时<ul>
+<li>Cloud Native Storage 云原生存储</li>
+<li>Container Runtime 容器运行时</li>
+<li>Cloud Native Network 云原生网络</li>
+</ul>
+</li>
+<li>Provisioning 提供者<ul>
+<li>Automation &amp; Configuration 自动化与配置</li>
+<li>Container Registry 容器注册</li>
+<li>Security &amp; Compliance 安全与合规</li>
+<li>Key Management 密钥管理</li>
+</ul>
+</li>
+<li>Observability and Analysis 可观察性和分析<ul>
+<li>Monitoring 监控</li>
+<li>Logging 日志</li>
+<li>Tracing 跟踪</li>
+<li>Chaos Engineering 混沌工程</li>
+</ul>
+</li>
+</ul>
+<p>其余还包括Kubernetes的平台提供商、Serverless、成员、认证的服务提供商等周边内容，并不在我们讨论的范围之内。但从基金会来看，它提供了一整套生态，非常有助于落地。</p>
+<p>那么，如何认识这五块呢？其实Landscape提供了很好的图形效果，我们只要记住两点：</p>
+<ol>
+<li><strong>应用定义与开发</strong>、<strong>编排和管理</strong>、<strong>运行时</strong>、<strong>提供者</strong> 这四块是自上而下的核心链路，下层为上层提供能力支撑</li>
+<li><strong>Observability and Analysis</strong> 是核心链路旁边的重要支撑</li>
+</ol>
+<p>相信到这里，你对CNCF已经有了初步认识。</p>
+<h2 id="2022-01-06-《我做系统架构的一些原则》From-陈皓"><a href="#2022-01-06-《我做系统架构的一些原则》From-陈皓" class="headerlink" title="2022-01-06 《我做系统架构的一些原则》From 陈皓"></a>2022-01-06 《我做系统架构的一些原则》From 陈皓</h2><p>今天，给大家推荐一篇来自左耳朵耗子-陈皓的<a target="_blank" rel="noopener" href="https://coolshell.cn/articles/21672.html">文章</a>。</p>
+<ol>
+<li>关注于真正的收益而不是技术本身</li>
+<li>以应用服务和 API 为视角，而不是以资源和技术为视角</li>
+<li>选择最主流和成熟的技术</li>
+<li>完备性会比性能更重要</li>
+<li>制定并遵循服从标准、规范和最佳实践</li>
+<li>重视架构扩展性和可运维性</li>
+<li>对控制逻辑进行全面收口</li>
+<li>不要迁就老旧系统的技术债务</li>
+<li>不要依赖自己的经验，要依赖于数据和学习</li>
+<li>千万要小心 X – Y 问题，要追问原始需求</li>
+<li>激进胜于保守，创新与实用并不冲突</li>
+</ol>
+<p>以上11点，理解会因人而异，我重点挑三个争议性比较大的聊聊，其余的内容建议大家阅读原文。</p>
+<h3 id="完备性会比性能更重要"><a href="#完备性会比性能更重要" class="headerlink" title="完备性会比性能更重要"></a>完备性会比性能更重要</h3><p>借用书中的一句话：<strong>使用最科学严谨的技术模型为主，并以不严谨的模型作为补充</strong>，也就是先紧后松。</p>
+<p>有不少开发者在实际工程中的实践往往相反：为了追求快速落地，会希望毕其功于一役，引入所谓的“一站式解决方案”（如例子中NoSQL），但实践下来引入大量的问题，让后人叫苦不迭。</p>
+<p>关于这个问题，我个人有三个思考：</p>
+<ul>
+<li><strong>不断提高自己的基础能力</strong>。很多架构上的局限性，往往是设计者停留于自己的舒适区，不愿意往前一步。</li>
+<li><strong>分清主次、合理分工。</strong> 在设计时，我们要分清楚核心功能和非核心功能，懂得取舍，将功能交由合适的模块或软件。</li>
+<li><strong>功能的实现不是对应到单模块，而是整个系统的涌现。</strong>性能问题的解法不仅仅限于单个软件，而是有一整套生态，可以多去查一些大厂的分享。</li>
+</ul>
+<h3 id="不要迁就老旧系统的技术债务"><a href="#不要迁就老旧系统的技术债务" class="headerlink" title="不要迁就老旧系统的技术债务"></a>不要迁就老旧系统的技术债务</h3><p>为了缩小讨论范围，我对这里 <strong>技术债务</strong> 做一个收口：不仅仅是指有弊端的技术问题，更是需要投入时间精力等成本去维护。有技术债务，不代表就一定要去还，而需要一个契机 - <strong>维护的成本 &gt; 修复的收益</strong>。</p>
+<p>举个例子，某个程序写得很烂，性能很差：</p>
+<ul>
+<li>前期可以通过扩容快速解决，上线后业务收益很高，那就是 成本大于收益，不需要排到最高优先级去修复；</li>
+<li>但随着业务收益稳定下来，增长只有个位数，但发现在机器上投入的成本很高，通过优化预计能缩容50%，可以让总收益提升20%，那这时还技术债务的优先级就很高了。</li>
+</ul>
+<p>还技术债，技术能力只是一个基本，以下两点更为重要：</p>
+<ul>
+<li>评估成本与收益，尽可能地做到有数据支撑，有助于决策者下决心还债；</li>
+<li>用更长远、更广维度地看待技术债务问题，不要拆东墙补西墙。</li>
+</ul>
+<h3 id="激进胜于保守，创新与实用并不冲突"><a href="#激进胜于保守，创新与实用并不冲突" class="headerlink" title="激进胜于保守，创新与实用并不冲突"></a>激进胜于保守，创新与实用并不冲突</h3><p>这个观点是很aggressive的，遇到这样的观念冲突时，决策者找不到客观标准去评估，就很难有二义性的定义：要么激进，要么保守；要么创新，要么实用。这种情况下，我遇到过的比较好的解法有两种：</p>
+<ol>
+<li>决策者自身技术能力强，能掌控团队技术的大致走向。</li>
+<li>决策者和执行者之间培养出足够的信任，适当评审与把控，放权实践。</li>
+</ol>
+<p>第一种情况在实际工作场景中并不多见，尤其当团队规模很大时，就像CTO往往不是公司技术最强的那位。所以，我更倾向于大家多尝试第二种途径。</p>
+<p>当然，我也遇到过很多效果不好的解法，比如说：决策者既然不清楚怎么做才好，那就找2个执行者进行battle，一个代表创新方，另一个代表保守方。也许在少数情况下，最后能帮助决策者找到正确的方向；但更多的实际场景中，会产生如下问题：</p>
+<ul>
+<li>两个执行者碰撞越来越激烈，但始终谁也说服不了谁</li>
+<li>决策者越听越迷茫，不知道该如何抉择</li>
+</ul>
+<p>在我看来，这类决策者往往是偏管理，技术上的掌控力不足，导致在决策时没有足够的倾向性；同时，与执行者之间的信任也不足，就希望把决策这件事下移、尝试着走平衡之道。</p>
+<p>我个人的想法是：先选择一个能力相对优秀的执行者，认真评估其方案，然后交由对方执行；最后哪怕失败了，也可以通过复盘改进，想想下次如何更好地决策，更好地把控方案；当然，如果你认为纯粹是执行者的问题，那就换个可信赖的人。</p>
+<h2 id="2022-01-07-CNCF-Kubernetes"><a href="#2022-01-07-CNCF-Kubernetes" class="headerlink" title="2022-01-07 CNCF-Kubernetes"></a>2022-01-07 CNCF-Kubernetes</h2><p>今天，我们一起来看看CNCF中的最核心项目 - <code>Kubernetes</code>。<code>Kubernetes</code>相关内容非常庞大，我们依旧关注聚焦于核心能力。</p>
+<p><code>Kubernetes</code> 位于CNCF核心的 <strong>调度与编排</strong> 模块，也就是整个解决方案的基石。在CNCF上的介绍为：</p>
+<blockquote>
+<p>Kubernetes is an open-source system for automating deployment, scaling, and management of containerized applications.</p>
+</blockquote>
+<p>对这个定义，我们关注两个点：</p>
+<ul>
+<li><code>automating deployment, scaling, and management</code> 自动化的部署、扩缩容和管理，这是k8s核心能力；</li>
+<li><code>containerized applications</code> 容器化应用，这是k8s操作的基本对象；</li>
+</ul>
+<p>为了更好地介绍Kubernetes，我对<a target="_blank" rel="noopener" href="https://kubernetes.io/">官方首页</a>描述中的关键特性再做一些更详细地说明：</p>
+<h3 id="Automated-rollouts-and-rollbacks"><a href="#Automated-rollouts-and-rollbacks" class="headerlink" title="Automated rollouts and rollbacks"></a>Automated rollouts and rollbacks</h3><p>自动化扩缩容和升级回滚。这个特性是k8s最核心的，也是大规模推广的根本原因。</p>
+<p>看起来，这功能描述与<code>CICD</code>流程差不多，但使用体验差距很大。在传统的模式下，我们执行的是一个<strong>具体的动作</strong>，比如扩1个机器、升级2个程序等；而在k8s里，使用者只要<strong>声明最终的预期状态</strong>，比如5台机器运行v1.0版本的程序，那么整个系统该扩容还是缩容、该升级还是回滚，都由k8s自行根据当前状态进行判断。</p>
+<p>这个，就是云原生的一大特性：<strong>声明式API</strong> ，而不是传统上的<strong>命令式API</strong>。</p>
+<blockquote>
+<p>声明式API不一定比命令式API好。在应用程序开发时，命令式API更容易理解。</p>
+</blockquote>
+<h3 id="Service-discovery-and-load-balancing"><a href="#Service-discovery-and-load-balancing" class="headerlink" title="Service discovery and load balancing"></a>Service discovery and load balancing</h3><p>服务发现与负载均衡。这个功能很大程度上减少了分布式软件运行模式的复杂性。</p>
+<p>服务发现，以前非常依赖<code>zookeeper</code>/<code>etcd</code>等这类注册中心，往往需要侵入到业务代码；而负载均衡，则很依赖<code>nginx</code>这类软件，并在上面做复杂配置。</p>
+<p>当然，k8s给出的只是通用解法，对一些具备很强业务属性的服务发现与负载均衡，仍需要程序自行实现。</p>
+<h3 id="Storage-orchestration"><a href="#Storage-orchestration" class="headerlink" title="Storage orchestration"></a>Storage orchestration</h3><p>存储编排。存储的编排是k8s重点演进的功能。</p>
+<p>k8s抽象了存储概念，从传统的本地存储扩展为分布式云存储，对上层应用屏蔽了存储这块的复杂度。</p>
+<h3 id="Designed-for-extensibility"><a href="#Designed-for-extensibility" class="headerlink" title="Designed for extensibility"></a>Designed for extensibility</h3><p>为扩展性而设计。</p>
+<p>扩展性是k8s非常重视的点，无论是开放出容器、网络、存储等接口规范，还是像自定义资源(CRD)等插件的开放，都体现出了一种开放的精神，也是k8s如今能作为云原生标志性的软件的立足之本。</p>
+<p>有一个点希望大家认识到：k8s的成功不是简单地因为开放性，更重要的是，它定义的这些开放性的规范与接口，都是<code>Google</code>经过实践总结出来的经验，符合主流厂商的趋势与开发者的需求。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -982,99 +1208,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/11/01/go-framework/go-framework-10/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/26/go-framework/go-framework-9/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/10/26/go-framework/go-framework-9/" class="post-title-link" itemprop="url">Go语言微服务框架 - 9.分布式链路追踪-OpenTracing的初步引入</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-10-26 12:00:00" itemprop="dateCreated datePublished" datetime="2021-10-26T12:00:00+08:00">2021-10-26</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-11-01 16:11:18" itemprop="dateModified" datetime="2021-11-01T16:11:18+08:00">2021-11-01</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>我们从API层到数据库层的链路已经打通，简单的CRUD功能已经可以快速实现。</p>
-<p>随着模块的增加，我们会越发感受到系统的复杂性，开始关注系统的可维护性。这时，有个名词会进入我们的视野：<strong>分布式链路追踪</strong>。相关的内容可以参考这我的两篇文章：</p>
-<ul>
-<li>OpenTelemetry <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/10/14/readings/go-digest-2/">https://junedayday.github.io/2021/10/14/readings/go-digest-2/</a></li>
-<li>Jaeger <a target="_blank" rel="noopener" href="https://junedayday.github.io/2021/10/20/readings/go-digest-3/">https://junedayday.github.io/2021/10/20/readings/go-digest-3/</a></li>
-</ul>
-<p>我们接下来直接进入实战。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/10/26/go-framework/go-framework-9/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

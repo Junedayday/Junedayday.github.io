@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="导语在网上搜索 Go单元测试，我们能找到各种开源工具和方法技巧，也可以照葫芦画瓢、快速地写出示例test case。但回到具体的工程项目里，当我们面对代码里的各种CRUD、接口与实现、内外部依赖时，往往发现很难写出有效的单元测试，空有一身技巧却无从下手。 我也被这个问题困扰许久，也反复在多个项目里折腾，发现要将单元测试落地到项目中，有一条被忽视的gap。下面我分享一下个人的思路。 Go单元测试的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言技巧 - 17.【Go工程化测试】业务项目中的Go单元测试心得">
+<meta property="og:url" content="http://example.com/2022/12/06/go-tip/go-tip-17/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="导语在网上搜索 Go单元测试，我们能找到各种开源工具和方法技巧，也可以照葫芦画瓢、快速地写出示例test case。但回到具体的工程项目里，当我们面对代码里的各种CRUD、接口与实现、内外部依赖时，往往发现很难写出有效的单元测试，空有一身技巧却无从下手。 我也被这个问题困扰许久，也反复在多个项目里折腾，发现要将单元测试落地到项目中，有一条被忽视的gap。下面我分享一下个人的思路。 Go单元测试的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-unittest-func.png">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-unittest-di.png">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-unittest-framework-new.png">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/my_wechat.jpeg">
+<meta property="article:published_time" content="2022-12-06T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-07T14:23:57.623Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Tip">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg">
+
+
+<link rel="canonical" href="http://example.com/2022/12/06/go-tip/go-tip-17/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言技巧 - 17.【Go工程化测试】业务项目中的Go单元测试心得 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E8%AF%AD"><span class="nav-number">1.</span> <span class="nav-text">导语</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0-%E4%BB%8E%E4%B8%9A%E5%8A%A1%E9%A1%B9%E7%9B%AE%E7%9A%84%E5%88%86%E5%B1%82%E8%81%8A%E8%B5%B7"><span class="nav-number">2.</span> <span class="nav-text">0. 从业务项目的分层聊起</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E7%9A%84%E5%A4%96%E9%83%A8%E4%BE%9D%E8%B5%96%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">1. 单元测试的外部依赖问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E4%BB%8E%E2%80%9C%E6%8D%B7%E5%BE%84%E2%80%9D%E5%88%B0%E6%94%BE%E5%BC%83"><span class="nav-number">3.1.</span> <span class="nav-text">1.1 从“捷径”到放弃</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E5%A6%82%E4%BD%95%E5%B1%8F%E8%94%BD%E5%A4%96%E9%83%A8%E4%BE%9D%E8%B5%96"><span class="nav-number">3.2.</span> <span class="nav-text">1.2 如何屏蔽外部依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-%E9%80%82%E9%85%8DGo%E8%AF%AD%E8%A8%80%E7%9A%84%E5%8D%95%E6%B5%8B%E6%96%B9%E6%A1%88"><span class="nav-number">3.3.</span> <span class="nav-text">1.3 适配Go语言的单测方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-%E4%B8%80%E4%B8%AADI%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.4.</span> <span class="nav-text">1.4 一个DI示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%9C%A8%E6%9C%89%E9%99%90%E7%9A%84%E6%97%B6%E9%97%B4%E5%86%85%EF%BC%8C%E6%8E%A2%E7%B4%A2%E2%80%9C%E6%9C%80%E6%9C%89%E4%BB%B7%E5%80%BC%E2%80%9D%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">2. 在有限的时间内，探索“最有价值”的单元测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E4%B8%80%E4%B8%AA%E4%BB%A3%E7%A0%81%E8%A6%86%E7%9B%96%E7%8E%87%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">4.1.</span> <span class="nav-text">2.1 一个代码覆盖率的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E6%98%8E%E7%A1%AE%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87-%E4%BF%9D%E9%9A%9C%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91"><span class="nav-number">4.2.</span> <span class="nav-text">2.2 明确核心目标 - 保障业务逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Controller-Dao%E5%B1%82%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%80%9D%E8%B7%AF"><span class="nav-number">4.3.</span> <span class="nav-text">2.3 Controller&#x2F;Dao层的单元测试思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87"><span class="nav-number">4.4.</span> <span class="nav-text">2.4 评价指标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E7%9A%84%E7%9B%B8%E5%85%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">5.</span> <span class="nav-text">3.  单元测试的相关实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Controller%E5%B1%82%E4%B8%8D%E5%BA%94%E5%90%91%E4%B8%8B%E4%BC%A0%E9%80%92%E5%8D%8F%E8%AE%AE%E7%B1%BB%E5%8F%82%E6%95%B0"><span class="nav-number">5.1.</span> <span class="nav-text">3.1 Controller层不应向下传递协议类参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Dao%E5%B1%82%E7%9A%84%E4%B8%9A%E5%8A%A1%E5%AE%9E%E7%8E%B0%E9%AB%98%E9%A2%91%E5%87%BA%E9%94%99%EF%BC%8C%E6%80%8E%E4%B9%88%E5%86%99%E5%8D%95%E6%B5%8B%EF%BC%9F"><span class="nav-number">5.2.</span> <span class="nav-text">3.2 Dao层的业务实现高频出错，怎么写单测？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Go%E7%9A%84%E5%8D%95%E6%B5%8B%E6%9C%89%E5%93%AA%E4%BA%9B%E5%A5%BD%E7%94%A8%E7%9A%84%E5%BA%93%E6%88%96%E8%80%85%E5%B7%A5%E5%85%B7%EF%BC%9F"><span class="nav-number">5.3.</span> <span class="nav-text">3.3 Go的单测有哪些好用的库或者工具？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/06/go-tip/go-tip-17/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言技巧 - 17.【Go工程化测试】业务项目中的Go单元测试心得
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-12-06 12:00:00" itemprop="dateCreated datePublished" datetime="2022-12-06T12:00:00+08:00">2022-12-06</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-12-07 22:23:57" itemprop="dateModified" datetime="2022-12-07T22:23:57+08:00">2022-12-07</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
+<h2 id="导语"><a href="#导语" class="headerlink" title="导语"></a>导语</h2><p>在网上搜索 <strong>Go单元测试</strong>，我们能找到各种开源工具和方法技巧，也可以照葫芦画瓢、快速地写出示例test case。但回到具体的工程项目里，当我们面对代码里的各种CRUD、接口与实现、内外部依赖时，往往发现很难写出有效的单元测试，空有一身技巧却无从下手。</p>
+<p>我也被这个问题困扰许久，也反复在多个项目里折腾，发现要将单元测试落地到项目中，有一条被忽视的<code>gap</code>。下面我分享一下个人的思路。</p>
+<p>Go单元测试的具体语法，本文会一笔带过，想了解细节的同学可以自行搜索。</p>
+<span id="more"></span>
+
+<h2 id="0-从业务项目的分层聊起"><a href="#0-从业务项目的分层聊起" class="headerlink" title="0. 从业务项目的分层聊起"></a>0. 从业务项目的分层聊起</h2><p>本文暂不讨论工具类项目，而是聚焦于结构相对复杂的业务类项目。</p>
+<blockquote>
+<p>偏基础工具类的代码库，写单元测试的逻辑会比较直观，也更注重性能等场景。</p>
+</blockquote>
+<p>业务项目通常会进行分层，本文以一个简化后的三层结构为例：</p>
+<ul>
+<li>请求/响应处理层 - Controller</li>
+<li>业务领域层 - Service（Domain/Logic）</li>
+<li>数据访问层 - Dao（Model）</li>
+</ul>
+<blockquote>
+<p>很多复杂的分层可认为是上面的的一种变体。</p>
+</blockquote>
+<p>写Go单元测试的具体语法，本文会一笔带过，想了解细节的同学可以自行搜索。</p>
+<h2 id="1-单元测试的外部依赖问题"><a href="#1-单元测试的外部依赖问题" class="headerlink" title="1. 单元测试的外部依赖问题"></a>1. 单元测试的外部依赖问题</h2><p>在业务开发时，有句玩笑话：如果你坚持写单测，最终会变成Postman工程师。虽然这话带有戏谑的色彩，但我们不妨想想它背后的逻辑：</p>
+<h3 id="1-1-从“捷径”到放弃"><a href="#1-1-从“捷径”到放弃" class="headerlink" title="1.1 从“捷径”到放弃"></a>1.1 从“捷径”到放弃</h3><p>一个项目中的代码是层层调用的，我们以一个满足上述分层的服务为例：</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-unittest-func.png"></p>
+<p>从调用栈来看，写一个顶层函数的单测，既能包括本层代码、又能覆盖下面各层，在最上层（Controller）写单元测试似乎成了最优解。这时，开发者会遇到一个常见问题 - <strong>代码的层层调用，很难屏蔽外部的依赖项</strong>，尤其是MySQL/Redis等中间件和自研服务。</p>
+<p>接下来是我的经历，相信能引起不少人的共鸣：</p>
+<p><strong>阶段一：依赖测试环境的服务写单测，立杆见影地跑通单测、覆盖率也不错。</strong></p>
+<blockquote>
+<p>我的想法：“巧妙的变通”</p>
+<p>虽说从单元测试的定义来说，不应依赖外部服务，但不妨把这当作是一种变通，又快又方便。</p>
+</blockquote>
+<p><strong>阶段二：外部服务引入的问题越来越多，严格检查结果的单测很难通过，只能不断删减检查项，导致单测的质量和覆盖率越来越差。</strong></p>
+<blockquote>
+<p>我的想法：对外部环境不得已的“妥协”</p>
+<p>外部服务既不稳定，又往往是有状态的，很难支撑单元测试里的各种case。单测能跑通总比跑不通好，单测质量下降并不是我偷懒，而是外部因素的不可控。</p>
+</blockquote>
+<p><strong>阶段三：单测能发现的问题越来越少，还不如用Postman手动请求并观察结果来得有效。食之无味，弃之可惜，单测就只作为评估绩效的指标了。</strong></p>
+<blockquote>
+<p>我的想法：复杂业务项目里的单元测试没什么价值，就仅仅作为一个绩效指标算了。</p>
+<p>对项目来说，单测失去了发现问题的能力；对开发者来说，那就只是应付性地去达成单测覆盖率的指标了。</p>
+</blockquote>
+<p>所以，为了保证单测的价值长期有效，我们要 <strong>尽可能地屏蔽外部系统的依赖</strong>；而对外部依赖的测试，尽可能地交由更高层面的接口测试、功能测试、系统联调等途径去保障。</p>
+<h3 id="1-2-如何屏蔽外部依赖"><a href="#1-2-如何屏蔽外部依赖" class="headerlink" title="1.2 如何屏蔽外部依赖"></a>1.2 如何屏蔽外部依赖</h3><p>屏蔽外部依赖，业界主要有两种解法：</p>
+<ol>
+<li><strong>容器技术</strong> - 将外部依赖转为内部项，跟随单元测试的生命周期</li>
+<li><strong>代码mock</strong> - 拦截对外部依赖的调用，获得可预期的返回结果</li>
+</ol>
+<p>第一个解法比较取巧，本质上仍是依赖外部服务，只是由单元测试掌控它们的生命周期。这种方案对于验证中间件相关的功能确实非常方便，但长期维护的成本不低，慎用。（后文会再次提及）</p>
+<p>第二个解法是单元测试最为推荐的方式，即常说的 mock/打桩。mock的具体方案依赖编程语言、框架以及对应的生态。例如在<code>Spring</code>里写单测很方便，包括：</p>
+<ol>
+<li>底层JVM强大的运行时能力</li>
+<li>Spring的依赖注入</li>
+<li>社区中成熟的各中间件Mock</li>
+</ol>
+<p>而Go语言在这块并没有得天独厚的优势。下面，我分享一个社区中比较推荐的解法。</p>
+<h3 id="1-3-适配Go语言的单测方案"><a href="#1-3-适配Go语言的单测方案" class="headerlink" title="1.3 适配Go语言的单测方案"></a>1.3 适配Go语言的单测方案</h3><p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-unittest-di.png"></p>
+<p>图中的重点内容如下：</p>
+<ol>
+<li>三个虚箭头<ol>
+<li>Service层的对象依赖Dao层的接口</li>
+<li>Dao层接口的业务实现，由开发者自行编写代码</li>
+<li>Dao层接口的mock实现，由 <a target="_blank" rel="noopener" href="https://github.com/golang/mock">gomock</a> 自动生成</li>
+</ol>
+</li>
+<li>依赖注入DI<ol>
+<li>业务对象在初始化时注入想要的实现，遵循<code>IoC</code>的设计原则</li>
+<li>正常情况下，注入业务实现；单元测试时，注入mock实现</li>
+<li>一般可利用google的<a target="_blank" rel="noopener" href="https://github.com/google/wire">wire</a>工具来自动化地生成依赖注入的代码</li>
+</ol>
+</li>
+</ol>
+<p>Mock实现无需依赖外部，我们利用面向对象的特性轻松地解决了这个问题。在复杂的工程中，还应注意两点：</p>
+<ol>
+<li>DI应和业务的抽象结合起来，不要只当作单纯的一种解耦的工具。</li>
+<li>业务领域层往往内部也会分为多层（参考DDD），优先梳理上下文关系，才能设计好DI的实现。</li>
+</ol>
+<blockquote>
+<p>DI是一个非常重要的解耦手段，但Go语言的框架无法强限制，往往只能靠“制定规范”， 如 <a target="_blank" rel="noopener" href="https://go-kratos.dev/">Kratos</a>。</p>
+</blockquote>
+<h3 id="1-4-一个DI示例"><a href="#1-4-一个DI示例" class="headerlink" title="1.4 一个DI示例"></a>1.4 一个DI示例</h3><p>service层</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> service</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Reader <span class="keyword">struct</span> &#123;</span><br><span class="line">  <span class="comment">// 依赖dao层的接口</span></span><br><span class="line">  dao.DaoReader</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 依赖注入</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">InitBook</span><span class="params">(reader dao.DaoReader)</span> *<span class="title">Reader</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> &amp;Reader&#123;reader&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>dao层</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> dao</span><br><span class="line"><span class="comment">// 接口</span></span><br><span class="line"><span class="keyword">type</span> DaoReader <span class="keyword">interface</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 业务实现</span></span><br><span class="line"><span class="keyword">type</span> MyReader DaoReader</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewMyReader</span><span class="params">()</span> <span class="title">DaoReader</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> &amp;MyReader&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>mock_dao层（建议另起一个目录）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 生成mock的示例命令</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 从dao/reader.go中的interface生成</span></span><br><span class="line">mockgen -source=dao/reader.go -destination=mock_dao/reader.go</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 以下代码为自动生成，并进行了简化</span></span><br><span class="line"><span class="keyword">package</span> mock_dao</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> MockDaoReader <span class="keyword">struct</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewMockDaoReader</span><span class="params">(ctrl *gomock.Controller)</span> *<span class="title">MockDaoReader</span></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> &amp;MockDaoReader&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>于是，就有了正常情况下与单元测试情况下的依赖注入：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> service</span><br><span class="line"><span class="comment">// 正常的注入</span></span><br><span class="line">reader := InitBook(dao.NewMyReader())</span><br><span class="line"></span><br><span class="line"><span class="comment">// 单元测试的注入</span></span><br><span class="line">mockReader := mock_dao.NewMockDaoReader(gomock.NewController(t))</span><br><span class="line">reader := InitBook(mockReader)</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-在有限的时间内，探索“最有价值”的单元测试"><a href="#2-在有限的时间内，探索“最有价值”的单元测试" class="headerlink" title="2. 在有限的时间内，探索“最有价值”的单元测试"></a>2. 在有限的时间内，探索“最有价值”的单元测试</h2><h3 id="2-1-一个代码覆盖率的问题"><a href="#2-1-一个代码覆盖率的问题" class="headerlink" title="2.1 一个代码覆盖率的问题"></a>2.1 一个代码覆盖率的问题</h3><p>在开发过程中，上层代码对下层的代码调用往往有具有限制，如限制了传参的类型、数量、范围。以下面的代码为例：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 上层</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sum</span><span class="params">(a, b <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">  s, _ := sum(a,b)</span><br><span class="line">  <span class="keyword">return</span> s</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 下层</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sum</span><span class="params">(a, b <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// case1 - a/b 为int</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// case2 - a/b 为float</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// case3 - a/b 为string</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时，上层<code>Sum</code>函数的入参限制，会导致下层<code>sum</code>中被调用到的代码很有限。因此，在上层<code>Sum</code>进行单元测试，会导致下层<code>sum</code>函数的测试不完全。</p>
+<p>这个代码覆盖率的问题是不可规避的。我们不难得出，在分层场景下，<strong>要使某层代码的覆盖率最高，尽量在同层编写单元测试</strong>。那么，如果要让整个项目的代码覆盖率达到100%，每层的单测都得写，相信没几个公司经得起这样的投入。</p>
+<p>时间有限，我们该如何寻找“最有价值”的单元测试呢？</p>
+<h3 id="2-2-明确核心目标-保障业务逻辑"><a href="#2-2-明确核心目标-保障业务逻辑" class="headerlink" title="2.2 明确核心目标 - 保障业务逻辑"></a>2.2 明确核心目标 - 保障业务逻辑</h3><p>一个业务项目的代码，最重要的自然是保障业务逻辑。从前面三个分层的职责来看，<strong>Service层是我们要聚焦的重点，它的代码测试覆盖度无疑是要优先保障的</strong>。</p>
+<p>于是，我们优先在Service层写了完整的单测，覆盖率也很高，但回头看到Controller/Dao层代码的覆盖率很低：</p>
+<ul>
+<li>上层Controller的代码无法从Service层调用到，单测覆盖率为0</li>
+<li>下层Dao层的里的业务实现代码也没有被调用（依赖注入的是mock实现），单测覆盖率也很低</li>
+</ul>
+<p>既然我们的核心目标是 <strong>保障业务逻辑</strong>，那么，我们不妨从分层的角度分析一下：Controller层与Dao层的代码对核心业务逻辑的影响有多大？</p>
+<h3 id="2-3-Controller-Dao层的单元测试思路"><a href="#2-3-Controller-Dao层的单元测试思路" class="headerlink" title="2.3 Controller/Dao层的单元测试思路"></a>2.3 Controller/Dao层的单元测试思路</h3><p>我们先看看这两层的主要功能：</p>
+<ul>
+<li>Controller层是做的是协议解析和数据转化，如HTTP根据Header里的content-type解析到对应结构体</li>
+<li>Dao层主要负责的工作是数据持久化，比如MySQL里的CRUD<ul>
+<li>为了方便讨论，我们对Dao层做一下延伸，认为与外部应用的RPC交互也是一种Dao层操作</li>
+</ul>
+</li>
+</ul>
+<p>这两层都具备一个共同特征：<strong>高度重复性的基础工作</strong>，非常适合建设公共的工具库。于是，Controller/Dao层的建设思路往往会分两步走：</p>
+<ol>
+<li>沉淀并维护公共的工具库 ，并保证其单元测试覆盖率<ol>
+<li>Controller层的RPC框架</li>
+<li>Dao层的MySQL ORM/服务SDK</li>
+</ol>
+</li>
+<li>Controller/Dao层主要工作就是去调用工具库，并适配其接口</li>
+</ol>
+<p>在这种模式下，Controller与Dao层发生的问题可以得到有效控制：</p>
+<ol>
+<li>工具库本身 - 引用优秀的开源库或自建，保证测试完备，自身很少出错（有问题就统一升级）</li>
+<li>工具库的调用 - 依赖库设计的调用方式与使用者的经验</li>
+<li>Controller/Dao层自身代码 - 只做简单的工具库调用与数据结构的转换</li>
+</ol>
+<blockquote>
+<p>第2点中的工具库设计很重要，建议多考虑一下设计模式与Go语言强类型的特点，能提高用户体验：</p>
+<p>比如说，工具库里要传一个时间类型的参数，可以将入参设计为 <code>duration int</code> （参数类型只有数字），但更好的方式是<code>duration time.Duration</code>（参数类型同时包含了数字+单位）。</p>
+</blockquote>
+<p>所以，对不熟悉框架的同学，在早期可以投入一些时间写写Controller/Dao层的单测，了解相关工具库的实现；而随着经验的积累，Controller/Dao层会专注于做2件事：</p>
+<ul>
+<li>选择合适的工具库进行调用</li>
+<li>数据转化（从一个结构体转化到另一个结构体）</li>
+</ul>
+<p>随着项目的迭代，Controller/Dao层会变得越来越“薄”，投入单测的意义就没那么大了。</p>
+<h3 id="2-4-评价指标"><a href="#2-4-评价指标" class="headerlink" title="2.4 评价指标"></a>2.4 评价指标</h3><p>至此，我们明确了以 <strong>保障核心业务逻辑</strong> 为单元测试的目标，并以 <strong>业务领域层</strong> 作为核心的单元测试覆盖对象，项目单元测试覆盖率指标也相对明确了，如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 指定service路径下的所有文件，来计算单测覆盖率</span></span><br><span class="line">go test ./service/...  -coverprofile=profile.cov</span><br><span class="line">go tool cover -html=profile.cov -o coverage.html</span><br></pre></td></tr></table></figure>
+
+<p>之后，就是一个不断迭代的过程了。整体的业务项目与工具库呈现如下：</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-unittest-framework-new.png"></p>
+<h2 id="3-单元测试的相关实践"><a href="#3-单元测试的相关实践" class="headerlink" title="3.  单元测试的相关实践"></a>3.  单元测试的相关实践</h2><h3 id="3-1-Controller层不应向下传递协议类参数"><a href="#3-1-Controller层不应向下传递协议类参数" class="headerlink" title="3.1 Controller层不应向下传递协议类参数"></a>3.1 Controller层不应向下传递协议类参数</h3><p>我们先看两段代码：</p>
+<p>标准HTTP的handler</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> controller</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">FooHandler</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">  service.Foo(w, req)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> service</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">  fmt.Fprint(w, <span class="string">&quot;my response&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Gin框架的Handler</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> controller</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">FooHandler</span><span class="params">(c *gin.Context)</span></span> &#123;</span><br><span class="line">	service.Foo(c)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> service</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">(c *gin.Context)</span></span> &#123;</span><br><span class="line">  c.JSON(<span class="number">200</span>, resp)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这两种代码都将协议相关的数据结构<code>http.ResponseWriter</code> 、<code>http.Request</code> 、 <code>gin.Context</code> 传递到了业务领域层。从功能开发来说完全正确，但大幅提升了业务领域层<code>Foo</code>函数单测的难度。</p>
+<p>再看<code>protobuf</code>方案，通过预定义的接口文档与代码生成技术，让controller层的定义变成了如下形式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Foo</span><span class="params">(ctx context.Context, req *proto.FooRequest)</span> <span class="params">(resp *proto.FooResponse, err error)</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>业务自定义的Controller层已经实现了与协议解耦，开发者无需关心协议是<code>HTTP</code>还是<code>gRPC</code>，数据格式是<code>json</code>还是<code>form</code>等。Controller层的这个优势，自然保证了Service层与协议无关。</p>
+<p>所以，<code>protobuf</code> 为代表的的IDL方案，对业务领域层的单测更为友好。</p>
+<h3 id="3-2-Dao层的业务实现高频出错，怎么写单测？"><a href="#3-2-Dao层的业务实现高频出错，怎么写单测？" class="headerlink" title="3.2 Dao层的业务实现高频出错，怎么写单测？"></a>3.2 Dao层的业务实现高频出错，怎么写单测？</h3><p>在理想状态，Dao层出现问题的概率很小，但实际情况中有诸多限制：</p>
+<ul>
+<li>dao层包含很多业务逻辑</li>
+<li>开发者使用工具库的经验少，CRUD常常犯错</li>
+<li>历史项目，dao层很难调整，工具库也常常出错</li>
+</ul>
+<p>当你评估Dao层的单测会给整个项目带来足够的收益时，自然可以添加Dao层的单测。这时，对于外部依赖的问题，有如下2种方式：</p>
+<ol>
+<li>优先使用容器，可利用<code>testing.Main</code>的特性来创建和销毁（类似python中的<code>setUp</code>和<code>tearDown</code>）</li>
+<li>如果不得不依赖测试环境，尽可能地用<code>defer</code>的特性去清理单测产生的数据</li>
+</ol>
+<p>长期维护这两个方案，都比较费时费力。</p>
+<h3 id="3-3-Go的单测有哪些好用的库或者工具？"><a href="#3-3-Go的单测有哪些好用的库或者工具？" class="headerlink" title="3.3 Go的单测有哪些好用的库或者工具？"></a>3.3 Go的单测有哪些好用的库或者工具？</h3><ol>
+<li>Mock类<ol>
+<li><a target="_blank" rel="noopener" href="https://github.com/golang/mock">gomock</a> 官方推荐的工具，可以从接口生成mock代码</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/agiledragon/gomonkey">Go Monkey</a> 可以对特定函数进行打桩，一般用于特定错误的模拟</li>
+</ol>
+</li>
+<li>接口相关<ol>
+<li><a target="_blank" rel="noopener" href="https://github.com/google/wire">wire</a> 解决依赖注入的利器</li>
+<li><a target="_blank" rel="noopener" href="https://www.jetbrains.com/help/go/extract-interface-dialog.html">Goland的提取接口</a> 从具体实现中，提取出接口定义，重构代码的利器</li>
+</ol>
+</li>
+<li>写单元测试<ol>
+<li><a target="_blank" rel="noopener" href="https://pkg.go.dev/testing#hdr-Main">testing.Main</a> 统一进行单测依赖项的初始化与销毁的工作，减少重复性代码</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/cweill/gotests">gotests</a> 生成具体单元测试代码的框架，少写很多代码，已集成到<code>VSCode</code>/<code>Goland</code></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/stretchr/testify">testify</a> 断言，可以减少单测的代码量，并增加可读性</li>
+</ol>
+</li>
+<li>其它 - 发掘自己写单测时的高度重复性的代码，利用<code>go genereate</code>特性自动生成</li>
+</ol>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文讨论的业务代码是以<strong>对象</strong>为最小维度的。如果对象内部涉及到<code>goroutine</code>、<code>channel</code> 等特性，就需要在该对象的单测设计时有更多的考量，但不会影响整体项目的框架。</p>
+<p>无论是框架分层、代码抽象，还是工具库的建设，单元测试都是高度依赖Go项目框架与规范的。<strong>良好的代码测试覆盖率是必须要框架适配的</strong>，生搬硬套往往让自己写单测写得很疲惫，也会让单元测试慢慢失去价值。</p>
+<p>在Go项目中，要保证核心代码的高测试覆盖率，难度往往比需求开发高 - 往往过程性思维的CRUD，就能满足完成需求，而优秀的单元测试则为了保证测试的完备性，需要相当的抽象能力，并且持续重构。</p>
+<p><strong>道阻且长，行则将至。</strong></p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/my_wechat.jpeg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Tip/" rel="tag"># Go-Tip</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/11/17/go-study/go-rpc-5/" rel="prev" title="Go语言学习 - RPC篇:gRPC拦截器剖析">
+                  <i class="fa fa-chevron-left"></i> Go语言学习 - RPC篇:gRPC拦截器剖析
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
