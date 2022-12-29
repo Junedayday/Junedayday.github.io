@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-count">107</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -170,7 +170,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -201,6 +201,182 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/05/go-framework/go-framework-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/05/go-framework/go-framework-5/" class="post-title-link" itemprop="url">Go语言微服务框架 - 5.GORM库的适配sqlmock的单元测试</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-05 12:00:00" itemprop="dateCreated datePublished" datetime="2021-09-05T12:00:00+08:00">2021-09-05</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-26 10:52:26" itemprop="dateModified" datetime="2021-09-26T10:52:26+08:00">2021-09-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>随着<code>GORM</code>库的引入，我们在数据库持久化上已经有了解决方案。但上一篇我们使用的<code>GORM</code>过于简单，应用到实际的项目中局限性很大。</p>
+<p>与此同时，我们也缺乏一个有效的手段来验证自己编写的相关代码。如果依靠连接到真实的<code>MySQL</code>去验证功能，那成本实在太高。那么，这里我们就引入一个经典的<code>sqlmock</code>框架，并配合对数据库相关代码的修改，来实现相关代码的可测试性。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/05/go-framework/go-framework-5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/29/go-framework/go-framework-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/29/go-framework/go-framework-4/" class="post-title-link" itemprop="url">Go语言微服务框架 - 4.初识GORM库</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-08-29 12:00:00" itemprop="dateCreated datePublished" datetime="2021-08-29T12:00:00+08:00">2021-08-29</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-26 10:52:13" itemprop="dateModified" datetime="2021-09-26T10:52:13+08:00">2021-09-26</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>数据持久化是服务的必要特性，最常见的组件就是关系型数据库<code>MySQL</code>。而在<code>Go</code>语言里，<code>GORM</code>已经成了对接<code>MySQL</code>事实上的标准，那么也就不去横向对比其它库了。</p>
+<p><code>GORM</code>库是一个很强大、但同时也是一个非常复杂的工具。为了支持复杂的<code>SQL</code>语言，它比之前的配置文件加载工具<code>github.com/spf13/viper</code>要复杂不少。今天，我们不会全量地引入<code>GORM</code>里的所有特性，而是从一个最简单的场景入手，对它的基本特性有所了解。而后续随着框架的完善，我们会逐渐细化功能。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/29/go-framework/go-framework-4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -921,208 +1097,6 @@
 <p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
 </blockquote>
 
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/09/go-tip/go-tip-6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/09/go-tip/go-tip-6/" class="post-title-link" itemprop="url">Go语言技巧 - 6.【深入Go Module】探索最小版本选择的机制</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-09 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-09T12:00:00+08:00">2021-07-09</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-12-31 23:27:53" itemprop="dateModified" datetime="2021-12-31T23:27:53+08:00">2021-12-31</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
-<h2 id="从一个示例讲起"><a href="#从一个示例讲起" class="headerlink" title="从一个示例讲起"></a>从一个示例讲起</h2><p>用一个简单列表来表示我们的模块A依赖：</p>
-<ul>
-<li>B1<code>v1.0.0</code><ul>
-<li>C1<code>v1.1.0</code></li>
-<li>C2 <code>v1.2.0</code></li>
-</ul>
-</li>
-<li>B2 <code>v1.2.0</code><ul>
-<li>C1<code>v1.1.2</code></li>
-<li>C3 <code>v1.2.0</code></li>
-</ul>
-</li>
-</ul>
-<p>表示 <em>A依赖B1与B2，而B1又依赖C1、C2，B2依赖C1、C3</em>。</p>
-<p>这里，我们把关注点放到有争议的C1，它存在两个版本<code>v1.1.0</code>与<code>v1.1.2</code>。而最终A选择的是<code>v1.1.2</code>版本的C1。</p>
-<ul>
-<li>B1<code>v1.0.0</code><ul>
-<li><del>C1<code>v1.1.0</code></del></li>
-<li>C2 <code>v1.2.0</code></li>
-</ul>
-</li>
-<li>B2 <code>v1.2.0</code><ul>
-<li>C1<code>v1.1.2</code></li>
-<li>C3 <code>v1.2.0</code></li>
-</ul>
-</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/09/go-tip/go-tip-6/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/03/go-tip/go-tip-5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/03/go-tip/go-tip-5/" class="post-title-link" itemprop="url">Go语言技巧 - 5.【初探Go Module】Go语言的版本管理</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-03 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-03T12:00:00+08:00">2021-07-03</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-12-16 14:58:36" itemprop="dateModified" datetime="2021-12-16T14:58:36+08:00">2021-12-16</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
-<h2 id="Go-Mod的官方说明"><a href="#Go-Mod的官方说明" class="headerlink" title="Go Mod的官方说明"></a>Go Mod的官方说明</h2><p>Go语言自从推出了<code>go mod</code>作为版本管理工具后，结束Go语言版本管理工具的纷争，实现了大一统。</p>
-<p>相信有很多人都对这个版本管理的机制都有基础的概念、但并不深入。而官方把最核心的实现，都放在这一篇 <a target="_blank" rel="noopener" href="https://golang.org/ref/mod">https://golang.org/ref/mod</a> 文档中。</p>
-<p>今天，我们一起来读读这一篇文章。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/03/go-tip/go-tip-5/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
       
     </div>
 

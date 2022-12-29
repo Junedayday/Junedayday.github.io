@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-count">107</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -170,7 +170,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -201,6 +201,208 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/09/go-tip/go-tip-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/09/go-tip/go-tip-6/" class="post-title-link" itemprop="url">Go语言技巧 - 6.【深入Go Module】探索最小版本选择的机制</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-09 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-09T12:00:00+08:00">2021-07-09</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-12-31 23:27:53" itemprop="dateModified" datetime="2021-12-31T23:27:53+08:00">2021-12-31</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
+<h2 id="从一个示例讲起"><a href="#从一个示例讲起" class="headerlink" title="从一个示例讲起"></a>从一个示例讲起</h2><p>用一个简单列表来表示我们的模块A依赖：</p>
+<ul>
+<li>B1<code>v1.0.0</code><ul>
+<li>C1<code>v1.1.0</code></li>
+<li>C2 <code>v1.2.0</code></li>
+</ul>
+</li>
+<li>B2 <code>v1.2.0</code><ul>
+<li>C1<code>v1.1.2</code></li>
+<li>C3 <code>v1.2.0</code></li>
+</ul>
+</li>
+</ul>
+<p>表示 <em>A依赖B1与B2，而B1又依赖C1、C2，B2依赖C1、C3</em>。</p>
+<p>这里，我们把关注点放到有争议的C1，它存在两个版本<code>v1.1.0</code>与<code>v1.1.2</code>。而最终A选择的是<code>v1.1.2</code>版本的C1。</p>
+<ul>
+<li>B1<code>v1.0.0</code><ul>
+<li><del>C1<code>v1.1.0</code></del></li>
+<li>C2 <code>v1.2.0</code></li>
+</ul>
+</li>
+<li>B2 <code>v1.2.0</code><ul>
+<li>C1<code>v1.1.2</code></li>
+<li>C3 <code>v1.2.0</code></li>
+</ul>
+</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/09/go-tip/go-tip-6/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/03/go-tip/go-tip-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/03/go-tip/go-tip-5/" class="post-title-link" itemprop="url">Go语言技巧 - 5.【初探Go Module】Go语言的版本管理</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-03 12:00:00" itemprop="dateCreated datePublished" datetime="2021-07-03T12:00:00+08:00">2021-07-03</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-12-16 14:58:36" itemprop="dateModified" datetime="2021-12-16T14:58:36+08:00">2021-12-16</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
+<h2 id="Go-Mod的官方说明"><a href="#Go-Mod的官方说明" class="headerlink" title="Go Mod的官方说明"></a>Go Mod的官方说明</h2><p>Go语言自从推出了<code>go mod</code>作为版本管理工具后，结束Go语言版本管理工具的纷争，实现了大一统。</p>
+<p>相信有很多人都对这个版本管理的机制都有基础的概念、但并不深入。而官方把最核心的实现，都放在这一篇 <a target="_blank" rel="noopener" href="https://golang.org/ref/mod">https://golang.org/ref/mod</a> 文档中。</p>
+<p>今天，我们一起来读读这一篇文章。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/03/go-tip/go-tip-5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -919,192 +1121,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/03/07/go-tip/go-tip-1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/03/05/go-study/go-study-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/05/go-study/go-study-1/" class="post-title-link" itemprop="url">Go语言学习路线 - 1.方向篇:明确Go语言的成长方向</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-03-05 11:27:15" itemprop="dateCreated datePublished" datetime="2021-03-05T11:27:15+08:00">2021-03-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-09-30 12:26:30" itemprop="dateModified" datetime="2022-09-30T12:26:30+08:00">2022-09-30</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go_study.jpeg"></p>
-<h2 id="Go的就业方向"><a href="#Go的就业方向" class="headerlink" title="Go的就业方向"></a>Go的就业方向</h2><p>目前，后端开发语言的就业方向主要分为两块：<strong>业务系统开发</strong> 与 <strong>基础平台开发</strong> 。<code>Go</code>语言自然也不会例外。</p>
-<p>也许有朋友不太了解这两块，那我简单地解释下：</p>
-<p><strong>业务系统开发</strong> 主要指公司对外盈利的系统，包括 <code>toB</code> 与 <code>toC</code>。由于这个是公司安身立命的根本，所以开发者是必须跟着业务走的。</p>
-<p><strong>基础平台开发</strong> 指的是公司为了提升工作效率（不仅仅是研发），搭建的一套内部体系，常常需要跨业务支持。</p>
-<blockquote>
-<p>目前主流的云平台，其实是包装成一套业务系统的基础平台，比如阿里云的ECS。</p>
-<p>这类云平台是大型公司将自己的基础平台能力沉淀下来后，包装成一套业务系统对外销售，内部也是分成了两类开发人员：上层开发一些多语言接口、计费等业务系统；下层开发对应的基础平台。</p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/05/go-study/go-study-1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/21/go-study/go-study-0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/21/go-study/go-study-0/" class="post-title-link" itemprop="url">Go语言学习路线 - 0.总览</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-02-21 11:27:15" itemprop="dateCreated datePublished" datetime="2021-02-21T11:27:15+08:00">2021-02-21</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-09-30 12:26:26" itemprop="dateModified" datetime="2022-09-30T12:26:26+08:00">2022-09-30</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go_study.jpeg"></p>
-<p>大家好，我是六月天天。从今天开始，我将开启一个新的系列 - <strong>Go语言学习路线</strong>。</p>
-<blockquote>
-<p>大家可以从 <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">bilibili</a> 的视频分享中看到观点的延伸思考</p>
-</blockquote>
-<h2 id="以成长为核心"><a href="#以成长为核心" class="headerlink" title="以成长为核心"></a>以成长为核心</h2><p>目前网上已有很多Go相关的教程，包括基础讲解、源码解析、面试技巧等，但我依然下决心来做一个具有强烈个人主观观点色彩的<strong>Go语言学习路线</strong>：这个系列的目标只有一个 - <strong>成长</strong> 。我不求这个系列超越其它的教程，而是能做到<strong>去芜存菁</strong> ，引发一批朋友的共鸣。</p>
-<p>整个系列中，我会输出大量的主观观点，大家不一定能全盘接受，我也不希望大家全盘接受。我坚信，<strong>没有碰撞的技术观点无法引起大家的深度思考</strong> ，犹如上课时老师对你进行单方面的内容输出；同时，<strong>主观观点会更具现实色彩与实践意义</strong> ，我经历的公司和方向都很丰富，或多或少会和大家的实际工作产生共鸣。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/02/21/go-study/go-study-0/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

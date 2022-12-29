@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="概览通过上一讲，我们对gRPC的拦截器有了一定的认识，也能定制出很多通用的中间件。 但在大部分的业务系统中，我们面向的还是HTTP协议。那么，今天我们就从gRPC-Gateway的mux选项出发，一起来看看一些很实用的特性。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go语言学习 - RPC篇:gRPC-Gateway定制mux选项">
+<meta property="og:url" content="http://example.com/2022/12/27/go-study/go-rpc-6/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="概览通过上一讲，我们对gRPC的拦截器有了一定的认识，也能定制出很多通用的中间件。 但在大部分的业务系统中，我们面向的还是HTTP协议。那么，今天我们就从gRPC-Gateway的mux选项出发，一起来看看一些很实用的特性。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go_study.jpeg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2022-12-27T04:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-28T13:24:41.573Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Study">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go_study.jpeg">
+
+
+<link rel="canonical" href="http://example.com/2022/12/27/go-study/go-rpc-6/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go语言学习 - RPC篇:gRPC-Gateway定制mux选项 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ServeMux"><span class="nav-number">2.</span> <span class="nav-text">ServeMux</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Header%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">Header的数据处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP%E4%B8%8EgRPC%E5%8D%8F%E8%AE%AE%E5%A4%B4%E5%8C%B9%E9%85%8D"><span class="nav-number">3.1.</span> <span class="nav-text">HTTP与gRPC协议头匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86HTTP%E5%A4%B4%E8%BD%AC%E6%88%90gRPC%E5%A4%B4"><span class="nav-number">3.2.</span> <span class="nav-text">将HTTP头转成gRPC头</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">返回数据处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E7%A1%AE%E8%BF%94%E5%9B%9E"><span class="nav-number">4.1.</span> <span class="nav-text">正确返回</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E8%BF%94%E5%9B%9E"><span class="nav-number">4.2.</span> <span class="nav-text">错误返回</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">107</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/27/go-study/go-rpc-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go语言学习 - RPC篇:gRPC-Gateway定制mux选项
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-12-27 12:00:00" itemprop="dateCreated datePublished" datetime="2022-12-27T12:00:00+08:00">2022-12-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-12-28 21:24:41" itemprop="dateModified" datetime="2022-12-28T21:24:41+08:00">2022-12-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go_study.jpeg"></p>
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>通过上一讲，我们对gRPC的拦截器有了一定的认识，也能定制出很多通用的中间件。</p>
+<p>但在大部分的业务系统中，我们面向的还是HTTP协议。那么，今天我们就从gRPC-Gateway的mux选项出发，一起来看看一些很实用的特性。</p>
+<span id="more"></span>
+
+<h2 id="ServeMux"><a href="#ServeMux" class="headerlink" title="ServeMux"></a>ServeMux</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">&quot;github.com/grpc-ecosystem/grpc-gateway/v2/runtime&quot;</span></span><br><span class="line"></span><br><span class="line">gwMux := runtime.NewServeMux()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数签名</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewServeMux</span><span class="params">(opts ...ServeMuxOption)</span> *<span class="title">ServeMux</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们将目标聚焦于这个<code>ServeMux</code>：</p>
+<ol>
+<li>目前官方区分v1和v2版本，版本不一致会导致很多编译上的问题</li>
+<li>入参包括多个<code>option</code>选项函数，用于定制想要的mux内容</li>
+</ol>
+<p>具体的内容可以参考<code>ServeMux</code>的数据结构，我这里挑选几个重点的能力：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ServeMux <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// 这个是server的核心实现：即注册的handlerf</span></span><br><span class="line">	handlers                  <span class="keyword">map</span>[<span class="keyword">string</span>][]handler</span><br><span class="line">  <span class="comment">// 1、转发正常响应</span></span><br><span class="line">	forwardResponseOptions    []<span class="function"><span class="keyword">func</span><span class="params">(context.Context, http.ResponseWriter, proto.Message)</span> <span class="title">error</span></span></span><br><span class="line">  <span class="comment">// 2、序列化工具</span></span><br><span class="line">	marshalers                marshalerRegistry</span><br><span class="line">  <span class="comment">// 3、进入时（http-&gt;grpc）的header匹配规则</span></span><br><span class="line">	incomingHeaderMatcher     HeaderMatcherFunc</span><br><span class="line">  <span class="comment">// 4、返回时（grpc-&gt;http）的header匹配规则</span></span><br><span class="line">	outgoingHeaderMatcher     HeaderMatcherFunc</span><br><span class="line">  <span class="comment">// 5、metadata的转换（从http转成grpc的md）</span></span><br><span class="line">	metadataAnnotators        []<span class="function"><span class="keyword">func</span><span class="params">(context.Context, *http.Request)</span> <span class="title">metadata</span>.<span class="title">MD</span></span></span><br><span class="line">  <span class="comment">// 6、错误处理</span></span><br><span class="line">	errorHandler              ErrorHandlerFunc</span><br><span class="line">  <span class="comment">// 7、流式错误处理</span></span><br><span class="line">	streamErrorHandler        StreamErrorHandlerFunc</span><br><span class="line">  <span class="comment">// 8、路由错误</span></span><br><span class="line">	routingErrorHandler       RoutingErrorHandlerFunc</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>综合一下，核心能力其实包括2块：</p>
+<ol>
+<li>Header数据的处理</li>
+<li>返回消息的处理（包括正常情况和错误情况）</li>
+</ol>
+<h2 id="Header的数据处理"><a href="#Header的数据处理" class="headerlink" title="Header的数据处理"></a>Header的数据处理</h2><h3 id="HTTP与gRPC协议头匹配"><a href="#HTTP与gRPC协议头匹配" class="headerlink" title="HTTP与gRPC协议头匹配"></a>HTTP与gRPC协议头匹配</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HTTP -&gt; gRPC</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithIncomingHeaderMatcher</span><span class="params">(fn HeaderMatcherFunc)</span> <span class="title">ServeMuxOption</span></span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// gRPC -&gt; HTTP</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithOutgoingHeaderMatcher</span><span class="params">(fn HeaderMatcherFunc)</span> <span class="title">ServeMuxOption</span></span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> HeaderMatcherFunc <span class="function"><span class="keyword">func</span><span class="params">(<span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">string</span>, <span class="keyword">bool</span>)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>这个函数只做一个简单的映射，我们可以通过下面的例子开快速了解：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 入参：header key</span></span><br><span class="line"><span class="comment">// 出参：返回header key，以及是否返回</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CustomMatcher</span><span class="params">(key <span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">string</span>, <span class="keyword">bool</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">switch</span> key &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="string">&quot;some-special-key&quot;</span>:</span><br><span class="line">		<span class="keyword">return</span> key, <span class="literal">true</span> </span><br><span class="line">	<span class="keyword">case</span> <span class="string">&quot;deprecated-key&quot;</span>:</span><br><span class="line">		<span class="keyword">return</span> <span class="string">&quot;&quot;</span>, <span class="literal">false</span></span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">    <span class="comment">// 默认的匹配规则</span></span><br><span class="line">		<span class="keyword">return</span> runtime.DefaultHeaderMatcher(key)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="将HTTP头转成gRPC头"><a href="#将HTTP头转成gRPC头" class="headerlink" title="将HTTP头转成gRPC头"></a>将HTTP头转成gRPC头</h3><p>上面的<code>matcher</code>只是做一个key的映射，如果<code>Header</code>里包括更复杂的部分（例如Cookie），需要引入下面函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithMetadata</span><span class="params">(annotator <span class="keyword">func</span>(context.Context, *http.Request)</span> <span class="title">metadata</span>.<span class="title">MD</span>) <span class="title">ServeMuxOption</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(serveMux *ServeMux)</span></span> &#123;</span><br><span class="line">		serveMux.metadataAnnotators = <span class="built_in">append</span>(serveMux.metadataAnnotators, annotator)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们注意两个点：</p>
+<ol>
+<li>只做协议转换，不做逻辑处理（逻辑处理交给gRPC层的中间件统一处理）</li>
+<li><code>metadata.MD</code>的底层数据结构为<code>map[string][]string</code>，与HTTP Header很类似</li>
+</ol>
+<p>下面给出一个HTTP的Cookie处理示例：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 示例</span></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">  HTTP_COOKIE_TOKEN = <span class="string">&quot;http_cookie&quot;</span></span><br><span class="line">  MD_TOKEN = <span class="string">&quot;md_cookie&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ExampleCookieMetadataAnnotator</span><span class="params">(ctx context.Context, r *http.Request)</span> <span class="params">(md metadata.MD)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 从HTTP的cookie中读出对应的数据</span></span><br><span class="line">  c, err := r.Cookie(ODIN_JWT_TOKEN)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 将值放到md里，方便在后续提取</span></span><br><span class="line">	<span class="keyword">return</span> metadata.Pairs(MD_TOKEN, c.Value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="返回数据处理"><a href="#返回数据处理" class="headerlink" title="返回数据处理"></a>返回数据处理</h2><h3 id="正确返回"><a href="#正确返回" class="headerlink" title="正确返回"></a>正确返回</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithForwardResponseOption</span><span class="params">(forwardResponseOption <span class="keyword">func</span>(context.Context, http.ResponseWriter, proto.Message)</span> <span class="title">error</span>) <span class="title">ServeMuxOption</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>正确返回时，核心的数据结构为 <code>protoMessage</code>。我们不妨做一个封装：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> HTTPResponse <span class="keyword">struct</span> &#123;</span><br><span class="line">	Errno <span class="keyword">int</span>         <span class="string">`json:&quot;errno&quot;`</span></span><br><span class="line">	Msg   <span class="keyword">string</span>      <span class="string">`json:&quot;msg&quot;`</span></span><br><span class="line">	Data  <span class="keyword">interface</span>&#123;&#125; <span class="string">`json:&quot;data&quot;`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GatewayResponseModifier</span><span class="params">(ctx context.Context, w http.ResponseWriter, resp proto.Message)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  <span class="comment">// 返回的数据，在外层同一封装了数据结构HTTPResponse，对一些历史项目兼容有很棒的效果</span></span><br><span class="line">  newResp := &amp;HTTPResponse&#123;</span><br><span class="line">    Data: resp,</span><br><span class="line">  &#125;</span><br><span class="line">	pbData, _ := json.Marshal(newResp)</span><br><span class="line">  w.Write(pbData)</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="错误返回"><a href="#错误返回" class="headerlink" title="错误返回"></a>错误返回</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithErrorHandler</span><span class="params">(fn ErrorHandlerFunc)</span> <span class="title">ServeMuxOption</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>错误处理在整个RPC框架中扮演了非常重要的角色，我们不妨通过如下例子来了解：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">GatewayErrModifier</span><span class="params">(ctx context.Context, mux *runtime.ServeMux, m runtime.Marshaler, w http.ResponseWriter, r *http.Request, err error)</span></span> &#123;</span><br><span class="line">	<span class="comment">// 提取error</span></span><br><span class="line">	s, ok := status.FromError(err)</span><br><span class="line">	<span class="comment">// 非标准错误</span></span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		runtime.DefaultHTTPErrorHandler(ctx, mux, m, w, r, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 对各类错误增加定制的逻辑</span></span><br><span class="line">	<span class="keyword">switch</span> s.Code() &#123;</span><br><span class="line">	<span class="keyword">case</span> codes.Unauthenticated:</span><br><span class="line">		<span class="comment">// 示例：认证失败，可以加入重定向的逻辑</span></span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		runtime.DefaultHTTPErrorHandler(ctx, mux, m, w, r, err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析一下重点：</p>
+<ol>
+<li><code>error</code>尽可能用<code>gRPC</code>标准的错误<code>Status</code>表示</li>
+<li><code>gRPC</code>的标准错误，对错误码code有一套定义（参考<code>google.golang.org/grpc/codes</code>），类似于<code>HTTP</code>的状态码</li>
+<li>错误码code要尽量少，过多没有意义<ol>
+<li>标准错误码尽可能复用，如资源找不到、权限不足等</li>
+<li>业务错误码可以独立，一般一个系统定义1个即可</li>
+</ol>
+</li>
+</ol>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本文重点介绍了<code>gRPC-Gateway</code>中2类<code>ServeMux</code>，也演示了对应的示例，大家能理解其基本用法即可。</p>
+<p>后续，随着整体项目的落地，我会增加一些日常项目中常见的定制需求，帮助大家更好地认识RPC框架的能力。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Study/" rel="tag"># Go-Study</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/12/06/go-tip/go-tip-17/" rel="prev" title="Go语言技巧 - 17.【Go工程化测试】业务项目中的Go单元测试心得">
+                  <i class="fa fa-chevron-left"></i> Go语言技巧 - 17.【Go工程化测试】业务项目中的Go单元测试心得
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/12/28/go-buf/go-buf-0/" rel="next" title="Go-Buf教程 - 0.总览">
+                  Go-Buf教程 - 0.总览 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

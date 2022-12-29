@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-count">107</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -170,7 +170,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -201,6 +201,196 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/11/go-framework/go-framework-11/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/11/11/go-framework/go-framework-11/" class="post-title-link" itemprop="url">Go语言微服务框架 - 11.接口的参数校验功能-buf中引入PGV</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-11-11 12:00:00" itemprop="dateCreated datePublished" datetime="2021-11-11T12:00:00+08:00">2021-11-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-11-15 19:45:20" itemprop="dateModified" datetime="2021-11-15T19:45:20+08:00">2021-11-15</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>随着API在线文档的发布，服务的接口将会被开放给各种各样的调用方。</p>
+<p>大量开发接口的朋友会经常遇到<strong>接口参数校验</strong>的问题。举个例子，我们希望将某个字段是必填的，如<code>name</code>，我们经常会需要做两步：</p>
+<ol>
+<li>在程序中加一个<strong>判断逻辑</strong>，当这个字段为空时返回错误给调用方</li>
+<li>在接口文档中加上<strong>注释</strong>，告诉调用方这个参数必填</li>
+</ol>
+<p>一旦某项工作被拆分为两步，就很容易出现<strong>不一致性</strong>：对应到参数检查，我们会经常遇到文档和具体实现不一致，从而导致双方研发的沟通成本增加。那么，今天我将引入一个方案，实现两者的一致性。</p>
+<blockquote>
+<p>为了缩小讨论范围，我们将 <strong>参数校验</strong> 限定为简单规则。</p>
+<p>而复合条件的检查（逻辑组合等），不在本次的讨论范围内，主要考虑到2点：</p>
+<ol>
+<li>要生成跨语言的方案，技术上比较难实现</li>
+<li>复合条件往往是一种业务逻辑的检查，放在接口层面不合适</li>
+</ol>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/11/11/go-framework/go-framework-11/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/01/go-framework/go-framework-10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/11/01/go-framework/go-framework-10/" class="post-title-link" itemprop="url">Go语言微服务框架 - 10.接口文档-openapiv2的在线文档方案</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-11-01 12:00:00" itemprop="dateCreated datePublished" datetime="2021-11-01T12:00:00+08:00">2021-11-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-11-02 18:08:07" itemprop="dateModified" datetime="2021-11-02T18:08:07+08:00">2021-11-02</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
+<p>随着项目的迭代，一个服务会开放出越来越多的接口供第三方调用。</p>
+<p>虽然<code>protobuf</code>已经是通用性很广的IDL文件了，但对于未接触过这块的程序员来说，还是有很大的学习成本。在综合可读性和维护性之后，我个人比较倾向于使用oepnapiv2的方案，提供在线接口文档。</p>
+<p>接下来，我们一起来看看这部分的实现。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/11/01/go-framework/go-framework-10/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -899,182 +1089,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/09/15/go-tip/go-tip-7/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/09/05/go-framework/go-framework-5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/09/05/go-framework/go-framework-5/" class="post-title-link" itemprop="url">Go语言微服务框架 - 5.GORM库的适配sqlmock的单元测试</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-09-05 12:00:00" itemprop="dateCreated datePublished" datetime="2021-09-05T12:00:00+08:00">2021-09-05</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-26 10:52:26" itemprop="dateModified" datetime="2021-09-26T10:52:26+08:00">2021-09-26</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>随着<code>GORM</code>库的引入，我们在数据库持久化上已经有了解决方案。但上一篇我们使用的<code>GORM</code>过于简单，应用到实际的项目中局限性很大。</p>
-<p>与此同时，我们也缺乏一个有效的手段来验证自己编写的相关代码。如果依靠连接到真实的<code>MySQL</code>去验证功能，那成本实在太高。那么，这里我们就引入一个经典的<code>sqlmock</code>框架，并配合对数据库相关代码的修改，来实现相关代码的可测试性。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/05/go-framework/go-framework-5/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/29/go-framework/go-framework-4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/29/go-framework/go-framework-4/" class="post-title-link" itemprop="url">Go语言微服务框架 - 4.初识GORM库</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-29 12:00:00" itemprop="dateCreated datePublished" datetime="2021-08-29T12:00:00+08:00">2021-08-29</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-26 10:52:13" itemprop="dateModified" datetime="2021-09-26T10:52:13+08:00">2021-09-26</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>数据持久化是服务的必要特性，最常见的组件就是关系型数据库<code>MySQL</code>。而在<code>Go</code>语言里，<code>GORM</code>已经成了对接<code>MySQL</code>事实上的标准，那么也就不去横向对比其它库了。</p>
-<p><code>GORM</code>库是一个很强大、但同时也是一个非常复杂的工具。为了支持复杂的<code>SQL</code>语言，它比之前的配置文件加载工具<code>github.com/spf13/viper</code>要复杂不少。今天，我们不会全量地引入<code>GORM</code>里的所有特性，而是从一个最简单的场景入手，对它的基本特性有所了解。而后续随着框架的完善，我们会逐渐细化功能。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/29/go-framework/go-framework-4/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

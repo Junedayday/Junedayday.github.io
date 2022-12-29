@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">105</span>
+          <span class="site-state-item-count">107</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -170,7 +170,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -201,6 +201,498 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/17/sharing-5min/2022-01/2022Week03/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/01/17/sharing-5min/2022-01/2022Week03/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week03</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-01-17 12:00:00" itemprop="dateCreated datePublished" datetime="2022-01-17T12:00:00+08:00">2022-01-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-01-22 21:49:36" itemprop="dateModified" datetime="2022-01-22T21:49:36+08:00">2022-01-22</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57571641299795_.pic_hd.jpg" alt="2022-01"></p>
+<h2 id="2022-01-17-CNCF-gRPC"><a href="#2022-01-17-CNCF-gRPC" class="headerlink" title="2022-01-17 CNCF-gRPC"></a>2022-01-17 CNCF-gRPC</h2><p>今天，我们一起来看CNCF的 <strong>Remote Procedure Call - RPC</strong> 模块中最具代表性的项目 - gRPC。</p>
+<p>gRPC官网的定义很简洁，重点强调了其<strong>高性能</strong>的特点：</p>
+<blockquote>
+<p>A high performance, open source universal RPC framework.</p>
+</blockquote>
+<p>我们再看一段官方更详细的描述：</p>
+<blockquote>
+<p>gRPC is a modern open source high performance Remote Procedure Call (RPC) framework that can run in any environment. It can efficiently connect services in and across data centers with pluggable support for load balancing, tracing, health checking and authentication. It is also applicable in last mile of distributed computing to connect devices, mobile applications and browsers to backend services.</p>
+</blockquote>
+<p>除了高性能，这里还提到了两个重要特性：</p>
+<ul>
+<li><strong>插件化的支持</strong>：负载均衡、tracing、健康监测、认证等</li>
+<li><strong>最后一公里</strong>：将手机app、浏览器与后端服务器的联通</li>
+</ul>
+<p>第一点体现出了gRPC的高度可扩展性。这里的插件化不仅体现在上面列举的这些具体功能，甚至像序列化的方案、底层通信的协议，都可以做到快速替换与迭代。</p>
+<p>第二点在实际生产上应用的case并不多，仍需要大量的实践与经验沉淀后，才建议大家尝试。目前，绝大多数的gRPC通信都是发生在后端服务之间。</p>
+<p>接下来，我们来谈谈官网列举的四个特性：</p>
+<h3 id="Simple-service-definition"><a href="#Simple-service-definition" class="headerlink" title="Simple service definition"></a>Simple service definition</h3><p>gRPC采用<code>Protocol Buffers</code>进行定义，从整体来说阅读体验确实是比较简洁的，但在实际工程中仍存在两个问题：</p>
+<ol>
+<li><strong>迁移成本大</strong>：gRPC没有提供从很多历史RPC解决方案中迁移的途径，如Thrift等，完全是另起炉灶，这对有历史包袱的团队来说很难接受；</li>
+<li><strong>配套开发工具缺失</strong>：高频使用<code>Protocol Buffers</code>的朋友都有了解，主流IDE对<code>pb</code>文件的错误提示和文件格式化都有缺失，很多问题都无法在coding的过程中实时提示，而是需要运行二进制命令<code>protoc</code>后才能了解。</li>
+</ol>
+<h3 id="Start-quickly-and-scale"><a href="#Start-quickly-and-scale" class="headerlink" title="Start quickly and scale"></a>Start quickly and scale</h3><p><strong>快速启动</strong> - 强调的是通过<code>Protocol Buffers</code>生成的代码，可以在各语言内用简洁的代码就可运行（这部分与各语言强相关）</p>
+<p><strong>快速扩容</strong> - 这个特性需要与<code>Kubernetes</code>的能力结合。</p>
+<h3 id="Works-across-languages-and-platforms"><a href="#Works-across-languages-and-platforms" class="headerlink" title="Works across languages and platforms"></a>Works across languages and platforms</h3><p>跨语言与平台的特性，非常依赖背后的生态 - 需要大量的工作去兼容多语言，也要兼顾性能、稳定性等问题。</p>
+<p>所以，这不仅仅是技术上的问题，更需要社区、资金等复杂因素的支持。</p>
+<h3 id="Bi-directional-streaming-and-integrated-auth"><a href="#Bi-directional-streaming-and-integrated-auth" class="headerlink" title="Bi-directional streaming and integrated auth"></a>Bi-directional streaming and integrated auth</h3><ul>
+<li><strong>双向流式通信</strong> - 这点是gRPC的核心特性，体现出了与其它RPC方案的差异</li>
+<li><strong>集成认证功能</strong> - Auth是gRPC插件化生态中的重要一环，这部分其实与服务网格的功能存在一定的重叠</li>
+</ul>
+<h2 id="2022-01-18-CNCF-Envoy"><a href="#2022-01-18-CNCF-Envoy" class="headerlink" title="2022-01-18 CNCF-Envoy"></a>2022-01-18 CNCF-Envoy</h2><p>作为云原生Service Mesh代表性的产品之一，Envoy占据了大壁江山。</p>
+<blockquote>
+<p>Envoy is an L7 proxy and communication bus designed for large modern service oriented architectures.</p>
+</blockquote>
+<ol>
+<li>定位：L7 代理和通信总线</li>
+<li>重点服务对象：SOA面向服务架构（也完全适用于微服务架构）</li>
+</ol>
+<p>核心理念：</p>
+<blockquote>
+<p>The network should be transparent to applications. When network and application problems do occur it should be easy to determine the source of the problem.</p>
+<p>网络应对应用程序透明。当网络和应用程序出现问题时，应该很容易地确定问题根源。</p>
+</blockquote>
+<p>文档资料：</p>
+<ul>
+<li>官方：<a target="_blank" rel="noopener" href="https://www.envoyproxy.io/docs/envoy/latest/intro/intro">https://www.envoyproxy.io/docs/envoy/latest/intro/intro</a></li>
+<li>中文版：<a target="_blank" rel="noopener" href="https://www.servicemesher.com/envoy/">https://www.servicemesher.com/envoy/</a></li>
+</ul>
+<p>我们依旧挑选三个核心特性展开：</p>
+<h3 id="Out-of-process-architecture-进程外架构"><a href="#Out-of-process-architecture-进程外架构" class="headerlink" title="Out of process architecture 进程外架构"></a>Out of process architecture 进程外架构</h3><p>进程外架构，其实就是一种微服务理念的体现，它的利与弊也是和微服务强相关的。</p>
+<p>优点很直观 - Envoy可以支持多语言，也可以独立于业务快速迭代与发展。</p>
+<p>而弊端在官网上没有体现，最关键的一点是：<strong>性能损耗</strong>。作为一种side-car模式，Envoy是在本机内、进程间进行通信，远远地比进程内调用的压栈、出栈更花时间。</p>
+<h3 id="Service-discovery-and-dynamic-configuration-服务发现和动态配置"><a href="#Service-discovery-and-dynamic-configuration-服务发现和动态配置" class="headerlink" title="Service discovery and dynamic configuration 服务发现和动态配置"></a>Service discovery and dynamic configuration 服务发现和动态配置</h3><p>很多运维同学都会拿Envoy去对比Nginx，确实在很多特性上，两者有很大的相似之处。但在这个特性上，Envoy有得天独厚的优势。</p>
+<p>以一个常见的动态负载均衡为例，nginx需要结合consul template来实现，还需要对应用程序做一定的侵入。而Envoy可以与Kubernetes完美契合，大幅度减少维护成本。</p>
+<h3 id="Best-in-class-observability-最佳的可观察性"><a href="#Best-in-class-observability-最佳的可观察性" class="headerlink" title="Best in class observability 最佳的可观察性"></a>Best in class observability 最佳的可观察性</h3><p>Envoy 的最主要目标是使网络透明，而最佳的可观测性往往会从OpenTelemetry推荐的三点入手：Metrics、Logging、Tracing。</p>
+<p>Envoy提供了大量的插件，一方面保证了Envoy内部的问题清晰明了，同时也能快速地协助定位到应用侧的问题。</p>
+<h2 id="2022-01-19-CNCF-Contour"><a href="#2022-01-19-CNCF-Contour" class="headerlink" title="2022-01-19 CNCF-Contour"></a>2022-01-19 CNCF-Contour</h2><p>作为CNCF中的控制平面的主打产品，Contour的知名度远不如Google的Istio。但由于种种原因，Istio并没有被捐献给云原生基金会，于是CNCF就孵化了Contour。</p>
+<blockquote>
+<p>定义</p>
+<p>Contour is an open source Kubernetes ingress controller providing the control plane for the Envoy edge and service proxy. Contour supports dynamic configuration updates and multi-team ingress delegation out of the box while maintaining a lightweight profile.</p>
+<p>三大特性</p>
+<ul>
+<li>Envoy Inside</li>
+<li>Flexible Architecture</li>
+<li>TLS Certificate Delegation</li>
+</ul>
+</blockquote>
+<p>从定义与三个特性的描述里，我们很难真实地感受到Contour的特点。</p>
+<p>今天我将换一个角度：从控制平面与数据平面进行分析。如果我们能清楚地认识到这两者的定义与边界，那么会对云原生的Service Mesh理念，以及Envoy、Contour、Istio等产品有更深的理解。</p>
+<p><a target="_blank" rel="noopener" href="http://dockone.io/article/9919">这篇博客</a>的定义很具有参考意义：</p>
+<ul>
+<li><strong>控制平面</strong> - 通过配置和控制消息来组织编排网络的逻辑，并下发给数据平面</li>
+<li><strong>数据平面</strong> - 以 Sidecar 的形式与应用部署在一起，承载其流量的发送与接收</li>
+</ul>
+<p>控制平面的关键功能就是<strong>控制与管理</strong>，重点对象是<strong>配置信息</strong>。</p>
+<p>我们可以将数据平面看作为基础的Nginx服务，它是和底层的应用强相关的，解析相关的数据包并实现路由、负载均衡等功能。但Nginx自身也需要有一定的配置信息，比如说：</p>
+<ul>
+<li>数据平面的服务发现中心往往是因服务而异的；</li>
+<li>数据平面的超时参数会频繁调整；</li>
+<li>在做蓝绿测试时，需要频繁调整流量；</li>
+<li>认证相关的设置往往需要统一更新，如证书；</li>
+</ul>
+<p>在我看来，控制平面更像是数据平面的配置中心，解决的是高频变化或应用间差异性很大的配置信息，让数据平面更稳定地运行。</p>
+<blockquote>
+<p>从架构层面来说，如果一层解决不了问题，那就再抽象一层。</p>
+</blockquote>
+<p>从具体的工程实践来说，数据平面主要负责的是底层实现，在保证稳定性的情况下更要兼具性能，所以不宜有太多丰富的功能。这时，引入了控制平面，我们可以将很多的配置信息通过界面UI方式进行管理，下发到各个控制平面，然后控制平面再针对性地进行转发到数据平面，就能大幅度地提高整个Service Mesh方案的可维护性。</p>
+<h2 id="2022-01-20-CNCF-Emissary-Ingress"><a href="#2022-01-20-CNCF-Emissary-Ingress" class="headerlink" title="2022-01-20 CNCF-Emissary-Ingress"></a>2022-01-20 CNCF-Emissary-Ingress</h2><p>Emissary-Ingress是CNCF中又一个与网络相关的项目。这款软件的前身叫作Ambassador。但Ambassador是一款商业软件，为了避免相关的问题，更名为Emissary-Ingress后被捐献给了CNCF。因为网上资料更多的都是Ambassador，下面统一用Ambassador对这款软件进行描述。</p>
+<p>CNCF上的定义为：</p>
+<blockquote>
+<p>open source Kubernetes-native API gateway for microservices built on the Envoy Proxy</p>
+</blockquote>
+<p>我们很容易将这个产品与Istio、Envoy混淆起来，那它们之间的区别是什么呢？这里有篇<a target="_blank" rel="noopener" href="https://itnext.io/ambassador-and-istio-edge-proxy-and-service-mesh-814aac9f23df">文章</a>，介绍了具体的实践，但我们直接可以从标题中得到关键信息：</p>
+<ul>
+<li>Ambassador - Edge proxy</li>
+<li>Istio - service mesh</li>
+</ul>
+<p>而Envoy+Contour对标的是Istio，所以不难看出，云原生推荐将Ambassador作为一种边缘网关，更多地是作为整体流量的出入口。如果说service mesh是一种对网络的精细化管理，那么边缘网关更多地是对整体流量的管理。</p>
+<p>但在实际使用中，两者有大量的重叠功能，如路由、认证、限速等，而我也没有在网上找到相关的Best Practice，这部分就很需要大家的经验与摸索了。从我的角度来看，更倾向于大家多使用Envoy的特性，毕竟它的生态最成熟。即便后续有了替代品，对方也往往会提供对应的兼容方案。</p>
+<p>这里，我引用了一个<a target="_blank" rel="noopener" href="https://www.getambassador.io/docs/emissary/latest/topics/concepts/microservices-api-gateways/#microservices-api-gateways-vs-enterprise-api-gateways">链接</a>，讲述了微服务网关(Emissary-Ingress定位)与传统企业级网关的差异。</p>
+<h3 id="Primary-Purpose-主要目标"><a href="#Primary-Purpose-主要目标" class="headerlink" title="Primary Purpose 主要目标"></a>Primary Purpose 主要目标</h3><ul>
+<li>传统企业级网关 - Expose, compose, and manage internal business APIs</li>
+<li>微服务网关 - Expose and observe internal business services</li>
+</ul>
+<p>微服务网关相对而言会更轻量级，而且对外以服务的维度呈现。</p>
+<h3 id="Publishing-Functionality-发布功能"><a href="#Publishing-Functionality-发布功能" class="headerlink" title="Publishing Functionality 发布功能"></a>Publishing Functionality 发布功能</h3><ul>
+<li>传统企业级网关 - API management team or service team registers / updates gateway via admin API</li>
+<li>微服务网关 - Service team registers / updates gateway via declarative code as part of the deployment process</li>
+</ul>
+<p>微服务网关更倡导自运维的方式。</p>
+<h3 id="Handling-and-Debugging-Issues-处理和Debug问题"><a href="#Handling-and-Debugging-Issues-处理和Debug问题" class="headerlink" title="Handling and Debugging Issues 处理和Debug问题"></a>Handling and Debugging Issues 处理和Debug问题</h3><ul>
+<li><p>传统企业级网关 - L7 error-handling (e.g. custom error page or payload). Run gateway/API with additional logging. Troubleshoot issue in staging environment</p>
+</li>
+<li><p>微服务网关 - Configure more detailed monitoring. Enable traffic shadowing and / or canarying</p>
+</li>
+</ul>
+<p>微服务网关更强调的是网络侧的更细致化的管理，突出了灵活性。</p>
+<h2 id="2022-01-21-谈谈Context在Go程序外的传递"><a href="#2022-01-21-谈谈Context在Go程序外的传递" class="headerlink" title="2022-01-21 谈谈Context在Go程序外的传递"></a>2022-01-21 谈谈Context在Go程序外的传递</h2><p>这两天，有个读者跟我讨论了一个关于链路追踪的问题 - 他发现通过context传递的trace-id丢失了。从根本上来说，这涉及到了<strong>Context在Go程序外的传递</strong>的理解，细想的话很有意思，所以我今天专门拿出来讲讲。</p>
+<p>如果你对Go语言有一定的基础，会很习惯地使用Context作为上下文信息的传递：无论是内部函数的调用，还是RPC的调用，这就会产生一种错觉：<strong>context的传递是水到渠成的</strong>。</p>
+<p>这位同学的调用链路是 Go程序 - MQ - Go程序，发现context中的trace-id丢失了。</p>
+<blockquote>
+<p>trace-id用于分布式的链路追踪</p>
+</blockquote>
+<p>分析这个问题不难，有很多种思路，但我比较建议大家从底层实现去理解：</p>
+<ol>
+<li>context的本质，是一种key-value的数据结构；</li>
+<li>服务之间的调用，本质上是一种网络上的二进制数据的传递，而<strong>context信息肯定是保存在其中的</strong>；</li>
+<li>HTTP是一种二进制数据上的协议表达格式，我们常见的RESTful API 的 json数据是填入到body中，但HTTP协议还有很多地方可以保存数据，尤其是HTTP Header。context信息大概率是被保存在Header里的；</li>
+</ol>
+<p><strong>Go语言的Client将context封装到Header里，Server将context从Header中解析出来</strong>。</p>
+<blockquote>
+<p>默认的官方库是不会写直接写的，需要做一层浅封装：</p>
+<p>发送前，从ctx中将对应的k-v填入到header；</p>
+<p>收到后，从header中提取k-v，写入到context。</p>
+</blockquote>
+<p>要验证一下上面的猜想很简单，我强烈大家用最底层的方式：<strong>Wireshark抓包</strong>。事实也如我们的预期，Go语言的ctx传递正是用这种方式实现的。而MQ这种第三方组件，往往不会去解析这种特定的Header，所以会发生丢失。</p>
+<p>这时，我们有什么样的解决方案呢？</p>
+<ol>
+<li>制定标准。这也是OpenTracing等规范推崇的，对广大的开发者来说非常友好，尤其是跨语言的情况，但这块非常依赖生态，需要大量的SDK，整体来说推进进度比较难。（这就体现了Service Mesh的价值）</li>
+<li>显示传递。相当于把关键信息填到HTTP的body里，对具体代码的实现来说侵入性很强，但不失为中小型公司快速落地的方案；遇到一些不支持标准的第三方软件，我们也往往只能采用这种方式。</li>
+</ol>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/10/sharing-5min/2022-01/2022Week02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/01/10/sharing-5min/2022-01/2022Week02/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week02</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-01-10 12:00:00" itemprop="dateCreated datePublished" datetime="2022-01-10T12:00:00+08:00">2022-01-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-01-15 21:28:52" itemprop="dateModified" datetime="2022-01-15T21:28:52+08:00">2022-01-15</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57571641299795_.pic_hd.jpg" alt="2022-01"></p>
+<h2 id="2022-01-10-Unix设计哲学概览"><a href="#2022-01-10-Unix设计哲学概览" class="headerlink" title="2022-01-10 Unix设计哲学概览"></a>2022-01-10 Unix设计哲学概览</h2><p>Unix设计哲学在程序员的圈子里经久不衰，备受追捧。而<code>Go</code>语言背后有很多<code>Unix</code>与<code>C语言</code>的影子，三位创始人Rob Pike（罗伯. 派克），Ken Thompson（肯. 汤普森）和Robert Griesemer（罗伯特. 格利茨默）都是这两块领域的泰山北斗。了解Unix的设计哲学，对写出优秀的代码很有帮助。</p>
+<ul>
+<li>英文资料 - <a target="_blank" rel="noopener" href="https://homepage.cs.uri.edu/~thenry/resources/unix_art/ch01s06.html">https://homepage.cs.uri.edu/~thenry/resources/unix_art/ch01s06.html</a></li>
+<li>中文wiki - <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Unix%E5%93%B2%E5%AD%A6">https://zh.wikipedia.org/wiki/Unix%E5%93%B2%E5%AD%A6</a></li>
+</ul>
+<h3 id="Doug-McIlroy的总结"><a href="#Doug-McIlroy的总结" class="headerlink" title="Doug McIlroy的总结"></a>Doug McIlroy的总结</h3><blockquote>
+<p>Write programs that do one thing and do it well. Write programs to work together. Write programs to handle text streams, because that is a universal interface.</p>
+<p>做一件事，做好它。让程序能够互相协同工作。应该让程序处理文本数据流，因为这是一个通用的接口。</p>
+</blockquote>
+<p>作为管道机制的发明者，Doug McIlroy对这块的解释重点很具有管道特色。这里，我们聚焦于一个点：<strong>做好一件事</strong>。</p>
+<p>将其拆分一下，主要分为两块：</p>
+<ol>
+<li><strong>做好。</strong>做一件事，可能只需要10分的能力；而做好，则需要100分的能力（但 <code>做好</code> 这个标准，尽可能地按照自己的认知上限去做，才可能有成长）。</li>
+<li><strong>一件事。</strong>怎么定义一件事呢？边界的定义就难倒了很多人。这个非常考验能力，更具体可能需要<code>case by case</code>去看。</li>
+</ol>
+<h3 id="Rob-Pike的总结"><a href="#Rob-Pike的总结" class="headerlink" title="Rob Pike的总结"></a>Rob Pike的总结</h3><blockquote>
+<ol>
+<li>你永远不会知道你的程序会在什么地方耗费时间。程序的瓶颈常常出现在意想不到的地方，因此在你确信找到瓶颈后再动手优化代码吧。</li>
+<li>测试代码。只有在你详细测试了代码，并且发现一部分代码耗费了绝大部分的运行时间时再对程序作速度优化。</li>
+<li>功能全面的算法（fancy algorithm）在处理小规模问题时效率很低，这是因为算法时间效率中的常量很大，而问题往往规模很小。除非你知道你遇到的常常是复杂的情况，否则就让代码丑陋但是简单而高效吧。（即使问题规模确实很大，也首先尝试第二条规则。）</li>
+<li>功能全面的算法比简单的算法更容易产生bug，更难实现。尽量使用简单的算法和数据结构。</li>
+<li>数据决定一切。如果选择的数据结构能很好的管理数据，算法部分往往不言自明。记住，数据结构，而非算法，才是编程的关键。</li>
+<li>没有第六条规则。</li>
+</ol>
+</blockquote>
+<p>按照wiki上的说法，1、2可以归纳为 <strong>过早的优化是一切罪恶的根源</strong>，3、4可以理解为 <strong>疑惑不定之时最适合穷举</strong>。</p>
+<p>而第五条就非常有意思，也就是 <strong>数据结构比算法更重要</strong>。</p>
+<p>这点，和我们在刷算法题时认知相反 - 在做算法题目时，我们往往已经得到了一个具体的数据结构，要做的更多是根据这个数据结构选择合适的算法。当数据结构确定时，可选择的算法就很有限了，这也大大缩小了题解的范围。</p>
+<p>在复杂的场景中，我们首先得确定数据结构，这一步尤为复杂：</p>
+<ol>
+<li>复合 - 数据结构往往是复合的、嵌套的，单一的数据结构很少见；</li>
+<li>抓住核心 - 可用数据结构解往往有多种，关键是识别其中决定性的因素；</li>
+<li>不确定性 - 最优解的数据结构，往往会根据时间变化而变化；</li>
+<li>简单性 - 性能最优解并不一定是最终的解，实际工程中多考虑简单性；</li>
+</ol>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>关于Unix的设计哲学还有很多优秀的见解，但综合起来，可以归纳为<code>KISS</code>原则，也就是<strong>简单性</strong>。希望大家能在工程实践中，多多思考怎么保证简单性，对做出优秀的设计会很有启发。</p>
+<h2 id="2022-01-11-CNCF-CrossPlane"><a href="#2022-01-11-CNCF-CrossPlane" class="headerlink" title="2022-01-11 CNCF-CrossPlane"></a>2022-01-11 CNCF-CrossPlane</h2><p>今天我们一起来看CNCF中的第二个项目 - <code>CrossPlane</code> 。它位于CNCF全景图中<code>Kubernetes</code>旁，受众比较小。</p>
+<p>先看一段来自官网 <a target="_blank" rel="noopener" href="https://crossplane.io/">https://crossplane.io/</a> 的信息：</p>
+<blockquote>
+<p> Crossplane is an open source Kubernetes add-on that enables platform teams to assemble infrastructure from multiple vendors, and expose higher level self-service APIs for application teams to consume, without having to write any code.</p>
+</blockquote>
+<p>我们依旧抽取其中关键的词进行解析：</p>
+<ul>
+<li><code>Kubernetes add-on</code> CrossPlane的定位是<code>Kubernetes</code>的插件，并非一个独立的平台</li>
+<li><code>assemble infrastructure from multiple vendors</code> 统一封装多个依赖方的基础设施</li>
+<li><code>expose higher level self-service APIs</code> 暴露高层接口</li>
+</ul>
+<p>然后，官方描述了五个关键性的特征：</p>
+<ul>
+<li>Provision and manage cloud infrastructure and services using kubectl</li>
+<li>There is a flavor of infrastructure for everyone on Crossplane</li>
+<li>Publish simplified infrastructure abstractions for your applications</li>
+<li>The Universal Cloud API</li>
+<li>Run Crossplane anywhere</li>
+</ul>
+<p>概括起来，可以定义为：<strong>使用 kubectl 封装了各类云的API，来统一管理基础设施、服务和应用</strong>。</p>
+<p>我们从具体的实践角度来看，统一封装接口往往只是加分项，而核心在于 <strong>支持的云基础设施与服务的范围</strong>。</p>
+<p>从 <a target="_blank" rel="noopener" href="https://crossplane.io/docs/v1.6/getting-started/provision-infrastructure.html">官方文档</a> 可以看到，<code>CrossPlane</code>主要支持了亚马逊云、谷歌云、微软云等厂商。可以看到，这款产品主要面向的是<strong>国外的公有云厂商</strong>。这其实也决定了<code>CrossPlane</code>更多面向的是国外开发者。</p>
+<p>学习<code>CrossPlane</code>的更多细节，对我们来说暂时没有更大的意义。我们可以尝试着从其理念中得到以下启发：</p>
+<ol>
+<li><strong>对接各类云厂商是复杂的。</strong>尽管<code>CNCF</code>统一了大致上的理念，但细节上的实现各有不同；尤其是结合了账号、权限、资源分配等各类特性后，对接起来的复杂度很高。</li>
+<li><strong>如果一层不能解决，那就加一层。</strong> 直接对接各类公有云复杂度很高，也会为<code>Kubernetes</code>这个核心项目带来大量侵入性极强的代码。这时，引入另一个项目作为<strong>防腐层</strong>，很具有扩展意义。</li>
+<li><strong>一个核心项目不一定需要做成大型平台，更重要的是它的特性符合整个生态的发展理念。</strong></li>
+</ol>
+<h2 id="2022-01-12-微服务架构特征"><a href="#2022-01-12-微服务架构特征" class="headerlink" title="2022-01-12 微服务架构特征"></a>2022-01-12 微服务架构特征</h2><p>今天的话题将围绕着一篇谈论微服务架构的文章展开。下面给出原文链接，以及一个翻译的版本：</p>
+<ul>
+<li>原文 - <a target="_blank" rel="noopener" href="https://martinfowler.com/articles/microservices.html">https://martinfowler.com/articles/microservices.html</a></li>
+<li>中文翻译 - <a target="_blank" rel="noopener" href="https://blog.51cto.com/u_15127669/4175353">https://blog.51cto.com/u_15127669/4175353</a> </li>
+</ul>
+<p>文中给出了以下九个微服务特征：</p>
+<ol>
+<li>Componentization via Services 通过服务来实现组件化</li>
+<li>Organized around Business Capabilities 围绕业务能力构建</li>
+<li>Products not Projects 面向产品，而不是面向项目</li>
+<li>Smart endpoints and dumb pipes 终端智能化，通讯轻量化</li>
+<li>Decentralized Governance 分散治理</li>
+<li>Decentralized Data Management 数据去中心化管理</li>
+<li>Infrastructure Automation 基础设施自动化</li>
+<li>Design for failure 容错性设计</li>
+<li>Evolutionary Design 演进式设计</li>
+</ol>
+<p>这些点，每个抛出来都可以写一篇长文。建议有兴趣的各位可以阅读原文，结合自己的实践多多思考。</p>
+<p>这里，我选择三个最近感触比较深的点，自己也曾经陷入过的认知误区，在这里和大家聊聊：</p>
+<h3 id="围绕业务能力构建"><a href="#围绕业务能力构建" class="headerlink" title="围绕业务能力构建"></a>围绕业务能力构建</h3><p>业务能力的概念很抽象，虽然我们会经常提及，但在实践过程中又往往容易忽略。</p>
+<p>从系统的角度来看，业务能力往往就是对外呈现的功能，对应到内部的技术模块，往往已经决定了七七八八。如何将这些技术模块做合理的拆分与合并，就是微服务架构需要考量的点。这里我谈谈最近比较有心得的三个考量点：</p>
+<ul>
+<li>拆分高频变化与低频变化</li>
+<li>分离计算密集型和IO密集型</li>
+<li>基础能力尽早引入业界的通用模块</li>
+</ul>
+<p>当然，还有更多的内容，需要大家在实践中摸索。</p>
+<h3 id="终端智能化，通讯轻量化"><a href="#终端智能化，通讯轻量化" class="headerlink" title="终端智能化，通讯轻量化"></a>终端智能化，通讯轻量化</h3><p>这一点在云原生的服务中体现得淋漓尽致：以<strong>RPC</strong>、<strong>Service Mesh</strong>、<strong>服务发现</strong>等技术为代表。</p>
+<p>终端体现在<code>Pod</code>这一层，也就是对一个具体运行的App来说，通过Istio、CoreDNS等技术将分布式的服务做到和单体应用一致，然后通过轻量级的通讯方案，如HTTP进行交互。这种方式的优点很明显：</p>
+<ol>
+<li>分布式服务之间的通讯复杂度最高的部分，由专用的、成熟的组件，引入到Pod层面完成；</li>
+<li>开发者的代码实现只需要关心RPC的数据出入，复杂度大幅度降低；</li>
+</ol>
+<p>目前云原生的Service Mesh技术还未完全形成行业标准，相信很快随着它的落地，将迎来微服务的又一波热潮。</p>
+<h3 id="容错性设计"><a href="#容错性设计" class="headerlink" title="容错性设计"></a>容错性设计</h3><p>容错性设计，也就是为错误而设计，这一点很反直觉。</p>
+<p>作为一名开发者，我们实现功能的思路往往是按照顺序的逻辑步骤；一个一个步骤的串联，才能保证最后的功能实现。但这个时候，如果要我们去关注各类错误的发生，小到网络波动、程序崩溃，大到机房断电，很容易无所适从。</p>
+<p>这里，我谈谈自己的理解：<strong>主要从发生的概率与影响的严重程度来思考，不要过度追求细节</strong>。这里有一个很重要的权衡点 - **健壮性 **与 <strong>简单性</strong> ：一般来说，要保证程序足够健壮，会引入各种异常的容错性设计，增加系统的复杂度，但这一点并不是绝对的。</p>
+<p><strong>从系统整体功能的维度，虽然看起来增加了复杂度，但通过分层、模块化、服务拆分等方式，分而治之 - 一些简单的模块用简单的规则组合成一个大模块，可维护性远远高于一个复杂的模块。</strong></p>
+<h2 id="2022-01-13-CNCF-CoreDNS"><a href="#2022-01-13-CNCF-CoreDNS" class="headerlink" title="2022-01-13 CNCF-CoreDNS"></a>2022-01-13 CNCF-CoreDNS</h2><p><code>CoreDNS</code>是CNCF全景图中 <strong>协调与服务发现</strong> 模块的核心项目，在<code>Kubernetes</code>1.12版本之后成为了默认的DNS服务。熟悉<code>CoreDNS</code>是掌握<code>Kubernetes</code>必不可少的技能。</p>
+<p>照例，我们先一起看下其核心定义，非常简洁明了：</p>
+<blockquote>
+<p>官网 - CoreDNS: DNS and Service Discovery</p>
+<p>CNCF - CoreDNS is a DNS server that chains plugins</p>
+</blockquote>
+<p>今天，我们将围绕一个关键词<code>chains plugins</code> - <strong>链式插件</strong> 展开，这也是<code>CoreDNS</code>实现的核心特性。</p>
+<p>官方对这个特性的定义如下，</p>
+<blockquote>
+<p>CoreDNS chains plugins. Each plugin performs a DNS function, such as Kubernetes service discovery, prometheus metrics, rewriting queries, or just serving from zone files. And many more.</p>
+</blockquote>
+<p>从中不难看出，<code>CoreDNS</code>将各种<code>DNS</code>的功能抽象成一个插件，进行链式调用。</p>
+<p>我们用 <a target="_blank" rel="noopener" href="https://github.com/coredns/coredns">官方github上的Corefile</a> 来了解这个特性：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">example.org:1053 &#123;</span><br><span class="line">    file /var/lib/coredns/example.org.signed</span><br><span class="line">    transfer &#123;</span><br><span class="line">        to * 2001:500:8f::53</span><br><span class="line">    &#125;</span><br><span class="line">    errors</span><br><span class="line">    log</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">. &#123;</span><br><span class="line">    any</span><br><span class="line">    forward . 8.8.8.8:53</span><br><span class="line">    errors</span><br><span class="line">    log</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>当访问<code>example.org:1053</code> 时，依次触发 file、transfer、errors、log四个插件</li>
+<li>访问其余DNS时，依次触发 any、forward、errors、log四个插件</li>
+</ol>
+<p>上面的语法与<code>nginx</code>非常类似，而作者实际上是参考<code>Caddy</code>软件进行设计的，有兴趣的可以查阅相关资料，例如这个 <a target="_blank" rel="noopener" href="https://mritd.com/2021/06/30/understand-caddyfile-syntax/">博客</a>。</p>
+<p>链式调用是一种表述形式非常强的语法：<strong>它以一个大众容易接受的顺序逻辑，讲述了一个完整的调用过程，将各个细节也描述地很清晰</strong>。</p>
+<p>既然链式调用的描述方式那么棒，为什么目前没有大规模地推广到各类工具上呢？这里，我谈谈个人的三个理解：</p>
+<ol>
+<li><strong>核心模块支持插件化</strong> - 链式调用需要动态加载各类插件，这一点对核心的模块要求很高，很多软件设计之初就决定了很难走插件化的道路；</li>
+<li><strong>无需兼容历史问题</strong> - 很多的工具都存在大量的历史版本，很难做到完全兼容这种表达形式；而<code>CoreDNS</code>在设计之初就强制采用这种规范，没有历史包袱；</li>
+<li><strong>每个插件的输入与输出保持一致</strong> - 作为一种链式调用，为了保证前者输入可以作为后者输出，两者支持的数据格式必须一样（可以参考Unix中的管道）。DNS服务的功能比较简单，可以保证一致；</li>
+</ol>
+<p>同样的，Corefile这种声明方式，也或多或少带来了一些问题，例如：</p>
+<ol>
+<li><strong>文件解析的复杂性</strong>（这点与链式调用本身无关） - 比如数据类型的问题，很难确定文件中的<code>5</code>是数字还是字符串；</li>
+<li><strong>链式调用很难解决前后有依赖的情况</strong> - 如调用A插件的结果有个特别的输出，用于插件B的输入时，很难解决；</li>
+<li><strong>长链式调用的复杂度</strong> - 如果链式调用过长，一方面带来了异常情况下排查问题的复杂度，另一方面很容易出现性能问题；</li>
+</ol>
+<p><code>CoreDNS</code>的成功，<strong>链式调用插件</strong> 这个特性只体现了简单性的理念，并不是关键性的原因，而更多地是依赖大量开箱即用的<a target="_blank" rel="noopener" href="https://coredns.io/plugins/">插件</a>。</p>
+<h2 id="2022-01-14-不可变基础设施"><a href="#2022-01-14-不可变基础设施" class="headerlink" title="2022-01-14 不可变基础设施"></a>2022-01-14 不可变基础设施</h2><p>看起来，这功能描述与<code>CICD</code>流程差不多，但使用体验差距很大。在传统的模式下，我们执行的是一个<strong>具体的动作</strong>，比如扩1个应用、升级2个程序等；而在k8s里，使用者只要<strong>声明最终的预期状态</strong>，比如5个应用运行v1.0版本的程序，那么整个系统该扩容还是缩容、该升级还是回滚，都由k8s自行根据当前状态进行判断。</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>ab4ea1c14f669e0e42040689da7aa074c4e479f3</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>云原生有五大代表性的技术 - <strong>容器、服务网格、微服务、不可变基础设施和声明式 API</strong>。相对于其余四种概念，不可变基础设施 - <code>Immutable Infrastructure</code> 更难理解，今天我们来一起看看。</p>
+<blockquote>
+<p>入门可以参考这篇文章 - <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/382203966">https://zhuanlan.zhihu.com/p/382203966</a> </p>
+</blockquote>
+<p>网上可搜索到的<strong>不可变基础设施</strong>定义有很多，这里我选择一个比较有代表性的：</p>
+<blockquote>
+<p>Immutable infrastructure refers to servers (or VMs) that are never modified after deployment.</p>
+</blockquote>
+<p>从开发者的角度来看，不可变基础设施是一个很棒的概念。如果用一个词总结它的优点，那就是 <strong>时间与空间上的一致性</strong>。</p>
+<p>如果有一个传统应用希望改造成适配 <strong>不可变基础设施</strong> 的场景，那么会有哪些常见的改造点呢？</p>
+<ol>
+<li>将传统应用的运行环境打造成一个具体的服务器，例如虚拟机、容器；</li>
+<li>重点分析该应用的输出形式，让其与 <strong>服务器无关</strong>；</li>
+</ol>
+<p>第二点有些抽象，这里我举三个具体的例子：</p>
+<ol>
+<li>本地缓存 - 转移到分布式缓存服务；</li>
+<li>本地保存的文件 - 转移到分布式存储服务中；</li>
+<li>本地日志 - 将原来打印到本地文件的日志服务，重定向到标准输出，由日志采集的side-car收集后统一汇总；</li>
+</ol>
+<p>但在实际的工程中，追求 <strong>不可变基础设施</strong> 很难完全落地，我们可以适当地做一些权衡：</p>
+<ol>
+<li>如果日志不允许落盘对部分程序的改造成本很高，那么我们可以用ELK等一套日志收集方案做准实时的同步，保证日志可丢失；</li>
+<li>如果完全依赖分布式缓存对性能压力过大，那么就建立一套分布式缓存与本地缓存的自动同步机制，保证重启后本地缓存丢失，仍可以恢复；</li>
+</ol>
+<p>不难看出，只要我们保证应用在基础设施上产生的数据 <strong>可在任意时间丢失</strong>，就能实现了一定程度上 <strong>应用无状态化</strong>，也能保证了<strong>不可变基础设施</strong>的落地。</p>
+<p><strong>不可变基础设施</strong>是一种理念，具体落地的技术非常依赖容器或虚拟机，以及分布式存储等配套设施。我们没有必要把它作为一种技术标准去强制执行，而应该结合现状，选择性地朝着这个方向不断优化。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -1018,196 +1510,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/02/go-framework/go-framework-12/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/11/go-framework/go-framework-11/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/11/go-framework/go-framework-11/" class="post-title-link" itemprop="url">Go语言微服务框架 - 11.接口的参数校验功能-buf中引入PGV</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-11-11 12:00:00" itemprop="dateCreated datePublished" datetime="2021-11-11T12:00:00+08:00">2021-11-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-11-15 19:45:20" itemprop="dateModified" datetime="2021-11-15T19:45:20+08:00">2021-11-15</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>随着API在线文档的发布，服务的接口将会被开放给各种各样的调用方。</p>
-<p>大量开发接口的朋友会经常遇到<strong>接口参数校验</strong>的问题。举个例子，我们希望将某个字段是必填的，如<code>name</code>，我们经常会需要做两步：</p>
-<ol>
-<li>在程序中加一个<strong>判断逻辑</strong>，当这个字段为空时返回错误给调用方</li>
-<li>在接口文档中加上<strong>注释</strong>，告诉调用方这个参数必填</li>
-</ol>
-<p>一旦某项工作被拆分为两步，就很容易出现<strong>不一致性</strong>：对应到参数检查，我们会经常遇到文档和具体实现不一致，从而导致双方研发的沟通成本增加。那么，今天我将引入一个方案，实现两者的一致性。</p>
-<blockquote>
-<p>为了缩小讨论范围，我们将 <strong>参数校验</strong> 限定为简单规则。</p>
-<p>而复合条件的检查（逻辑组合等），不在本次的讨论范围内，主要考虑到2点：</p>
-<ol>
-<li>要生成跨语言的方案，技术上比较难实现</li>
-<li>复合条件往往是一种业务逻辑的检查，放在接口层面不合适</li>
-</ol>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/11/go-framework/go-framework-11/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/01/go-framework/go-framework-10/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/01/go-framework/go-framework-10/" class="post-title-link" itemprop="url">Go语言微服务框架 - 10.接口文档-openapiv2的在线文档方案</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-11-01 12:00:00" itemprop="dateCreated datePublished" datetime="2021-11-01T12:00:00+08:00">2021-11-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-11-02 18:08:07" itemprop="dateModified" datetime="2021-11-02T18:08:07+08:00">2021-11-02</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/08/15/QfmqMJGaNOgt7LC.jpg" alt="Go-Framework"></p>
-<p>随着项目的迭代，一个服务会开放出越来越多的接口供第三方调用。</p>
-<p>虽然<code>protobuf</code>已经是通用性很广的IDL文件了，但对于未接触过这块的程序员来说，还是有很大的学习成本。在综合可读性和维护性之后，我个人比较倾向于使用oepnapiv2的方案，提供在线接口文档。</p>
-<p>接下来，我们一起来看看这部分的实现。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/01/go-framework/go-framework-10/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
