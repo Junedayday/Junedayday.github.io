@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">107</span>
+          <span class="site-state-item-count">117</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -170,7 +170,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -205,7 +205,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/08/go-leetcode/go-leetcode-5/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/12/etcd/etcd-4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -222,7 +222,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/04/08/go-leetcode/go-leetcode-5/" class="post-title-link" itemprop="url">Go算法实战 - 5.【最长回文子串LeetCode-5】</a>
+            <a href="/2022/07/12/etcd/etcd-4/" class="post-title-link" itemprop="url">etcd源码分析 - 4.【打通核心流程】processInternalRaftRequestOnce四个细节</a>
         </h2>
 
         <div class="post-meta-container">
@@ -233,14 +233,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-04-08 08:00:00" itemprop="dateCreated datePublished" datetime="2022-04-08T08:00:00+08:00">2022-04-08</time>
+      <time title="创建时间：2022-07-12 12:00:00" itemprop="dateCreated datePublished" datetime="2022-07-12T12:00:00+08:00">2022-07-12</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-04-09 11:40:04" itemprop="dateModified" datetime="2022-04-09T11:40:04+08:00">2022-04-09</time>
+        <time title="修改时间：2022-07-14 13:46:26" itemprop="dateModified" datetime="2022-07-14T13:46:26+08:00">2022-07-14</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -248,7 +248,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
         </span>
     </span>
 
@@ -262,12 +262,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-5-最长回文子串"><a href="#Leetcode-5-最长回文子串" class="headerlink" title="Leetcode-5 最长回文子串"></a>Leetcode-5 最长回文子串</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/longest-palindromic-substring/">https://leetcode-cn.com/problems/longest-palindromic-substring/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longestPalindrome</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p>在上一讲，我们继续梳理了<code>PUT</code>请求到<code>EtcdServer</code>这一层的逻辑，并大概阅读了其中的关键函数<code>processInternalRaftRequestOnce</code>。</p>
+<p>这个方法里面有不少细节，我们今天就选择其中有价值的四点来看看。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/04/08/go-leetcode/go-leetcode-5/#more" rel="contents">
+              <a class="btn" href="/2022/07/12/etcd/etcd-4/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -293,7 +293,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/07/go-leetcode/go-leetcode-4/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/04/etcd/etcd-3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -310,7 +310,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/04/07/go-leetcode/go-leetcode-4/" class="post-title-link" itemprop="url">Go算法实战 - 4.【寻找两个正序数组的中位数LeetCode-4】</a>
+            <a href="/2022/07/04/etcd/etcd-3/" class="post-title-link" itemprop="url">etcd源码分析 - 3.【打通核心流程】PUT键值对的执行链路</a>
         </h2>
 
         <div class="post-meta-container">
@@ -320,17 +320,23 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2022-04-07 08:00:00 / 修改时间：07:46:13" itemprop="dateCreated datePublished" datetime="2022-04-07T08:00:00+08:00">2022-04-07</time>
+      <time title="创建时间：2022-07-04 12:00:00" itemprop="dateCreated datePublished" datetime="2022-07-04T12:00:00+08:00">2022-07-04</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-07-05 20:10:59" itemprop="dateModified" datetime="2022-07-05T20:10:59+08:00">2022-07-05</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
         </span>
     </span>
 
@@ -344,12 +350,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-4-寻找两个正序数组的中位数"><a href="#Leetcode-4-寻找两个正序数组的中位数" class="headerlink" title="Leetcode-4 寻找两个正序数组的中位数"></a>Leetcode-4 寻找两个正序数组的中位数</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/median-of-two-sorted-arrays/">https://leetcode-cn.com/problems/median-of-two-sorted-arrays/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">findMedianSortedArrays</span><span class="params">(nums1 []<span class="keyword">int</span>, nums2 []<span class="keyword">int</span>)</span> <span class="title">float64</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p>在上一讲，我们一起看了etcd server是怎么匹配到对应的处理函数的，如果忘记了请回顾一下。</p>
+<p>今天，我们再进一步，看看<code>PUT</code>操作接下来是怎么执行的。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/04/07/go-leetcode/go-leetcode-4/#more" rel="contents">
+              <a class="btn" href="/2022/07/04/etcd/etcd-3/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -375,7 +381,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/06/go-leetcode/go-leetcode-3/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/28/etcd/etcd-2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -392,7 +398,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/04/06/go-leetcode/go-leetcode-3/" class="post-title-link" itemprop="url">Go算法实战 - 3.【无重复字符的最长子串LeetCode-3】</a>
+            <a href="/2022/06/28/etcd/etcd-2/" class="post-title-link" itemprop="url">etcd源码分析 - 2.【打通核心流程】PUT键值对匹配处理函数</a>
         </h2>
 
         <div class="post-meta-container">
@@ -403,14 +409,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-04-06 12:00:00" itemprop="dateCreated datePublished" datetime="2022-04-06T12:00:00+08:00">2022-04-06</time>
+      <time title="创建时间：2022-06-28 12:00:00" itemprop="dateCreated datePublished" datetime="2022-06-28T12:00:00+08:00">2022-06-28</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-04-07 07:46:02" itemprop="dateModified" datetime="2022-04-07T07:46:02+08:00">2022-04-07</time>
+        <time title="修改时间：2022-07-04 15:24:07" itemprop="dateModified" datetime="2022-07-04T15:24:07+08:00">2022-07-04</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -418,7 +424,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
         </span>
     </span>
 
@@ -432,12 +438,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-3-无重复字符的最长子串"><a href="#Leetcode-3-无重复字符的最长子串" class="headerlink" title="Leetcode-3 无重复字符的最长子串"></a>Leetcode-3 无重复字符的最长子串</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/">https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">lengthOfLongestSubstring</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p>在阅读了etcd server的启动流程后，我们对很多关键性函数的入口都有了初步印象。</p>
+<p>那么，接下来我们一起看看对键值对的修改，在etcd server内部是怎么流转的。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/04/06/go-leetcode/go-leetcode-3/#more" rel="contents">
+              <a class="btn" href="/2022/06/28/etcd/etcd-2/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -463,7 +469,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/06/go-leetcode/go-leetcode-2/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/20/etcd/etcd-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -480,7 +486,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/04/06/go-leetcode/go-leetcode-2/" class="post-title-link" itemprop="url">Go算法实战 - 2.【两数相加LeetCode-2】非递归解法</a>
+            <a href="/2022/06/20/etcd/etcd-1/" class="post-title-link" itemprop="url">etcd源码分析 - 1.【打通核心流程】etcd server的启动流程</a>
         </h2>
 
         <div class="post-meta-container">
@@ -490,17 +496,23 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2022-04-06 08:00:00 / 修改时间：23:01:28" itemprop="dateCreated datePublished" datetime="2022-04-06T08:00:00+08:00">2022-04-06</time>
+      <time title="创建时间：2022-06-20 12:00:00" itemprop="dateCreated datePublished" datetime="2022-06-20T12:00:00+08:00">2022-06-20</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-06-27 13:55:00" itemprop="dateModified" datetime="2022-06-27T13:55:00+08:00">2022-06-27</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
         </span>
     </span>
 
@@ -514,13 +526,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
-<p>我们继续看上一个题目，这次我们尝试写一个非递归的解法。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p><code>etcd</code>的源码相对<code>Kubernetes</code>少了很多，但学习成本依旧在。</p>
+<p>在第一阶段，我将从主流程出发，讲述一个<code>PUT</code>指令是怎么将数据更新到<code>etcd server</code>中的。今天，我们先来看看server是怎么启动的。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/04/06/go-leetcode/go-leetcode-2/#more" rel="contents">
+              <a class="btn" href="/2022/06/20/etcd/etcd-1/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -546,7 +557,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/05/go-leetcode/go-leetcode-1/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/14/etcd/etcd-0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -563,7 +574,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/04/05/go-leetcode/go-leetcode-1/" class="post-title-link" itemprop="url">Go算法实战 - 1.【两数相加LeetCode-2】递归解法</a>
+            <a href="/2022/06/14/etcd/etcd-0/" class="post-title-link" itemprop="url">etcd源码分析 - 0.搭建学习etcd的环境</a>
         </h2>
 
         <div class="post-meta-container">
@@ -574,14 +585,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-04-05 08:00:00" itemprop="dateCreated datePublished" datetime="2022-04-05T08:00:00+08:00">2022-04-05</time>
+      <time title="创建时间：2022-06-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-06-14T12:00:00+08:00">2022-06-14</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-04-06 23:01:06" itemprop="dateModified" datetime="2022-04-06T23:01:06+08:00">2022-04-06</time>
+        <time title="修改时间：2022-07-04 14:12:40" itemprop="dateModified" datetime="2022-07-04T14:12:40+08:00">2022-07-04</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -589,7 +600,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+          <a href="/categories/%E6%8A%80%E6%9C%AF%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">技术框架</span></a>
         </span>
     </span>
 
@@ -603,12 +614,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-2-两数相加"><a href="#Leetcode-2-两数相加" class="headerlink" title="Leetcode-2 两数相加"></a>Leetcode-2 两数相加</h2><p>原题链接 - <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/add-two-numbers/">https://leetcode-cn.com/problems/add-two-numbers/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">    Val <span class="keyword">int</span></span><br><span class="line">    Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">addTwoNumbers</span><span class="params">(l1 *ListNode, l2 *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/etcd.jpg"></p>
+<p>之前，我在b站视频简单地讲述了etcd的功能与特性，有兴趣的可以参考<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV155411Y7Pq/">相关视频</a>。</p>
+<p>但如果要更深入地研究etcd，就需要我们涉及到源码、并结合实践进行学习。那么，接下来，我将基于<code>v3.4</code>这个版本，做一期深入的环境搭建。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/04/05/go-leetcode/go-leetcode-1/#more" rel="contents">
+              <a class="btn" href="/2022/06/14/etcd/etcd-0/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -634,7 +645,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/01/go-leetcode/go-leetcode-12/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/07/go-tip/go-tip-16/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -651,7 +662,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/04/01/go-leetcode/go-leetcode-12/" class="post-title-link" itemprop="url">Go算法实战 - 12.【二分查找LeetCode-704】</a>
+            <a href="/2022/06/07/go-tip/go-tip-16/" class="post-title-link" itemprop="url">Go语言技巧 - 16.【Go泛型】何时使用泛型</a>
         </h2>
 
         <div class="post-meta-container">
@@ -662,14 +673,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-04-01 13:00:00" itemprop="dateCreated datePublished" datetime="2022-04-01T13:00:00+08:00">2022-04-01</time>
+      <time title="创建时间：2022-06-07 12:00:00" itemprop="dateCreated datePublished" datetime="2022-06-07T12:00:00+08:00">2022-06-07</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-04-10 13:01:00" itemprop="dateModified" datetime="2022-04-10T13:01:00+08:00">2022-04-10</time>
+        <time title="修改时间：2022-06-09 20:31:52" itemprop="dateModified" datetime="2022-06-09T20:31:52+08:00">2022-06-09</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -677,7 +688,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
         </span>
     </span>
 
@@ -691,12 +702,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-704-二分查找"><a href="#Leetcode-704-二分查找" class="headerlink" title="Leetcode-704 二分查找"></a>Leetcode-704 二分查找</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/binary-search/submissions/">https://leetcode-cn.com/problems/binary-search/submissions/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">search</span><span class="params">(nums []<span class="keyword">int</span>, target <span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
+<h2 id="导语"><a href="#导语" class="headerlink" title="导语"></a>导语</h2><p>本文重点依赖于 <a target="_blank" rel="noopener" href="https://go.dev/blog/when-generics">https://go.dev/blog/when-generics</a> 这篇博客，有时间的可以自行阅读。</p>
+<p>本文会结合个人的理解与经验，强调其中的重点。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/04/01/go-leetcode/go-leetcode-12/#more" rel="contents">
+              <a class="btn" href="/2022/06/07/go-tip/go-tip-16/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -722,7 +733,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/01/go-leetcode/go-leetcode-11/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/04/readings/go-digest-4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -739,7 +750,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/04/01/go-leetcode/go-leetcode-11/" class="post-title-link" itemprop="url">Go算法实战 - 11.【反转链表LeetCode-206】</a>
+            <a href="/2022/06/04/readings/go-digest-4/" class="post-title-link" itemprop="url">技术阅读摘要 - 4.闲谈晋升</a>
         </h2>
 
         <div class="post-meta-container">
@@ -749,23 +760,17 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2022-04-01 12:00:00" itemprop="dateCreated datePublished" datetime="2022-04-01T12:00:00+08:00">2022-04-01</time>
+      <time title="创建时间：2022-06-04 12:00:00 / 修改时间：15:56:39" itemprop="dateCreated datePublished" datetime="2022-06-04T12:00:00+08:00">2022-06-04</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-04-10 13:00:33" itemprop="dateModified" datetime="2022-04-10T13:00:33+08:00">2022-04-10</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
         </span>
     </span>
 
@@ -779,12 +784,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
-<h2 id="Leetcode-206-反转链表"><a href="#Leetcode-206-反转链表" class="headerlink" title="Leetcode-206 反转链表"></a>Leetcode-206 反转链表</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/reverse-linked-list/">https://leetcode-cn.com/problems/reverse-linked-list/</a></p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ListNode <span class="keyword">struct</span> &#123;</span><br><span class="line">	Val  <span class="keyword">int</span></span><br><span class="line">	Next *ListNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">reverseList</span><span class="params">(head *ListNode)</span> *<span class="title">ListNode</span></span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>晋升是每个技术人都应该经历的一次洗礼。一般来说，分为提名、准备、述职、答辩这四个步骤。</p>
+<p>尽管每个人的经历与体会都有不同，很难照搬硬套，但我相信只要是真心分享的经验，总会对人有帮助。接下来，我将从五个点展开。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/04/01/go-leetcode/go-leetcode-11/#more" rel="contents">
+              <a class="btn" href="/2022/06/04/readings/go-digest-4/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -810,7 +814,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/28/sharing-5min/2022-03/2022Week13/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/09/go-leetcode/go-leetcode-7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -827,7 +831,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/28/sharing-5min/2022-03/2022Week13/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week13</a>
+            <a href="/2022/04/09/go-leetcode/go-leetcode-7/" class="post-title-link" itemprop="url">Go算法实战 - 7.【盛最多水的容器LeetCode-11】</a>
         </h2>
 
         <div class="post-meta-container">
@@ -837,23 +841,17 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2022-03-28 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-28T12:00:00+08:00">2022-03-28</time>
+      <time title="创建时间：2022-04-09 11:00:00 / 修改时间：11:40:31" itemprop="dateCreated datePublished" datetime="2022-04-09T11:00:00+08:00">2022-04-09</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-04-02 14:45:54" itemprop="dateModified" datetime="2022-04-02T14:45:54+08:00">2022-04-02</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
         </span>
     </span>
 
@@ -867,85 +865,17 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
-<h2 id="2022-03-28-Go1-5的GC概览3-Tri-color"><a href="#2022-03-28-Go1-5的GC概览3-Tri-color" class="headerlink" title="2022-03-28 Go1.5的GC概览3 - Tri-color"></a>2022-03-28 Go1.5的GC概览3 - Tri-color</h2><p>在标记阶段，Go语言使用了 tri-color，也就是著名的三色标记法。在这篇文章里，详细地描述了这部分的实现。</p>
-<blockquote>
-<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a></p>
-</blockquote>
-<p>三色标记法是一种堆上对象的图算法。这里图的边Edge即指针，所以这里的关系是<strong>单向</strong>的。</p>
-<blockquote>
-<p> In a tri-color collector, every object is either white, grey, or black and we view the heap as a graph of connected objects.</p>
-</blockquote>
-<p>接下来，就是具体的三色标记法的工作了：</p>
-<blockquote>
-<p>At the start of a GC cycle all objects are white. The GC visits all <em>roots</em>, which are objects directly accessible by the application such as globals and things on the stack, and colors these grey. The GC then chooses a grey object, blackens it, and then scans it for pointers to other objects. When this scan finds a pointer to a white object, it turns that object grey. This process repeats until there are no more grey objects. At this point, white objects are known to be unreachable and can be reused.</p>
-</blockquote>
-<p>这一段内容很长，但描述得很直白，我简单概括下：</p>
-<ul>
-<li>GC初始化<ul>
-<li>将所有的对象设置为 <strong>白色</strong></li>
-</ul>
-</li>
-<li>Mark的初始化<ul>
-<li>将全局变量和栈上的对象，标记为 <strong>灰色</strong></li>
-<li>这些灰色对象会被放入队列中</li>
-</ul>
-</li>
-<li>Mark的核心流程<ul>
-<li>从队列中弹出一个灰色对象</li>
-<li>访问这个灰色对象的指针，将<strong>白色对象</strong>的转变为<strong>灰色对象</strong>，并加入到队列中</li>
-<li>将这个<strong>灰色对象</strong>标记为<strong>黑色</strong>，表示访问完毕</li>
-<li>重复上述过程，直到队列为空</li>
-</ul>
-</li>
-<li>清理阶段<ul>
-<li>将所有剩余的 <strong>白色对象</strong> 进行垃圾回收</li>
-</ul>
-</li>
-</ul>
-<p>我们重点看这里的 <strong>Mark的核心流程</strong>，里面有个关键问题：<code>mutator</code>（也就是运行中的程序）在不停地修改对象的指针，所以会出现各种异常情况，比如说让一个黑色对象指向白色对象（正常情况下，黑色对象指向的是黑色或者灰色）。</p>
-<blockquote>
-<p>网上有很多关于三色标记的资料，不太清楚的朋友需要自行搜索，比如 <a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000022030353">https://segmentfault.com/a/1190000022030353</a> 。</p>
-<p>重点可以结合写屏障要解决的问题，进行理解。</p>
-</blockquote>
-<p>这个时候，就引入了我们前面说的内容 - <strong>写屏障write barrier</strong>。</p>
-<blockquote>
-<p>Go’s write barrier colors the now-reachable object grey if it is currently white, ensuring that the garbage collector will eventually scan it for pointers.</p>
-</blockquote>
-<p>写屏障即会在每次发生指针变更时，加入一小段代码：比如检测到新的被指向的对象是白色，就将它修改为灰色，需要扫描。这只是一个简单例子，后续Go语言对写屏障进行了迭代，采用的写屏障技术是 <strong>混合写屏障</strong>，也就是 <strong>插入写屏障</strong>+<strong>删除写屏障</strong>。</p>
-<h2 id="2022-04-02-Go1-5的GC概览4-深入细节"><a href="#2022-04-02-Go1-5的GC概览4-深入细节" class="headerlink" title="2022-04-02 Go1.5的GC概览4 - 深入细节"></a>2022-04-02 Go1.5的GC概览4 - 深入细节</h2><p>今天我们会开始抠细节，来加深大家对这块的理解。</p>
-<blockquote>
-<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a></p>
-</blockquote>
-<p><strong>Of course the devil is in the details.</strong> 细节才是恶魔，但只有去抠这些细节，我们才能掌握GC的实现。作者在文中抛出了很多问题，我们挑出3个关键性的问题进行回答。</p>
-<h3 id="When-do-we-start-a-GC-cycle"><a href="#When-do-we-start-a-GC-cycle" class="headerlink" title="When do we start a GC cycle?"></a>When do we start a GC cycle?</h3><p><strong>一个主动调用和两个被动调用</strong>。</p>
-<p>主动调用指的是代码调用<code>runtime.GC()</code>函数，被动调用包括 周期性强制执行（如2min）和GC Pacing算法。</p>
-<p>其中GC Pacing主要和堆上空间的增长速度相关，增长越快，GC频率越快。</p>
-<h3 id="How-do-we-know-where-the-roots-are"><a href="#How-do-we-know-where-the-roots-are" class="headerlink" title="How do we know where the roots are?"></a>How do we know where the roots are?</h3><p>标记阶段的根节点来自于哪里呢？从程序的维度来说，包括 <strong>全局变量</strong> 和 <strong>Goroutine的栈上变量</strong>。</p>
-<p>全局变量，对应到进程结构中的bss段(未初始化的全局变量)和data段(已初始化的全局变量)。bss和data段的概念是通用的，也就是Go、C++等任意进程都是这样的数据结构。</p>
-<p>而Goroutine栈上变量是Go的runtime自己维护的。</p>
-<h3 id="How-do-we-know-where-in-an-object-pointers-are-located"><a href="#How-do-we-know-where-in-an-object-pointers-are-located" class="headerlink" title="How do we know where in an object pointers are located?"></a>How do we know where in an object pointers are located?</h3><p>在一个对象中，我们如何识别出对象内部的指针呢？</p>
-<p>首先，我们要了解到，一个对象在内存中是一段连续0和1。由于Go语言的强类型特点，我们可以清楚地计算出这个结构体的总大小、以及内部各个成员变量的大小。</p>
-<p>对象内部的变量分为两类：具体的数值和指针。具体的数值，如int64 a=1，那就在开辟一个可以存储int64大小空间段，存下1这个数值；而指针呢，如*int64这个指针，它在堆上先存储int64具体的值，记录它的起始地址如0x1111，结构体内部开辟一个指针大小的空间，记录地址的值0x1111。</p>
-<p>如果抛开强类型，我们看到程序中的数值是无法区分的，比如上述例子中的1可以被理解地址0x0001，而0x1111也可以被理解为是具体的数字。强类型的语言是一种解决方案，它能在编译期就识别出具体的类型。</p>
-<blockquote>
-<p>为了延伸思考，这边也提一下另一种方案：</p>
-<p>扩展数据，将它拆分为 对象类型（如前x位）+数据 。比如，</p>
-<ul>
-<li>数值1 = int64数据 + 1</li>
-<li>指针1 = int64的指针 + 指针起始地址</li>
-</ul>
-<p>这就有JAVA里“一切皆对象”的影子了。</p>
-</blockquote>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>细节既是恶魔，也提供了我们梳理知识体系的过程。虽然大多数的时间我们没法掌握细节，但只要怀着一颗保持探索的心，总是能不断往前进的。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-11-盛最多水的容器"><a href="#Leetcode-11-盛最多水的容器" class="headerlink" title="Leetcode-11 盛最多水的容器"></a>Leetcode-11 盛最多水的容器</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/container-with-most-water/">https://leetcode-cn.com/problems/container-with-most-water/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">maxArea</span><span class="params">(height []<span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/09/go-leetcode/go-leetcode-7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -966,7 +896,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/21/sharing-5min/2022-03/2022Week12/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/09/go-leetcode/go-leetcode-8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -983,7 +913,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/21/sharing-5min/2022-03/2022Week12/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week12</a>
+            <a href="/2022/04/09/go-leetcode/go-leetcode-8/" class="post-title-link" itemprop="url">Go算法实战 - 8.【三数之和LeetCode-15】</a>
         </h2>
 
         <div class="post-meta-container">
@@ -994,14 +924,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-03-21 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-21T12:00:00+08:00">2022-03-21</time>
+      <time title="创建时间：2022-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2022-04-09T11:00:00+08:00">2022-04-09</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-04-06 10:29:31" itemprop="dateModified" datetime="2022-04-06T10:29:31+08:00">2022-04-06</time>
+        <time title="修改时间：2022-04-10 11:45:49" itemprop="dateModified" datetime="2022-04-10T11:45:49+08:00">2022-04-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1009,7 +939,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
         </span>
     </span>
 
@@ -1023,124 +953,17 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
-<h2 id="2022-03-21-Go垃圾回收之旅6-ROC与Write-Barrier"><a href="#2022-03-21-Go垃圾回收之旅6-ROC与Write-Barrier" class="headerlink" title="2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier"></a>2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier</h2><p>今天，我们来看GC的一种设计 - ROC(Request Oriented Collector)。虽然ROC并没有被实际工程采用，但很值得我们学习，加深理解。</p>
-<blockquote>
-<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
-</blockquote>
-<h3 id="ROC-面向请求的回收器"><a href="#ROC-面向请求的回收器" class="headerlink" title="ROC-面向请求的回收器"></a>ROC-面向请求的回收器</h3><p>ROC提出了一种假设：</p>
-<p><strong>Objects associated with a completed request or a dormant goroutine die at a higher rate than other object.</strong></p>
-<p>与一个完整请求 或 休眠 goroutine 所关联的对象们`，比其它对象更容易死亡。</p>
-<p>我们假设存在两个Goroutine - G1和G2，它们的对象分为如下三类：</p>
-<ul>
-<li>G1私有</li>
-<li>G2私有</li>
-<li>G1和G2共有</li>
-</ul>
-<p>当G1的生命周期结束时，即Goroutine退出，G1私有的的对象就应该被回收，这一点很容易理解。</p>
-<p>但是，程序实际运行的过程中，对象一直在变化，也就是G1私有的对象变成了G1和G2共有的。这个时候，我们就必须引入一个新的概念 - write barrier。</p>
-<h3 id="Write-Barrier-写屏障"><a href="#Write-Barrier-写屏障" class="headerlink" title="Write Barrier-写屏障"></a>Write Barrier-写屏障</h3><p>我们通过一句话来了解的写屏障功能：</p>
-<blockquote>
-<p>Whenever there was a write, we would have to see if it was writing a pointer to a private object into a public object.</p>
-</blockquote>
-<p>也就是说，当有个写请求时，我们就必须检查它是否将一个指针从私有对象变成了公共对象。这里注意两个点：</p>
-<ol>
-<li><strong>对象的复杂性</strong> - 如果一个对象从私有变成共有，那么它内部的子对象也需要变化</li>
-<li><strong>针对指针</strong> - 不用考虑一些值拷贝的对象</li>
-</ol>
-<p>由于第一点的存在，ROC需要始终开启写屏障，给整个程序带来了大量的成本，所以ROC最终没有被采用。</p>
-<blockquote>
-<p>我们不妨延伸地思考一下，当一个共有对象变成私有时，该怎么操作？我这边提供2个思路：</p>
-<ol>
-<li>每次删除指针引用时，看一下这个对象、是否只有一个Goroutine的引用，是的话转为私有</li>
-<li>不处理。等这个对象没有任何引用时，用GC清理</li>
-</ol>
-</blockquote>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>ROC的思想很朴素，非常符合我们的直觉，具有一定的参考价值。</p>
-<p>而写屏障目前被广泛地应用在各类GC中，今天我们也借ROC对它有了初步印象。</p>
-<h2 id="2022-03-24-Go1-5的GC概览1-官方Talk"><a href="#2022-03-24-Go1-5的GC概览1-官方Talk" class="headerlink" title="2022-03-24 Go1.5的GC概览1 - 官方Talk"></a>2022-03-24 Go1.5的GC概览1 - 官方Talk</h2><p>在上一个系列，我们通过阅读 <strong>Go垃圾回收之旅</strong> 的相关资料，对Go中GC的很多概念有了基本的认识，这就给我们接下来的学习铺好了路。</p>
-<p>今天开始，我们将一起阅读下一篇内容，也就是官方博客对Go1.5版本GC的讲解。</p>
-<blockquote>
-<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a> </p>
-<p>为什么我不选择最新版本进行讲解呢？</p>
-<p>Go1.5的GC实现是具有一定里程碑意义的，实现了 <strong>并发标记清扫</strong>，与最新的GC实现差异并不大，作为入门学习资料更容易理解。</p>
-</blockquote>
-<p>在这篇博客中，作者先引入了一个Talk，里面重点讲述了GC的实现与性能，而实现部分是我们今天的重点。</p>
-<blockquote>
-<p>请跳转阅读 - <a target="_blank" rel="noopener" href="https://go.dev/talks/2015/go-gc.pdf">https://go.dev/talks/2015/go-gc.pdf</a></p>
-</blockquote>
-<h3 id="GC相关的差异（Go与Java）"><a href="#GC相关的差异（Go与Java）" class="headerlink" title="GC相关的差异（Go与Java）"></a>GC相关的差异（Go与Java）</h3><table>
-<thead>
-<tr>
-<th align="center">维度</th>
-<th align="center">GO</th>
-<th align="center">java</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">运行线程</td>
-<td align="center">1000+Goroutine</td>
-<td align="center">10+线程</td>
-</tr>
-<tr>
-<td align="center">同步机制</td>
-<td align="center">channel</td>
-<td align="center">锁</td>
-</tr>
-<tr>
-<td align="center">运行时实现</td>
-<td align="center">Go语言实现</td>
-<td align="center">C语言实现</td>
-</tr>
-<tr>
-<td align="center">内存分布</td>
-<td align="center">具备局部性</td>
-<td align="center">通过指针跳转</td>
-</tr>
-</tbody></table>
-<h3 id="GC概览"><a href="#GC概览" class="headerlink" title="GC概览"></a>GC概览</h3><ol>
-<li>Scan Phase 扫描</li>
-<li>Mark Phase 标记</li>
-<li>Sweep Phase 清理</li>
-</ol>
-<blockquote>
-<p>关于这三个阶段是怎么实现的，可以对照着ppt看，或者观看视频 - <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV18r4y1q7p3">https://www.bilibili.com/video/BV18r4y1q7p3</a></p>
-</blockquote>
-<p>关于更细节的 <strong>GC Algorithm Phases</strong> 实现，我们会在下一讲描述。</p>
-<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>本篇内容主要结合这个Talk，讲述了Go1.5版本的GC基本实现，希望大家能对GC背景和三阶段操作有基本了解。</p>
-<h2 id="2022-03-26-Go1-5的GC概览2-GC-Algorithm-Phases"><a href="#2022-03-26-Go1-5的GC概览2-GC-Algorithm-Phases" class="headerlink" title="2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases"></a>2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases</h2><p>在上一篇，我们从这篇Talk - <a target="_blank" rel="noopener" href="https://go.dev/talks/2015/go-gc.pdf">https://go.dev/talks/2015/go-gc.pdf</a> 里了解标记清理算法。</p>
-<p>今天，我们将对着下面这张Go1.5 GC算法的各个阶段，串讲一下GC这个过程。</p>
-<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go1.5-gc.png" alt="Go 1.5 GC"></p>
-<h3 id="Stack-scan-栈扫描"><a href="#Stack-scan-栈扫描" class="headerlink" title="Stack scan 栈扫描"></a>Stack scan 栈扫描</h3><p>栈扫描的启动阶段有一小段STW，这是因为GC要启动写屏障，所以必须先暂停所有Goroutine的运行。这个时间很短，大概耗时在几十微秒。</p>
-<p>runtime中的写屏障的数据结构如下：    </p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> writeBarrier <span class="keyword">struct</span> &#123;</span><br><span class="line">	enabled <span class="keyword">bool</span>    <span class="comment">// compiler emits a check of this before calling write barrier</span></span><br><span class="line">	pad     [<span class="number">3</span>]<span class="keyword">byte</span> <span class="comment">// compiler uses 32-bit load for &quot;enabled&quot; field</span></span><br><span class="line">	needed  <span class="keyword">bool</span>    <span class="comment">// whether we need a write barrier for current GC phase</span></span><br><span class="line">	cgo     <span class="keyword">bool</span>    <span class="comment">// whether we need a write barrier for a cgo check</span></span><br><span class="line">	alignme <span class="keyword">uint64</span>  <span class="comment">// guarantee alignment so that compiler can use a 32 or 64-bit load</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>完成启动后，就进入这一步的工作：<strong>从全局变量和各个Goroutine的栈上收集指针信息</strong>。这一步，也就是初始化所有标记对象的集合。</p>
-<h3 id="Mark-标记"><a href="#Mark-标记" class="headerlink" title="Mark 标记"></a>Mark 标记</h3><p>标记阶段即根据扫描出的初始指针对象，做BFS遍历，也就将所有可触达的对象加上标记。这里有一句话：</p>
-<p><strong>Write barrier tracks pointer changes by mutator.</strong> 也就是在标记阶段中，如果有程序变更了指针，就需要添加写屏障。</p>
-<p>关于写屏障的实现细节我们先不细聊，先一起来看看GC中的三个概念：</p>
-<ol>
-<li>mutator：一般指应用程序，在运行过程中，会不停地修改堆对象里的指向关系</li>
-<li>collector：垃圾回收期，更多地是指GC线程</li>
-<li>allocator：内存分配器，也就是程序向操作系统申请内存、释放内存，这一点在GC里很重要，往往被我们忽视</li>
-</ol>
-<h3 id="Mark-Termination-标记结束"><a href="#Mark-Termination-标记结束" class="headerlink" title="Mark Termination 标记结束"></a>Mark Termination 标记结束</h3><p>完成标记后，主要分为三个工作：</p>
-<ol>
-<li>Rescan - 重新扫描其中变化的内容</li>
-<li>Clean Up Tasks - 这里的清理并不是清理对象，而是对整个Mark标记的收尾工作，比如收缩栈</li>
-<li>关闭写屏障</li>
-</ol>
-<p>注意，这一整个阶段都是STW的。</p>
-<h3 id="Sweep-清扫"><a href="#Sweep-清扫" class="headerlink" title="Sweep 清扫"></a>Sweep 清扫</h3><p>Sweep就是将未标记的堆上对象进行清理，回收资源。这一阶段是并发的。</p>
-<p>值得一提的是，我们之前谈论过的GC Paging算法就是在这一步启动的，用在估算下一次启动GC的最佳时间。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-15-三数之和"><a href="#Leetcode-15-三数之和" class="headerlink" title="Leetcode-15 三数之和"></a>Leetcode-15 三数之和</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/3sum/">https://leetcode-cn.com/problems/3sum/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">threeSum</span><span class="params">(nums []<span class="keyword">int</span>)</span> [][]<span class="title">int</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/09/go-leetcode/go-leetcode-8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1161,7 +984,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/14/sharing-5min/2022-03/2022Week11/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/09/go-leetcode/go-leetcode-6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1178,7 +1001,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/14/sharing-5min/2022-03/2022Week11/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week11</a>
+            <a href="/2022/04/09/go-leetcode/go-leetcode-6/" class="post-title-link" itemprop="url">Go算法实战 - 6.【正则表达式匹配LeetCode-10】</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1188,23 +1011,17 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2022-03-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-14T12:00:00+08:00">2022-03-14</time>
+      <time title="创建时间：2022-04-09 08:00:00 / 修改时间：11:40:11" itemprop="dateCreated datePublished" datetime="2022-04-09T08:00:00+08:00">2022-04-09</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-03-24 22:20:32" itemprop="dateModified" datetime="2022-03-24T22:20:32+08:00">2022-03-24</time>
-      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+          <a href="/categories/%E7%AE%97%E6%B3%95%E5%AE%9E%E6%88%98/" itemprop="url" rel="index"><span itemprop="name">算法实战</span></a>
         </span>
     </span>
 
@@ -1218,129 +1035,17 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
-<h2 id="2022-03-14-Go垃圾回收之旅3-静态编译"><a href="#2022-03-14-Go垃圾回收之旅3-静态编译" class="headerlink" title="2022-03-14 Go垃圾回收之旅3 - 静态编译"></a>2022-03-14 Go垃圾回收之旅3 - 静态编译</h2><p>Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。那么，这对学习GC有什么意义呢？让我们一起看看今天的内容。</p>
-<blockquote>
-<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
-</blockquote>
-<p>我们先和JAVA程序做个对比：</p>
-<ul>
-<li><strong>Go</strong><ul>
-<li>Go编译的二进制文件</li>
-<li>Linux</li>
-</ul>
-</li>
-<li><strong>JAVA</strong><ul>
-<li>Java打包的JAR文件</li>
-<li>JVM</li>
-<li>Linux</li>
-</ul>
-</li>
-</ul>
-<p>从这个架构不难猜到，上文谈到的 运行时，Go语言是直接编译到二进制文件里的；而JAVA是在JVM里实现的。</p>
-<p>Go的这种实现方式，主要优劣点如下：</p>
-<ul>
-<li>优点： 程序的运行更具备 <strong>确定性</strong>，即开发人员可以根据代码，预测到程序的运行逻辑，更容易针对性地优化</li>
-<li>缺点：运行时没有<code>JIT</code>机制，无法针对具体的运行结果进行反馈优化</li>
-</ul>
-<p><code>JIT</code>的优化方向很多，我这里举一个热点函数优化的例子：</p>
-<ol>
-<li>在代码中，函数f需要输入参数a和b</li>
-<li>运行了一段时间后，<code>JIT</code>发现b的输入参数一直都是某个固定值b1</li>
-<li>这时，<code>JIT</code>进行编译优化，将函数f编译成一个新函数f1<ol>
-<li>f1只需要入参a</li>
-<li>b参数被替换为固定值b1</li>
-<li>减少参数复杂度，能提升程序效率，尤其是热点函数</li>
-</ol>
-</li>
-<li>如果参数b突然变成了b2，那<code>JIT</code>就会从f1回退到f</li>
-</ol>
-<p>简单来说：<strong>Go程序会怎么运行，往往在编码阶段就可以预期到了</strong>；而JAVA引入的<code>JIT</code>能力，可以在程序运行后，根据具体的运行情况，做针对性地优化，提升效率的同时也带了很多的不确定性。</p>
-<p>两种实现方式各有利弊，团队可以根据实际情况自行选择。单从Go语言开发者来说，排查线上问题相对有<code>JIT</code>机制的JAVA程序简单很多。</p>
-<p>这种确定性也让Go的GC相对简单不少，方便我们的学习。</p>
-<h2 id="2022-03-15-Go垃圾回收之旅4-性能压力下的Go程序"><a href="#2022-03-15-Go垃圾回收之旅4-性能压力下的Go程序" class="headerlink" title="2022-03-15 Go垃圾回收之旅4 - 性能压力下的Go程序"></a>2022-03-15 Go垃圾回收之旅4 - 性能压力下的Go程序</h2><p>在<a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">这篇演讲</a>中，有这么一段很有意思的描述：</p>
-<blockquote>
-<p>Out of memory, OOMs, are tough on Go; </p>
-<p>temporary spikes in memory usage should be handled by increasing CPU costs, not by aborting. </p>
-<p>Basically if the GC sees memory pressure it informs the application that it should shed load. Once things are back to normal the GC informs the application that it can go back to its regular load.</p>
-</blockquote>
-<p>这段话包含了Go语言的GC，在面对CPU和内存压力下的决策：</p>
-<ol>
-<li><strong>Go程序很少会OOM</strong><ol>
-<li>这句话有一定前提，即内存设置是合理的，代码也没有明显的内存泄露问题</li>
-<li>至于具体原因，我们看下文</li>
-</ol>
-</li>
-<li><strong>业务高峰时内存使用率过高，应该通过提升CPU能力来解决，而不是中止程序</strong><ol>
-<li>自动GC是需要CPU的计算资源做支持，来清理无用内存</li>
-<li>要保证内存资源能支持程序的正常运行，有两个思路：<ol>
-<li>减少已有内存 - 通过GC来回收无用的内存</li>
-<li>限制新增内存 - 即运行时尽可能地避免新内存的分配，最简单的方法就是不运行代码</li>
-</ol>
-</li>
-<li>显然，中止程序对业务的影响很大，我们更倾向于通过GC去回收内存，腾出新的空间</li>
-</ol>
-</li>
-<li><strong>GC压力高时，通知应用减少负载；而当恢复正常后，GC再通知应用可以恢复到正常模式了</strong><ol>
-<li>我们可以将上述分为两类工作<ol>
-<li>业务逻辑的Goroutine</li>
-<li>GC的Goroutine</li>
-</ol>
-</li>
-<li>这两类Goroutine都会消耗CPU资源，区别在于：<ol>
-<li>运行业务逻辑往往会增加内存</li>
-<li>GC是回收内存</li>
-</ol>
-</li>
-<li>这里就能体现出Go运行时的策略<ol>
-<li>内存压力高时，GC线程更容易抢占到CPU资源，进行内存回收</li>
-<li>代价是业务处理逻辑会有一定性能损耗，被分配的计算资源减少</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-<p>GC最直观的影响就体现在延迟上。尤其是在STW - Stop The World情况下，程序会暂停所有非GC的工作，进行全量的垃圾回收。即便整个GC只花费了1s，所有涉及到这个程序的业务调用，都会增加1s延迟；在微服务场景下，这个问题会变得尤为复杂。</p>
-<p>而GC的方案迭代，最直观的效果就体现在这个延迟优化上。</p>
-<h2 id="2022-03-17-Go垃圾回收之旅5-GC-Pacer"><a href="#2022-03-17-Go垃圾回收之旅5-GC-Pacer" class="headerlink" title="2022-03-17 Go垃圾回收之旅5 - GC Pacer"></a>2022-03-17 Go垃圾回收之旅5 - GC Pacer</h2><p>今天我们会重点讨论Go语言GC Pacer这个概念。</p>
-<blockquote>
-<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
-</blockquote>
-<p>要理解透彻GC Pacer的非常困难，底层实现细节必须深入到源码。这里，我们会通过分享中的关键性描述，来思考GC Pacer的设计理念。</p>
-<blockquote>
-<p>It is basically based on a feedback loop that determines when to best start a GC cycle. </p>
-</blockquote>
-<p>我们聚焦到两个词：</p>
-<ul>
-<li><code>feedback loop</code> 反馈循环，GC Pacer是会根据实际GC情况会不断迭代、反馈的</li>
-<li><code> when to best start a GC cycle</code> 强调了GC Pacer的目标 - 为了决定一个最佳启动GC的时机</li>
-</ul>
-<p>GC Pacer的内部原理也和它的定义非常贴切，它是根据步长来决定GC的：</p>
-<ul>
-<li>对象：堆上的内存分配</li>
-<li>步长：设定值，如100%</li>
-<li>触发时机：当前堆上内存大小 &gt;= 上次堆上内存大小 * (1 + 100%)</li>
-</ul>
-<p>简单来说，就是一种 <strong>按比例增长</strong> 的触发机制。但这个机制没有那么简单，我们看下面这段：</p>
-<blockquote>
-<p>If need be, the Pacer slows down allocation while speeding up marking. </p>
-<p>At a high level the Pacer stops the Goroutine, which is doing a lot of the allocation, and puts it to work doing marking. </p>
-</blockquote>
-<p>这两句描述和我们上一讲的内容对应上了 - 在一定的性能压力下，Pacer会减少内存的分配，而花更多的时间在对象的标记（marking）上，它是GC里的最耗性能的步骤。</p>
-<p>对应到上面提到的反馈呢，也就是GC Pacer并不是单纯的一种 按比例增长 的触发机制，还有一些其余因素的影响：比如，当前这次的GC花费的CPU计算资源与标记的耗时超过了预期，表示当前整个GC存在一定压力，下次的GC的开始时间需要适当提前。</p>
-<p>GC Pacer最近也重新做了一次大的改动，有兴趣的可以参考这篇文章：</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/a216b56e743c5b6b300b3ef1673ee62684b5b63b/design/44167-gc-pacer-redesign.md">https://go.googlesource.com/proposal/+/a216b56e743c5b6b300b3ef1673ee62684b5b63b/design/44167-gc-pacer-redesign.md</a></p>
-</blockquote>
-<p>深入研究GC Pacer需要很多数学知识储备，留给有兴趣的同学自行探索了。</p>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
+          <p><img src="https://i.loli.net/2021/07/10/SbG3k5XFRlsJdOV.jpg" alt="Go-Leetcode"></p>
+<h2 id="Leetcode-10-正则表达式匹配"><a href="#Leetcode-10-正则表达式匹配" class="headerlink" title="Leetcode-10 正则表达式匹配"></a>Leetcode-10 正则表达式匹配</h2><p>原题链接 <a target="_blank" rel="noopener" href="https://leetcode-cn.com/problems/regular-expression-matching/">https://leetcode-cn.com/problems/regular-expression-matching/</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">isMatch</span><span class="params">(s <span class="keyword">string</span>, p <span class="keyword">string</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/04/09/go-leetcode/go-leetcode-6/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1360,7 +1065,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1401,7 +1106,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

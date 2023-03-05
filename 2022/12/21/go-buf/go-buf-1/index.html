@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="首先，buf是一个什么样的工具？我提取了三个关键词：  Protocol Buffers - 底层的技术基础是Google的protobuf语言 API Lifecycle - 目标是管理API接口的全生命周期，重点是初次发布与后续更新 Team - 强调的是团队协作，解决人与人之间沟通的问题  要说清楚buf这个项目，就离不开API接口开发的历史演进。今天，我将挑选官方介绍的三个重点，让大家更">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go-Buf教程 - 1.【背景篇】从Buf定位看API接口的演进">
+<meta property="og:url" content="http://example.com/2022/12/21/go-buf/go-buf-1/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="首先，buf是一个什么样的工具？我提取了三个关键词：  Protocol Buffers - 底层的技术基础是Google的protobuf语言 API Lifecycle - 目标是管理API接口的全生命周期，重点是初次发布与后续更新 Team - 强调的是团队协作，解决人与人之间沟通的问题  要说清楚buf这个项目，就离不开API接口开发的历史演进。今天，我将挑选官方介绍的三个重点，让大家更">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-buf.jpg">
+<meta property="og:image" content="https://buf.build/static/restful-apis-6cd5944265317eef85e787ad02885e6b.svg">
+<meta property="og:image" content="https://buf.build/static/protobuf-ca548d51691fe9bda30b04275e0e5563.svg">
+<meta property="og:image" content="https://buf.build/static/buf-graph-f73585cb2ce571190da213de0af6e198.svg">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2022-12-21T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-02T12:03:06.586Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Go-Buf">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-buf.jpg">
+
+
+<link rel="canonical" href="http://example.com/2022/12/21/go-buf/go-buf-1/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Go-Buf教程 - 1.【背景篇】从Buf定位看API接口的演进 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%A4%E4%B8%AA%E8%A7%92%E8%89%B2%EF%BC%9AProducer-amp-Consumer"><span class="nav-number">1.</span> <span class="nav-text">两个角色：Producer &amp; Consumer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%881-RESTful"><span class="nav-number">2.</span> <span class="nav-text">方案1 - RESTful</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%882-Protocol-Buffers%EF%BC%88%E6%97%A0Buf%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">方案2 - Protocol Buffers（无Buf）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%883-Protocol-Buffers%EF%BC%88%E6%9C%89Buf%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">方案3 - Protocol Buffers（有Buf）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">117</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/21/go-buf/go-buf-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Go-Buf教程 - 1.【背景篇】从Buf定位看API接口的演进
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-12-21 12:00:00" itemprop="dateCreated datePublished" datetime="2022-12-21T12:00:00+08:00">2022-12-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2023-01-02 20:03:06" itemprop="dateModified" datetime="2023-01-02T20:03:06+08:00">2023-01-02</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-buf.jpg"></p>
+<p>首先，<code>buf</code>是一个什么样的工具？我提取了三个关键词：</p>
+<ul>
+<li><code>Protocol Buffers</code> - 底层的技术基础是Google的<code>protobuf</code>语言</li>
+<li><code>API Lifecycle</code> - 目标是管理<code>API</code>接口的全生命周期，重点是初次发布与后续更新</li>
+<li><code>Team</code> - 强调的是团队协作，解决人与人之间沟通的问题</li>
+</ul>
+<p>要说清楚<code>buf</code>这个项目，就离不开API接口开发的历史演进。今天，我将挑选<a target="_blank" rel="noopener" href="https://buf.build/">官方</a>介绍的三个重点，让大家更好地了解<code>buf</code>要解决的问题。</p>
+<span id="more"></span>
+
+<h2 id="两个角色：Producer-amp-Consumer"><a href="#两个角色：Producer-amp-Consumer" class="headerlink" title="两个角色：Producer &amp; Consumer"></a>两个角色：Producer &amp; Consumer</h2><p>对于一个API服务，有2种最重要的角色：</p>
+<ul>
+<li>Producer - API服务提供方，也叫被调用方</li>
+<li>Consumer - API服务的使用方，也叫调用方，往往具有多个</li>
+</ul>
+<p>要调通一个API不难，但要做好，有很多问题需要解决，尤其如下三个问题：</p>
+<ol>
+<li><strong>理解成本</strong>：API接口怎么理解？提供文档或SDK就能满足吗？</li>
+<li><strong>迭代问题</strong>：Producer紧急修复了问题、更新了接口，怎么通知到各个调用方？</li>
+<li><strong>重复开发</strong>：多语言、多框架的情况下，怎么减少重复度高的编码工作，如定义数据结构？</li>
+</ol>
+<p>关于API的设计与实现的细节，不同团队有自己的方案，我们来看看<code>buf</code>提供的亮点：</p>
+<ul>
+<li>Producer<ul>
+<li>遵循Best Practice来使用<code>protobuf</code>的API</li>
+<li>分发API到各使用方，让对方及时更新</li>
+<li>集中式地管理API文档</li>
+</ul>
+</li>
+<li>Consumer<ul>
+<li>根据<code>protobuf</code>定义，快速开发</li>
+<li>用工具减少歧义</li>
+<li>可生成的CLI/定制插件/mock服务/压力测试等特性</li>
+</ul>
+</li>
+</ul>
+<p>以上特性看起来很酷，核心方向依旧是：<strong>提高Producer和Consumer的效率与协作</strong>。</p>
+<h2 id="方案1-RESTful"><a href="#方案1-RESTful" class="headerlink" title="方案1 - RESTful"></a>方案1 - RESTful</h2><p>官方对RESTful接口的概括如下图：</p>
+<p><img src="https://buf.build/static/restful-apis-6cd5944265317eef85e787ad02885e6b.svg" alt="RESTful APIs"></p>
+<p>RESTful API虽然已经被公认为一种很好的API设计标准，但在实际开发过程中，各有各的理解。所以，RESTful更像是一种风格趋势，但无法形成标准，这就对Consumer在协作开发时带来了难度：</p>
+<ul>
+<li>理解成本：标准不统一，调接口类似于黑盒测试</li>
+<li>实现方式：不同调用方有自己的实现，对后续维护带来很大成本</li>
+</ul>
+<p>我们可以通过以下两条路径进行改善：</p>
+<ol>
+<li>内部统一框架：利用相关的工具，强制约束接口设计</li>
+<li>自动生成SDK：调用方统一用SDK收敛</li>
+</ol>
+<p>这两点从技术实现来看并不难，但挺考验研发团队的能力，一不小心就造了个很不好用的轮子。对于大部分开发者来说，更希望找一个成熟的、长期维护的方案。</p>
+<h2 id="方案2-Protocol-Buffers（无Buf）"><a href="#方案2-Protocol-Buffers（无Buf）" class="headerlink" title="方案2 - Protocol Buffers（无Buf）"></a>方案2 - Protocol Buffers（无Buf）</h2><p>接着，我们来看看社区中原生的<code>Protocol Buffers</code>的方案：</p>
+<p><img src="https://buf.build/static/protobuf-ca548d51691fe9bda30b04275e0e5563.svg" alt="Protocol Buffers without Buf"></p>
+<p>本方案最大的变化，就是有了一个协议的<strong>标准传输介质</strong> - <code>Protobuf Schema</code>。它规范了Producer侧的接口实现，并且利用<code>protobuf</code>提供了跨语言的方案。</p>
+<p>但是，从图中可以看出，传播<code>Protobuf Schema</code>依然是一个高频出现问题的地方：</p>
+<ul>
+<li>Producer - 设计与发布API没有支持，全靠人工、甚至是邮件沟通</li>
+<li>Consumer - 对<code>protobuf</code>没有统一管理的手段，如版本依赖、SDK生成等</li>
+</ul>
+<p>不过，<code>Protobuf</code>对API接口设计提供了很关键的基础能力 - 有了切实可落地的标准，并且实现了跨语言代码生成的基础。接下来，就是要解决 <strong>最后一公里</strong> 的问题了。</p>
+<h2 id="方案3-Protocol-Buffers（有Buf）"><a href="#方案3-Protocol-Buffers（有Buf）" class="headerlink" title="方案3 - Protocol Buffers（有Buf）"></a>方案3 - Protocol Buffers（有Buf）</h2><p>Buf方案，核心是对<code>Protobuf Schema</code>的管理与扩展</p>
+<p><img src="https://buf.build/static/buf-graph-f73585cb2ce571190da213de0af6e198.svg" alt="Buf"></p>
+<p>从<code>Buf</code>提供的核心能力来说，主要分为3块：</p>
+<ol>
+<li>语法规范 - 从语法上规范API设计，遵循其<code>Best Practice</code></li>
+<li>代码生成 - 包括Producer与Consumer侧的代码自动生成</li>
+<li>依赖管理 - 对各Consumer的依赖进行统一管理</li>
+</ol>
+<blockquote>
+<p>我认为核心在于第一点：规范化、标准化的程度越高，自动化的能力自然就越强：</p>
+<p>第二、三点，往往会根据团队情况，需要定制化。</p>
+</blockquote>
+<p>其余能力是偏插件化的功能，就不重点讲了。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>今天，我们通过对3个API方案的介绍，对<code>Buf</code>套件有了初步的了解。如果用一句话概括：</p>
+<p><strong><code>Buf</code>重点是通过对<code>Protobuf Schema</code>的规范化，提供代码生成、依赖管理等一站式的API接口管理方案，来保证开发效率与团队协作的收益最大化。</strong></p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p><img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go-Buf/" rel="tag"># Go-Buf</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/12/06/go-tip/go-tip-17/" rel="prev" title="Go语言技巧 - 17.【Go工程化测试】业务项目中的Go单元测试心得">
+                  <i class="fa fa-chevron-left"></i> Go语言技巧 - 17.【Go工程化测试】业务项目中的Go单元测试心得
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/12/27/go-study/go-rpc-6/" rel="next" title="Go语言学习 - RPC篇:gRPC-Gateway定制mux选项">
+                  Go语言学习 - RPC篇:gRPC-Gateway定制mux选项 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

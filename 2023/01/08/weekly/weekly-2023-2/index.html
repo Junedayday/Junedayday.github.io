@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="作为一名年龄30+程序员，随着2023年的到来，我的工作和生活正在逐步变化。 本系列会以周维度为周期，记录我对如下三块内容的思考，大家挑选各自感兴趣的内容阅读即可：  Go技巧 - Go开发者作为重点阅读的群体，不忘初心 编程思考 - 面向所有开发者，从系统设计等高层维度进行分享 工作生活 - 以更贴近生活的视角，分享时间管理、职业发展、焦虑感的一些心得">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【每周小结】2023-Week2">
+<meta property="og:url" content="http://example.com/2023/01/08/weekly/weekly-2023-2/index.html">
+<meta property="og:site_name" content="Junedayday Blog">
+<meta property="og:description" content="作为一名年龄30+程序员，随着2023年的到来，我的工作和生活正在逐步变化。 本系列会以周维度为周期，记录我对如下三块内容的思考，大家挑选各自感兴趣的内容阅读即可：  Go技巧 - Go开发者作为重点阅读的群体，不忘初心 编程思考 - 面向所有开发者，从系统设计等高层维度进行分享 工作生活 - 以更贴近生活的视角，分享时间管理、职业发展、焦虑感的一些心得">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/weekly.jpg">
+<meta property="og:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1.png">
+<meta property="og:image" content="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg">
+<meta property="article:published_time" content="2023-01-08T12:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-08T13:10:10.874Z">
+<meta property="article:author" content="Junedayday">
+<meta property="article:tag" content="Weekly">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/weekly.jpg">
+
+
+<link rel="canonical" href="http://example.com/2023/01/08/weekly/weekly-2023-2/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【每周小结】2023-Week2 | Junedayday Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Junedayday Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">六月天天的个人博客</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Go%E6%8A%80%E5%B7%A7-%E7%94%A8%E6%8E%A5%E5%8F%A3interface%E6%8F%90%E9%AB%98%E6%A8%A1%E5%9D%97%E9%97%B4%E5%8D%8F%E4%BD%9C%E6%95%88%E7%8E%87"><span class="nav-number">1.</span> <span class="nav-text">Go技巧 - 用接口interface提高模块间协作效率</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%AE%BE%E8%AE%A1%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.1.</span> <span class="nav-text">1 - 设计接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%A1%E6%A0%B8%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.2.</span> <span class="nav-text">2 - 审核接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%9E%E7%8E%B0%E4%B8%8E%E4%BD%BF%E7%94%A8%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.3.</span> <span class="nav-text">3 - 实现与使用接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E6%80%9D%E8%80%83-%E6%8F%90%E9%AB%98%E4%B8%AA%E4%BA%BA%E7%9A%84%E5%B8%82%E5%9C%BA%E7%AB%9E%E4%BA%89%E5%8A%9B"><span class="nav-number">2.</span> <span class="nav-text">编程思考 - 提高个人的市场竞争力</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E7%94%9F%E6%B4%BB-%E8%AE%B0%E5%BD%95%E7%94%9F%E6%B4%BB%E4%BD%9C%E6%81%AF"><span class="nav-number">3.</span> <span class="nav-text">工作生活 - 记录生活作息</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Junedayday</p>
+  <div class="site-description" itemprop="description">Blog信息</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">117</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/01/08/weekly/weekly-2023-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【每周小结】2023-Week2
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-01-08 20:00:00 / 修改时间：21:10:10" itemprop="dateCreated datePublished" datetime="2023-01-08T20:00:00+08:00">2023-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/weekly.jpg"></p>
+<p>作为一名年龄30+程序员，随着2023年的到来，我的工作和生活正在逐步变化。</p>
+<p>本系列会以周维度为周期，记录我对如下三块内容的思考，大家挑选各自感兴趣的内容阅读即可：</p>
+<ul>
+<li><strong>Go技巧</strong> - Go开发者作为重点阅读的群体，不忘初心</li>
+<li><strong>编程思考</strong> - 面向所有开发者，从系统设计等高层维度进行分享</li>
+<li><strong>工作生活</strong> - 以更贴近生活的视角，分享时间管理、职业发展、焦虑感的一些心得</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="Go技巧-用接口interface提高模块间协作效率"><a href="#Go技巧-用接口interface提高模块间协作效率" class="headerlink" title="Go技巧 - 用接口interface提高模块间协作效率"></a>Go技巧 - 用接口<code>interface</code>提高模块间协作效率</h2><p>本周要分享的一个技巧是 - <strong>用接口<code>interface</code>提高模块间协作效率</strong>。</p>
+<p>我们在协作开发时，在划分清边界后，就需要协同开发。而这个边界，如果能结合<code>interface</code>特性，就会大幅提升效率。从边界功能的角色来看，主要包括2个：<strong>提供方</strong>与<strong>调用方</strong>。</p>
+<p>从下图来看：</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/%E6%8E%A5%E5%8F%A3%E8%AE%BE%E8%AE%A1.png"></p>
+<p>我们以一个具体工作内容为例：我们要开发一个Book的CRUD的工作，但时间紧迫，所以计划分为两块：</p>
+<ul>
+<li>A同学 - HTTP API部分</li>
+<li>B同学 - MySQL数据库部分</li>
+</ul>
+<p>而由于数据库部分的工作比较少，所以计划让B同学来主导接口这块工作，即B是提供方，A是使用方。接下来的三块工作内容如下：</p>
+<h3 id="1-设计接口"><a href="#1-设计接口" class="headerlink" title="1 - 设计接口"></a>1 - 设计接口</h3><p>B同学给出一版接口：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 核心接口定义</span></span><br><span class="line"><span class="keyword">type</span> BookDao <span class="keyword">interface</span> &#123;</span><br><span class="line">  Create(book *Book) error</span><br><span class="line">  Delete(bookId <span class="keyword">int64</span>) error</span><br><span class="line">  List(pageNumber,pageSize <span class="keyword">int</span>) ([]*Book, error)</span><br><span class="line">  Update(bookId <span class="keyword">int64</span>, bookName <span class="keyword">string</span>) error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实例化，新建</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewBookDao</span><span class="params">()</span> <span class="title">BookDao</span></span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Book <span class="keyword">struct</span> &#123;</span><br><span class="line">  <span class="comment">// 具体实现</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里并没有真正的代码实现。代码重点包括3个部分：</p>
+<ul>
+<li><code>interface</code>的定义：核心内容，方便使用者阅读</li>
+<li>实例化：<code>interface</code>怎么创建</li>
+<li>数据结构：<code>interface</code>涉及的结构体</li>
+</ul>
+<p>这一块，非常考验B同学的代码设计能力：怎么样让使用者快速了解你的设计？注释固然是一个不错的方式，但更好的方式是通过函数名、参数名等，详情可参考《 Effective Go》、《代码整洁之道》等资料。</p>
+<h3 id="2-审核接口"><a href="#2-审核接口" class="headerlink" title="2 - 审核接口"></a>2 - 审核接口</h3><p>在B同学完成初步设计后，就需要A同学进行审核。审核主要的目标：<strong>发掘信息差，保证最终功能的正确性</strong>。</p>
+<p>信息差来源于不同模块的上下文差异。比如说，数据库同学更关注底层的数据存储，而API层的同学更关注用户的使用场景。所以，通过评审，A同学可以发现与B同学的信息差，并对接口提出意见、希望B同学加以改进。</p>
+<p>从上面的示例来看，可能存在如下问题，我用注释的方式加以说明（往往结合Code Review）：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> BookDao <span class="keyword">interface</span> &#123;</span><br><span class="line">  <span class="comment">// 需求点1：提供批量创建的能力</span></span><br><span class="line">  Create(book *Book) error</span><br><span class="line">  <span class="comment">// 需求点2：能否支持软删除</span></span><br><span class="line">  Delete(bookId <span class="keyword">int64</span>) error</span><br><span class="line">  <span class="comment">// 需求点3：查询能否支持一些字段的模糊查询，如bookName</span></span><br><span class="line">  <span class="comment">// 需求点4：需要查询满足条件的Book总数，支持分页功能</span></span><br><span class="line">  List(pageNumber,pageSize <span class="keyword">int</span>) ([]*Book, error)</span><br><span class="line">  <span class="comment">// 需求点5：需要修改其余字段，如作者author</span></span><br><span class="line">  Update(bookId <span class="keyword">int64</span>, bookName <span class="keyword">string</span>) error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 需求点6：字段缺失：如出版商、出版时间</span></span><br><span class="line"><span class="keyword">type</span> Book <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来，就是A与B的不断沟通、不断修改<code>interface</code>的过程，直到双方基本达成一致。</p>
+<h3 id="3-实现与使用接口"><a href="#3-实现与使用接口" class="headerlink" title="3 - 实现与使用接口"></a>3 - 实现与使用接口</h3><p>随着接口的敲定，接下来的工作就可以兵分两路了:</p>
+<ul>
+<li>B - 提供方去编写这个接口的具体实现，也就是MySQL相关的部分</li>
+<li>A - 使用方调用代码，完成上层业务部分的开发</li>
+</ul>
+<p>可以看到，<code>interface</code>的定义有利于将工作进行拆分，定义关键边界，然后各自完成独立开发。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>从两个角色来看，他们侧重的能力点会有差异：</p>
+<ul>
+<li>提供者：偏向基础能力，主要在于代码的可读性与能力的通用性（不仅仅对接一个使用方）</li>
+<li>使用者：偏向业务能力，需要结合用户使用场景来思考程序设计</li>
+</ul>
+<p>这个情况不仅仅存在于模块间设计，在更大的系统设计时也有非常重要的体现。所以，这是一个很好的提升能力的机会。</p>
+<h2 id="编程思考-提高个人的市场竞争力"><a href="#编程思考-提高个人的市场竞争力" class="headerlink" title="编程思考 - 提高个人的市场竞争力"></a>编程思考 - 提高个人的市场竞争力</h2><p>最近，我经常看到一个问题：<strong>我该学习什么编程能力？</strong> 我会先关心提问者的初衷，常见分为两种：</p>
+<ul>
+<li>提升编程能力</li>
+<li>提高个人的市场竞争力</li>
+</ul>
+<p>相信绝大多数的人都是为了后者。单纯为了提升编程能力的话，自己去啃那些经典教材即可。</p>
+<p>认清并承认自己的目标很重要。关于<strong>程序员的市场竞争力</strong>这个问题，我分享个人的三点看法：</p>
+<ul>
+<li>从ROI的角度分析个人的能力成长方向，把自己当作一个商品（想不清楚的话，多搜搜各大公司的招聘要求）</li>
+<li>多和“高阶人士”交流，扩展视野：可以是职位比你高的领导，也可以是某个方向的资深人员</li>
+<li>为机遇创造条件（能力储备、人脉），但不要一心追求机遇，而是逐步成长</li>
+</ul>
+<h2 id="工作生活-记录生活作息"><a href="#工作生活-记录生活作息" class="headerlink" title="工作生活 - 记录生活作息"></a>工作生活 - 记录生活作息</h2><p>我从本周开始，记录了自己的每日生活作息，分为7类：</p>
+<ul>
+<li>睡眠</li>
+<li>吃饭</li>
+<li>工作</li>
+<li>娱乐</li>
+<li>学习</li>
+<li>运动</li>
+<li>家庭</li>
+</ul>
+<p>记录的动作很简单，拿纸笔就能快速完成，但我在今年才开始真正地做这件事。这背后，我长期存在的一个性格问题：<strong>我清楚自己浪费时间的问题所在，但不敢真正地去面对它，更羞于看到具体的浪费时长。</strong></p>
+<p>我的最终目标也不是为了成为一个时间管理领域的达人，而是 <strong>让自己时间更可控</strong>，减少来自浪费时间的焦虑感。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p><img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Weekly/" rel="tag"># Weekly</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/12/30/go-buf/go-buf-2/" rel="prev" title="Go-Buf教程 - 2.【背景篇】Buf生态概览">
+                  <i class="fa fa-chevron-left"></i> Go-Buf教程 - 2.【背景篇】Buf生态概览
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/01/15/weekly/weekly-2023-3/" rel="next" title="【每周小结】2023-Week3">
+                  【每周小结】2023-Week3 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Junedayday</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+<div class=BbeiAn-info">
+  浙ICP备 -
+  <a target="_blank" rel="noopener" href="http://www.miitbeian.gov.cn/">19051676号-1</a>
+  </a>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
