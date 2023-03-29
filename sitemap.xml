@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://example.com/CNAME.html</loc>
+    
+    <lastmod>2023-03-29</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://example.com/2023/03/19/weekly/weekly-2023-12/</loc>
     
     <lastmod>2023-03-20</lastmod>
@@ -117,13 +124,6 @@
     <loc>http://example.com/2022/12/06/go-tip/go-tip-17/</loc>
     
     <lastmod>2022-12-07</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/CNAME.html</loc>
-    
-    <lastmod>2022-12-05</lastmod>
     
   </url>
   
@@ -786,14 +786,14 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-002/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-001/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
   </url>
   
   <url>
-    <loc>http://example.com/2021/02/18/k8s/k8s-001/</loc>
+    <loc>http://example.com/2021/02/18/k8s/k8s-002/</loc>
     
     <lastmod>2021-03-29</lastmod>
     
@@ -886,7 +886,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-etcd/</loc>
+    <loc>http://example.com/tags/Go-Framework/</loc>
     <lastmod>2023-03-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -900,21 +900,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/tags/Go-Framework/</loc>
-    <lastmod>2023-03-29</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://example.com/tags/Go-Programming-Patterns/</loc>
-    <lastmod>2023-03-29</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.com/tags/gRPC/</loc>
     <lastmod>2023-03-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -935,6 +921,13 @@
   </url>
   
   <url>
+    <loc>http://example.com/tags/gRPC/</loc>
+    <lastmod>2023-03-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://example.com/tags/Kubernetes/</loc>
     <lastmod>2023-03-29</lastmod>
     <changefreq>daily</changefreq>
@@ -943,6 +936,13 @@
   
   <url>
     <loc>http://example.com/tags/Digest/</loc>
+    <lastmod>2023-03-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://example.com/tags/Go-etcd/</loc>
     <lastmod>2023-03-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
