@@ -886,6 +886,13 @@
   </url>
   
   <url>
+    <loc>http://example.com/tags/Go-etcd/</loc>
+    <lastmod>2023-03-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://example.com/tags/Go-Framework/</loc>
     <lastmod>2023-03-29</lastmod>
     <changefreq>daily</changefreq>
@@ -936,13 +943,6 @@
   
   <url>
     <loc>http://example.com/tags/Digest/</loc>
-    <lastmod>2023-03-29</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.com/tags/Go-etcd/</loc>
     <lastmod>2023-03-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
