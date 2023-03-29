@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">117</span>
+          <span class="site-state-item-count">120</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,6 +201,557 @@
       
 
       
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/28/sharing-5min/2022-03/2022Week13/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/28/sharing-5min/2022-03/2022Week13/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week13</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-28 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-28T12:00:00+08:00">2022-03-28</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-02 14:45:54" itemprop="dateModified" datetime="2022-04-02T14:45:54+08:00">2022-04-02</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
+<h2 id="2022-03-28-Go1-5的GC概览3-Tri-color"><a href="#2022-03-28-Go1-5的GC概览3-Tri-color" class="headerlink" title="2022-03-28 Go1.5的GC概览3 - Tri-color"></a>2022-03-28 Go1.5的GC概览3 - Tri-color</h2><p>在标记阶段，Go语言使用了 tri-color，也就是著名的三色标记法。在这篇文章里，详细地描述了这部分的实现。</p>
+<blockquote>
+<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a></p>
+</blockquote>
+<p>三色标记法是一种堆上对象的图算法。这里图的边Edge即指针，所以这里的关系是<strong>单向</strong>的。</p>
+<blockquote>
+<p> In a tri-color collector, every object is either white, grey, or black and we view the heap as a graph of connected objects.</p>
+</blockquote>
+<p>接下来，就是具体的三色标记法的工作了：</p>
+<blockquote>
+<p>At the start of a GC cycle all objects are white. The GC visits all <em>roots</em>, which are objects directly accessible by the application such as globals and things on the stack, and colors these grey. The GC then chooses a grey object, blackens it, and then scans it for pointers to other objects. When this scan finds a pointer to a white object, it turns that object grey. This process repeats until there are no more grey objects. At this point, white objects are known to be unreachable and can be reused.</p>
+</blockquote>
+<p>这一段内容很长，但描述得很直白，我简单概括下：</p>
+<ul>
+<li>GC初始化<ul>
+<li>将所有的对象设置为 <strong>白色</strong></li>
+</ul>
+</li>
+<li>Mark的初始化<ul>
+<li>将全局变量和栈上的对象，标记为 <strong>灰色</strong></li>
+<li>这些灰色对象会被放入队列中</li>
+</ul>
+</li>
+<li>Mark的核心流程<ul>
+<li>从队列中弹出一个灰色对象</li>
+<li>访问这个灰色对象的指针，将<strong>白色对象</strong>的转变为<strong>灰色对象</strong>，并加入到队列中</li>
+<li>将这个<strong>灰色对象</strong>标记为<strong>黑色</strong>，表示访问完毕</li>
+<li>重复上述过程，直到队列为空</li>
+</ul>
+</li>
+<li>清理阶段<ul>
+<li>将所有剩余的 <strong>白色对象</strong> 进行垃圾回收</li>
+</ul>
+</li>
+</ul>
+<p>我们重点看这里的 <strong>Mark的核心流程</strong>，里面有个关键问题：<code>mutator</code>（也就是运行中的程序）在不停地修改对象的指针，所以会出现各种异常情况，比如说让一个黑色对象指向白色对象（正常情况下，黑色对象指向的是黑色或者灰色）。</p>
+<blockquote>
+<p>网上有很多关于三色标记的资料，不太清楚的朋友需要自行搜索，比如 <a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000022030353">https://segmentfault.com/a/1190000022030353</a> 。</p>
+<p>重点可以结合写屏障要解决的问题，进行理解。</p>
+</blockquote>
+<p>这个时候，就引入了我们前面说的内容 - <strong>写屏障write barrier</strong>。</p>
+<blockquote>
+<p>Go’s write barrier colors the now-reachable object grey if it is currently white, ensuring that the garbage collector will eventually scan it for pointers.</p>
+</blockquote>
+<p>写屏障即会在每次发生指针变更时，加入一小段代码：比如检测到新的被指向的对象是白色，就将它修改为灰色，需要扫描。这只是一个简单例子，后续Go语言对写屏障进行了迭代，采用的写屏障技术是 <strong>混合写屏障</strong>，也就是 <strong>插入写屏障</strong>+<strong>删除写屏障</strong>。</p>
+<h2 id="2022-04-02-Go1-5的GC概览4-深入细节"><a href="#2022-04-02-Go1-5的GC概览4-深入细节" class="headerlink" title="2022-04-02 Go1.5的GC概览4 - 深入细节"></a>2022-04-02 Go1.5的GC概览4 - 深入细节</h2><p>今天我们会开始抠细节，来加深大家对这块的理解。</p>
+<blockquote>
+<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a></p>
+</blockquote>
+<p><strong>Of course the devil is in the details.</strong> 细节才是恶魔，但只有去抠这些细节，我们才能掌握GC的实现。作者在文中抛出了很多问题，我们挑出3个关键性的问题进行回答。</p>
+<h3 id="When-do-we-start-a-GC-cycle"><a href="#When-do-we-start-a-GC-cycle" class="headerlink" title="When do we start a GC cycle?"></a>When do we start a GC cycle?</h3><p><strong>一个主动调用和两个被动调用</strong>。</p>
+<p>主动调用指的是代码调用<code>runtime.GC()</code>函数，被动调用包括 周期性强制执行（如2min）和GC Pacing算法。</p>
+<p>其中GC Pacing主要和堆上空间的增长速度相关，增长越快，GC频率越快。</p>
+<h3 id="How-do-we-know-where-the-roots-are"><a href="#How-do-we-know-where-the-roots-are" class="headerlink" title="How do we know where the roots are?"></a>How do we know where the roots are?</h3><p>标记阶段的根节点来自于哪里呢？从程序的维度来说，包括 <strong>全局变量</strong> 和 <strong>Goroutine的栈上变量</strong>。</p>
+<p>全局变量，对应到进程结构中的bss段(未初始化的全局变量)和data段(已初始化的全局变量)。bss和data段的概念是通用的，也就是Go、C++等任意进程都是这样的数据结构。</p>
+<p>而Goroutine栈上变量是Go的runtime自己维护的。</p>
+<h3 id="How-do-we-know-where-in-an-object-pointers-are-located"><a href="#How-do-we-know-where-in-an-object-pointers-are-located" class="headerlink" title="How do we know where in an object pointers are located?"></a>How do we know where in an object pointers are located?</h3><p>在一个对象中，我们如何识别出对象内部的指针呢？</p>
+<p>首先，我们要了解到，一个对象在内存中是一段连续0和1。由于Go语言的强类型特点，我们可以清楚地计算出这个结构体的总大小、以及内部各个成员变量的大小。</p>
+<p>对象内部的变量分为两类：具体的数值和指针。具体的数值，如int64 a=1，那就在开辟一个可以存储int64大小空间段，存下1这个数值；而指针呢，如*int64这个指针，它在堆上先存储int64具体的值，记录它的起始地址如0x1111，结构体内部开辟一个指针大小的空间，记录地址的值0x1111。</p>
+<p>如果抛开强类型，我们看到程序中的数值是无法区分的，比如上述例子中的1可以被理解地址0x0001，而0x1111也可以被理解为是具体的数字。强类型的语言是一种解决方案，它能在编译期就识别出具体的类型。</p>
+<blockquote>
+<p>为了延伸思考，这边也提一下另一种方案：</p>
+<p>扩展数据，将它拆分为 对象类型（如前x位）+数据 。比如，</p>
+<ul>
+<li>数值1 = int64数据 + 1</li>
+<li>指针1 = int64的指针 + 指针起始地址</li>
+</ul>
+<p>这就有JAVA里“一切皆对象”的影子了。</p>
+</blockquote>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>细节既是恶魔，也提供了我们梳理知识体系的过程。虽然大多数的时间我们没法掌握细节，但只要怀着一颗保持探索的心，总是能不断往前进的。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/21/sharing-5min/2022-03/2022Week12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/21/sharing-5min/2022-03/2022Week12/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week12</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-21 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-21T12:00:00+08:00">2022-03-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-04-06 10:29:31" itemprop="dateModified" datetime="2022-04-06T10:29:31+08:00">2022-04-06</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
+<h2 id="2022-03-21-Go垃圾回收之旅6-ROC与Write-Barrier"><a href="#2022-03-21-Go垃圾回收之旅6-ROC与Write-Barrier" class="headerlink" title="2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier"></a>2022-03-21 Go垃圾回收之旅6 - ROC与Write Barrier</h2><p>今天，我们来看GC的一种设计 - ROC(Request Oriented Collector)。虽然ROC并没有被实际工程采用，但很值得我们学习，加深理解。</p>
+<blockquote>
+<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
+</blockquote>
+<h3 id="ROC-面向请求的回收器"><a href="#ROC-面向请求的回收器" class="headerlink" title="ROC-面向请求的回收器"></a>ROC-面向请求的回收器</h3><p>ROC提出了一种假设：</p>
+<p><strong>Objects associated with a completed request or a dormant goroutine die at a higher rate than other object.</strong></p>
+<p>与一个完整请求 或 休眠 goroutine 所关联的对象们`，比其它对象更容易死亡。</p>
+<p>我们假设存在两个Goroutine - G1和G2，它们的对象分为如下三类：</p>
+<ul>
+<li>G1私有</li>
+<li>G2私有</li>
+<li>G1和G2共有</li>
+</ul>
+<p>当G1的生命周期结束时，即Goroutine退出，G1私有的的对象就应该被回收，这一点很容易理解。</p>
+<p>但是，程序实际运行的过程中，对象一直在变化，也就是G1私有的对象变成了G1和G2共有的。这个时候，我们就必须引入一个新的概念 - write barrier。</p>
+<h3 id="Write-Barrier-写屏障"><a href="#Write-Barrier-写屏障" class="headerlink" title="Write Barrier-写屏障"></a>Write Barrier-写屏障</h3><p>我们通过一句话来了解的写屏障功能：</p>
+<blockquote>
+<p>Whenever there was a write, we would have to see if it was writing a pointer to a private object into a public object.</p>
+</blockquote>
+<p>也就是说，当有个写请求时，我们就必须检查它是否将一个指针从私有对象变成了公共对象。这里注意两个点：</p>
+<ol>
+<li><strong>对象的复杂性</strong> - 如果一个对象从私有变成共有，那么它内部的子对象也需要变化</li>
+<li><strong>针对指针</strong> - 不用考虑一些值拷贝的对象</li>
+</ol>
+<p>由于第一点的存在，ROC需要始终开启写屏障，给整个程序带来了大量的成本，所以ROC最终没有被采用。</p>
+<blockquote>
+<p>我们不妨延伸地思考一下，当一个共有对象变成私有时，该怎么操作？我这边提供2个思路：</p>
+<ol>
+<li>每次删除指针引用时，看一下这个对象、是否只有一个Goroutine的引用，是的话转为私有</li>
+<li>不处理。等这个对象没有任何引用时，用GC清理</li>
+</ol>
+</blockquote>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>ROC的思想很朴素，非常符合我们的直觉，具有一定的参考价值。</p>
+<p>而写屏障目前被广泛地应用在各类GC中，今天我们也借ROC对它有了初步印象。</p>
+<h2 id="2022-03-24-Go1-5的GC概览1-官方Talk"><a href="#2022-03-24-Go1-5的GC概览1-官方Talk" class="headerlink" title="2022-03-24 Go1.5的GC概览1 - 官方Talk"></a>2022-03-24 Go1.5的GC概览1 - 官方Talk</h2><p>在上一个系列，我们通过阅读 <strong>Go垃圾回收之旅</strong> 的相关资料，对Go中GC的很多概念有了基本的认识，这就给我们接下来的学习铺好了路。</p>
+<p>今天开始，我们将一起阅读下一篇内容，也就是官方博客对Go1.5版本GC的讲解。</p>
+<blockquote>
+<p>原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/go15gc">https://go.dev/blog/go15gc</a> </p>
+<p>为什么我不选择最新版本进行讲解呢？</p>
+<p>Go1.5的GC实现是具有一定里程碑意义的，实现了 <strong>并发标记清扫</strong>，与最新的GC实现差异并不大，作为入门学习资料更容易理解。</p>
+</blockquote>
+<p>在这篇博客中，作者先引入了一个Talk，里面重点讲述了GC的实现与性能，而实现部分是我们今天的重点。</p>
+<blockquote>
+<p>请跳转阅读 - <a target="_blank" rel="noopener" href="https://go.dev/talks/2015/go-gc.pdf">https://go.dev/talks/2015/go-gc.pdf</a></p>
+</blockquote>
+<h3 id="GC相关的差异（Go与Java）"><a href="#GC相关的差异（Go与Java）" class="headerlink" title="GC相关的差异（Go与Java）"></a>GC相关的差异（Go与Java）</h3><table>
+<thead>
+<tr>
+<th align="center">维度</th>
+<th align="center">GO</th>
+<th align="center">java</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">运行线程</td>
+<td align="center">1000+Goroutine</td>
+<td align="center">10+线程</td>
+</tr>
+<tr>
+<td align="center">同步机制</td>
+<td align="center">channel</td>
+<td align="center">锁</td>
+</tr>
+<tr>
+<td align="center">运行时实现</td>
+<td align="center">Go语言实现</td>
+<td align="center">C语言实现</td>
+</tr>
+<tr>
+<td align="center">内存分布</td>
+<td align="center">具备局部性</td>
+<td align="center">通过指针跳转</td>
+</tr>
+</tbody></table>
+<h3 id="GC概览"><a href="#GC概览" class="headerlink" title="GC概览"></a>GC概览</h3><ol>
+<li>Scan Phase 扫描</li>
+<li>Mark Phase 标记</li>
+<li>Sweep Phase 清理</li>
+</ol>
+<blockquote>
+<p>关于这三个阶段是怎么实现的，可以对照着ppt看，或者观看视频 - <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV18r4y1q7p3">https://www.bilibili.com/video/BV18r4y1q7p3</a></p>
+</blockquote>
+<p>关于更细节的 <strong>GC Algorithm Phases</strong> 实现，我们会在下一讲描述。</p>
+<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>本篇内容主要结合这个Talk，讲述了Go1.5版本的GC基本实现，希望大家能对GC背景和三阶段操作有基本了解。</p>
+<h2 id="2022-03-26-Go1-5的GC概览2-GC-Algorithm-Phases"><a href="#2022-03-26-Go1-5的GC概览2-GC-Algorithm-Phases" class="headerlink" title="2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases"></a>2022-03-26 Go1.5的GC概览2 - GC Algorithm Phases</h2><p>在上一篇，我们从这篇Talk - <a target="_blank" rel="noopener" href="https://go.dev/talks/2015/go-gc.pdf">https://go.dev/talks/2015/go-gc.pdf</a> 里了解标记清理算法。</p>
+<p>今天，我们将对着下面这张Go1.5 GC算法的各个阶段，串讲一下GC这个过程。</p>
+<p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go1.5-gc.png" alt="Go 1.5 GC"></p>
+<h3 id="Stack-scan-栈扫描"><a href="#Stack-scan-栈扫描" class="headerlink" title="Stack scan 栈扫描"></a>Stack scan 栈扫描</h3><p>栈扫描的启动阶段有一小段STW，这是因为GC要启动写屏障，所以必须先暂停所有Goroutine的运行。这个时间很短，大概耗时在几十微秒。</p>
+<p>runtime中的写屏障的数据结构如下：    </p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> writeBarrier <span class="keyword">struct</span> &#123;</span><br><span class="line">	enabled <span class="keyword">bool</span>    <span class="comment">// compiler emits a check of this before calling write barrier</span></span><br><span class="line">	pad     [<span class="number">3</span>]<span class="keyword">byte</span> <span class="comment">// compiler uses 32-bit load for &quot;enabled&quot; field</span></span><br><span class="line">	needed  <span class="keyword">bool</span>    <span class="comment">// whether we need a write barrier for current GC phase</span></span><br><span class="line">	cgo     <span class="keyword">bool</span>    <span class="comment">// whether we need a write barrier for a cgo check</span></span><br><span class="line">	alignme <span class="keyword">uint64</span>  <span class="comment">// guarantee alignment so that compiler can use a 32 or 64-bit load</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成启动后，就进入这一步的工作：<strong>从全局变量和各个Goroutine的栈上收集指针信息</strong>。这一步，也就是初始化所有标记对象的集合。</p>
+<h3 id="Mark-标记"><a href="#Mark-标记" class="headerlink" title="Mark 标记"></a>Mark 标记</h3><p>标记阶段即根据扫描出的初始指针对象，做BFS遍历，也就将所有可触达的对象加上标记。这里有一句话：</p>
+<p><strong>Write barrier tracks pointer changes by mutator.</strong> 也就是在标记阶段中，如果有程序变更了指针，就需要添加写屏障。</p>
+<p>关于写屏障的实现细节我们先不细聊，先一起来看看GC中的三个概念：</p>
+<ol>
+<li>mutator：一般指应用程序，在运行过程中，会不停地修改堆对象里的指向关系</li>
+<li>collector：垃圾回收期，更多地是指GC线程</li>
+<li>allocator：内存分配器，也就是程序向操作系统申请内存、释放内存，这一点在GC里很重要，往往被我们忽视</li>
+</ol>
+<h3 id="Mark-Termination-标记结束"><a href="#Mark-Termination-标记结束" class="headerlink" title="Mark Termination 标记结束"></a>Mark Termination 标记结束</h3><p>完成标记后，主要分为三个工作：</p>
+<ol>
+<li>Rescan - 重新扫描其中变化的内容</li>
+<li>Clean Up Tasks - 这里的清理并不是清理对象，而是对整个Mark标记的收尾工作，比如收缩栈</li>
+<li>关闭写屏障</li>
+</ol>
+<p>注意，这一整个阶段都是STW的。</p>
+<h3 id="Sweep-清扫"><a href="#Sweep-清扫" class="headerlink" title="Sweep 清扫"></a>Sweep 清扫</h3><p>Sweep就是将未标记的堆上对象进行清理，回收资源。这一阶段是并发的。</p>
+<p>值得一提的是，我们之前谈论过的GC Paging算法就是在这一步启动的，用在估算下一次启动GC的最佳时间。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/03/14/sharing-5min/2022-03/2022Week11/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Junedayday">
+      <meta itemprop="description" content="Blog信息">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Junedayday Blog">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/14/sharing-5min/2022-03/2022Week11/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week11</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-14 12:00:00" itemprop="dateCreated datePublished" datetime="2022-03-14T12:00:00+08:00">2022-03-14</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-03-24 22:20:32" itemprop="dateModified" datetime="2022-03-24T22:20:32+08:00">2022-03-24</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57591641299799_.pic_hd.jpg" alt="2020-03"></p>
+<h2 id="2022-03-14-Go垃圾回收之旅3-静态编译"><a href="#2022-03-14-Go垃圾回收之旅3-静态编译" class="headerlink" title="2022-03-14 Go垃圾回收之旅3 - 静态编译"></a>2022-03-14 Go垃圾回收之旅3 - 静态编译</h2><p>Go的源码会被编译成二进制文件，然后直接在对应的操作系统上运行。那么，这对学习GC有什么意义呢？让我们一起看看今天的内容。</p>
+<blockquote>
+<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
+</blockquote>
+<p>我们先和JAVA程序做个对比：</p>
+<ul>
+<li><strong>Go</strong><ul>
+<li>Go编译的二进制文件</li>
+<li>Linux</li>
+</ul>
+</li>
+<li><strong>JAVA</strong><ul>
+<li>Java打包的JAR文件</li>
+<li>JVM</li>
+<li>Linux</li>
+</ul>
+</li>
+</ul>
+<p>从这个架构不难猜到，上文谈到的 运行时，Go语言是直接编译到二进制文件里的；而JAVA是在JVM里实现的。</p>
+<p>Go的这种实现方式，主要优劣点如下：</p>
+<ul>
+<li>优点： 程序的运行更具备 <strong>确定性</strong>，即开发人员可以根据代码，预测到程序的运行逻辑，更容易针对性地优化</li>
+<li>缺点：运行时没有<code>JIT</code>机制，无法针对具体的运行结果进行反馈优化</li>
+</ul>
+<p><code>JIT</code>的优化方向很多，我这里举一个热点函数优化的例子：</p>
+<ol>
+<li>在代码中，函数f需要输入参数a和b</li>
+<li>运行了一段时间后，<code>JIT</code>发现b的输入参数一直都是某个固定值b1</li>
+<li>这时，<code>JIT</code>进行编译优化，将函数f编译成一个新函数f1<ol>
+<li>f1只需要入参a</li>
+<li>b参数被替换为固定值b1</li>
+<li>减少参数复杂度，能提升程序效率，尤其是热点函数</li>
+</ol>
+</li>
+<li>如果参数b突然变成了b2，那<code>JIT</code>就会从f1回退到f</li>
+</ol>
+<p>简单来说：<strong>Go程序会怎么运行，往往在编码阶段就可以预期到了</strong>；而JAVA引入的<code>JIT</code>能力，可以在程序运行后，根据具体的运行情况，做针对性地优化，提升效率的同时也带了很多的不确定性。</p>
+<p>两种实现方式各有利弊，团队可以根据实际情况自行选择。单从Go语言开发者来说，排查线上问题相对有<code>JIT</code>机制的JAVA程序简单很多。</p>
+<p>这种确定性也让Go的GC相对简单不少，方便我们的学习。</p>
+<h2 id="2022-03-15-Go垃圾回收之旅4-性能压力下的Go程序"><a href="#2022-03-15-Go垃圾回收之旅4-性能压力下的Go程序" class="headerlink" title="2022-03-15 Go垃圾回收之旅4 - 性能压力下的Go程序"></a>2022-03-15 Go垃圾回收之旅4 - 性能压力下的Go程序</h2><p>在<a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">这篇演讲</a>中，有这么一段很有意思的描述：</p>
+<blockquote>
+<p>Out of memory, OOMs, are tough on Go; </p>
+<p>temporary spikes in memory usage should be handled by increasing CPU costs, not by aborting. </p>
+<p>Basically if the GC sees memory pressure it informs the application that it should shed load. Once things are back to normal the GC informs the application that it can go back to its regular load.</p>
+</blockquote>
+<p>这段话包含了Go语言的GC，在面对CPU和内存压力下的决策：</p>
+<ol>
+<li><strong>Go程序很少会OOM</strong><ol>
+<li>这句话有一定前提，即内存设置是合理的，代码也没有明显的内存泄露问题</li>
+<li>至于具体原因，我们看下文</li>
+</ol>
+</li>
+<li><strong>业务高峰时内存使用率过高，应该通过提升CPU能力来解决，而不是中止程序</strong><ol>
+<li>自动GC是需要CPU的计算资源做支持，来清理无用内存</li>
+<li>要保证内存资源能支持程序的正常运行，有两个思路：<ol>
+<li>减少已有内存 - 通过GC来回收无用的内存</li>
+<li>限制新增内存 - 即运行时尽可能地避免新内存的分配，最简单的方法就是不运行代码</li>
+</ol>
+</li>
+<li>显然，中止程序对业务的影响很大，我们更倾向于通过GC去回收内存，腾出新的空间</li>
+</ol>
+</li>
+<li><strong>GC压力高时，通知应用减少负载；而当恢复正常后，GC再通知应用可以恢复到正常模式了</strong><ol>
+<li>我们可以将上述分为两类工作<ol>
+<li>业务逻辑的Goroutine</li>
+<li>GC的Goroutine</li>
+</ol>
+</li>
+<li>这两类Goroutine都会消耗CPU资源，区别在于：<ol>
+<li>运行业务逻辑往往会增加内存</li>
+<li>GC是回收内存</li>
+</ol>
+</li>
+<li>这里就能体现出Go运行时的策略<ol>
+<li>内存压力高时，GC线程更容易抢占到CPU资源，进行内存回收</li>
+<li>代价是业务处理逻辑会有一定性能损耗，被分配的计算资源减少</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>GC最直观的影响就体现在延迟上。尤其是在STW - Stop The World情况下，程序会暂停所有非GC的工作，进行全量的垃圾回收。即便整个GC只花费了1s，所有涉及到这个程序的业务调用，都会增加1s延迟；在微服务场景下，这个问题会变得尤为复杂。</p>
+<p>而GC的方案迭代，最直观的效果就体现在这个延迟优化上。</p>
+<h2 id="2022-03-17-Go垃圾回收之旅5-GC-Pacer"><a href="#2022-03-17-Go垃圾回收之旅5-GC-Pacer" class="headerlink" title="2022-03-17 Go垃圾回收之旅5 - GC Pacer"></a>2022-03-17 Go垃圾回收之旅5 - GC Pacer</h2><p>今天我们会重点讨论Go语言GC Pacer这个概念。</p>
+<blockquote>
+<p>《Go垃圾回收之旅》原文链接 - <a target="_blank" rel="noopener" href="https://go.dev/blog/ismmkeynote">https://go.dev/blog/ismmkeynote</a></p>
+</blockquote>
+<p>要理解透彻GC Pacer的非常困难，底层实现细节必须深入到源码。这里，我们会通过分享中的关键性描述，来思考GC Pacer的设计理念。</p>
+<blockquote>
+<p>It is basically based on a feedback loop that determines when to best start a GC cycle. </p>
+</blockquote>
+<p>我们聚焦到两个词：</p>
+<ul>
+<li><code>feedback loop</code> 反馈循环，GC Pacer是会根据实际GC情况会不断迭代、反馈的</li>
+<li><code> when to best start a GC cycle</code> 强调了GC Pacer的目标 - 为了决定一个最佳启动GC的时机</li>
+</ul>
+<p>GC Pacer的内部原理也和它的定义非常贴切，它是根据步长来决定GC的：</p>
+<ul>
+<li>对象：堆上的内存分配</li>
+<li>步长：设定值，如100%</li>
+<li>触发时机：当前堆上内存大小 &gt;= 上次堆上内存大小 * (1 + 100%)</li>
+</ul>
+<p>简单来说，就是一种 <strong>按比例增长</strong> 的触发机制。但这个机制没有那么简单，我们看下面这段：</p>
+<blockquote>
+<p>If need be, the Pacer slows down allocation while speeding up marking. </p>
+<p>At a high level the Pacer stops the Goroutine, which is doing a lot of the allocation, and puts it to work doing marking. </p>
+</blockquote>
+<p>这两句描述和我们上一讲的内容对应上了 - 在一定的性能压力下，Pacer会减少内存的分配，而花更多的时间在对象的标记（marking）上，它是GC里的最耗性能的步骤。</p>
+<p>对应到上面提到的反馈呢，也就是GC Pacer并不是单纯的一种 按比例增长 的触发机制，还有一些其余因素的影响：比如，当前这次的GC花费的CPU计算资源与标记的耗时超过了预期，表示当前整个GC存在一定压力，下次的GC的开始时间需要适当提前。</p>
+<p>GC Pacer最近也重新做了一次大的改动，有兴趣的可以参考这篇文章：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/a216b56e743c5b6b300b3ef1673ee62684b5b63b/design/44167-gc-pacer-redesign.md">https://go.googlesource.com/proposal/+/a216b56e743c5b6b300b3ef1673ee62684b5b63b/design/44167-gc-pacer-redesign.md</a></p>
+</blockquote>
+<p>深入研究GC Pacer需要很多数学知识储备，留给有兴趣的同学自行探索了。</p>
+<blockquote>
+<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
+<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
+<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
+<p>公众号: golangcoding</p>
+<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+  
+  
+  
+
       
   
   
@@ -1637,422 +2188,6 @@
 <p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
 </blockquote>
 
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/02/go-tip/go-tip-14/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/02/02/go-tip/go-tip-14/" class="post-title-link" itemprop="url">Go语言技巧 - 14.【浅析微服务框架】go-zero概览</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-02-02 12:00:00 / 修改时间：21:59:21" itemprop="dateCreated datePublished" datetime="2022-02-02T12:00:00+08:00">2022-02-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
-<h2 id="go-zero概况"><a href="#go-zero概况" class="headerlink" title="go-zero概况"></a>go-zero概况</h2><p><code>go-zero</code>是当前处于CNCF孵化中的一个<code>Go</code>z语言框架项目，在Github上的star数目前达到14.3K。</p>
-<p>作为一款起源于国内的项目，<code>go-zero</code>的中文资料比较齐全，对国内开发者相对友好。但前景如何，还需要进一步的观察。今天我们一起来了解这个项目。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/02/02/go-tip/go-tip-14/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/24/sharing-5min/2022-01/2022Week04/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/01/24/sharing-5min/2022-01/2022Week04/" class="post-title-link" itemprop="url">五分钟技术小分享 - 2022Week04</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-01-24 12:00:00" itemprop="dateCreated datePublished" datetime="2022-01-24T12:00:00+08:00">2022-01-24</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-01-29 12:40:40" itemprop="dateModified" datetime="2022-01-29T12:40:40+08:00">2022-01-29</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%AF%8F%E6%97%A5%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">每日技术分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/57571641299795_.pic_hd.jpg" alt="2022-01"></p>
-<h2 id="2022-01-24-CNCF-Linkerd"><a href="#2022-01-24-CNCF-Linkerd" class="headerlink" title="2022-01-24 CNCF-Linkerd"></a>2022-01-24 CNCF-Linkerd</h2><p>今天我们来看 <strong>Orchestration &amp; Management 编排和管理</strong> 层最后一个核心项目 - Linkerd。从严格意义上来说，我们应称它为Linkerd2，区别于原来的1.0版本。</p>
-<blockquote>
-<p>Linkerd是Service Mesh的第一个产品，但在Google的Istio入场后在功能与性能上完全超越。这一段的历史很有意思，大家可以自行搜索了解。</p>
-</blockquote>
-<p>关于Service Mesh，我们已经聊过两款CNCF中的软件了 - Envoy/Contour，这个Linkerd是两者的结合。我们来看一下它的架构示意图，整体来说分为三块：</p>
-<img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/control-plane.png" alt="Linkerd2" style="zoom:50%;" />
-
-<ol>
-<li>CLI - 客户端，对Linkerd2进行管理</li>
-<li>Control Plane 控制平面<ol>
-<li>destination 获取各类信息，如服务发现、网络策略、性能和监控指标</li>
-<li>indentity 主要是TLS安全相关</li>
-<li>proxy-injector 是一种Kubernetes的Admission Controller，用于对初始化pod注入linkerd相关的信息</li>
-</ol>
-</li>
-<li>Data Plane 数据平面<ol>
-<li>linkerd-proxy 核心的功能实现，包括代理、路由、TLS、限流等等</li>
-<li>linkerd-init 是一种Kubernetes的Init Containter，用iptables的特性将Pod的流量都导向linkerd-proxy</li>
-</ol>
-</li>
-</ol>
-<p>Linkerd的架构非常清晰明了，与Kubernetes的特性紧密结合。我们也不难看到，它的核心能力非常依赖linkerd-proxy这个组件。linkerd-proxy采用了Rust语言编写，而对应的Envoy使用的是C++，从性能来看两者相差无几，更多的是语言生态上的选择不同。</p>
-<p>我们再一起读一段<a target="_blank" rel="noopener" href="https://linkerd.io/what-is-a-service-mesh/">Linkerd官方对Service Mesh的定义</a>：</p>
-<blockquote>
-<p>A service mesh like Linkerd is a tools for adding observability, security, and reliability features to “cloud native” applications by transparently inserting this functionality at the platform layer rather than the application layer.</p>
-</blockquote>
-<ul>
-<li><p>observability - 可观察性：logging、metrics、tracing</p>
-</li>
-<li><p>security - 安全性：TLS等特性</p>
-</li>
-<li><p>reliability - 可靠性：体现在对网络层的统一管理</p>
-</li>
-</ul>
-<p>从目前来看，Linkerd仍处于一个比较早期的阶段，对标Istio还有大量的功能缺失，我在短期内不太看好。不过它引入了Rust语言有可能吸引一批优秀的人才，成为突破口。</p>
-<h2 id="2022-01-25-Go1-18的两个教程"><a href="#2022-01-25-Go1-18的两个教程" class="headerlink" title="2022-01-25 Go1.18的两个教程"></a>2022-01-25 Go1.18的两个教程</h2><p>在1月初，我们已经一起看了Go官方对1.18的新特性讲解，想回顾的朋友可以点击这个链接：<a target="_blank" rel="noopener" href="https://junedayday.github.io/2022/01/04/sharing-5min/2022-01/2022Week01/#2022-01-04-Go1-18%E6%A6%82%E8%A7%88">Go1.18概览</a>。前几天，官方又发布了对泛型和Fuzzing的两个教程，我们再一起浏览下，查漏补缺。</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://go.dev/doc/tutorial/generics">Tutorial: Getting started with generics</a></li>
-<li><a target="_blank" rel="noopener" href="https://go.dev/doc/tutorial/fuzz">Tutorial: Getting started with fuzzing</a></li>
-</ul>
-<h3 id="Generics"><a href="#Generics" class="headerlink" title="Generics"></a>Generics</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SumIntsOrFloats</span>[<span class="title">K</span> <span class="title">comparable</span>, <span class="title">V</span> <span class="title">int64</span> | <span class="title">float64</span>]<span class="params">(m <span class="keyword">map</span>[K]V)</span> <span class="title">V</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> s V</span><br><span class="line">    <span class="keyword">for</span> _, v := <span class="keyword">range</span> m &#123;</span><br><span class="line">        s += v</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> s</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>comparable 是个关键词，指的是支持操作符<code>==</code> 和 <code>!=</code></li>
-<li>int64 | float64 则用简洁的语法表示了两种支持的类型</li>
-</ul>
-<p>但第二点，如果支持的类型太多，就需要做一次抽象，如</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Number <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="keyword">int64</span> | <span class="keyword">float64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SumNumbers</span>[<span class="title">K</span> <span class="title">comparable</span>, <span class="title">V</span> <span class="title">Number</span>]<span class="params">(m <span class="keyword">map</span>[K]V)</span> <span class="title">V</span></span> &#123;</span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>Go语言的泛型表示方法非常简单，其支持的能力也很有限。相对于C++与JAVA中的泛型，无疑逊色了很多。我们可以简单地归纳Go泛型的使用场景：用于 <strong>基础类型</strong> 的通用操作，如int/int32/int64/float64等这种重复性很高的基本运算。</p>
-<p>作为一种标准，Go的泛型落地非常坎坷，短期内官方也不太可能在这块扩增新的特性，所以Go的泛型适用性会比较窄。</p>
-<p>随着1.18的完全落地，我们可以在很多基础库中看到泛型的实践，到时候我们再可以根据具体case进行了解。</p>
-<h3 id="Fuzzing"><a href="#Fuzzing" class="headerlink" title="Fuzzing"></a>Fuzzing</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">FuzzReverse</span><span class="params">(f *testing.F)</span></span> &#123;</span><br><span class="line">    testcases := []<span class="keyword">string</span>&#123;<span class="string">&quot;Hello, world&quot;</span>, <span class="string">&quot; &quot;</span>, <span class="string">&quot;!12345&quot;</span>&#125;</span><br><span class="line">    <span class="keyword">for</span> _, tc := <span class="keyword">range</span> testcases &#123;</span><br><span class="line">        f.Add(tc)  <span class="comment">// Use f.Add to provide a seed corpus</span></span><br><span class="line">    &#125;</span><br><span class="line">    f.Fuzz(<span class="function"><span class="keyword">func</span><span class="params">(t *testing.T, orig <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">        rev := Reverse(orig)</span><br><span class="line">        doubleRev := Reverse(rev)</span><br><span class="line">        <span class="keyword">if</span> orig != doubleRev &#123;</span><br><span class="line">            t.Errorf(<span class="string">&quot;Before: %q, after: %q&quot;</span>, orig, doubleRev)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> utf8.ValidString(orig) &amp;&amp; !utf8.ValidString(rev) &#123;</span><br><span class="line">            t.Errorf(<span class="string">&quot;Reverse produced invalid UTF-8 string %q&quot;</span>, rev)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相对于传统的单元测试，Fuzzing Test更强调一种 <strong>不确定性的输入</strong> 理念 - 由于输入的数据是随机的，输出往往是不确定的，那我们最好可以通过一定的操作，<strong>减少甚至消除输出的不确定性</strong>，才能保证测试的完备性：</p>
-<p>比如说，示例中对字符串的反转，转变成了两个测试点：</p>
-<ol>
-<li>Reversing a string twice preserves the original value 即两次反转后成为原字符串，</li>
-<li>The reversed string preserves its state as valid UTF-8 字符串依然为UTF-8编码格式</li>
-</ol>
-<p>从输入和输出来看，如果每个输入都对应枚举出一个输出，那就是单元测试；而Fuzzing Test的理念是尽可能地将输出做到可控，更方便地写各种测试。</p>
-<p>在实际工程中，能用到Fuzzing特性的地方很少，更多的还是依赖简单地单元测试保障我们的代码质量。</p>
-<h2 id="2022-01-26-如何避免分布式事务"><a href="#2022-01-26-如何避免分布式事务" class="headerlink" title="2022-01-26 如何避免分布式事务"></a>2022-01-26 如何避免分布式事务</h2><p>最近，有朋友和我交流分布式事务的实践心得，而我的建议是：<strong>尽量避免分布式事务</strong>。</p>
-<p>这里的避免并非完全的不要使用，毕竟像金融场景中，这还是一个必要的特性。但对于绝大多数系统，分布式事务带来的复杂度是非常高的，也需要很高的维护成本与理解成本，远超其收益，我不太建议大家刻意地使用这个技术。</p>
-<p>举一个简单的case - 用户下了一个订单，经过如下步骤：</p>
-<ol>
-<li>订单服务生成订单</li>
-<li>库存服务扣去库存</li>
-<li>付费服务完成扣款</li>
-<li>用户积分服务增加积分</li>
-</ol>
-<p>这时，最直观的解法是要有一套成熟的分布式事务的方案。但事实上，我更推荐在工程上采用下面两种解决方案，而其中的关键词就是 - <strong>补偿</strong>。</p>
-<h3 id="在MQ中重试"><a href="#在MQ中重试" class="headerlink" title="在MQ中重试"></a>在MQ中重试</h3><p>我们经常会利用MQ来解耦服务，那么自然会用它来驱动大量的消息。</p>
-<p>例如，我们将扣款请求放到MQ里，扣款服务处理成功后通过另一个MQ通知成功。而当扣款服务出现问题时、也就是扣款失败，常见的有2种选择：</p>
-<ol>
-<li>如果要求是必须成功的，消费时就不要返回成功，在服务中反复重试，即便MQ积压产生告警、再人工恢复；</li>
-<li>如果允许失败，那就设置一个最大重试次数，超过最大重试次数则通知给对应的补偿服务；</li>
-</ol>
-<h3 id="利用trace-id-ELK"><a href="#利用trace-id-ELK" class="headerlink" title="利用trace-id+ELK"></a>利用trace-id+ELK</h3><p>trace-id是分布式链路追踪的关键信息，用于串联信息；而ELK又通过日志收集系统，将这块收集到了一个系统。</p>
-<p>我们可以在生成订单时，同时记录这个关键性的trace-id，然后调用各个服务。有任何一个服务失败，我们就将订单状态修改为失败或超时；而数据不一致的问题，就由对应的补偿服务，根据这些有问题的订单的trace-id去分析。</p>
-<blockquote>
-<p>其实可以从这个方案延伸出类似的，比如直接将错误通过trace-id+信息发送给补偿服务，统一收集。</p>
-</blockquote>
-<h3 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h3><ol>
-<li>补偿不代表只能手动，我们可以在补偿服务内根据错误码，实现一定的自动化；</li>
-<li>补偿更多体现的是一种<strong>最终一致性</strong>的思想，会有延时，我们要保证中间状态的数据不会污染系统；</li>
-</ol>
-<p>在微服务+云原生时代，我们非常提倡 <strong>面向错误编程</strong>，正是为了能更好地面对各种不确定的异常case。分布式事务带来了大量的复杂度，目前也没有一套跨语言、跨组件的通用解决方案，目前主流几个方案对应用的侵入性很强，所以我不太建议大部分朋友在生产环境使用，而花更多时间学习相关理论、应付面试就行了。</p>
-<h2 id="2022-01-27-CNCF-TiKV"><a href="#2022-01-27-CNCF-TiKV" class="headerlink" title="2022-01-27 CNCF-TiKV"></a>2022-01-27 CNCF-TiKV</h2><p>了解完核心的 <strong>调度与管理</strong> 相关的软件后，我们接下来开始接触 <strong>应用定义与开发</strong> 的相关软件，这部分与我们实际开发接触最为紧密，也更容易理解。</p>
-<ul>
-<li>官网 - <a target="_blank" rel="noopener" href="https://tikv.org/">https://tikv.org/</a></li>
-<li>Github - <a target="_blank" rel="noopener" href="https://github.com/tikv/tikv">https://github.com/tikv/tikv</a></li>
-</ul>
-<p>官方的定义为：</p>
-<blockquote>
-<p>TiKV provides both raw and ACID-compliant transactional key-value API, which is widely used in online serving services, such as the metadata storage system for object storage service, the storage system for recommendation systems, the online feature store, etc.</p>
-</blockquote>
-<p>也就是TiKV支持 <strong>简单的与满足ACID事务性的KV存储</strong>，被应用在各种存储系统上，如关系型数据库、非关系型数据库、分布式文件系统，最具有代表性的即同属一个公司的TiDB。按官方的定义，我们可以将它对标Redis。</p>
-<p>我们结合TiKV的核心特性来看看。</p>
-<h3 id="Low-and-stable-latency"><a href="#Low-and-stable-latency" class="headerlink" title="Low and stable latency"></a>Low and stable latency</h3><blockquote>
-<p>RawKV’s average response time less than 1 ms (P99=10 ms).</p>
-</blockquote>
-<p>延迟是IO相关的软件很重要的特性。但对于这个特性，我们要注意两点：</p>
-<ol>
-<li>只针对简单KV，而不针对事务</li>
-<li>真实延迟很依赖存储介质</li>
-</ol>
-<p>从这点来看，在TiKV层面引入事务的特性前，需要我们要斟酌一下它对延迟的影响。</p>
-<h3 id="High-scalabilit"><a href="#High-scalabilit" class="headerlink" title="High scalabilit"></a>High scalabilit</h3><blockquote>
-<p>With the Placement Driver and carefully designed Raft groups, TiKV excels in horizontal scalability and can easily scale to 100+ terabytes of data. Scale-out your TiKV cluster to fit the data size growth without any impact on the application.</p>
-</blockquote>
-<p>强调了高扩展性，可支持100TB+的数据。</p>
-<p>TiKV采用了Raft作为分布式一致性的协议，这一点与Etcd一致。关于Raft这块是目前工程化的主流，相对于Paxos更容易落地。不过，各家在实现Raft时都或多或少有一些变种，这块我们暂时不细聊。</p>
-<h3 id="Consistent-distributed-transactions"><a href="#Consistent-distributed-transactions" class="headerlink" title="Consistent distributed transactions"></a>Consistent distributed transactions</h3><blockquote>
-<p>Similar to Google’s Spanner, TiKV (TxnKV mode) supports externally consistent distributed transactions.</p>
-</blockquote>
-<p>支持一致性的分布式事务。</p>
-<p>分布式事务对强一致性的业务非常有价值，但它的实现必然会带来一定的性能问题，尤其体现在延迟上。以金融服务为例，分布式事务能保证资金的一致性，不产生资损；但延迟问题又会带来一些异常case，所以需要做好权衡。</p>
-<h3 id="Adjustable-consistency"><a href="#Adjustable-consistency" class="headerlink" title="Adjustable consistency"></a>Adjustable consistency</h3><blockquote>
-<p>In RawKV and TxnKV modes, you can customize the balance between consistency and performance.</p>
-</blockquote>
-<p>对简单KV模式与事务性的KV模式，提供了可调节的一致性功能。</p>
-<p>这就是一致性与性能上的权衡。关于这点，大家可以了解一下ACID与BASE对业务的价值。从我的观察来看，目前越来越多的服务倾向于最终一致性，主要有以下优点：</p>
-<ol>
-<li><strong>对外部服务来说视角清晰，更容易理解</strong> - 从外部服务视角来看，本服务最终会趋于一致，而不需要关心各种异常的中间状态，这非常有助于微服务的边界划分；</li>
-<li><strong>服务更具健壮性</strong> - 软件系统的不稳定因素很多，最终一致性可以更好地处理这些异常。</li>
-</ol>
-<p>当然，对应的代价是该服务需要引入重试、幂等、异步校验、状态机、恢复日志等特性，自身的复杂度是比较高的。这些技术我也会在后面和大家分享。</p>
-<h2 id="2022-01-28-CNCF-Vitess"><a href="#2022-01-28-CNCF-Vitess" class="headerlink" title="2022-01-28 CNCF-Vitess"></a>2022-01-28 CNCF-Vitess</h2><p>今天我们来聊聊一款和关系型数据库相关的产品 - <code>Vitess</code>。<code>Vitess</code>的定位很简洁：</p>
-<blockquote>
-<p>A database clustering system for horizontal scaling of MySQL</p>
-</blockquote>
-<p>我们直接从架构图入手，来了解它是怎么实现 <strong>MySQL横向扩展</strong> 的。</p>
-<img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/20220127221720.png" style="zoom:50%;" />
-
-<p>我们关注最核心的两个模块：</p>
-<h3 id="VTTablet"><a href="#VTTablet" class="headerlink" title="VTTablet"></a>VTTablet</h3><blockquote>
-<p>A <em>tablet</em> is a combination of a <code>mysqld</code> process and a corresponding <code>vttablet</code> process, usually running on the same machine. Each tablet is assigned a <em>tablet type</em>, which specifies what role it currently performs.</p>
-</blockquote>
-<p>一个<code>Tablet</code>对应到一个具体的<code>MySQL</code>实例，类似于sidecar模式。我之前基于VTTablet做过一定的二次开发，和大家分享一下我对这块的认识：</p>
-<p><code>VTTablet</code>最核心实现，是 <strong>模拟一个MySQL，与真正的MySQL进行连接</strong>。所以，可以体现如下的特点：</p>
-<ol>
-<li>无侵入式 - 充分利用了MySQL集群间通信的协议，不会侵入原MySQL。这点能衍生出很多价值，例如兼容多版本的MySQL。</li>
-<li>性能较优 - 通过MySQL内部通信的协议交互。</li>
-<li>可扩展性强 - 从原先对大MySQL集群的维护，转变成了相对轻量级的<code>VTTablet</code>集群的维护</li>
-</ol>
-<h3 id="VTGate"><a href="#VTGate" class="headerlink" title="VTGate"></a>VTGate</h3><blockquote>
-<p>VTGate is a lightweight proxy server that routes traffic to the correct VTTablet servers and returns consolidated results back to the client. It speaks both the MySQL Protocol and the Vitess gRPC protocol. Thus, your applications can connect to VTGate as if it is a MySQL Server.</p>
-</blockquote>
-<p><code>VTGate</code>是网关层的角色，主要分三块功能：</p>
-<ol>
-<li>对外暴露出原生的MySQL协议与gRPC协议；</li>
-<li>对内维护与<code>VTTablet</code>集群的连接；</li>
-<li>核心依赖Topology服务中的数据，主要是<code>VTTablet</code>的状态数据和Admin的配置数据</li>
-</ol>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p><code>Vitess</code>是用Go语言编写的软件，我比较推荐对数据库原理感兴趣的朋友去阅读<code>VTTablet</code>相关的源码，从中你可以了解到很多MySQL的关键性功能，会比直接阅读MySQL的C++简单很多。比如我曾经做过的：</p>
-<ol>
-<li>SQL解析 - 用于自研的查询平台</li>
-<li>Binlog同步 - 用于MySQL到异构数据库的同步平台</li>
-</ol>
-<blockquote>
-<p>Github: <a target="_blank" rel="noopener" href="https://github.com/Junedayday/code_reading">https://github.com/Junedayday/code_reading</a></p>
-<p>Blog: <a target="_blank" rel="noopener" href="http://junes.tech/">http://junes.tech/</a></p>
-<p>Bilibili: <a target="_blank" rel="noopener" href="https://space.bilibili.com/293775192">https://space.bilibili.com/293775192</a></p>
-<p>公众号: golangcoding</p>
-<p> <img src="https://i.loli.net/2021/02/28/RPzy7Hjc9GZ8I3e.jpg" alt="二维码"></p>
-</blockquote>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/01/23/go-tip/go-tip-13/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Junedayday">
-      <meta itemprop="description" content="Blog信息">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Junedayday Blog">
-    </span>
-
-    
-    
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/01/23/go-tip/go-tip-13/" class="post-title-link" itemprop="url">Go语言技巧 - 13.【浅析微服务框架】Go-Kit概览</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-01-23 12:00:00" itemprop="dateCreated datePublished" datetime="2022-01-23T12:00:00+08:00">2022-01-23</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-01-27 15:02:49" itemprop="dateModified" datetime="2022-01-27T15:02:49+08:00">2022-01-27</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%88%90%E9%95%BF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">成长分享</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="https://cloud-fitter-1305666920.cos.ap-beijing.myqcloud.com/go-study.jpeg" alt="go-tip"></p>
-<h2 id="Go-Kit概况"><a href="#Go-Kit概况" class="headerlink" title="Go-Kit概况"></a>Go-Kit概况</h2><p>截止到本文发布时，<code>Go-Kit</code>在github上的star数为22.2k，超过了我们已经一起看过的<code>Go-Micro</code>与<code>Kratos</code>。</p>
-<p><code>Go-Kit</code>不同于前两者，它更像是一种Go语言的工具集，而不是一种统一化的框架。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/01/23/go-tip/go-tip-13/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
       
     </div>
 
